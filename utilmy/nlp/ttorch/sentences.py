@@ -37,11 +37,10 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
-
 #vfrom tensorflow.keras.metrics import SparseCategoricalAccuracy
 from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 
-from utilmy.utilmy import glob_glob
+
 try :
     import sentence_transformers as st
     from sentence_transformers import SentenceTransformer, SentencesDataset, losses, util
@@ -53,7 +52,7 @@ except Exception as e:
 
 
 #### read data on disk
-from utilmy import pd_read_file, pd_to_file
+from utilmy import pd_read_file, pd_to_file, os_system, glob_glob
 
 
 #############################################################################################
@@ -164,8 +163,8 @@ def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parq
     """
     # sts_dataset_path = dirdata + '/stsbenchmark.tsv.gz'
     name='AllNLI.tsv.gz'
-    dataset_download(name=name, dirout= dirdata)
-    dataset_path = dirdata + '/' + name
+    dataset_path = dataset_download(name=name, dirout= dirdata)
+    # dataset_path = dirdata + '/' + name
 
     # Read the AllNLI.tsv.gz file and create the training dataset
     df = pd_read_file3(dataset_path, npool=1) 
@@ -233,6 +232,8 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
     os.makedirs(dirout, exist_ok=True)  
     util.http_get(url, dirouti)
+    log(os.listdir( dirout))
+    return dirouti
 
 
 
