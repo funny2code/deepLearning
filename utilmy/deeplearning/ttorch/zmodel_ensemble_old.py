@@ -575,6 +575,45 @@ def test2c():
 
 
 
+############################################################################################
+##### LSTM #################################################################################
+class LSTM(nn.Module):
+  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
+    super(LSTM, self).__init__()
+    self.num_layers = num_layers
+    self.input_size = input_size
+    self.hidden_size = hidden_size
+    self.num_classes = num_classes
+    self.dropout = dropout
+    
+    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
+                        dropout = self.dropout, batch_first=True)
+    self.fc = nn.Linear(self.hidden_size, self.num_classes)
+
+  def forward(self, x):
+    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    out, _ = self.lstm(x, (h0,c0))
+    out = out[:,-1,:]
+    out = self.fc(out)
+    return out
+    
+
+
+class SequenceReshaper(nn.Module):
+	def __init__(self, from_ = 'vision'):
+		super(SequenceReshaper,self).__init__()
+		self.from_ = from_
+	
+	def forward(self, x):
+		if self.from_ == 'vision':
+			x = x[:,0,:,:]
+			x = x.squeeze()
+			return x
+		else:
+			return x
+
+############################################################################################
 def test2d():
     """
     """
@@ -727,45 +766,6 @@ def test2d():
 
 
 
-
-##### LSTM #################################################################################
-class LSTM(nn.Module):
-  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
-    super(LSTM, self).__init__()
-    self.num_layers = num_layers
-    self.input_size = input_size
-    self.hidden_size = hidden_size
-    self.num_classes = num_classes
-    self.dropout = dropout
-    
-    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
-                        dropout = self.dropout, batch_first=True)
-    self.fc = nn.Linear(self.hidden_size, self.num_classes)
-
-  def forward(self, x):
-    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    out, _ = self.lstm(x, (h0,c0))
-    out = out[:,-1,:]
-    out = self.fc(out)
-    return out
-    
-
-
-class SequenceReshaper(nn.Module):
-	def __init__(self, from_ = 'vision'):
-		super(SequenceReshaper,self).__init__()
-		self.from_ = from_
-	
-	def forward(self, x):
-		if self.from_ == 'vision':
-			x = x[:,0,:,:]
-			x = x.squeeze()
-			return x
-		else:
-			return x
-
-
 def test2e():
     """
     """
@@ -830,8 +830,10 @@ def test2e():
         return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
 
+
     ######################################################################
     #### SEPARATE the models completetly, and create duplicate
+
     ### modelA  ##########################################################
     from torchvision import  models
     model_ft = models.resnet18(pretrained=True)
@@ -849,18 +851,53 @@ def test2e():
     modelA = model_create(ARG.modelA)
 
 
+    ### modelB  ##########################################################
+    from torchvision import  models
+    model_ft = models.resnet50(pretrained=True)
+    embB_dim = int(model_ft.fc.in_features)
+
+    ARG.modelB                     = {}
+    ARG.modelB.name                = 'resnet50'
+    ARG.modelB.nn_model            = model_ft
+    ARG.modelB.layer_emb_id        = 'fc'
+    ARG.modelB.architect           = [embB_dim ]   ### head size
+    ARG.modelB.architect.input_dim = [train_config.BATCH_SIZE,3,28,28]
+    ARG.modelB.dataset             = {}
+    ARG.modelB.dataset.dirin       = "/"
+    ARG.modelB.dataset.coly        = 'ytarget'
+    modelB = model_create(ARG.modelB )
+
+
+    # ### modelC  ########################################################
+    from torchvision import  models
+    model_ft                       = models.efficientnet_b0(pretrained=True)
+    embC_dim                       = model_ft.classifier[1].in_features
+    ARG.modelC                     = {}
+    ARG.modelC.name                = 'efficientnet_b0'
+    ARG.modelC.nn_model            = model_ft
+    ARG.modelC.layer_emb_id        = 'fc'
+    ARG.modelC.architect           = [ embC_dim ]   ### head size
+    ARG.modelC.architect.input_dim = [train_config.BATCH_SIZE,3,28,28]
+    ARG.modelC.dataset             = {}
+    ARG.modelC.dataset.dirin       = "/"
+    ARG.modelC.dataset.coly        = 'ytarget'
+    modelC = model_create(ARG.modelC )
+    
     # ### modelD  ########################################################
     lstm = LSTM(input_size=28, hidden_size=128, num_layers=2, num_classes=2, dropout=0.0)
     #from models.LSTM import lstm
     #from models.SequenceReshaper import SequenceReshaper
+	 
     model_ft                 = lstm
     embD_dim                 = int(model_ft.fc.in_features)
     
     ##Reshape input to be compatible with Sequence Model
     seq_reshaper = SequenceReshaper(from_='vision') 
-    model_ft = torch.nn.Sequential(seq_reshaper,	model_ft )
+    model_ft = torch.nn.Sequential(
+    	seq_reshaper,
+    	model_ft
+    )
     
-
     ARG.modelD               = Box()
     ARG.modelD.name          = 'LSTM'
     ARG.modelD.nn_model      = model_ft
@@ -877,7 +914,7 @@ def test2e():
     ARG.merge_model           = {}
     ARG.merge_model.name      = 'modelmerge1'
     ARG.merge_model.architect                  = {}
-    ARG.merge_model.architect.input_dim        =  embA_dim + embD_dim
+    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim + embC_dim + embD_dim
 
     ARG.merge_model.architect.merge_type       = 'cat'         #### Common to all tasks
     ARG.merge_model.architect.merge_layers_dim = [1024, 768]
@@ -891,7 +928,7 @@ def test2e():
     ARG.merge_model.dataset.dirin = "/"
     ARG.merge_model.dataset.coly = 'ytarget'
     ARG.merge_model.train_config  = train_config
-    model = MergeModel_create(ARG, model_create_list=  [modelA, modelD] )
+    model = MergeModel_create(ARG, model_create_list=  [modelA, modelB, modelC, modelD] )
 
 
     #### Run Model   ###################################################
@@ -903,8 +940,6 @@ def test2e():
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
     outputs = model.predict(inputs)
     log(outputs)
-
-
 
 
 ##############################################################################################
@@ -1444,77 +1479,6 @@ class model_create(BaseModel):
         if not loss_fun : loss_fun
         return torch.nn.BCELoss()
 
-
-
-#################################################################################################
-def device_setup(arg, device='cpu', seed=67):
-    """function device_setup
-    """
-    device = arg.get('device', device)
-    seed   = arg.get('seed', seed)
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-
-    if 'gpu' in device :
-        try :
-            torch.cuda.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
-            torch.backends.cudnn.deterministic = True
-            torch.backends.cudnn.benchmark = False
-        except Exception as e:
-            log(e)
-            device = 'cpu'
-    return device
-
-
-def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, test_X=None, test_y=None,
-                            device='cpu', batch_size=16,)->torch.utils.data.DataLoader:
-    """function dataloader_create
-    Args:
-        train_X:
-        train_y:
-        valid_X:
-        valid_y:
-        test_X:
-        test_y:
-        arg:
-    Returns:
-
-    """
-    train_loader, valid_loader, test_loader = None, None, None
-
-    if train_X is not None :
-        train_X, train_y = torch.tensor(train_X, dtype=torch.float32, device=device), torch.tensor(train_y, dtype=torch.float32, device=device)
-        train_loader = DataLoader(TensorDataset(train_X, train_y), batch_size=batch_size, shuffle=True,drop_last=True)
-        log("data size", len(train_X) )
-
-    if valid_X is not None :
-        valid_X, valid_y = torch.tensor(valid_X, dtype=torch.float32, device=device), torch.tensor(valid_y, dtype=torch.float32, device=device)
-        valid_loader = DataLoader(TensorDataset(valid_X, valid_y), batch_size=valid_X.shape[0])
-        log("data size", len(valid_X)  )
-
-    if test_X  is not None :
-        test_X, test_y   = torch.tensor(test_X,  dtype=torch.float32, device=device), torch.tensor(test_y, dtype=torch.float32, device=device)
-        test_loader  = DataLoader(TensorDataset(test_X, test_y), batch_size=test_X.shape[0])
-        log("data size:", len(test_X) )
-
-    return train_loader, valid_loader, test_loader
-
-
-def torch_norm_l2(X):
-    """
-    normalize the torch  tensor X by L2 norm.
-    """
-    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
-    X_norm = X / X_norm
-    return X_norm
-
-
-
-
-
-#################################################################################################
 class modelA_create(BaseModel):
     """ modelA
     """
@@ -1742,10 +1706,69 @@ class modelD_create(BaseModel):
 
 
 
+#################################################################################################
+def device_setup(arg, device='cpu', seed=67):
+    """function device_setup
+    """
+    device = arg.get('device', device)
+    seed   = arg.get('seed', seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if 'gpu' in device :
+        try :
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+        except Exception as e:
+            log(e)
+            device = 'cpu'
+    return device
 
 
+def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, test_X=None, test_y=None,
+                            device='cpu', batch_size=16,)->torch.utils.data.DataLoader:
+    """function dataloader_create
+    Args:
+        train_X:
+        train_y:
+        valid_X:
+        valid_y:
+        test_X:
+        test_y:
+        arg:
+    Returns:
+
+    """
+    train_loader, valid_loader, test_loader = None, None, None
+
+    if train_X is not None :
+        train_X, train_y = torch.tensor(train_X, dtype=torch.float32, device=device), torch.tensor(train_y, dtype=torch.float32, device=device)
+        train_loader = DataLoader(TensorDataset(train_X, train_y), batch_size=batch_size, shuffle=True,drop_last=True)
+        log("data size", len(train_X) )
+
+    if valid_X is not None :
+        valid_X, valid_y = torch.tensor(valid_X, dtype=torch.float32, device=device), torch.tensor(valid_y, dtype=torch.float32, device=device)
+        valid_loader = DataLoader(TensorDataset(valid_X, valid_y), batch_size=valid_X.shape[0])
+        log("data size", len(valid_X)  )
+
+    if test_X  is not None :
+        test_X, test_y   = torch.tensor(test_X,  dtype=torch.float32, device=device), torch.tensor(test_y, dtype=torch.float32, device=device)
+        test_loader  = DataLoader(TensorDataset(test_X, test_y), batch_size=test_X.shape[0])
+        log("data size:", len(test_X) )
+
+    return train_loader, valid_loader, test_loader
 
 
+def torch_norm_l2(X):
+    """
+    normalize the torch  tensor X by L2 norm.
+    """
+    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
+    X_norm = X / X_norm
+    return X_norm
 
 
 ###############################################################################################################
