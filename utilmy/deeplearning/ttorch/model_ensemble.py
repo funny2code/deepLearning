@@ -122,6 +122,7 @@ def test_all():
     test2b()
     test2c()
     test2d()
+    test2_lstm()
 
 
 
@@ -729,9 +730,8 @@ def test2d():
 
 
 ##### LSTM #################################################################################
-def test2e():
-    """ LSTM Version
-    """
+def test2_lstm():
+    log('\n\n\n\nLSTM Version')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
     ARG = Box({
