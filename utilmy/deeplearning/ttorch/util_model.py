@@ -2,7 +2,8 @@
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
-import pickle 
+import pickle
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -592,6 +593,7 @@ class MultiClassMultiLabel_Head(nn.Module):
         super().__init__()
         self.dropout = nn.Dropout(dropout)
         self.relu    = nn.ReLU()
+        self.class_label_dict = class_label_dict
  
         ########Common part #################################################################
         out_dimi = layers_dim[0] 
@@ -614,7 +616,7 @@ class MultiClassMultiLabel_Head(nn.Module):
            x = self.relu(lin_layer(self.dropout(x)))
 
         yout  = {}
-        for class_i in class_label_dict.keys():
+        for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
         return yout
     
@@ -627,9 +629,10 @@ class MultiClassMultiLabel_Head(nn.Module):
         if loss_calc_custom is None :
            loss_calc_fun = nn.CrossEntropyLoss()
         else :
-           loss_calc_fun = loss_calc()
+           loss_calc_fun = loss_calc_custom()
 
-        for ypred_col, ytrue_col in zip(ypred_col, ytrue_col) :
+        loss_list = []
+        for ypred_col, ytrue_col in zip(ypred, ytrue) :
            loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
 
         if sum_loss:
