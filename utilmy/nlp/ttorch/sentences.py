@@ -238,6 +238,19 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
 
 
+"""
+
+label2int = {"contradiction": 0, "entailment": 1, "neutral": 2}
+train_samples = []
+with gzip.open(nli_dataset_path, 'rt', encoding='utf8') as fIn:
+    reader = csv.DictReader(fIn, delimiter='\t', quoting=csv.QUOTE_NONE)
+    for row in reader:
+        if row['split'] == 'train':
+            label_id = label2int[row['label']]
+            train_samples.append(InputExample(texts=[row['sentence1'], row['sentence2']], label=label_id))
+
+"""            
+
 
 ###################################################################################################################        
 def model_finetune(modelname_or_path='distilbert-base-nli-mean-tokens',
@@ -768,9 +781,11 @@ def sentence_compare(df, cola, colb, model):
 ###################################################################################################################  
 if 'utils':
     def pd_read_file3(path_or_df='./myfile.csv', npool=1, nrows=1000,  **kw)->pd.DataFrame:
+        import csv
         if isinstance(path_or_df, str):            
             if  'AllNLI' in path_or_df:
-                dftrain = pd.read_csv(path_or_df, error_bad_lines=False, nrows=nrows, sep="\t")
+                dftrain = pd.read_csv(path_or_df, error_bad_lines=False, nrows=nrows, sep="\t", quoting=csv.QUOTE_NONE,
+                compression='gzip', encoding='utf8')
             else :
                 dftrain = pd_read_file(path_or_df, npool=npool, nrows=nrows)
             
