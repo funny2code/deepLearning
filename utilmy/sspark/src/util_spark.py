@@ -587,14 +587,13 @@ def spark_add_jar(sparksession, hive_jar_cmd=None):
 #from pyspark.sql.functions import col, explode, array, lit
 def spark_df_isempty(df):
     try :
-        return len(df.sample(1)) == 0
-
+        return len(df.limit(1)) == 0
     except: return True
 
 
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
-                   save=True, verbose=True, returnval=False):
-    """ Check dataframe for debugging
+                   save=True, verbose=True, returnval=False, pandasonly=False):
+    """ Checkpoiting dataframe for easy debugging
     Doc::
 
         Args:
@@ -608,19 +607,22 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
         Returns:
     """
     if conf is not None :
-        confc = conf.get('Check', {})
-        dirout = confc.get('path_check', dirout)
-        save = confc.get('save', save)
+        confc     = conf.get('Check', {})
+        dirout    = confc.get('path_check', dirout)
+        save      = confc.get('save', save)
         returnval = confc.get('returnval', returnval)
-        verbose = confc.get('verbose', verbose)
+        verbose   = confc.get('verbose', verbose)
 
     if save or returnval or verbose:
         df1 =   df.limit(nsample).toPandas()
 
-    if save :
-        ##### Need HDFS version
+    if save and pandasonly :
         os.makedirs(dirout, exist_ok=True)
         df1.to_csv(dirout + f'/table_{tag}.csv', sep='\t', index=False)
+
+    if save and not pandasonly :
+        spark_df_write(df.limit(nsample), dirout= dirout + f'/table_{tag}.csv', format='csv')
+
 
     if verbose :
         log(df1.head(2).T)
