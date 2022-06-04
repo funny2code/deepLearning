@@ -43,7 +43,8 @@ except: pass
 
 
 #############################################################################################
-from utilmy import log, log2
+from utilmy import log, log2, os_module_name
+MNAME = os_module_name(__file__)
 
 def help():
     """function help        """
