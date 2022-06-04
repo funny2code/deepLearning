@@ -240,6 +240,7 @@ def hive_get_tablelist(dbname):
     """
     cmd = f"hive -e 'show tables from {dbname}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     ltable = []
     for li in lines :
@@ -255,6 +256,7 @@ def hive_get_dblist():
     """
     cmd = f"hive -e  'show databases '"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     ldb = []
     for li in lines :
@@ -270,6 +272,7 @@ def hive_get_tablechema(tablename):
     """
     cmd = f"hive -e 'describe {tablename}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     table_info = {}
     for li in lines :
@@ -294,6 +297,7 @@ def hive_get_tabledetails(table):
     """
     cmd = f"hive -e 'describe formatted {table}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     table_info = {}
     ltable = []
@@ -390,7 +394,7 @@ def show_parquet(path, nfiles=1, nrows=10, verbose=1, cols=None):
         try :
             arr_table = pq.read_table(pfile, columns=cols)
             df        = arr_table.to_pandas()
-            print(df.head(nrows), df.shape, df.columns)
+            print(df.head(n_rows), df.shape, df.columns)
             del arr_table; gc.collect()
         except : pass
 
@@ -585,29 +589,35 @@ def spark_add_jar(sparksession, hive_jar_cmd=None):
 #########################################################################################
 ###### Dataframe ########################################################################
 #from pyspark.sql.functions import col, explode, array, lit
-def spark_df_isempty(df):
+def spark_df_isempty(df:sp_dataframe):
+    """
+    Doc::
+        True: spark DataFrame is empty
+        False: spark DataFrame is not empty
+    """
     try :
-        return len(df.limit(1)) == 0
+        return len(df.head(1)) == 0
     except: return True
 
 
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
-    """ Checkpoiting dataframe for easy debugging
+    """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
 
         Args:
             conf:  Configuration in dict
-            df:
-            dirout:
-            nsample:
-            save:
-            verbose:
-            returnval:
+                dirout:
+                nsample:
+                save:
+                verbose:
+                returnval:
         Returns:
     """
     if conf is not None :
-        confc     = conf.get('Check', {})
+        if   'test' in conf :       confc = conf.get('test', {})
+        elif 'checkpoint' in conf : confc = conf.get('checkpoint', {})
+
         dirout    = confc.get('path_check', dirout)
         save      = confc.get('save', save)
         returnval = confc.get('returnval', returnval)
@@ -626,7 +636,7 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
 
     if verbose :
         log(df1.head(2).T)
-        log( df.printSchema() )
+        df.printSchema()
 
     if returnval :
         return df1
@@ -707,9 +717,9 @@ def spark_df_sampleunder(df:sp_dataframe, coltarget:str='animal',
 def spark_df_stats_null(df:sp_dataframe,cols:Union[list,str], sample_fraction=-1, doprint=True)->pd.DataFrame:
     """ get the percentage of value absent and most frequent and least frequent value  in the column
     """
-    if isinstance(cols, str): cols= [ cols]
+    if isinstance(cols, str): cols = [cols]
 
-    df = spark_df_sample(df,  fraction= sample_fraction, col_stratify=None, with_replace=True)
+    df = spark_df_sample(df, fraction=sample_fraction, col_stratify=None, with_replace=True)
 
     n = df.count()
     dfres = []
@@ -729,7 +739,7 @@ def spark_df_stats_null(df:sp_dataframe,cols:Union[list,str], sample_fraction=-1
 def spark_df_stats_freq(df:sp_dataframe, cols_cat:Union[list,str], sample_fraction=-1, doprint=True)->pd.DataFrame:
     """ get the percentage of value absent and most frequent and least frequent value  in the column
     """
-    if isinstance(cols_cat, str): cols_cat= [ cols_cat]
+    if isinstance(cols_cat, str): cols_cat = [ cols_cat]
 
     df = spark_df_sample(df,  fraction= sample_fraction, col_stratify=None, with_replace=True)
 
