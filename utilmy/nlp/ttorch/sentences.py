@@ -164,12 +164,13 @@ def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parq
     # sts_dataset_path = dirdata + '/stsbenchmark.tsv.gz'
     name='AllNLI.tsv.gz'
     dataset_path = dataset_download(name=name, dirout= dirdata)
-    # dataset_path = dirdata + '/' + name
 
     # Read the AllNLI.tsv.gz file and create the training dataset
     df = pd_read_file3(dataset_path, npool=1) 
+    log(df)
+    log(df.columns)
 
-    df = df[df['split'] == 'train' ]
+    # df = df[df['split'] == 'train' ]
     
     # df = df.sample(frac=0.1)
     df['score'] = np.random.random( len(df) )   #### only for Evaluation.
@@ -232,7 +233,7 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
     os.makedirs(dirout, exist_ok=True)  
     util.http_get(url, dirouti)
-    log(os.listdir( dirout))
+    log('Files', os.listdir( dirout))
     return dirouti
 
 
