@@ -240,6 +240,7 @@ def hive_get_tablelist(dbname):
     """
     cmd = f"hive -e 'show tables from {dbname}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     ltable = []
     for li in lines :
@@ -255,6 +256,7 @@ def hive_get_dblist():
     """
     cmd = f"hive -e  'show databases '"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     ldb = []
     for li in lines :
@@ -270,6 +272,7 @@ def hive_get_tablechema(tablename):
     """
     cmd = f"hive -e 'describe {tablename}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     table_info = {}
     for li in lines :
@@ -294,6 +297,7 @@ def hive_get_tabledetails(table):
     """
     cmd = f"hive -e 'describe formatted {table}'"
     stdout,stderr = os_system(cmd)
+    if stderr: return stderr
     lines = stdout.split("\n")
     table_info = {}
     ltable = []
@@ -390,7 +394,7 @@ def show_parquet(path, nfiles=1, nrows=10, verbose=1, cols=None):
         try :
             arr_table = pq.read_table(pfile, columns=cols)
             df        = arr_table.to_pandas()
-            print(df.head(nrows), df.shape, df.columns)
+            print(df.head(n_rows), df.shape, df.columns)
             del arr_table; gc.collect()
         except : pass
 
@@ -585,10 +589,17 @@ def spark_add_jar(sparksession, hive_jar_cmd=None):
 #########################################################################################
 ###### Dataframe ########################################################################
 #from pyspark.sql.functions import col, explode, array, lit
-def spark_df_isempty(df):
-    try :
-        return len(df.limit(1)) == 0
-    except: return True
+def spark_df_isempty(df:sp_dataframe):
+    """
+    Doc::
+        True: spark DataFrame is empty
+        False: spark DataFrame is not empty
+    """
+    return df.rdd.isEmpty()
+
+    # try :
+    #     return len(df.limit(1)) == 0
+    # except: return True
 
 
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
