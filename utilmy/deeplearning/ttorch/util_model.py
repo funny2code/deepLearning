@@ -586,7 +586,7 @@ class MultiClassMultiLabel_Head(nn.Module):
     def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0,):
         """
 
-           class_label_dict :  'gender': 2,  'age' : 5  ##5 bucckets
+           class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
         """
         super().__init__()
@@ -619,8 +619,11 @@ class MultiClassMultiLabel_Head(nn.Module):
         return yout
     
 
-    def get_loss(self,ypred, ytrue, loss_calc=None):
-        if loss_calc is None :
+    def get_loss(self,ypred, ytrue, loss_calc_custom=None):
+        """
+
+        """
+        if loss_calc_custom is None :
            loss_calc_fun = nn.CrossEntropyLoss()
         else :
            loss_calc_fun = loss_calc()
