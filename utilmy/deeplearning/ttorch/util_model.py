@@ -593,7 +593,7 @@ class MultiClassMultiLabel_Head(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.relu    = nn.ReLU()
  
-        ########################################################################
+        ########Common part #################################################################
         out_dimi = layers_dim[0] 
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
@@ -603,7 +603,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         dim_final = layers_dim[-1]        
 
-        ########################################################################
+        ########Multi-Class ################################################################
         self.head_task_dict = {}
         for classname, n_unique_label in class_label_dict.items():
             self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
@@ -619,7 +619,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         return yout
     
 
-    def get_loss(self,ypred, ytrue, loss_calc_custom=None):
+    def get_loss(self,ypred, ytrue, loss_calc_custom=None,
+                 weights=None, sum_loss=True):
         """
 
         """
@@ -630,6 +631,13 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         for ypred_col, ytrue_col in zip(ypred_col, ytrue_col) :
            loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+
+        if sum_loss:
+            weights = 1.0 / len(loss_list) np.ones(len(loss_list))  if weights is None else weights
+            lsum = 0.0
+            for li in loss_list:
+                lsum = lsum + weights[i]* li
+            return lsum
         return loss_list
 
 
