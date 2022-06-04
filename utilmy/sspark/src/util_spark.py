@@ -593,21 +593,22 @@ def spark_df_isempty(df):
 
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
-    """ Checkpoiting dataframe for easy debugging
+    """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
 
         Args:
             conf:  Configuration in dict
-            df:
-            dirout:
-            nsample:
-            save:
-            verbose:
-            returnval:
+                dirout:
+                nsample:
+                save:
+                verbose:
+                returnval:
         Returns:
     """
     if conf is not None :
-        confc     = conf.get('Check', {})
+        if   'test' in conf :       confc = conf.get('test', {})
+        elif 'checkpoint' in conf : confc = conf.get('checkpoint', {})
+
         dirout    = confc.get('path_check', dirout)
         save      = confc.get('save', save)
         returnval = confc.get('returnval', returnval)
