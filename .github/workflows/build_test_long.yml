@@ -104,7 +104,7 @@ jobs:
           
 
     - name: utilmy/nlp/ttorch/sentences.py  
-      continue-on-error: true 
+      #continue-on-error: true 
       run: |
           python utilmy/nlp/ttorch/sentences.py  test_all
 

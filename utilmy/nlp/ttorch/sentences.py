@@ -1,23 +1,70 @@
 # -*- coding: utf-8 -*-
-"""#
+""" sentence_tansformer wrapper.
 Doc::
 
-    sentence_tansformer wrapper
 
-    python  utilmy/nlp/ttorch/sentences.py  test1
+    os.environ['CUDA_VISIBLE_DEVICES']='2,3'
+  
+    cc        = Box({})
+    cc.epoch  = 3
+    cc.lr     = 1E-5
+    cc.warmup = 10
+
+    cc.eval_steps = 50
+    cc.batch_size = 8
+
+    cc.mode    = 'cpu/gpu'
+    cc.use_gpu = 0
+    cc.ncpu    = 5
+    cc.ngpu    = 2
+
+    #### Data
+    cc.data_nclass = 5
+    cc.datasetname = 'sts5'
 
 
-    Original file is located at
+    dirtmp = 'ztmp/'
+    modelid = "distilbert-base-nli-mean-tokens"
+    
+    cols = ['sentence1', 'sentence2', 'label', 'score' ]  ### score can be NA
+    dfcheck = dataset_fake(name='AllNLI.tsv.gz', dirdata=dirtmp, fname='data_fake.parquet', nsample=10)  ### Create fake version
+    assert len(dfcheck[ cols ]) > 1 , "missing columns"
+    ## Score can be empty or [0,1]
+    
+    lloss = [ 'cosine', 'triplethard',"softmax", 'MultpleNegativesRankingLoss' ]
+    
+    for lname in lloss :
+        log("\n\n\n ########### Classifier with Loss ", lname)
+        cc.lossname = lname
+        model = model_finetune(modelname_or_path = modelid,
+                               taskname   = "classifier",
+                               lossname   = lname,
+                               metricname = 'cosinus',
+
+                               cols        = cols,
+                               datasetname = cc.datasetname,
+                               train_path  = dirtmp + f"/data_fake.parquet",
+                               val_path    = dirtmp + f"/data_fake.parquet",
+                               eval_path   = dirtmp + f"/data_fake.parquet",
+
+                               dirout= dirtmp + f"/model/" + lname, nsample=100, cc=cc)
+    
+
+    log('\n\n########### model encode')
+    df = model_encode( model= model,  dirdata=dirtmp +"/data_fake.parquet",
+                       colid=None, coltext='sentence1', batch_size=32, 
+                       dirout=None,
+                       normalize_embeddings=True  #### sub encode params
+              )  
+
+
     https://colab.research.google.com/drive/1dPPD-2Vrn61v2uYZT1AXiujqqw7ZwzEA#scrollTo=TZCBsq36j4aH
-
 
     train Sentence Transformer with different Losses such as:**
     > Softmax Loss
     > Cusine Loss
     > TripletHard Loss
     > MultpleNegativesRanking Loss
-
-    # !pip install sentence-transformers
 
     We create a new end-to-end example on how to use a custom inference.py script w
     ith a Sentence Transformer and a mean pooling layer to create sentence embeddings.🤯
@@ -140,9 +187,9 @@ def test1():
 
     log('\n\n########### model encode')
     df = model_encode( model= model,  dirdata=dirtmp +"/data_fake.parquet",
-                           colid=None, coltext='sentence1', batch_size=32, 
-                           dirout=None,
-              normalize_embeddings=True  #### sub encode params
+                       colid=None, coltext='sentence1', batch_size=32, 
+                       dirout=None,
+                       normalize_embeddings=True  #### sub encode params
               )  
     if df is not None : log(df.head(3))
     
@@ -166,9 +213,9 @@ def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parq
     dataset_path = dataset_download(name=name, dirout= dirdata)
 
     # Read the AllNLI.tsv.gz file and create the training dataset
+    ##['split', 'dataset', 'filename', 'sentence1', 'sentence2', 'label']
     df = pd_read_file3(dataset_path, npool=1) 
-    log(df)
-    log(df.columns)
+    log(df, df.columns)
 
     # df = df[df['split'] == 'train' ]
     
@@ -238,18 +285,6 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
 
 
-"""
-
-label2int = {"contradiction": 0, "entailment": 1, "neutral": 2}
-train_samples = []
-with gzip.open(nli_dataset_path, 'rt', encoding='utf8') as fIn:
-    reader = csv.DictReader(fIn, delimiter='\t', quoting=csv.QUOTE_NONE)
-    for row in reader:
-        if row['split'] == 'train':
-            label_id = label2int[row['label']]
-            train_samples.append(InputExample(texts=[row['sentence1'], row['sentence2']], label=label_id))
-
-"""            
 
 
 ###################################################################################################################        
@@ -785,7 +820,7 @@ if 'utils':
         if isinstance(path_or_df, str):            
             if  'AllNLI' in path_or_df:
                 dftrain = pd.read_csv(path_or_df, error_bad_lines=False, nrows=nrows, sep="\t", quoting=csv.QUOTE_NONE,
-                compression='gzip', encoding='utf8')
+                                      compression='gzip', encoding='utf8')
             else :
                 dftrain = pd_read_file(path_or_df, npool=npool, nrows=nrows)
             
@@ -796,6 +831,18 @@ if 'utils':
         return dftrain    
         
       
+"""
+
+label2int = {"contradiction": 0, "entailment": 1, "neutral": 2}
+train_samples = []
+with gzip.open(nli_dataset_path, 'rt', encoding='utf8') as fIn:
+    reader = csv.DictReader(fIn, delimiter='\t', quoting=csv.QUOTE_NONE)
+    for row in reader:
+        if row['split'] == 'train':
+            label_id = label2int[row['label']]
+            train_samples.append(InputExample(texts=[row['sentence1'], row['sentence2']], label=label_id))
+
+"""            
 
 
 
