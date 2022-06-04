@@ -595,11 +595,9 @@ def spark_df_isempty(df:sp_dataframe):
         True: spark DataFrame is empty
         False: spark DataFrame is not empty
     """
-    return df.rdd.isEmpty()
-
-    # try :
-    #     return len(df.limit(1)) == 0
-    # except: return True
+    try :
+        return len(df.head(1)) == 0
+    except: return True
 
 
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
