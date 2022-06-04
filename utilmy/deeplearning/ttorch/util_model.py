@@ -633,7 +633,7 @@ class MultiClassMultiLabel_Head(nn.Module):
            loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
 
         if sum_loss:
-            weights = 1.0 / len(loss_list) np.ones(len(loss_list))  if weights is None else weights
+            weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
             lsum = 0.0
             for li in loss_list:
                 lsum = lsum + weights[i]* li
