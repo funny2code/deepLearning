@@ -76,8 +76,9 @@ jobs:
         pip install -e .
         python -c "import utilmy"
         python -c "import os, pandas as pd; print(os)"
+        pip list
         
-    ########  Runs All test  ######################################
+    ########  Runs All test  #######################################
     - name: test_setup
       run: |
           mkdir -p    /home/runner/work/log_tmp/
@@ -90,7 +91,7 @@ jobs:
     #   run: |
     #       python test.py test_deeplearning_torch
 
-    - name: test import_all
+    - name: test.py test_import_all
       continue-on-error: true 
       run: |
           python test.py test_import_all
@@ -102,13 +103,13 @@ jobs:
           python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
           
 
-    - name: test utilmy.nlp.ttorch.sentences
-      continue-on-error: true 
+    - name: utilmy/nlp/ttorch/sentences.py  
+      #continue-on-error: true 
       run: |
           python utilmy/nlp/ttorch/sentences.py  test_all
 
 
-    - name:  sspark/src/util_spark.py test_all
+    - name:  sspark/src/util_spark.py 
       # continue-on-error: true 
       run: |
           python utilmy/sspark/src/util_spark.py test_all
@@ -123,9 +124,7 @@ jobs:
 
 
 
-
-
-    - name: utilmy/deeplearning/ttorch/  util_model.py
+    - name: utilmy/deeplearning/ttorch/util_model.py
       continue-on-error: true 
       run: |
           python utilmy/deeplearning/ttorch/util_model.py     test_all
