@@ -65,6 +65,7 @@ def help():
     print( help_create(__file__) )
 
 
+
 #############################################################################################
 def test_all() -> None:
     """function test_all"""
@@ -156,6 +157,7 @@ def test2():
     log(df.head())
 
 
+
 ###################################################################################################################        
 def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parquet', nsample=10):        
     """ Fake text data for tests
@@ -175,11 +177,11 @@ def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parq
 
     df['label'] = pd.factorize(df['label'])[0]   ###into integer
     #df['label'] = 6.0  # np.random.randint(0, 3, len(df) )
-    df['label'] = df['label'].astype('float')  ### needed for cosinus loss 
+    df['label'] = df['label'].astype('float')    ### needed for cosinus loss
 
     log(df, df.columns, df.shape)
     dirout = dirdata +"/" + fname
-    df = df.iloc[:nsample, :]
+    df     = df.iloc[:nsample, :]
     df.to_parquet(dirout)
     return df.iloc[:10, :]
 
@@ -231,6 +233,7 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
     os.makedirs(dirout, exist_ok=True)  
     util.http_get(url, dirouti)
+
 
 
 
@@ -393,22 +396,6 @@ def model_encode(model = "model name or path or object", dirdata:Dataframe_str="
         pd_to_file(embs_all, dirout, show=1)   
 
 
-def model_encode_batch(model = "model name or path or object", dirdata:str="data/*.parquet", 
-                coltext:str='sentence1', colid=None,
-                dirout:str="embs/myfile.parquet", nsplit=5, imin=0, imax=500,   **kw ):
-    """   Sentence encoder in parallel batch mode
-      file_{ii}.parquet  with ii= imin, imax.
-
-    """  
-    flist = glob_glob(dirdata)
-    ### Filter files based on rule
-    flist2 = flist
-
-    model_encode(model = model, dirdata=flist2, 
-                coltext=coltext, colid=colid,
-                dirout=dirout, )
-
-
 def model_evaluate(model ="modelname OR path OR model object", dirdata='./*.csv', dirout='./',
                    cc:dict= None, batch_size=16, name='sts-test'):
 
@@ -490,7 +477,33 @@ def model_save(model,path:str, reload=True):
 
 
 
-###################################################################################################################  
+###################################################################################################################
+def model_encode_batch(model = "model name or path or object", dirdata:str="data/*.parquet",
+                coltext:str='sentence1', colid=None,
+                dirout:str="embs/myfile.parquet", nsplit=5, imin=0, imax=500,   **kw ):
+    """   Sentence encoder in parallel batch mode
+      file_{ii}.parquet  with ii= imin, imax.
+
+    """
+    flist = glob_glob(dirdata)
+    ### Filter files based on rule
+    flist2 = flist
+
+    model_encode(model = model, dirdata=flist2,
+                coltext=coltext, colid=colid,
+                dirout=dirout, )
+
+
+
+
+
+
+
+
+
+
+
+###################################################################################################################
 ######## Custom Task ##############################################################################################
 def model_finetune_classifier(modelname_or_path='distilbert-base-nli-mean-tokens',
                             taskname="classifier", lossname="cosinus",
@@ -774,8 +787,8 @@ if 'utils':
 ##########################################################################################
 if __name__ == '__main__':
     import fire
-    # fire.Fire()
-    test1()
-    test2()
+    fire.Fire()
+    #test1()
+    #test2()
 
 

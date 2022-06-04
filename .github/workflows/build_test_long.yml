@@ -76,8 +76,9 @@ jobs:
         pip install -e .
         python -c "import utilmy"
         python -c "import os, pandas as pd; print(os)"
+        pip list
         
-    ########  Runs All test  ######################################
+    ########  Runs All test  #######################################
     - name: test_setup
       run: |
           mkdir -p    /home/runner/work/log_tmp/
