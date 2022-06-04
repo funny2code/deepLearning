@@ -120,7 +120,7 @@ import pandas as pd
 from box import Box
 
 def log(*s):
-  print(*s, flush=True)
+    print(*s, flush=True)
 
 
 

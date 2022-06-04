@@ -638,7 +638,7 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
 
     if verbose :
         log(df1.head(2).T)
-        log( df.printSchema() )
+        df.printSchema()
 
     if returnval :
         return df1
@@ -719,9 +719,9 @@ def spark_df_sampleunder(df:sp_dataframe, coltarget:str='animal',
 def spark_df_stats_null(df:sp_dataframe,cols:Union[list,str], sample_fraction=-1, doprint=True)->pd.DataFrame:
     """ get the percentage of value absent and most frequent and least frequent value  in the column
     """
-    if isinstance(cols, str): cols= [ cols]
+    if isinstance(cols, str): cols = [cols]
 
-    df = spark_df_sample(df,  fraction= sample_fraction, col_stratify=None, with_replace=True)
+    df = spark_df_sample(df, fraction=sample_fraction, col_stratify=None, with_replace=True)
 
     n = df.count()
     dfres = []
@@ -741,7 +741,7 @@ def spark_df_stats_null(df:sp_dataframe,cols:Union[list,str], sample_fraction=-1
 def spark_df_stats_freq(df:sp_dataframe, cols_cat:Union[list,str], sample_fraction=-1, doprint=True)->pd.DataFrame:
     """ get the percentage of value absent and most frequent and least frequent value  in the column
     """
-    if isinstance(cols_cat, str): cols_cat= [ cols_cat]
+    if isinstance(cols_cat, str): cols_cat = [ cols_cat]
 
     df = spark_df_sample(df,  fraction= sample_fraction, col_stratify=None, with_replace=True)
 
