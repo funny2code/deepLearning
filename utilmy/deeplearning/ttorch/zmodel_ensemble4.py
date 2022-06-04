@@ -122,6 +122,7 @@ def test_all():
     test2b()
     test2c()
     test2d()
+    test2e()
 
 
 
@@ -1730,9 +1731,9 @@ class modelD_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l3= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
                 embD = self.forward(x)
-                embD = layer_l3.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
+                embD = layer_l2.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
                 return embD
         return modelD(layers_dim, nn_model_base, layer_id )
 
@@ -1752,4 +1753,3 @@ class modelD_create(BaseModel):
 if __name__ == "__main__":
     import fire
     test_all()
-
