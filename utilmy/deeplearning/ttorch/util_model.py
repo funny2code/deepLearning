@@ -320,6 +320,59 @@ def model_delete_layers(model, del_ids = []):
     
     return model
 
+class myMultiClassMultiHead(nn.Module):
+    def __init__(self, in_features=None, out_feature=None, inter_feat=None, dropout=0,class_label_dict=None):
+        super().__init__()
+
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+
+        # Layer 1
+        self.linear1        = nn.Linear(in_features=in_features, out_features=out_feature, bias=False)        
+        # Layer 2
+        self.linear2        = nn.Linear(in_features=out_feature, out_features=inter_feat, bias=False)
+        ########################################################################
+        self.head_task_dict = {}
+        for cls, lable in class_label_dict.items():
+            self.head_task_dict[cls] = nn.Linear(inter_feat, lable)
+
+
+    def forward(self, x):
+        x = self.relu(self.linear1(self.dropout(x)))
+        x = self.relu(self.linear2(self.dropout(x)))
+        out  = {}
+        for cls in class_label_dict.keys():
+            out[cls] = self.head_task_dict[cls](x)
+        return out
+    
+    def get_loss(self,y, ytrue):
+        c_entrpy = nn.CrossEntropyLoss()
+        loss = c_entrpy(y, ytrue)
+        return loss
+
+
+class MultilableHead(nn.Module):
+    def __init__(self, in_features=None,out_feature=None, inter_feat=None, dropout=0,class_label=None):
+        super().__init__()
+
+        self.dropout = nn.Dropout(dropout)
+        self.relu = nn.ReLU()
+
+        # Layer 1
+        self.linear1        = nn.Linear(in_features=in_features, out_features=out_feature, bias=False)        
+        # Layer 2
+        self.linear2        = nn.Linear(in_features=out_feature, out_features=inter_feat, bias=False)
+        ########################################################################
+        self.linear3        = nn.Linear(inter_feat, class_label)
+        self.head_task      = nn.Linear(class_label, 1)
+
+    def forward(self, x):
+        x = self.relu(self.linear1(self.dropout(x)))
+        x = self.relu(self.linear2(self.dropout(x)))
+        x = self.relu(self.linear3(self.dropout(x)))
+        out = self.head_task(x)
+        return out
+
 
 def model_add_layers(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
@@ -376,6 +429,17 @@ def model_add_layers(model, modules = []):
 
     return model
 
+
+def grad_check(self,):
+    for i in range(len(self.net.models_nets)):
+        net_model = self.net.models_nets[i]
+        kk = 0
+        for param1, param2 in zip(self.models_list[i].net.parameters(),net_model.parameters()):
+            if kk > 5 : break
+            kk = kk + 1 
+            # torch.testing.assert_close(param1.data, param2.data)
+            if(param2.requires_grad==True):
+                raise Exception("Gradients are updated in models_nets {}".format(i) )
 
 class model_LayerRecorder():
     '''Get input, output or parameters to a module/layer 
@@ -634,18 +698,45 @@ class SmeLU(torch.nn.Module):
 
 
 
-###################################################################################################
-def gradwalk(x, _depth=0):
-    if hasattr(x, 'grad_fn'):
-        x = x.grad_fn
-    if hasattr(x, 'next_functions'):
-        for fn in x.next_functions:
-            print(' ' * _depth + str(fn))
-            gradwalk(fn[0], _depth+1)
 
-def gradwalk_run(graph):
-    for name, param in graph.named_parameters():
-        gradwalk(param)
+
+
+class LSTM(nn.Module):
+  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
+    super(LSTM, self).__init__()
+    self.num_layers = num_layers
+    self.input_size = input_size
+    self.hidden_size = hidden_size
+    self.num_classes = num_classes
+    self.dropout = dropout
+    
+    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
+                        dropout = self.dropout, batch_first=True)
+    self.fc = nn.Linear(self.hidden_size, self.num_classes)
+
+  def forward(self, x):
+    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    out, _ = self.lstm(x, (h0,c0))
+    out = out[:,-1,:]
+    out = self.fc(out)
+    return out
+    
+
+
+class SequenceReshaper(nn.Module):
+	def __init__(self, from_ = 'vision'):
+		super(SequenceReshaper,self).__init__()
+		self.from_ = from_
+	
+	def forward(self, x):
+		if self.from_ == 'vision':
+			x = x[:,0,:,:]
+			x = x.squeeze()
+			return x
+		else:
+			return x
+
 
 
 
