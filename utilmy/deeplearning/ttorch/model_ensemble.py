@@ -122,6 +122,7 @@ def test_all():
     test2b()
     test2c()
     test2d()
+    test2_lstm()
 
 
 
@@ -729,7 +730,7 @@ def test2d():
 
 
 ##### LSTM #################################################################################
-def test2e():
+def test2_lstm():
     """ LSTM Version
     """
     from utilmy.deeplearning.ttorch import model_ensemble as me
