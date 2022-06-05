@@ -16,7 +16,7 @@ Doc::
        pyspark
        conda  install libhdfs3 pyarrow
        https://stackoverflow.com/questions/53087752/unable-to-load-libhdfs-when-using-pyarrow
-
+       2) export CLASSPATH=`$HADOOP_HOME/bin/hdfs classpath --glob`
 
 
     utilmy/sspark/src/util_spark.py
@@ -108,17 +108,20 @@ from utilmy.sspark.src.util_hadoop import (
    hdfs_mkdir,
    hdfs_download,
    hdfs_ls,
+
    hdfs_dir_rm,
-   hdfs_dir_list,
+   hdfs_dir_list,  ### == hdfs_ls
    hdfs_dir_exists,
    hdfs_dir_info,
    hdfs_dir_stats,
 
-### parquet
+### read HDFS into Pandas 
 hdfs_pd_read_parquet,
 hdfs_pd_write_parquet,
 pd_read_parquet_hdfs,
 pd_write_parquet_hdfs,
+pd_read_csv_hdfs,
+pd_read_json_hdfs,
 
 
 ### hive
@@ -371,7 +374,9 @@ def show_parquet(path, nfiles=1, nrows=10, verbose=1, cols=None):
     """ Us pyarrow
     Doc::
 
-       conda  install libhdfs3 pyarrow
+       1) conda  install libhdfs3 pyarrow
+       2) export CLASSPATH=`$HADOOP_HOME/bin/hdfs classpath --glob`
+
        https://stackoverflow.com/questions/53087752/unable-to-load-libhdfs-when-using-pyarrow
 
 
