@@ -219,17 +219,16 @@ def test3():
 
 def test4():
    class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
-   batch_size = 64
-   data = torch.rand(batch_size, 512)
-
    layers_dim=[512, 256]
-   model = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
 
-   y_pred = model(data)
-   y_true  =   {'gender': torch.rand(batch_size, 2),
-               'season':torch.rand(batch_size, 4) ,
-               'age':torch.rand(batch_size, 5) } 
+   batch_size       = 64
+   X       = torch.rand(batch_size, 512)
+   y_true  = { 'gender': torch.rand(batch_size, 2),
+               'season': torch.rand(batch_size, 4) ,
+               'age':    torch.rand(batch_size, 5) } 
 
+   model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
+   y_pred = model(X)
    loss = model.get_loss(y_pred, y_true)
 
 
