@@ -727,9 +727,7 @@ def test2d():
 
 
 
-
-
-##### LSTM #################################################################################
+##### LSTM ################################
 def test2_lstm():
     log('\n\n\n\nLSTM Version')
     from utilmy.deeplearning.ttorch import model_ensemble as me
@@ -890,6 +888,10 @@ def test2_lstm():
 
 
 
+
+
+
+
 ##############################################################################################
 class SequenceReshaper(nn.Module):
     def __init__(self, from_ = 'vision'):
@@ -932,7 +934,7 @@ class model_getlayer():
 
 class model_template_MLP(torch.nn.Module):
     def __init__(self,layers_dim=[20,100,16]):
-        super(modelA, self).__init__()
+        super(model_template_MLP, self).__init__()
         self.layers_dim = layers_dim
         self.output_dim = layers_dim[-1]
         # self.head_task = nn.Sequential()
@@ -1516,6 +1518,46 @@ def torch_norm_l2(X):
     X_norm = X / X_norm
     return X_norm
 
+
+
+
+def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num_workers=8, transform_custom=None):
+    """
+       return dataloader_train,  dataloader_test
+
+
+    """
+    from torchvision import transforms, datasets, models
+    from torch.utils import data
+
+    transform = transform_custom
+    if transform_custom is None :
+        # transform to normalize the data
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0.5,), (0.5,))])
+
+
+    dataset_train = datasets.FashionMNIST(root='fashion-mnist',
+                                          train=True, download=True,transform=transform)
+
+    dataset_test  = datasets.FashionMNIST(root='fashion-mnist',
+                                         train=False, download=True, transform=transform)
+
+    permutation = np.random.permutation(np.arange(len(dataset_train)))
+    indices_rnd = permutation[:nrows]
+    dt_train_rnd = data.DataLoader(dataset_train,
+                                   batch_size=batch_size,
+                                   sampler=data.SubsetRandomSampler(indices_rnd),
+                                   num_workers= num_workers)
+
+    permutation = np.random.permutation(np.arange(len(dataset_train)))
+    indices_rnd = permutation[:nrows]
+    dt_test_rnd  = data.DataLoader(dataset_test,
+                                   batch_size=batch_size,
+                                   sampler=data.SubsetRandomSampler(indices_rnd),
+                                   num_workers= num_workers)
+
+    return dt_train_rnd, dt_test_rnd
 
 
 

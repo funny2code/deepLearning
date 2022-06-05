@@ -141,7 +141,7 @@ def test2():
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
         # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
+        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
         # Delete the last linear layer of an Elman RNN
         simple_rnn = nn.Sequential(
@@ -152,7 +152,7 @@ def test2():
             nn.Linear(100, 10),
         )
 
-        simple_rnn = util_model.model_delete_layers(simple_rnn, del_ids = [1])
+        simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
 
 
 
@@ -160,7 +160,7 @@ def test2():
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
         # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
+        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
         # Add back to the model the deleted layer
         module = {
@@ -169,7 +169,7 @@ def test2():
                 'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
                 }
 
-        model.classifier = util_model.model_add_layers(model.classifier, modules = [module])
+        model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
 
 
 
@@ -219,34 +219,36 @@ def test3():
 def test4():
     pass
 
+
+
 #################################################################################################
 ################ Model tooling ##################################################################
 def model_getparams(model, params_to_get = None, detach = True):
-    '''Extracts the parameters, names, and 'requires gradient' status from a
-    model
+    '''Extracts the parameters, names, and 'requires gradient' status from  model
+    Docs::
 
-    Input
-    -----
-    model: class instance based on the base class torch.nn.Module
+        Input
+        -----
+        model: class instance based on the base class torch.nn.Module
 
-    params_to_get: list of str, default=None, specifying the names of the
-        parameters to be extracted
-        If None, then all parameters and names of parameters from the model
-        will be extracted
+        params_to_get: list of str, default=None, specifying the names of the
+            parameters to be extracted
+            If None, then all parameters and names of parameters from the model
+            will be extracted
 
-    detach: bool, default True, detach the tensor from the computational graph
+        detach: bool, default True, detach the tensor from the computational graph
 
-    Output
-    ------
-    params_name: list, contaning one str for each extracted parameter
+        Output
+        ------
+        params_name: list, contaning one str for each extracted parameter
 
-    params_values: list, containg one tensor corresponding to each
-        parameter.
-        NOTE: The tensor is detached from the computation graph
+        params_values: list, containg one tensor corresponding to each
+            parameter.
+            NOTE: The tensor is detached from the computation graph
 
-    req_grad: list, containing one Boolean variable for each parameter
-        denoting the requires_grad status of the tensor/parameter
-        of the model
+        req_grad: list, containing one Boolean variable for each parameter
+            denoting the requires_grad status of the tensor/parameter
+            of the model
     '''
     params_names = []
     params_values = []
@@ -271,26 +273,25 @@ def model_getparams(model, params_to_get = None, detach = True):
     return params_values, params_names, req_grad
 
 
-def model_freezeparams(model,
-                  params_to_freeze = None,
-                  freeze = True):
+def model_freezeparams(model,  params_to_freeze = None,  freeze = True):
     '''Freeze or unfreeze the parametrs of a model
+    Docs::
 
-    Input
-    -----
-    model:  class instance based on the base class torch.nn.Module
+        Input
+        -----
+        model:  class instance based on the base class torch.nn.Module
 
-    params_to_freeze: list of str specifying the names of the params to be
-        frozen or unfrozen
+        params_to_freeze: list of str specifying the names of the params to be
+            frozen or unfrozen
 
-    freeze: bool, default True, specifying the freeze or
-        unfreeze of model params
+        freeze: bool, default True, specifying the freeze or
+            unfreeze of model params
 
-    Output
-    ------
-    model: class instance based on the base class torch.nn.Module with changed
-        requires_grad param for the anmes params in params_to_freeze
-        (freeze = requires_grad is False unfreeze = requires_grad is True)
+        Output
+        ------
+        model: class instance based on the base class torch.nn.Module with changed
+            requires_grad param for the anmes params in params_to_freeze
+            (freeze = requires_grad is False unfreeze = requires_grad is True)
     '''
     for name, param in zip(model.named_parameters(), model.parameters()):
         if params_to_freeze is not None:
@@ -300,7 +301,7 @@ def model_freezeparams(model,
             param.requires_grad = True if freeze is False else False
 
 
-def model_delete_layers(model, del_ids = []):
+def model_layers_delete(model, del_ids = []):
     '''Delete layers from model
 
     Input
@@ -324,7 +325,7 @@ def model_delete_layers(model, del_ids = []):
     return model
 
 
-def model_add_layers(model, modules = []):
+def model_layers_add(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
 
     Input
@@ -380,55 +381,83 @@ def model_add_layers(model, modules = []):
     return model
 
 
+def model_layers_getall(model):
+    '''
+    Get all the children (layers) from a model, even the ones that are nested
+
+    Input
+    -----
+    model: class instance based on the base class torch.nn.Module
+
+    Output
+    ------
+    all_layers: list of all layers of the model
+
+    Adapted from:
+    https://stackoverflow.com/questions/54846905/pytorch-get-all-layers-of-model
+    '''
+    children = list(model.children())
+    all_layers = []
+    if not children:#if model has no children model is last child
+        return model
+    else:
+       # Look for children from children to the last child
+       for child in children:
+            try:
+                all_layers.extend(model_layers_getall(child))
+            except TypeError:
+                all_layers.append(model_layers_getall(child))
+
+    return all_layers
 
 
 
 class model_LayerRecorder():
-    '''Get input, output or parameters to a module/layer
-    by registering forward or backward hooks
+    '''Get input, output or parameters to a module/layer by registering forward or backward hooks
+    Docs ::
 
-    Input
-    -----
-    module: a module of a class in torch.nn.modules
+        Input
+        -----
+        module: a module of a class in torch.nn.modules
 
-    record_input: bool, default False, deciding if input to module will be
-        recorded
+        record_input: bool, default False, deciding if input to module will be
+            recorded
 
-    record_output: bool, default False, deciding if output to module will be
-        recorded
+        record_output: bool, default False, deciding if output to module will be
+            recorded
 
-    record_params: bool, default False, deciding if params of module will be
-        recorded
+        record_params: bool, default False, deciding if params of module will be
+            recorded
 
-    params_to_get: list of str, default None, specifying the parameters to be
-        recorded from the module (if None all parameters are recorded)
-        NOTE: meaningful only if record_params
+        params_to_get: list of str, default None, specifying the parameters to be
+            recorded from the module (if None all parameters are recorded)
+            NOTE: meaningful only if record_params
 
-    backward: bool, default False, deciding if a forward or backward hook
-        will be registered and the recprding will be performed accordingly
+        backward: bool, default False, deciding if a forward or backward hook
+            will be registered and the recprding will be performed accordingly
 
-    custom_fn: function, default None, to be executed in the forward or backward
-        pass.
+        custom_fn: function, default None, to be executed in the forward or backward
+            pass.
 
-        It must have the following signature:
+            It must have the following signature:
 
-        custom_fn(module, output, input, **kwars)
+            custom_fn(module, output, input, **kwars)
 
-        with kwars optional
+            with kwars optional
 
-        The signature follows the signature of functions to be registered
-        in hooks. See for more details:
-        https://pytorch.org/docs/stable/generated/torch.nn.modules.module.register_module_forward_hook.html
+            The signature follows the signature of functions to be registered
+            in hooks. See for more details:
+            https://pytorch.org/docs/stable/generated/torch.nn.modules.module.register_module_forward_hook.html
 
-     save_to: str, default None, specifying a path to a folder for all recordings
-         to be saved.
-         NOTE: recodrings are saved with filename: recording_0, recording_1, recording_N
+         save_to: str, default None, specifying a path to a folder for all recordings
+             to be saved.
+             NOTE: recodrings are saved with filename: recording_0, recording_1, recording_N
 
-     **kwargs: if keyword args are specified they will be passed as to the
-         custom_fn
+         **kwargs: if keyword args are specified they will be passed as to the
+             custom_fn
 
 
-    The attribute recording contains the output, input or params of a module
+        The attribute recording contains the output, input or params of a module
     '''
     def __init__(self,
                  module,
@@ -508,36 +537,6 @@ class model_LayerRecorder():
         if att: self.counter = 0
 
 
-def model_get_alllayers(model):
-    '''
-    Get all the children (layers) from a model, even the ones that are nested
-
-    Input
-    -----
-    model: class instance based on the base class torch.nn.Module
-
-    Output
-    ------
-    all_layers: list of all layers of the model
-
-    Adapted from:
-    https://stackoverflow.com/questions/54846905/pytorch-get-all-layers-of-model
-    '''
-    children = list(model.children())
-    all_layers = []
-    if not children:#if model has no children model is last child
-        return model
-    else:
-       # Look for children from children to the last child
-       for child in children:
-            try:
-                all_layers.extend(model_get_alllayers(child))
-            except TypeError:
-                all_layers.append(model_get_alllayers(child))
-
-    return all_layers
-
-
 class model_getlayer():
     """ Get a specific layer for embedding output
     Doc::
@@ -574,6 +573,7 @@ class model_getlayer():
         return
       for layer in network.children():
         self.get_layers_in_order(layer)
+
 
 
 
@@ -622,7 +622,7 @@ def plot_grad_flow(named_parameters):
 
 
 def plot_grad_flow_v2(named_parameters):
-    '''
+    '''  Check Grad Flow
     Docs::
 
         Plots the gradients flowing through different layers in the net during training.
