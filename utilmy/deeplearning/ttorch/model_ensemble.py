@@ -1290,6 +1290,8 @@ class MergeModel_create(BaseModel):
         self.head_layers_dim=  self.arg.merge_model.architect.get('head_layers_dim', [512, 128, 10] )
         self.head_custom=      self.arg.merge_model.architect.get('head_custom', None)
 
+        self.loss_merge_custom = self.arg.merge_model.architect.get('loss_custom', None)
+
 
 
         class Modelmerge(torch.nn.Module):
@@ -1440,7 +1442,11 @@ class MergeModel_create(BaseModel):
             modelA_loss(x_a, embA)
         """
         super(MergeModel_create,self).create_loss()
-        loss =  torch.nn.BCEWithLogitsLoss()
+
+        if self.loss_merge_custom is None :
+           loss =  torch.nn.BCEWithLogitsLoss()
+        else :
+            loss = self.loss_merge_custom   
         return loss
 
 
