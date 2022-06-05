@@ -578,14 +578,16 @@ class model_getlayer():
 
 ##################################################################################################
 ########### Gradient Checks ######################################################################
-def model_gradient_check(net_model):
+def model_is_gradient_needed(net_model):
         kk = 0
         for param1 in zip(net_model.parameters()):
             if kk > 5 : break
             kk = kk + 1
             # torch.testing.assert_close(param1.data, param2.data)
             if(param1.requires_grad==True):
-                raise Exception( f"Gradients are updated in models_nets {param1}" )
+                 return True
+            else :
+                 return False
 
 
 def plot_grad_flow(named_parameters):
