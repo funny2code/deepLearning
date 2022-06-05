@@ -416,8 +416,6 @@ class model_LayerRecorder():
     '''Get input, output or parameters to a module/layer by registering forward or backward hooks
     Docs ::
 
-        Input
-        -----
         module: a module of a class in torch.nn.modules
 
         record_input: bool, default False, deciding if input to module will be
@@ -560,7 +558,7 @@ class model_getlayer():
         self.last_layer = self.layers[pos_layer]
         self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
 
-    def hook_fn(self, module, input, output):
+    def hook_fn(self, module1, input, output):
         self.input = input
         self.output = output
 
@@ -655,6 +653,10 @@ def plot_grad_flow_v2(named_parameters):
                 Line2D([0], [0], color="k", lw=4)], ['max-gradient', 'mean-gradient', 'zero-gradient'])
 
 
+
+
+
+
 ##################################################################################################
 ########### Computer vision ######################################################################
 def vision_prediction_check():
@@ -677,15 +679,17 @@ def vision_prediction_check():
 ###############################################################################################
 ########### Custom layer ######################################################################
 class MultiClassMultiLabel_Head(nn.Module):
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0,):
-        """
+    """  Multi Class Multi Label head
+    Docs::
 
-           class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
+        class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-        """
+    """    
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
+
         super().__init__()
-        self.dropout = nn.Dropout(dropout)
-        self.relu    = nn.ReLU()
+        self.dropout     = nn.Dropout(dropout)
+        self.activation  = nn.ReLU() if activation_custom is None else activation_custom
         self.class_label_dict = class_label_dict
 
         ########Common part #################################################################
@@ -706,7 +710,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
     def forward(self, x):
         for lin_layer in self.linear_list:
-           x = self.relu(lin_layer(self.dropout(x)))
+           x = self.activation(lin_layer(self.dropout(x)))
 
         yout  = {}
         for class_i in self.class_label_dict.keys():
@@ -716,7 +720,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
     def get_loss(self,ypred, ytrue, loss_calc_custom=None,
                  weights=None, sum_loss=True):
-        """
+        """ Get losses
 
         """
         if loss_calc_custom is None :
@@ -763,17 +767,17 @@ class LSTM(nn.Module):
 
 
 class SequenceReshaper(nn.Module):
-	def __init__(self, from_ = 'vision'):
-		super(SequenceReshaper,self).__init__()
-		self.from_ = from_
+    def __init__(self, from_ = 'vision'):
+        super(SequenceReshaper,self).__init__()
+        self.from_ = from_
 
-	def forward(self, x):
-		if self.from_ == 'vision':
-			x = x[:,0,:,:]
-			x = x.squeeze()
-			return x
-		else:
-			return x
+    def forward(self, x):
+        if self.from_ == 'vision':
+            x = x[:,0,:,:]
+            x = x.squeeze()
+            return x
+        else:
+            return x
 
 
 ###############################################################################################
