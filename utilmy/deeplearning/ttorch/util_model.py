@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+import os,sys, pickle
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
-import pickle
 import numpy as np
 
 import torch
@@ -378,16 +378,16 @@ def model_add_layers(model, modules = []):
     return model
 
 
-def grad_check(self,):
-    for i in range(len(self.net.models_nets)):
-        net_model = self.net.models_nets[i]
+
+def model_gradient_check(net_model):
         kk = 0
-        for param1, param2 in zip(self.models_list[i].net.parameters(),net_model.parameters()):
+        for param1 in zip(net_model.parameters()):
             if kk > 5 : break
             kk = kk + 1 
             # torch.testing.assert_close(param1.data, param2.data)
-            if(param2.requires_grad==True):
-                raise Exception("Gradients are updated in models_nets {}".format(i) )
+            if(param1.requires_grad==True):
+                raise Exception( f"Gradients are updated in models_nets {param1}" )
+
 
 class model_LayerRecorder():
     '''Get input, output or parameters to a module/layer 
@@ -481,6 +481,8 @@ class model_LayerRecorder():
             name = 'recording_' + str(self.counter) 
             filename = Path(self.save_to) / name
             self.counter += 1
+
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, 'wb') as handle:
                 if record_what == 'input': 
                     pickle.dump(input, handle, protocol = pickle.HIGHEST_PROTOCOL)
@@ -502,6 +504,7 @@ class model_LayerRecorder():
             name = 'recording_' + str(self.counter) 
             filename = Path(self.save_to) / name
             self.counter += 1
+            os.makedirs(os.path.dirname(filename), exist_ok=True)            
             with open(filename, 'wb') as handle:
                 pickle.dump(res, handle, protocol = pickle.HIGHEST_PROTOCOL)
             
