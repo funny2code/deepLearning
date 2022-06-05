@@ -1,4 +1,4 @@
-name: AA_Build_test_long
+name: AA_Build_test_devtorch
 
 ###  https://github.com/arita37/awesome-actions#static-analysis
 
@@ -9,13 +9,13 @@ on:
     
   push:
     branches:
-    - main
+    - devtorch
   
   
-  schedule:
-     - cron:  '0 0 */2 * *'      #### 60mins
-     #   #    - cron:  '*/10 * * * *'
-     #   - cron:  '* * */2 * *'    
+  #schedule:
+  #   - cron:  '0 0 */2 * *'      #### 60mins
+  #   #   #    - cron:  '*/10 * * * *'
+  #   #   - cron:  '* * */2 * *'    
   
 concurrency: 
   group: ${{ github.ref }}_long
@@ -39,7 +39,9 @@ jobs:
         python-version: 3.7.*
       
     - name: Install pipenv
-      uses: dschep/install-pipenv-action@v1
+      #uses: dschep/install-pipenv-action@v1
+      run: |
+           pip install pipenv==2022.4.30   
       
   
     - name: Cache pipenv virtualenv
@@ -74,13 +76,13 @@ jobs:
         pip install -e .
         python -c "import utilmy"
         python -c "import os, pandas as pd; print(os)"
+        pip list
         
-    ########  Runs All test  ######################################
+    ########  Runs All test  #######################################
     - name: test_setup
       run: |
           mkdir -p    /home/runner/work/log_tmp/
           chmod -R 777 . 
-
 
     ################################################################
     # - name: test_deeplearning_torch
@@ -88,47 +90,27 @@ jobs:
     #   run: |
     #       python test.py test_deeplearning_torch
 
-
-    - name: test utilmy.nlp.ttorch
+    - name: test.py test_import_all
       continue-on-error: true 
       run: |
-          python test.py test_long
-
-
-    - name:  sspark/src/util_spark.py test_all
-      # continue-on-error: true 
-      run: |
-          python utilmy/sspark/src/util_spark.py test_all
+          python test.py test_import_all
 
 
     - name: utilmy/deeplearning/ttorch/model_ensemble.py  
       # continue-on-error: true 
       run: |
           python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
+          
+
+    - name: utilmy/deeplearning/ttorch/util_torch.py  
+      # continue-on-error: true 
+      run: |
+          python utilmy/deeplearning/ttorch/util_torch.py   test_all
 
 
 
-    - name: utilmy/deeplearning/ttorch/  util_model.py
+    - name: utilmy/deeplearning/ttorch/util_model.py
       # continue-on-error: true 
       run: |
           python utilmy/deeplearning/ttorch/util_model.py     test_all
-
-
-
-    - name: utilmy/deeplearning/util_embedding.py 
-      continue-on-error: true 
-      run: |
-          python utilmy/deeplearning/util_embedding.py test_all
-
-
-
-
-
-
-
-
-
-
-
-
 

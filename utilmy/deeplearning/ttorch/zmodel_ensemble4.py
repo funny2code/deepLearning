@@ -122,7 +122,7 @@ def test_all():
     test2b()
     test2c()
     test2d()
-    test2_lstm()
+    test2e()
 
 
 
@@ -730,8 +730,46 @@ def test2d():
 
 
 ##### LSTM #################################################################################
-def test2_lstm():
-    log('\n\n\n\nLSTM Version')
+class LSTM(nn.Module):
+  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
+    super(LSTM, self).__init__()
+    self.num_layers = num_layers
+    self.input_size = input_size
+    self.hidden_size = hidden_size
+    self.num_classes = num_classes
+    self.dropout = dropout
+    
+    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
+                        dropout = self.dropout, batch_first=True)
+    self.fc = nn.Linear(self.hidden_size, self.num_classes)
+
+  def forward(self, x):
+    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
+    out, _ = self.lstm(x, (h0,c0))
+    out = out[:,-1,:]
+    out = self.fc(out)
+    return out
+    
+
+
+class SequenceReshaper(nn.Module):
+	def __init__(self, from_ = 'vision'):
+		super(SequenceReshaper,self).__init__()
+		self.from_ = from_
+	
+	def forward(self, x):
+		if self.from_ == 'vision':
+			x = x[:,0,:,:]
+			x = x.squeeze()
+			return x
+		else:
+			return x
+
+
+def test2e():
+    """
+    """
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
     ARG = Box({
@@ -812,30 +850,10 @@ def test2_lstm():
     modelA = model_create(ARG.modelA)
 
 
-    # ### model lSTM  ########################################################
-    class LSTM(nn.Module):
-        def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
-            super(LSTM, self).__init__()
-            self.num_layers = num_layers
-            self.input_size = input_size
-            self.hidden_size = hidden_size
-            self.num_classes = num_classes
-            self.dropout = dropout
-            
-            self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
-                                dropout = self.dropout, batch_first=True)
-            self.fc = nn.Linear(self.hidden_size, self.num_classes)
-
-        def forward(self, x):
-            h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-            c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-            out, _ = self.lstm(x, (h0,c0))
-            out = out[:,-1,:]
-            out = self.fc(out)
-            return out
-            
+    # ### modelD  ########################################################
     lstm = LSTM(input_size=28, hidden_size=128, num_layers=2, num_classes=2, dropout=0.0)
-    #from util_models.LSTM import lstm
+    #from models.LSTM import lstm
+    #from models.SequenceReshaper import SequenceReshaper
     model_ft                 = lstm
     embD_dim                 = int(model_ft.fc.in_features)
     
@@ -891,23 +909,6 @@ def test2_lstm():
 
 
 ##############################################################################################
-class SequenceReshaper(nn.Module):
-    def __init__(self, from_ = 'vision'):
-        """ Reshape output to fit the merge flatenning
-
-        """
-        super(SequenceReshaper,self).__init__()
-        self.from_ = from_
-    
-    def forward(self, x):
-        if self.from_ == 'vision':
-            x = x[:,0,:,:]
-            x = x.squeeze()
-            return x
-        else:
-            return x
-
-
 class model_getlayer():
     def __init__(self, network, backward=False, pos_layer=-2):
         self.layers = []
@@ -1386,6 +1387,7 @@ class MergeModel_create(BaseModel):
             self.save_weight(  path = path_save, meta_data = { 'epoch' : epoch, 'loss_train': loss_train, 'loss_val': loss_val, } )
 
 
+###################################################################
 class model_create(BaseModel):
     """ modelA
     """
@@ -1442,13 +1444,6 @@ class model_create(BaseModel):
         super(model_create,self).create_loss()
         if not loss_fun : loss_fun
         return torch.nn.BCELoss()
-
-
-
-
-
-
-
 
 
 
@@ -1736,9 +1731,9 @@ class modelD_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l3= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
                 embD = self.forward(x)
-                embD = layer_l3.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
+                embD = layer_l2.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
                 return embD
         return modelD(layers_dim, nn_model_base, layer_id )
 
@@ -1758,4 +1753,3 @@ class modelD_create(BaseModel):
 if __name__ == "__main__":
     import fire
     test_all()
-

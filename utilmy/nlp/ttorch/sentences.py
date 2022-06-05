@@ -1,23 +1,70 @@
 # -*- coding: utf-8 -*-
-"""#
+""" sentence_tansformer wrapper.
 Doc::
 
-    sentence_tansformer wrapper
 
-    python  utilmy/nlp/ttorch/sentences.py  test1
+    os.environ['CUDA_VISIBLE_DEVICES']='2,3'
+  
+    cc        = Box({})
+    cc.epoch  = 3
+    cc.lr     = 1E-5
+    cc.warmup = 10
+
+    cc.eval_steps = 50
+    cc.batch_size = 8
+
+    cc.mode    = 'cpu/gpu'
+    cc.use_gpu = 0
+    cc.ncpu    = 5
+    cc.ngpu    = 2
+
+    #### Data
+    cc.data_nclass = 5
+    cc.datasetname = 'sts5'
 
 
-    Original file is located at
+    dirtmp = 'ztmp/'
+    modelid = "distilbert-base-nli-mean-tokens"
+    
+    cols = ['sentence1', 'sentence2', 'label', 'score' ]  ### score can be NA
+    dfcheck = dataset_fake(name='AllNLI.tsv.gz', dirdata=dirtmp, fname='data_fake.parquet', nsample=10)  ### Create fake version
+    assert len(dfcheck[ cols ]) > 1 , "missing columns"
+    ## Score can be empty or [0,1]
+    
+    lloss = [ 'cosine', 'triplethard',"softmax", 'MultpleNegativesRankingLoss' ]
+    
+    for lname in lloss :
+        log("\n\n\n ########### Classifier with Loss ", lname)
+        cc.lossname = lname
+        model = model_finetune(modelname_or_path = modelid,
+                               taskname   = "classifier",
+                               lossname   = lname,
+                               metricname = 'cosinus',
+
+                               cols        = cols,
+                               datasetname = cc.datasetname,
+                               train_path  = dirtmp + f"/data_fake.parquet",
+                               val_path    = dirtmp + f"/data_fake.parquet",
+                               eval_path   = dirtmp + f"/data_fake.parquet",
+
+                               dirout= dirtmp + f"/model/" + lname, nsample=100, cc=cc)
+    
+
+    log('\n\n########### model encode')
+    df = model_encode( model= model,  dirdata=dirtmp +"/data_fake.parquet",
+                       colid=None, coltext='sentence1', batch_size=32, 
+                       dirout=None,
+                       normalize_embeddings=True  #### sub encode params
+              )  
+
+
     https://colab.research.google.com/drive/1dPPD-2Vrn61v2uYZT1AXiujqqw7ZwzEA#scrollTo=TZCBsq36j4aH
-
 
     train Sentence Transformer with different Losses such as:**
     > Softmax Loss
     > Cusine Loss
     > TripletHard Loss
     > MultpleNegativesRanking Loss
-
-    # !pip install sentence-transformers
 
     We create a new end-to-end example on how to use a custom inference.py script w
     ith a Sentence Transformer and a mean pooling layer to create sentence embeddings.🤯
@@ -37,11 +84,10 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
-
 #vfrom tensorflow.keras.metrics import SparseCategoricalAccuracy
 from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 
-from utilmy.utilmy import glob_glob
+
 try :
     import sentence_transformers as st
     from sentence_transformers import SentenceTransformer, SentencesDataset, losses, util
@@ -49,11 +95,11 @@ try :
     from sentence_transformers.readers import InputExample
     from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
 except Exception as e:
-    print(e)
+    print(e) ; 1/0
 
 
 #### read data on disk
-from utilmy import pd_read_file, pd_to_file
+from utilmy import pd_read_file, pd_to_file, os_system, glob_glob
 
 
 #############################################################################################
@@ -63,6 +109,7 @@ Dataframe_str = Union[str, pd.DataFrame, None]
 from utilmy import log, log2, help_create
 def help():
     print( help_create(__file__) )
+
 
 
 #############################################################################################
@@ -140,9 +187,9 @@ def test1():
 
     log('\n\n########### model encode')
     df = model_encode( model= model,  dirdata=dirtmp +"/data_fake.parquet",
-                           colid=None, coltext='sentence1', batch_size=32, 
-                           dirout=None,
-              normalize_embeddings=True  #### sub encode params
+                       colid=None, coltext='sentence1', batch_size=32, 
+                       dirout=None,
+                       normalize_embeddings=True  #### sub encode params
               )  
     if df is not None : log(df.head(3))
     
@@ -156,30 +203,32 @@ def test2():
     log(df.head())
 
 
+
 ###################################################################################################################        
 def dataset_fake(name='AllNLI.tsv.gz', dirdata:str='', fname:str='data_fake.parquet', nsample=10):        
     """ Fake text data for tests
     """
     # sts_dataset_path = dirdata + '/stsbenchmark.tsv.gz'
     name='AllNLI.tsv.gz'
-    dataset_download(name=name, dirout= dirdata)
-    dataset_path = dirdata + '/' + name
+    dataset_path = dataset_download(name=name, dirout= dirdata)
 
     # Read the AllNLI.tsv.gz file and create the training dataset
+    ##['split', 'dataset', 'filename', 'sentence1', 'sentence2', 'label']
     df = pd_read_file3(dataset_path, npool=1) 
+    log(df, df.columns)
 
-    df = df[df['split'] == 'train' ]
+    # df = df[df['split'] == 'train' ]
     
     # df = df.sample(frac=0.1)
     df['score'] = np.random.random( len(df) )   #### only for Evaluation.
 
     df['label'] = pd.factorize(df['label'])[0]   ###into integer
     #df['label'] = 6.0  # np.random.randint(0, 3, len(df) )
-    df['label'] = df['label'].astype('float')  ### needed for cosinus loss 
+    df['label'] = df['label'].astype('float')    ### needed for cosinus loss
 
     log(df, df.columns, df.shape)
     dirout = dirdata +"/" + fname
-    df = df.iloc[:nsample, :]
+    df     = df.iloc[:nsample, :]
     df.to_parquet(dirout)
     return df.iloc[:10, :]
 
@@ -231,6 +280,10 @@ def dataset_download(name='AllNLI.tsv.gz', dirout='/content/sample_data/sent_tan
 
     os.makedirs(dirout, exist_ok=True)  
     util.http_get(url, dirouti)
+    log('Files', os.listdir( dirout))
+    return dirouti
+
+
 
 
 
@@ -393,22 +446,6 @@ def model_encode(model = "model name or path or object", dirdata:Dataframe_str="
         pd_to_file(embs_all, dirout, show=1)   
 
 
-def model_encode_batch(model = "model name or path or object", dirdata:str="data/*.parquet", 
-                coltext:str='sentence1', colid=None,
-                dirout:str="embs/myfile.parquet", nsplit=5, imin=0, imax=500,   **kw ):
-    """   Sentence encoder in parallel batch mode
-      file_{ii}.parquet  with ii= imin, imax.
-
-    """  
-    flist = glob_glob(dirdata)
-    ### Filter files based on rule
-    flist2 = flist
-
-    model_encode(model = model, dirdata=flist2, 
-                coltext=coltext, colid=colid,
-                dirout=dirout, )
-
-
 def model_evaluate(model ="modelname OR path OR model object", dirdata='./*.csv', dirout='./',
                    cc:dict= None, batch_size=16, name='sts-test'):
 
@@ -431,7 +468,7 @@ def model_evaluate(model ="modelname OR path OR model object", dirdata='./*.csv'
     log( pd_read_file(dirout +"/*" ))
 
 
-def model_setup_compute(model, use_gpu=0, ngpu=1, ncpu=1, cc:Dict_none=None)->SentenceTransformer: 
+def model_setup_compute(model, use_gpu=0, ngpu=1, ncpu=1, cc:Dict_none=None):
     """#
     Doc::
     
@@ -490,7 +527,33 @@ def model_save(model,path:str, reload=True):
 
 
 
-###################################################################################################################  
+###################################################################################################################
+def model_encode_batch(model = "model name or path or object", dirdata:str="data/*.parquet",
+                coltext:str='sentence1', colid=None,
+                dirout:str="embs/myfile.parquet", nsplit=5, imin=0, imax=500,   **kw ):
+    """   Sentence encoder in parallel batch mode
+      file_{ii}.parquet  with ii= imin, imax.
+
+    """
+    flist = glob_glob(dirdata)
+    ### Filter files based on rule
+    flist2 = flist
+
+    model_encode(model = model, dirdata=flist2,
+                coltext=coltext, colid=colid,
+                dirout=dirout, )
+
+
+
+
+
+
+
+
+
+
+
+###################################################################################################################
 ######## Custom Task ##############################################################################################
 def model_finetune_classifier(modelname_or_path='distilbert-base-nli-mean-tokens',
                             taskname="classifier", lossname="cosinus",
@@ -753,9 +816,11 @@ def sentence_compare(df, cola, colb, model):
 ###################################################################################################################  
 if 'utils':
     def pd_read_file3(path_or_df='./myfile.csv', npool=1, nrows=1000,  **kw)->pd.DataFrame:
+        import csv
         if isinstance(path_or_df, str):            
             if  'AllNLI' in path_or_df:
-                dftrain = pd.read_csv(path_or_df, error_bad_lines=False, nrows=nrows, sep="\t")
+                dftrain = pd.read_csv(path_or_df, error_bad_lines=False, nrows=nrows, sep="\t", quoting=csv.QUOTE_NONE,
+                                      compression='gzip', encoding='utf8')
             else :
                 dftrain = pd_read_file(path_or_df, npool=npool, nrows=nrows)
             
@@ -766,6 +831,18 @@ if 'utils':
         return dftrain    
         
       
+"""
+
+label2int = {"contradiction": 0, "entailment": 1, "neutral": 2}
+train_samples = []
+with gzip.open(nli_dataset_path, 'rt', encoding='utf8') as fIn:
+    reader = csv.DictReader(fIn, delimiter='\t', quoting=csv.QUOTE_NONE)
+    for row in reader:
+        if row['split'] == 'train':
+            label_id = label2int[row['label']]
+            train_samples.append(InputExample(texts=[row['sentence1'], row['sentence2']], label=label_id))
+
+"""            
 
 
 
@@ -774,8 +851,8 @@ if 'utils':
 ##########################################################################################
 if __name__ == '__main__':
     import fire
-    # fire.Fire()
-    test1()
-    test2()
+    fire.Fire()
+    #test1()
+    #test2()
 
 
