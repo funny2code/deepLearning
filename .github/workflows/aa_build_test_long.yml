@@ -1,4 +1,4 @@
-name: AA_Build_test_devtorch
+name: AA_Build_test_long
 
 ###  https://github.com/arita37/awesome-actions#static-analysis
 
@@ -9,13 +9,13 @@ on:
     
   push:
     branches:
-    - devtorch
+    - main
   
   
-  #schedule:
-  #   - cron:  '0 0 */2 * *'      #### 60mins
-  #   #   #    - cron:  '*/10 * * * *'
-  #   #   - cron:  '* * */2 * *'    
+  schedule:
+     - cron:  '0 0 */2 * *'      #### 60mins
+     #   #    - cron:  '*/10 * * * *'
+     #   - cron:  '* * */2 * *'    
   
 concurrency: 
   group: ${{ github.ref }}_long
@@ -84,6 +84,7 @@ jobs:
           mkdir -p    /home/runner/work/log_tmp/
           chmod -R 777 . 
 
+
     ################################################################
     # - name: test_deeplearning_torch
     #   # continue-on-error: true 
@@ -102,17 +103,30 @@ jobs:
           python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
           
 
+
+
+
+
     - name: utilmy/deeplearning/ttorch/util_torch.py  
-      # continue-on-error: true 
+      continue-on-error: true 
       run: |
           python utilmy/deeplearning/ttorch/util_torch.py   test_all
 
 
 
+
     - name: utilmy/deeplearning/ttorch/util_model.py
-      # continue-on-error: true 
+      continue-on-error: true 
       run: |
           python utilmy/deeplearning/ttorch/util_model.py     test_all
+
+
+
+    - name: utilmy/deeplearning/util_embedding.py 
+      continue-on-error: true 
+      run: |
+          python utilmy/deeplearning/util_embedding.py test_all
+
 
 
 

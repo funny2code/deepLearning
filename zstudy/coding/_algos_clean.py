@@ -1,4 +1,527 @@
 
+###################################################################################################### 
+########### Strin problem ############################################################################
+
+        Parenthesis problem:-
+
+            1.https://leetcode.com/problems/generate-parentheses
+            2.https://leetcode.com/problems/score-of-parentheses
+            3.https://leetcode.com/problems/valid-parentheses
+            4.https://leetcode.com/problems/valid-parentheses Easy
+            5.https://leetcode.com/problems/remove-outermost-parentheses Easy
+            6.https://leetcode.com/problems/different-ways-to-add-parentheses/ Medium
+            7.https://leetcode.com/problems/remove-invalid-parentheses Hard
+            8.https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses Medium
+            9.https://leetcode.com/problems/maximum-nesting-depth-of-the-parentheses Easy
+
+        Counting of substring based on some condition:-
+
+            1.https://leetcode.com/problems/number-of-wonderful-substrings Medium
+            2.https://leetcode.com/problems/sum-of-beauty-of-all-substrings/ Medium
+            3.https://leetcode.com/problems/maximum-number-of-occurrences-of-a-substring Medium
+            4.https://leetcode.com/problems/number-of-wonderful-substrings Medium
+
+        Check types of string:-
+
+            1.https://leetcode.com/problems/isomorphic-strings Easy
+            2.https://leetcode.com/problems/valid-anagram Easy
+            3. https://leetcode.com/problems/additive-number Medium
+            4.https://leetcode.com/problems/buddy-strings Easy
+            5.https://leetcode.com/problems/longest-happy-prefix Hard
+            6.https://leetcode.com/problems/increasing-decreasing-string Easy
+            7.https://leetcode.com/problems/check-if-a-string-can-break-another-string Medium
+            8.https://leetcode.com/problems/determine-if-two-strings-are-close Medium
+            9.https://leetcode.com/problems/check-if-two-string-arrays-are-equivalent Easy
+            10.https://leetcode.com/problems/check-if-word-equals-summation-of-two-words Easy
+            11.https://leetcode.com/problems/check-if-one-string-swap-can-make-strings-equal Easy
+
+        **Palindromic string:- **
+
+            1.https://leetcode.com/problems/palindrome-partitioning Medium
+            2.https://leetcode.com/problems/palindrome-partitioning-ii Hard
+            3.https://leetcode.com/problems/valid-palindrome Easy
+            4.https://leetcode.com/problems/shortest-palindrome Hard
+            5.https://leetcode.com/problems/palindrome-pairs Hard
+            6.https://leetcode.com/problems/longest-palindrome Easy
+            7.https://leetcode.com/problems/longest-palindromic-subsequence Medium
+            8.https://leetcode.com/problems/find-the-closest-palindrome Hard
+            9.https://leetcode.com/problems/palindromic-substrings Medium
+            10.https://leetcode.com/problems/valid-palindrome-ii Easy
+            11.https://leetcode.com/problems/longest-chunked-palindrome-decomposition Hard 12.https://leetcode.com/problems/break-a-palindrome Medium
+            13. https://leetcode.com/problems/can-make-palindrome-from-substring Medium
+            14.https://leetcode.com/problems/palindrome-partitioning-iii Hard
+            15.https://leetcode.com/problems/minimum-insertion-steps-to-make-a-string-palindrome Hard
+            16.https://leetcode.com/problems/remove-palindromic-subsequences Easy
+            16.https://leetcode.com/problems/construct-k-palindrome-strings Medium
+            17.https://leetcode.com/problems/split-two-strings-to-make-palindrome Medium
+
+        Sorting on String:-
+            1.https://leetcode.com/problems/sort-characters-by-frequency Medium
+            2.https://leetcode.com/problems/custom-sort-string
+
+        Longest and shortest kind of String Problem :-
+
+            https://leetcode.com/problems/longest-duplicate-substring Hard
+            2.https://leetcode.com/problems/longest-string-chain Medium
+            3.https://leetcode.com/problems/longest-common-subsequence Medium
+            4.https://leetcode.com/problems/longest-happy-string Medium
+            5.https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters Medium
+            6.https://leetcode.com/problems/find-longest-awesome-substring Hard
+            7.https://leetcode.com/problems/largest-substring-between-two-equal-characters Easy
+            8.https://leetcode.com/problems/largest-odd-number-in-string Easy
+
+
+
+
+
+
+###################################################################################################### 
+######################################################################################################
+https://leetcode.com/problems/kth-largest-element-in-a-stream/
+  
+      Design a class to find the kth largest element in a stream. 
+      Note that it is the kth largest element in the sorted order, not the kth distinct element.
+
+    Implement KthLargest class:
+
+    KthLargest(int k, int[] nums) Initializes the object with the integer k and the stream of integers nums.
+    int add(int val) Appends the integer val to the stream and returns the element representing the kth largest element in the stream.
+
+
+    Example 1:
+
+    Input
+    ["KthLargest", "add", "add", "add", "add", "add"]
+    [[3, [4, 5, 8, 2]], [3], [5], [10], [9], [4]]
+    k=3 
+    Output
+    [null, 4, 5, 5, 8, 8]
+
+    Explanation
+    KthLargest kthLargest = new KthLargest(3,    [4, 5, 8, 2]);
+
+    kthLargest.add(3);   // return 4   because  8,5,4      3th largest  from [4, 5, 8, 2]  + [3]     8,    
+    kthLargest.add(5);   // return 5   becaues  8,5,5       
+    kthLargest.add(10);  // return 5  
+    kthLargest.add(9);   // return 8
+    kthLargest.add(4);   // return 8
+
+
+    Constraints:
+
+    1 <= k <= 104
+    0 <= nums.length <= 104
+    -104 <= nums[i] <= 104
+    -104 <= val <= 104
+    At most 104 calls will be made to add.
+    It is guaranteed that there will be at least k elements in the array when you search for the kth element.
+
+        
+        Similar to Problems 0973 K Closest Points to Origin and 0215 Kth Largest Element in an Array with exactly the same idea:
+        here we heap min-heap with k biggest elements, then k-th largest element will be in the root of our heap.
+        When we have new element we check if it is more than root of our heap, then we put this element to heap and remove smallest element from heap, so we will always keep it k elements.
+
+        Complexity
+        It is O(k + (n-k)*log k) for init and O(log k) for add. Space complexity is O(k).
+
+
+        heap structure ???
+
+        
+            A heap is a data structure, in sorted    increasing heap or descr heap.  
+                push      :         insert in correct order.
+                findMax/findMin :   Finds the largest or smallest vales ( depending on increasing heap OR descresing heap ). 
+                deletMax/deleteMin: Delets Min/max value. 
+                heappushpop   == GetMax + deleteMax  (in  incr. heap ) 
+                        
+            heap == stream ordered  : receive elt and put it in correct sorted location
+            
+                
+        #### Code
+        class KthLargest:
+            def __init__(self, k, nums):
+                self.heap = nums[:k]  ##init
+                heapify(self.heap)  ### sorted array
+                self.k = k
+                for num in nums[k:]:   ### activate the stream
+                    if num > self.heap[0]:  ###  hepa[0] is min,,, heap[-1] is max
+                        ### push new value, and Remove the smalleest
+                        ### size is kept ==  K                 
+                        heappushpop(self.heap, num)   ###push it and replace the min value.
+                        
+            def add(self, val) :
+                if len(self.heap) < self.k:
+                    heappush(self.heap, val)  ### push new value , smaller
+                    
+                elif val > self.heap[0]:
+                    heappushpop(self.heap, val)   ### do same before
+                    
+                ### heap[0] = min    <>   heap == k-largest because len(heap) >= k :    
+                
+                ### construction of the HEAP --->   Min == K-largest  (True by construction of the heap with headpushpop)
+                #### remove min, keep higher value.
+                return self.heap[0]     ### k-
+            
+            [4, 5, 8, 2]  + [3]   -->   [4, 5, 8 ]     2 < 4 :  discard 2,   3 < 4 : discard,  keep 4   
+            
+            
+        heap : sorted array 
+        Constructu heap to ensure than  heap[0] == min == K-largest  (ie compare heap[0] with new value)
+
+        
+        
+
+  
+  
+  
+###################################################################################################### 
+###################################################################################################### 
+https://leetcode.com/problems/valid-palindrome-ii/ 
+      Valid Palindrome II
+      Easy
+      Given a string s, return true if the s can be palindrome after deleting at most one character from it.
+
+
+
+      Example 1:
+
+        Input: s = "aba"
+        Output: true
+        Example 2:
+
+        Input: s = "abca"
+        Output: true
+        Explanation: You could delete the character 'c'.
+          
+      Example 3:
+        Input: s = "abc"
+        Output: false
+
+
+      Constraints:
+
+          1 <= s.length <= 105
+          s consists of lowercase English letters.
+
+
+
+
+      What we need to do is to start to traverse our string from both sides and if elements are equal, we are OK,
+      we need to take both (we can not remove both, because we allowed only delete one. 
+     There are couple of tricks we can use: all(...) to check if all elements in list are True. 
+
+    Also s[~i] will give you i-th element from the end: we traverse our string and if we have different symbols on some step, 
+    we check two options: substring s[i+1:j] and s[i:j-1].
+
+    Complexity
+    It is O(n) for time and O(1) for space.
+
+
+    if not equal:
+       remove the right character and check again if not 
+            remove the left chacrter and check again if not 
+                                    return False 
+
+    def check(s: str) -> bool:         
+          for i in range(len(s) // 2): 
+                if s[i] != s[~i]:
+                     return False 
+
+          return True 
+
+
+    def solution(s: str) -> bool: 
+
+        for i in range(len(s) // 2): 
+             if s[i] != s[~i]: 
+                  tmp1 = tmp2 = s
+                  tmp1.remove(i)
+                  tmp2.remove(len(s) - i - 1)
+                  return check(tmp1) or check(tmp2)
+
+        return True 
+
+    yes, clearer process, thanks
+
+
+
+
+
+                        
+###################################################################################################### 
+######################################################################################################                        
+https://leetcode.com/problems/split-array-largest-sum/                                                
+      410. Split Array Largest Sum
+      Hard
+      Given an array nums which consists of non-negative integers and an integer m, 
+          you can split the array into m non-empty continuous subarrays.
+
+      Write an algorithm to minimize the largest sum among these m subarrays.
+
+      Example 1:
+          Input: nums = [7,2,5,10,8], m = 2
+          Output: 18
+          Explanation:
+          There are four ways to split nums into two subarrays.
+                            
+      The best way is to split it into [7,2,5] and [10,8],
+      where the largest sum among the two subarrays is only 18.
+                            
+      Example 2:
+          Input: nums = [1,2,3,4,5], m = 2
+          Output: 9
+          Example 3:
+
+      Input: nums = [1,4,4], m = 3
+      Output: 4
+
+
+      Constraints:
+
+      1 <= nums.length <= 1000
+      0 <= nums[i] <= 106
+      1 <= m <= min(50, nums.length)
+
+
+                                                     
+                        
+        Solution 1
+            One way is to use binary search for Q: check 
+                if we can split numbers into m groups such that the largest sum <= Q. We do it in greedy way.
+
+                                    
+        Complexity
+        Time complexity of this approach is O(n * log(SUM)), where SUM is sum of all numbers in array. Space complexity is O(1).
+
+        Q: is the value which is the largest sum should be less than Q, we are doing binary search on Q      
+            "Write an algorithm to minimize the largest sum among these m subarrays."
+                                    
+                    Minimize  some largest value  ---> we to take intermediate value V and minimize V.
+                        1)  flag = calcuate(array, V)
+                                    
+                        2)  Min(V)  with algo 2  (binary search min)          
+                                                            
+                                    
+        class Solution:
+            def splitArray(self, nums, m):
+            
+                ##Interemdiate variables Q, and split based on Q : sum                             
+                def check_cansplit(sum1= Q):   #####  checking if one can split array into m subarrays, with  largest sum < Q 
+                    if max(nums) > Q: return False
+                    acc, ans = 0, 1
+                    for num in nums:
+                        if acc + num <= Q:  ### 
+                            acc += num  ### Accumualte sum, sum > 1 : create a new sub-array
+                        else:
+                            acc = num  ### reset sub-array
+                            ans += 1   ### increase Mn of sub-array count
+                    return ans <= m   ### Nb of sub-array <= m, 
+                    ###  not just == because if you can split the array into less than m, you can make it into m
+                    ### how to make into m :  if one of subarrays contains N values you can unroll it to N subbarrays instead of 1 subarray and so on. 
+                    ### ok, I was missing obvious thing,
+                    
+                                    
+                #### Binary search  :  Minimum , k-th minimal things.              
+                #### 1 elt = max,  all elts == sum( array)        
+                beg, end = max(nums) - 1, sum(nums)
+                while beg + 1 < end:
+                    mid = (beg + end)//2
+                    if check_cansplit(sum1 = mid):  ### move to left part, becayse minimal sum, at least mid part.
+                        end = mid
+                    else:
+                        beg = mid
+                
+                return end
+
+                                    
+                                    
+                            
+                            
+                        
+        Solution 2
+        Another solution is use DP: let dp[i][j] be an answer for first i numbers and j groups. 
+        Then to evaluate dp[i][j] we need to look find min_k[max(dp[k][j-1], S_k-S_i)],
+        where S_k are cumulative sums. To find this minimum we can either use linear search with O(m n^2), but it will give TLE.
+        Alternative is to use binary search, where we use the property that first term of max is increasing and the second is decreasing.
+
+        Complexity
+        Time complexity is O(mn log n), space is O(n).
+
+        Code
+        class Solution:
+            def splitArray(self, nums, m):
+                n = len(nums)
+                acc = [0] + list(accumulate(nums))
+                dp = list(acc)
+                
+                for j in range(1, m):
+                    for i in range(n, j, -1):
+                        beg, end = j - 1, i
+                        while beg + 1 < end:
+                            mid = (beg + end)//2
+                            if dp[mid] >= acc[i] - acc[mid]:
+                                end = mid
+                            else:
+                                beg = mid
+                            dp[i] = min(max(dp[end], acc[i] - acc[end]), max(dp[beg], acc[i] - acc[beg]))
+                
+                return dp[-1]
+
+                                    
+                                    
+                    
+
+                 
+                        
+                        
+
+###################################################################################                        
+###################################################################################                        
+https://leetcode.com/problems/backspace-string-compare/                                          
+        844. Backspace String Compare
+        Given two strings s and t, return true if they are equal when both are typed into empty text editors. '#' means a backspace character.
+
+        Note that after backspacing an empty text, the text will continue empty.
+
+        
+        Example 1:
+            Input: s = "ab#c", t = "ad#c"
+            Output: true
+            Explanation: Both s and t become "ac".
+
+            
+        Example 2:
+            Input: s = "ab##", t = "c#d#"
+            Output: true
+            Explanation: Both s and t become "".
+
+        Example 3:
+            Input: s = "a#c", t = "b"
+            Output: false
+            Explanation: s becomes "c" while t becomes "b".
+        
+
+        Constraints:
+            1 <= s.length, t.length <= 200
+            s and t only contain lowercase letters and '#' characters.
+
+            Follow up: Can you solve it in O(n) time and O(1) space?                        
+
+            O(n + m) time and space solution is straightforward: use stack and imitate process.
+
+            If we want to do it in O(1) space, we need to go from the end of string, because if we go from the beginning we do not know in advance if symbol will be erased or not. Let i, j be indexes for the first and the second string and backS, backT be counter how many symbols we need to erase. We iterate over both strings until we need to remove symbols and then compare symbols.
+
+        Complexity
+        It is O(m + n) for time and space
+
+                            
+
+                                
+        def simulate_backspace(S)                        
+        for ci in S :
+            if ci != "#":
+                s2 =  s2 + ci
+            else :
+                s2 = s2[:-1]  ### last value removed        
+        return s2     
+                
+        return    simulate(S) == simulate(T)
+                
+                
+                
+                                
+                                
+                                
+                        
+                        
+                                      
+                        
+###################################################################################                        
+###################################################################################                         
+https://leetcode.com/problems/subarray-sum-equals-k/                        
+ 560. Subarray Sum Equals K
+    Medium
+    Given an array of integers nums and an integer k, return the total number of subarrays whose sum equals to k.
+    A subarray is a contiguous non-empty sequence of elements within an array.
+
+    Example 1:
+        Input: nums = [1,1,1], k = 2
+        Output: 2
+        Example 2:
+
+        Input: nums = [1,2,3], k = 3
+        Output: 2
+
+
+    Constraints:
+
+    1 <= nums.length <= 2 * 104
+    -1000 <= nums[i] <= 1000
+    -107 <= k <= 107
+    Accepted
+    785,933
+    Subm                       
+
+
+
+     Evaluate cumulative sums and then for each cumulative sum si check if we already have si - k in
+      our dictionary and how many times. If we do not found it, just increase frequency by one. Be careful, we need to traverse cumulative sums one by one, we can not just evaluate frequencies, in this way we can have both k and -k subarrays.
+
+    Complexity
+    Time and space complexity is O(n).
+
+    Code
+    class Solution:
+        def subarraySum(self, nums, k):
+            acc = [0] + list(accumulate(nums))
+            count = 0
+            d = defaultdict(int)
+            for i in acc:
+                if (i-k) in d:
+                    count += d[i-k] 
+                d[i] += 1
+            return count                       
+
+		
+        
+        left = 0 
+        for i2 in range(0,n):
+                       
+           if ssum == k :
+              cnt  = cnt+1
+           elif ssum < K :
+               ssum =  ssum + A[i2]               
+            
+           elif ssum > K :
+               while ssum > K and left < i2:
+                  ssum =  ssum - A[left]
+                  left += 1 
+        
+        
+        ssum : continuously increase, decrease.
+             we can do line 478: permutation tomorrow ?
+              
+            should be fine, thanks.
+            letst op now 
+            Okay perfect! Thank you :) 
+              
+        
+        Okay no problem , tell me if you have any questions
+        we can finish on this one
+         sorry, zoom cut.
+        
+        
+
+
+
+
+
+
+
+
+
+
+
 
 
 
