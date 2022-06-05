@@ -115,7 +115,7 @@ pickleshare==0.7.5
 Pillow==9.1.1
 pluggy==1.0.0
 pmlb==1.0.1.post3
-polars==0.13.40
+polars==0.13.41
 preshed==3.0.6
 pretty-html-table==0.9.16
 prettytable==3.3.0
@@ -198,7 +198,7 @@ tzlocal==4.2
 umap==0.1.1
 urllib3==1.26.9
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@37573e730d1721a4266064e7dc00b8dc8ec402a1#egg=utilmy
+-e git+https://github.com/arita37/myutil@771ff4ec6d41ceef86cc03c1c0431655ee152171#egg=utilmy
 visions==0.7.1
 wasabi==0.9.1
 wcwidth==0.2.5
