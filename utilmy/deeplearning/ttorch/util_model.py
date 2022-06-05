@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
+import numpy as np
 
 #################################################################################################
 def test_all():
@@ -217,7 +218,20 @@ def test3():
 
 
 def test4():
-    pass
+   class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
+   batch_size = 64
+   data = torch.rand(batch_size, 512)
+
+   layers_dim=[512, 256]
+   model = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
+
+   y_pred = model(data)
+   y_true  =   {'gender': torch.rand(batch_size, 2),
+               'season':torch.rand(batch_size, 4) ,
+               'age':torch.rand(batch_size, 5) } 
+
+   loss = model.get_loss(y_pred, y_true)
+
 
 #################################################################################################
 ################ Model tooling ##################################################################
@@ -687,22 +701,20 @@ class MultiClassMultiLabel_Head(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.relu    = nn.ReLU()
         self.class_label_dict = class_label_dict
-
+        self.linear_list = []
         ########Common part #################################################################
         out_dimi = layers_dim[0]
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
             in_dimi  = out_dimi
-            out_dimi = layers_dim[i]
-            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
-
+            out_dimi = dimi
+            self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False))
         dim_final = layers_dim[-1]
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
         for classname, n_unique_label in class_label_dict.items():
             self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
-
 
     def forward(self, x):
         for lin_layer in self.linear_list:
@@ -725,18 +737,16 @@ class MultiClassMultiLabel_Head(nn.Module):
            loss_calc_fun = loss_calc_custom()
 
         loss_list = []
-        for ypred_col, ytrue_col in zip(ypred, ytrue) :
-           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+        for classname in self.class_label_dict.keys():
+            loss_list.append(loss_calc_fun(ypred[classname], ytrue[classname]) )
 
         if sum_loss:
             weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
             lsum = 0.0
-            for li in loss_list:
-                lsum = lsum + weights[i]* li
+            for li in range(len(loss_list)):
+                lsum = lsum + weights[li]* loss_list[li]
             return lsum
         return loss_list
-
-
 
 
 class LSTM(nn.Module):
