@@ -732,7 +732,6 @@ def test3():
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset
    
-   from torchmerge import merge as me
    ARG = Box({
        'MODE'   : 'mode1',
        'DATASET': {},
@@ -804,7 +803,7 @@ def test3():
    ARG.modelA.layer_emb_id  = 'fc'
    ARG.modelA.architect     = [ embA_dim]  ### head s
    ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
-   modelA = me.model_create(ARG.modelA)
+   modelA = model_create(ARG.modelA)
    
 
 
@@ -819,7 +818,7 @@ def test3():
    ARG.modelB.layer_emb_id  = 'fc'
    ARG.modelB.architect     = [embB_dim ]   ### head size
    ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
-   modelB = me.model_create(ARG.modelB )
+   modelB = model_create(ARG.modelB )
 
 
 
@@ -851,7 +850,7 @@ def test3():
    ARG.merge_model.train_config  = train_config
 
 
-   model = me.MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+   model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
    model.build()
 
 
