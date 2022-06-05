@@ -588,12 +588,13 @@ def spark_add_jar(sparksession, hive_jar_cmd=None):
 
 #########################################################################################
 ###### Dataframe ########################################################################
-#from pyspark.sql.functions import col, explode, array, lit
-def spark_df_isempty(df:sp_dataframe):
-    """
+def spark_df_isempty(df:sp_dataframe)->bool:
+    """ True: spark DataFrame is empty
+
     Doc::
-        True: spark DataFrame is empty
-        False: spark DataFrame is not empty
+        
+        Tested as Fastest way, 30 sec for 70Gb dataset.
+        https://stackoverflow.com/questions/32707620/how-to-check-if-spark-dataframe-is-empty
     """
     try :
         return len(df.head(1)) == 0
