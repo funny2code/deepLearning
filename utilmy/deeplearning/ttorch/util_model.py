@@ -590,7 +590,7 @@ def model_gradient_check(net_model):
 def plot_grad_flow(named_parameters):
     """
     Docs::
-    
+
         Gradient flow check in Pytorch
         Check that the gradient flow is proper in the network by recording the average gradients per layer in every training iteration and then plotting them at the end. If the average gradients are zero in the initial layers of the network then probably your network is too deep for the gradient to flow.
 
