@@ -416,8 +416,6 @@ class model_LayerRecorder():
     '''Get input, output or parameters to a module/layer by registering forward or backward hooks
     Docs ::
 
-        Input
-        -----
         module: a module of a class in torch.nn.modules
 
         record_input: bool, default False, deciding if input to module will be
