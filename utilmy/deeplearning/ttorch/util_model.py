@@ -679,12 +679,12 @@ def vision_prediction_check():
 ###############################################################################################
 ########### Custom layer ######################################################################
 class MultiClassMultiLabel_Head(nn.Module):
-        """  Multi Class Multi Label head
-        Docs::
+    """  Multi Class Multi Label head
+    Docs::
 
-           class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
+        class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-        """    
+    """    
     def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
 
         super().__init__()
