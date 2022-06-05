@@ -32,7 +32,7 @@ def test1():
   print(recorder.recording)#tensor of shape (64, 192, 27, 27)
   recorder.close()#remove the recorder
 
-  # Record input to the layer during the forward pass 
+  # Record input to the layer during the forward pass
   recorder = util_model.model_LayerRecorder(layer, record_input = True, backward = False)
   data = torch.rand(64, 3, 224, 224)
   output = model(data)
@@ -41,9 +41,9 @@ def test1():
 
   # Register a recorder to the 4th layer of the features part of AlexNet
   # MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
-  # and record the output of the layer in the bacward pass 
+  # and record the output of the layer in the bacward pass
   layer = list(model.features.named_children())[2][1]
-  # Record output to the layer during the backward pass 
+  # Record output to the layer during the backward pass
   recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = True)
   data = torch.rand(64, 3, 224, 224)
   output = model(data)
@@ -56,16 +56,16 @@ def test1():
 
   # Register a recorder to the 4th layer of the features part of AlexNet
   # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-  # and record the parameters of the layer in the forward pass 
-  layer = list(model.features.named_children())[3][1] 
+  # and record the parameters of the layer in the forward pass
+  layer = list(model.features.named_children())[3][1]
   recorder = util_model.model_LayerRecorder(layer, record_params = True, backward = False)
   data = torch.rand(64, 3, 224, 224)
   output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases) 
+  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
   recorder.close()#remove the recorder
 
-  # A custom function can also be passed to the recorder and perform arbitrary 
-  # operations. In the example below, the custom function prints the kwargs that 
+  # A custom function can also be passed to the recorder and perform arbitrary
+  # operations. In the example below, the custom function prints the kwargs that
   # are passed along with the custon function and also return 1 (stored in the recorder)
   def custom_fn(*args, **kwargs):#signature of any custom fn
       print('custom called')
@@ -80,15 +80,15 @@ def test1():
                                             print_value = 5)
   data = torch.rand(64, 3, 224, 224)
   output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases) 
+  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
   recorder.close()#remove the recorder
 
-  # Record output to the layer during the forward pass and store it in folder 
+  # Record output to the layer during the forward pass and store it in folder
   layer = list(model.features.named_children())[3][1]
   recorder = util_model.model_LayerRecorder(
-      layer, 
-      record_params = True, 
-      backward = False, 
+      layer,
+      record_params = True,
+      backward = False,
       save_to = './test_recorder'#create the folder before running this example!
   )
   for _ in range(5):#5 passes e.g. batches, thus 5 stored "recorded" tensors
@@ -139,14 +139,14 @@ def test2():
 
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        # Delete the last layer of the classifier of the AlexNet model 
+        # Delete the last layer of the classifier of the AlexNet model
         model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
 
         # Delete the last linear layer of an Elman RNN
         simple_rnn = nn.Sequential(
-            nn.RNN(2, 
-                100, 
-                1, 
+            nn.RNN(2,
+                100,
+                1,
                 batch_first = True),
             nn.Linear(100, 10),
         )
@@ -158,14 +158,14 @@ def test2():
 
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        # Delete the last layer of the classifier of the AlexNet model 
+        # Delete the last layer of the classifier of the AlexNet model
         model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
 
         # Add back to the model the deleted layer
         module = {
                 'name': '6',
                 'position': 6,
-                'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True) 
+                'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
                 }
 
         model.classifier = util_model.model_add_layers(model.classifier, modules = [module])
@@ -190,11 +190,11 @@ def test3():
     ])
 
     batch_size = 32
-    testset = torchvision.datasets.CIFAR10(root = './CIFAR_torchvision', 
+    testset = torchvision.datasets.CIFAR10(root = './CIFAR_torchvision',
                                           train = False,
-                                          download = True, 
+                                          download = True,
                                           transform = transform)
-    testloader = torch.utils.data.DataLoader(testset, 
+    testloader = torch.utils.data.DataLoader(testset,
                                             batch_size = batch_size,
                                             shuffle = True)
     # Assign a recorder to a layer of AlexNet:
@@ -220,38 +220,38 @@ def test3():
 #################################################################################################
 ################ Model tooling ##################################################################
 def model_getparams(model, params_to_get = None, detach = True):
-    '''Extracts the parameters, names, and 'requires gradient' status from a 
+    '''Extracts the parameters, names, and 'requires gradient' status from a
     model
-    
+
     Input
     -----
     model: class instance based on the base class torch.nn.Module
-    
-    params_to_get: list of str, default=None, specifying the names of the 
+
+    params_to_get: list of str, default=None, specifying the names of the
         parameters to be extracted
-        If None, then all parameters and names of parameters from the model 
+        If None, then all parameters and names of parameters from the model
         will be extracted
-        
-    detach: bool, default True, detach the tensor from the computational graph    
-    
+
+    detach: bool, default True, detach the tensor from the computational graph
+
     Output
-    ------     
+    ------
     params_name: list, contaning one str for each extracted parameter
-    
-    params_values: list, containg one tensor corresponding to each 
-        parameter. 
-        NOTE: The tensor is detached from the computation graph 
-        
+
+    params_values: list, containg one tensor corresponding to each
+        parameter.
+        NOTE: The tensor is detached from the computation graph
+
     req_grad: list, containing one Boolean variable for each parameter
-        denoting the requires_grad status of the tensor/parameter 
-        of the model      
-    '''    
+        denoting the requires_grad status of the tensor/parameter
+        of the model
+    '''
     params_names = []
-    params_values = [] 
+    params_values = []
     req_grad = []
-    for name, param in zip(model.named_parameters(), model.parameters()):             
+    for name, param in zip(model.named_parameters(), model.parameters()):
         if params_to_get is not None:
-            if name[0] in params_to_get: 
+            if name[0] in params_to_get:
                 params_names.append(name[0])
                 if detach is True:
                     params_values.append(param.detach().clone())
@@ -265,91 +265,91 @@ def model_getparams(model, params_to_get = None, detach = True):
             elif detach is False:
                 params_values.append(param.clone())
             req_grad.append(param.requires_grad)
-                       
+
     return params_values, params_names, req_grad
 
 
-def model_freezeparams(model, 
+def model_freezeparams(model,
                   params_to_freeze = None,
-                  freeze = True):  
+                  freeze = True):
     '''Freeze or unfreeze the parametrs of a model
-    
+
     Input
     -----
-    model:  class instance based on the base class torch.nn.Module 
-    
-    params_to_freeze: list of str specifying the names of the params to be 
+    model:  class instance based on the base class torch.nn.Module
+
+    params_to_freeze: list of str specifying the names of the params to be
         frozen or unfrozen
-        
-    freeze: bool, default True, specifying the freeze or 
-        unfreeze of model params  
-        
+
+    freeze: bool, default True, specifying the freeze or
+        unfreeze of model params
+
     Output
     ------
     model: class instance based on the base class torch.nn.Module with changed
         requires_grad param for the anmes params in params_to_freeze
-        (freeze = requires_grad is False unfreeze = requires_grad is True)   
+        (freeze = requires_grad is False unfreeze = requires_grad is True)
     '''
-    for name, param in zip(model.named_parameters(), model.parameters()):             
+    for name, param in zip(model.named_parameters(), model.parameters()):
         if params_to_freeze is not None:
-            if name[0] in params_to_freeze: 
+            if name[0] in params_to_freeze:
                 param.requires_grad = True if freeze is False else False
         else:
-            param.requires_grad = True if freeze is False else False  
-    
+            param.requires_grad = True if freeze is False else False
+
 
 def model_delete_layers(model, del_ids = []):
     '''Delete layers from model
-    
+
     Input
     -----
     model: model to be modified
-    
+
     del_ids: list, default [], of int the modules/layers
         that will be deleted
         NOTE: 0, 1... denotes the 1st, 2nd etc layer
-        
+
     Output
-    ------ 
-    model: model with deleted modules/layers that is an instance of  
+    ------
+    model: model with deleted modules/layers that is an instance of
         torch.nn.modules.container.Sequential
     '''
-    children = [c for i,c in enumerate(model.named_children()) if i not in del_ids]  
+    children = [c for i,c in enumerate(model.named_children()) if i not in del_ids]
     model = torch.nn.Sequential(
         OrderedDict(children)
-    ) 
-    
+    )
+
     return model
 
 
 def model_add_layers(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
-    
+
     Input
     -----
     model: instance of class of base class torch.nn.Module
-    
+
     modules: list of dict
         each dict has key:value pairs
-        
+
         {
         'name': str
-        'position': int 
+        'position': int
         'module': torch.nn.Module
         }
-        
-        with: 
-            name: str, name to be added in the nn.modules.container.Sequential 
-            
+
+        with:
+            name: str, name to be added in the nn.modules.container.Sequential
+
             position: int, [0,..N], with N>0, also -1, where N the total
             nr of modules in the torch.nn.modules.container.Sequential
             -1 denotes the module that will be appended at the end
-            
+
             module: torch.nn.Module
-    
+
     Output
     ------
-    model: model with added modules/layers that is an instance of   
+    model: model with added modules/layers that is an instance of
         torch.nn.modules.container.Sequential
     '''
     all_positions = [m['position'] for m in modules]
@@ -370,73 +370,65 @@ def model_add_layers(model, modules = []):
         idx = all_positions.index(-1)
         d = modules[idx]
         children.append((d['name'], d['module']))
-        
+
     model = torch.nn.Sequential(
         OrderedDict(children)
-    ) 
+    )
 
     return model
 
 
 
-def model_gradient_check(net_model):
-        kk = 0
-        for param1 in zip(net_model.parameters()):
-            if kk > 5 : break
-            kk = kk + 1 
-            # torch.testing.assert_close(param1.data, param2.data)
-            if(param1.requires_grad==True):
-                raise Exception( f"Gradients are updated in models_nets {param1}" )
 
 
 class model_LayerRecorder():
-    '''Get input, output or parameters to a module/layer 
+    '''Get input, output or parameters to a module/layer
     by registering forward or backward hooks
-    
+
     Input
     -----
-    module: a module of a class in torch.nn.modules 
-    
+    module: a module of a class in torch.nn.modules
+
     record_input: bool, default False, deciding if input to module will be
         recorded
-        
+
     record_output: bool, default False, deciding if output to module will be
-        recorded 
-        
+        recorded
+
     record_params: bool, default False, deciding if params of module will be
-        recorded 
-        
-    params_to_get: list of str, default None, specifying the parameters to be 
+        recorded
+
+    params_to_get: list of str, default None, specifying the parameters to be
         recorded from the module (if None all parameters are recorded)
         NOTE: meaningful only if record_params
-        
+
     backward: bool, default False, deciding if a forward or backward hook
         will be registered and the recprding will be performed accordingly
-        
+
     custom_fn: function, default None, to be executed in the forward or backward
         pass.
-        
+
         It must have the following signature:
-        
+
         custom_fn(module, output, input, **kwars)
-        
+
         with kwars optional
-        
+
         The signature follows the signature of functions to be registered
         in hooks. See for more details:
         https://pytorch.org/docs/stable/generated/torch.nn.modules.module.register_module_forward_hook.html
-    
+
      save_to: str, default None, specifying a path to a folder for all recordings
          to be saved.
          NOTE: recodrings are saved with filename: recording_0, recording_1, recording_N
-         
-     **kwargs: if keyword args are specified they will be passed as to the 
-         custom_fn     
-         
-         
+
+     **kwargs: if keyword args are specified they will be passed as to the
+         custom_fn
+
+
     The attribute recording contains the output, input or params of a module
     '''
-    def __init__(self, 
+    def __init__(self,
                  module,
                  record_input = False,
                  record_output = False,
@@ -448,84 +440,84 @@ class model_LayerRecorder():
                  **kwargs):
         self.params_to_get = params_to_get
         self.kwargs = kwargs if kwargs else None
-        if save_to: 
+        if save_to:
             self.counter = 0#if path is specified, keep a counter
-            self.save_to = save_to 
+            self.save_to = save_to
         if record_input is True:
-            fn = partial(self._fn_in_out_params, record_what = 'input') 
+            fn = partial(self._fn_in_out_params, record_what = 'input')
         elif record_output is True:
-            fn = partial(self._fn_in_out_params, record_what = 'output')  
+            fn = partial(self._fn_in_out_params, record_what = 'output')
         elif record_params is True:
-            fn = partial(self._fn_in_out_params, record_what = 'params') 
-            
-        if custom_fn is not None: 
+            fn = partial(self._fn_in_out_params, record_what = 'params')
+
+        if custom_fn is not None:
             fn = self._custom_wrapper
             self.custom_fn = custom_fn
-            
+
         if backward is False:
             self.hook = module.register_forward_hook(fn)
         elif backward is True:
             self.hook = module.register_full_backward_hook(fn)
-            
+
     def _fn_in_out_params(self, module, input, output, record_what = None):
         att = getattr(self, 'save_to', None)
         if att is None:
-            if record_what == 'input': 
+            if record_what == 'input':
                 self.recording = input
             elif record_what == 'output':
                 self.recording = output
             elif record_what == 'params':
                 params = model_getparams(module, params_to_get = self.params_to_get)[0]
-                self.recording = params 
+                self.recording = params
         else:
-            name = 'recording_' + str(self.counter) 
+            name = 'recording_' + str(self.counter)
             filename = Path(self.save_to) / name
             self.counter += 1
 
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, 'wb') as handle:
-                if record_what == 'input': 
+                if record_what == 'input':
                     pickle.dump(input, handle, protocol = pickle.HIGHEST_PROTOCOL)
                 elif record_what == 'output':
                     pickle.dump(output, handle, protocol = pickle.HIGHEST_PROTOCOL)
                 elif record_what == 'params':
                     params = model_getparams(module, params_to_get = self.params_to_get)[0]
                     pickle.dump(params, handle, protocol = pickle.HIGHEST_PROTOCOL)
-                
+
     def _custom_wrapper(self, module, input, output):
-        if self.kwargs: 
+        if self.kwargs:
             res = self.custom_fn(module, input, output, **self.kwargs)
         else:
             res = self.custom_fn(module, input, output)
         att = getattr(self, 'save_to', None)
-        if res and att is None:    
+        if res and att is None:
             self.recording = res
         elif res and att:
-            name = 'recording_' + str(self.counter) 
+            name = 'recording_' + str(self.counter)
             filename = Path(self.save_to) / name
             self.counter += 1
-            os.makedirs(os.path.dirname(filename), exist_ok=True)            
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, 'wb') as handle:
                 pickle.dump(res, handle, protocol = pickle.HIGHEST_PROTOCOL)
-            
+
     def close(self):
         self.hook.remove()
         att = getattr(self, 'counter', None)
         if att: self.counter = 0
-        
-        
+
+
 def model_get_alllayers(model):
     '''
     Get all the children (layers) from a model, even the ones that are nested
-    
+
     Input
     -----
     model: class instance based on the base class torch.nn.Module
-        
+
     Output
     ------
     all_layers: list of all layers of the model
-    
+
     Adapted from:
     https://stackoverflow.com/questions/54846905/pytorch-get-all-layers-of-model
     '''
@@ -540,7 +532,7 @@ def model_get_alllayers(model):
                 all_layers.extend(model_get_alllayers(child))
             except TypeError:
                 all_layers.append(model_get_alllayers(child))
-            
+
     return all_layers
 
 
@@ -583,6 +575,101 @@ class model_getlayer():
 
 
 
+##################################################################################################
+########### Gradient Checks ######################################################################
+def model_gradient_check(net_model):
+        kk = 0
+        for param1 in zip(net_model.parameters()):
+            if kk > 5 : break
+            kk = kk + 1
+            # torch.testing.assert_close(param1.data, param2.data)
+            if(param1.requires_grad==True):
+                raise Exception( f"Gradients are updated in models_nets {param1}" )
+
+
+def plot_grad_flow(named_parameters):
+    """
+    Docs::
+
+        Gradient flow check in Pytorch
+        Check that the gradient flow is proper in the network by recording the average gradients per layer in every training iteration and then plotting them at the end. If the average gradients are zero in the initial layers of the network then probably your network is too deep for the gradient to flow.
+
+        Usage
+        loss = self.criterion(outputs, labels)
+        loss.backward()
+        plot_grad_flow(model.named_parameters()) # version 1
+        # OR
+        plot_grad_flow_v2(model.named_parameters()) # version 2
+    """
+    from matplotlib import pyplot as plt
+    ave_grads = []
+    layers = []
+    for n, p in named_parameters:
+        if(p.requires_grad) and ("bias" not in n):
+            layers.append(n)
+            ave_grads.append(p.grad.abs().mean())
+    plt.plot(ave_grads, alpha=0.3, color="b")
+    plt.hlines(0, 0, len(ave_grads)+1, linewidth=1, color="k" )
+    plt.xticks(range(0,len(ave_grads), 1), layers, rotation="vertical")
+    plt.xlim(xmin=0, xmax=len(ave_grads))
+    plt.xlabel("Layers")
+    plt.ylabel("average gradient")
+    plt.title("Gradient flow")
+    plt.grid(True)
+
+
+def plot_grad_flow_v2(named_parameters):
+    '''
+    Docs::
+
+        Plots the gradients flowing through different layers in the net during training.
+        Can be used for checking for possible gradient vanishing / exploding problems.
+
+        Usage: Plug this function in Trainer class after loss.backwards() as
+        "plot_grad_flow(self.model.named_parameters())" to visualize the gradient flow
+    '''
+    from matplotlib import pyplot as plt
+    ave_grads = []
+    max_grads= []
+    layers = []
+    for n, p in named_parameters:
+        if(p.requires_grad) and ("bias" not in n):
+            layers.append(n)
+            ave_grads.append(p.grad.abs().mean())
+            max_grads.append(p.grad.abs().max())
+    plt.bar(np.arange(len(max_grads)), max_grads, alpha=0.1, lw=1, color="c")
+    plt.bar(np.arange(len(max_grads)), ave_grads, alpha=0.1, lw=1, color="b")
+    plt.hlines(0, 0, len(ave_grads)+1, lw=2, color="k" )
+    plt.xticks(range(0,len(ave_grads), 1), layers, rotation="vertical")
+    plt.xlim(left=0, right=len(ave_grads))
+    plt.ylim(bottom = -0.001, top=0.02) # zoom in on the lower gradient regions
+    plt.xlabel("Layers")
+    plt.ylabel("average gradient")
+    plt.title("Gradient flow")
+    plt.grid(True)
+    plt.legend([Line2D([0], [0], color="c", lw=4),
+                Line2D([0], [0], color="b", lw=4),
+                Line2D([0], [0], color="k", lw=4)], ['max-gradient', 'mean-gradient', 'zero-gradient'])
+
+
+##################################################################################################
+########### Computer vision ######################################################################
+def vision_prediction_check():
+    """ Tooling for Vision checks
+    Docs::
+
+            https://github.com/jacobgil/pytorch-grad-cam
+
+            https://github.com/pytorch/captum
+
+    """
+    pass
+
+
+
+
+
+
 
 ###############################################################################################
 ########### Custom layer ######################################################################
@@ -597,16 +684,16 @@ class MultiClassMultiLabel_Head(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.relu    = nn.ReLU()
         self.class_label_dict = class_label_dict
- 
+
         ########Common part #################################################################
-        out_dimi = layers_dim[0] 
+        out_dimi = layers_dim[0]
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
             in_dimi  = out_dimi
             out_dimi = layers_dim[i]
-            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)    
+            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
 
-        dim_final = layers_dim[-1]        
+        dim_final = layers_dim[-1]
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
@@ -622,7 +709,7 @@ class MultiClassMultiLabel_Head(nn.Module):
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
         return yout
-    
+
 
     def get_loss(self,ypred, ytrue, loss_calc_custom=None,
                  weights=None, sum_loss=True):
@@ -657,8 +744,8 @@ class LSTM(nn.Module):
     self.hidden_size = hidden_size
     self.num_classes = num_classes
     self.dropout = dropout
-    
-    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
+
+    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers,
                         dropout = self.dropout, batch_first=True)
     self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
@@ -669,14 +756,14 @@ class LSTM(nn.Module):
     out = out[:,-1,:]
     out = self.fc(out)
     return out
-    
+
 
 
 class SequenceReshaper(nn.Module):
 	def __init__(self, from_ = 'vision'):
 		super(SequenceReshaper,self).__init__()
 		self.from_ = from_
-	
+
 	def forward(self, x):
 		if self.from_ == 'vision':
 			x = x[:,0,:,:]
