@@ -580,14 +580,13 @@ class model_getlayer():
 ########### Gradient Checks ######################################################################
 def model_is_gradient_needed(net_model):
         kk = 0
-        for param1 in zip(net_model.parameters()):
+        for param1 in net_model.parameters():
             if kk > 5 : break
             kk = kk + 1
             # torch.testing.assert_close(param1.data, param2.data)
             if(param1.requires_grad==True):
                  return True
-            else :
-                 return False
+        return False
 
 
 def plot_grad_flow(named_parameters):
