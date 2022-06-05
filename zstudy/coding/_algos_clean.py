@@ -171,8 +171,31 @@ https://leetcode.com/problems/kth-largest-element-in-a-stream/
         
         
 
-  
-  
+        #### idea :
+        heap : head[0] = min == k-largest element  , heap size k 
+        build the heap to ensure heap[0] == k-largest
+        heappushpop(heap1, val)  ## val > min
+
+
+        def init():
+            heap = heapify(v[:k])
+            n = len(v)
+            for i in range(k, n):
+                if v[i] > heap[0]:
+                    heappushpop(heap, v[i])  ### v[i] is inserted to replace the min
+                else :    
+                    pass
+        
+        def add(x):
+            if len(heap) < k :
+                heappush(heap, val)  #### just becuease
+
+            if x > heap[0] :
+                heappushpop(heap, x)
+
+
+
+
   
 ###################################################################################################### 
 ###################################################################################################### 
@@ -204,8 +227,6 @@ https://leetcode.com/problems/valid-palindrome-ii/
           s consists of lowercase English letters.
 
 
-
-
       What we need to do is to start to traverse our string from both sides and if elements are equal, we are OK,
       we need to take both (we can not remove both, because we allowed only delete one. 
      There are couple of tricks we can use: all(...) to check if all elements in list are True. 
@@ -222,7 +243,7 @@ https://leetcode.com/problems/valid-palindrome-ii/
             remove the left chacrter and check again if not 
                                     return False 
 
-    def check(s: str) -> bool:         
+    def check(s: str) :         
           for i in range(len(s) // 2): 
                 if s[i] != s[~i]:
                      return False 
@@ -231,17 +252,15 @@ https://leetcode.com/problems/valid-palindrome-ii/
 
 
     def solution(s: str) -> bool: 
-
         for i in range(len(s) // 2): 
              if s[i] != s[~i]: 
                   tmp1 = tmp2 = s
-                  tmp1.remove(i)
-                  tmp2.remove(len(s) - i - 1)
-                  return check(tmp1) or check(tmp2)
+                  tmp1.remove(i)   ### remove current
+                  tmp2.remove(len(s) - i - 1)  #### remove symmetric
+                  return check(tmp1) or check(tmp2)   #### check one of the 2 cases
 
         return True 
 
-    yes, clearer process, thanks
 
 
 
@@ -282,9 +301,7 @@ https://leetcode.com/problems/split-array-largest-sum/
       0 <= nums[i] <= 106
       1 <= m <= min(50, nums.length)
 
-
-                                                     
-                        
+                            
         Solution 1
             One way is to use binary search for Q: check 
                 if we can split numbers into m groups such that the largest sum <= Q. We do it in greedy way.
@@ -334,42 +351,7 @@ https://leetcode.com/problems/split-array-largest-sum/
                 return end
 
                                     
-                                    
-                            
-                            
-                        
-        Solution 2
-        Another solution is use DP: let dp[i][j] be an answer for first i numbers and j groups. 
-        Then to evaluate dp[i][j] we need to look find min_k[max(dp[k][j-1], S_k-S_i)],
-        where S_k are cumulative sums. To find this minimum we can either use linear search with O(m n^2), but it will give TLE.
-        Alternative is to use binary search, where we use the property that first term of max is increasing and the second is decreasing.
-
-        Complexity
-        Time complexity is O(mn log n), space is O(n).
-
-        Code
-        class Solution:
-            def splitArray(self, nums, m):
-                n = len(nums)
-                acc = [0] + list(accumulate(nums))
-                dp = list(acc)
-                
-                for j in range(1, m):
-                    for i in range(n, j, -1):
-                        beg, end = j - 1, i
-                        while beg + 1 < end:
-                            mid = (beg + end)//2
-                            if dp[mid] >= acc[i] - acc[mid]:
-                                end = mid
-                            else:
-                                beg = mid
-                            dp[i] = min(max(dp[end], acc[i] - acc[end]), max(dp[beg], acc[i] - acc[beg]))
-                
-                return dp[-1]
-
-                                    
-                                    
-                    
+         
 
                  
                         
