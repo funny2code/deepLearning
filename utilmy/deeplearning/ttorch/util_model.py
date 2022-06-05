@@ -481,6 +481,8 @@ class model_LayerRecorder():
             name = 'recording_' + str(self.counter) 
             filename = Path(self.save_to) / name
             self.counter += 1
+
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
             with open(filename, 'wb') as handle:
                 if record_what == 'input': 
                     pickle.dump(input, handle, protocol = pickle.HIGHEST_PROTOCOL)
@@ -502,6 +504,7 @@ class model_LayerRecorder():
             name = 'recording_' + str(self.counter) 
             filename = Path(self.save_to) / name
             self.counter += 1
+            os.makedirs(os.path.dirname(filename), exist_ok=True)            
             with open(filename, 'wb') as handle:
                 pickle.dump(res, handle, protocol = pickle.HIGHEST_PROTOCOL)
             
