@@ -653,6 +653,10 @@ def plot_grad_flow_v2(named_parameters):
                 Line2D([0], [0], color="k", lw=4)], ['max-gradient', 'mean-gradient', 'zero-gradient'])
 
 
+
+
+
+
 ##################################################################################################
 ########### Computer vision ######################################################################
 def vision_prediction_check():
@@ -675,12 +679,14 @@ def vision_prediction_check():
 ###############################################################################################
 ########### Custom layer ######################################################################
 class MultiClassMultiLabel_Head(nn.Module):
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
-        """
+        """  Multi Class Multi Label head
+        Docs::
 
            class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-        """
+        """    
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
+
         super().__init__()
         self.dropout     = nn.Dropout(dropout)
         self.activation  = nn.ReLU() if activation_custom is None else activation_custom
@@ -714,7 +720,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
     def get_loss(self,ypred, ytrue, loss_calc_custom=None,
                  weights=None, sum_loss=True):
-        """
+        """ Get losses
 
         """
         if loss_calc_custom is None :
