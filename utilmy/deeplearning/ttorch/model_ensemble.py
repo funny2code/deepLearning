@@ -122,6 +122,7 @@ def test_all():
     test2b()
     test2c()
     test2d()
+    test3()
     test2_lstm()
 
 
@@ -726,7 +727,143 @@ def test2d():
     log(outputs)
 
 
+##MultiClassMultiLable
+def test3():    
+   from box import Box ; from copy import deepcopy
+   from torch.utils.data import DataLoader, TensorDataset
+   
+   from torchmerge import merge as me
+   ARG = Box({
+       'MODE'   : 'mode1',
+       'DATASET': {},
+       'MODEL_INFO' : {},
+   })
+   PARAMS = {}
 
+
+   ##################################################################
+   if ARG.MODE == 'mode1':
+       ARG.MODEL_INFO.TYPE = 'dataonly' 
+       train_config                           = Box({})
+       train_config.LR                        = 0.001
+       train_config.SEED                      = 42
+       train_config.DEVICE                    = 'cpu'
+       train_config.BATCH_SIZE                = 64
+       train_config.EPOCHS                    = 1
+       train_config.EARLY_STOPPING_THLD       = 10
+       train_config.VALID_FREQ                = 1
+       train_config.SAVE_FILENAME             = './model.pt'
+       train_config.TRAIN_RATIO               = 0.7
+       train_config.VAL_RATIO                 = 0.2
+       train_config.TEST_RATIO                = 0.1
+
+
+   ####################################################################
+   def load_DataFrame():
+       return None
+
+   def test_dataset_f_mnist(samples=100):
+       from sklearn.model_selection import train_test_split
+       from torchvision import transforms, datasets
+       # Generate the transformations
+       train_list_transforms = [transforms.ToTensor(),transforms.Lambda(lambda x: x.repeat(3, 1, 1))]
+
+       dataset1 = datasets.FashionMNIST(root="data",train=True,
+                                        transform=transforms.Compose(train_list_transforms),download=True,)
+       
+       #sampling the requred no. of samples from dataset 
+       dataset1 = torch.utils.data.Subset(dataset1, np.arange(samples))
+       X,Y    = [],  []
+       for data, targets in dataset1:
+           X.append(data)
+           Y.append(targets)
+
+       #Converting list to tensor format
+       X,y = torch.stack(X),torch.Tensor(Y)
+
+       train_r, test_r, val_r  = train_config.TRAIN_RATIO, train_config.TEST_RATIO,train_config.VAL_RATIO
+       train_X, test_X, train_y, test_y = train_test_split(X,  y,  test_size=1 - train_r)
+       valid_X, test_X, valid_y, test_y = train_test_split(test_X, test_y, test_size= test_r / (test_r + val_r))
+       return (train_X, train_y, valid_X, valid_y, test_X , test_y)
+
+
+   def prepro_dataset(self,df:pd.DataFrame=None):
+       train_X ,train_y,valid_X ,valid_y,test_X, test_y = test_dataset_f_mnist(samples=100)
+       return train_X ,train_y,valid_X ,valid_y,test_X,test_y
+
+
+   
+   ### modelA  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet18(pretrained=True)
+   embA_dim = model_ft.fc.in_features  ###
+
+   ARG.modelA               = {}   
+   ARG.modelA.name          = 'resnet18'
+   ARG.modelA.nn_model      = model_ft
+   ARG.modelA.layer_emb_id  = 'fc'
+   ARG.modelA.architect     = [ embA_dim]  ### head s
+   ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
+   modelA = me.model_create(ARG.modelA)
+   
+
+
+   ### modelB  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet50(pretrained=True)
+   embB_dim = int(model_ft.fc.in_features)
+
+   ARG.modelB               = {}   
+   ARG.modelB.name          = 'resnet50'
+   ARG.modelB.nn_model      = model_ft
+   ARG.modelB.layer_emb_id  = 'fc'
+   ARG.modelB.architect     = [embB_dim ]   ### head size
+   ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
+   modelB = me.model_create(ARG.modelB )
+
+
+
+
+   ### merge_model  ###################################################
+   ### EXPLICIT DEPENDENCY  
+   ARG.merge_model           = {}
+   ARG.merge_model.name      = 'modelmerge1'
+
+   ARG.merge_model.architect                  = {}
+   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+
+   ARG.merge_model.architect.merge_type       = 'cat'
+   ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
+   ARG.merge_model.architect.merge_custom     = None
+
+
+   ### Custom head
+   
+   class_label_dict =  {'gender': 2}  ##5 n_unique_label
+   ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+   head_custom = MultiClassMultiLabel_Head(ARG.merge_model.architect.head_layers_dim,class_label_dict)
+   ARG.merge_model.architect.head_custom      = head_custom
+ 
+ 
+   ARG.merge_model.dataset       = {}
+   ARG.merge_model.dataset.dirin = "/"
+   ARG.merge_model.dataset.coly = 'ytarget'
+   ARG.merge_model.train_config  = train_config
+
+
+   model = me.MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+   model.build()
+
+
+
+   #### Run Model   ###################################################
+   model.training(load_DataFrame, prepro_dataset) 
+
+   model.save_weight('ztmp/model_x5.pt')
+   model.load_weights('ztmp/model_x5.pt')
+   inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+   outputs = model.predict(inputs)
+   print(outputs)
 
 
 ##### LSTM #################################################################################
@@ -1443,13 +1580,73 @@ class model_create(BaseModel):
         if not loss_fun : loss_fun
         return torch.nn.BCELoss()
 
+class MultiClassMultiLabel_Head(nn.Module):
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0,):
+        """
+
+           class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
+
+        """
+        super().__init__()
+        self.dropout = nn.Dropout(dropout)
+        self.relu    = nn.ReLU()
+        self.class_label_dict = class_label_dict
+
+        ########Common part #################################################################
+        self.linear_list = []
+        out_dimi = layers_dim[0]
+        for i,dimi in enumerate(layers_dim[1:]) :
+            # Layer 1
+            in_dimi  = out_dimi
+            out_dimi = dimi
+            self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False))
+        dim_final = layers_dim[-1]
+        #self.linear_list.append(nn.Linear(in_features=out_dimi, out_features=dim_final, bias=False))
+        self.linear_list = nn.Sequential(*self.linear_list)
+       
+
+        ########Multi-Class ################################################################
+        self.head_task_dict = {}
+        for classname, n_unique_label in class_label_dict.items():
+            self.head_task_dict[classname] = []
+            self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
+            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            self.head_task_dict[classname] = nn.Sequential(*self.head_task_dict[classname])
 
 
 
+    def forward(self, x):
+        for lin_layer in self.linear_list:
+           x = self.relu(lin_layer(self.dropout(x)))
+        yout  = {}
+        out = 0
+        ##We are returning only tensor assuming only one class
+        for class_i in self.class_label_dict.keys():
+            out = yout[class_i] = self.head_task_dict[class_i](x)
+        return out
 
 
+    def get_loss(self,ypred, ytrue, loss_calc_custom=None,
+                 weights=None, sum_loss=True):
+        """
 
+        """
+        if loss_calc_custom is None :
+           loss_calc_fun = nn.CrossEntropyLoss()
+        else :
+           loss_calc_fun = loss_calc_custom()
 
+        loss_list = []
+        for ypred_col, ytrue_col in zip(ypred, ytrue) :
+           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+
+        if sum_loss:
+            weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
+            lsum = 0.0
+            for li in loss_list:
+                lsum = lsum + weights* li
+            return lsum
+        return loss_list
 
 
 #################################################################################################
