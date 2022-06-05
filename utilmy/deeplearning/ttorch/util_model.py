@@ -763,17 +763,17 @@ class LSTM(nn.Module):
 
 
 class SequenceReshaper(nn.Module):
-	def __init__(self, from_ = 'vision'):
-		super(SequenceReshaper,self).__init__()
-		self.from_ = from_
+    def __init__(self, from_ = 'vision'):
+        super(SequenceReshaper,self).__init__()
+        self.from_ = from_
 
-	def forward(self, x):
-		if self.from_ == 'vision':
-			x = x[:,0,:,:]
-			x = x.squeeze()
-			return x
-		else:
-			return x
+    def forward(self, x):
+        if self.from_ == 'vision':
+            x = x[:,0,:,:]
+            x = x.squeeze()
+            return x
+        else:
+            return x
 
 
 ###############################################################################################
