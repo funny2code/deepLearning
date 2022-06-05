@@ -560,7 +560,7 @@ class model_getlayer():
         self.last_layer = self.layers[pos_layer]
         self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
 
-    def hook_fn(self, module, input, output):
+    def hook_fn(self, module1, input, output):
         self.input = input
         self.output = output
 
@@ -677,15 +677,15 @@ def vision_prediction_check():
 ###############################################################################################
 ########### Custom layer ######################################################################
 class MultiClassMultiLabel_Head(nn.Module):
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0,):
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
         """
 
            class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
         """
         super().__init__()
-        self.dropout = nn.Dropout(dropout)
-        self.relu    = nn.ReLU()
+        self.dropout     = nn.Dropout(dropout)
+        self.activation  = nn.ReLU() if activation_custom is None else activation_custom
         self.class_label_dict = class_label_dict
 
         ########Common part #################################################################
@@ -706,7 +706,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
     def forward(self, x):
         for lin_layer in self.linear_list:
-           x = self.relu(lin_layer(self.dropout(x)))
+           x = self.activation(lin_layer(self.dropout(x)))
 
         yout  = {}
         for class_i in self.class_label_dict.keys():
