@@ -837,7 +837,8 @@ def test3():
 
 
    ### Custom head
-   
+   from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+
    class_label_dict =  {'gender': 2}  ##5 n_unique_label
    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
    head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
@@ -1588,7 +1589,7 @@ class model_create(BaseModel):
         return torch.nn.BCELoss()
 
 
-from util_model import MultiClassMultiLabel_Head
+from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
 
 
 #################################################################################################
