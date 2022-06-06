@@ -711,11 +711,22 @@ class MultiClassMultiLabel_Head(nn.Module):
             self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
+        self.linear_list = nn.Sequential(*self.linear_list)
+       
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
         for classname, n_unique_label in class_label_dict.items():
-            self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
+            self.head_task_dict[classname] = []
+            self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
+            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
+
+
+        #########Multi-Class ################################################################
+        #self.head_task_dict = {}
+        #for classname, n_unique_label in class_label_dict.items():
+        #    self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
 
 
     def forward(self, x):
@@ -727,6 +738,7 @@ class MultiClassMultiLabel_Head(nn.Module):
             yout[class_i] = self.head_task_dict[class_i](x)
             if self.use_first_head_only: 
                return yout[ class_i ]    
+
         return yout
 
 
