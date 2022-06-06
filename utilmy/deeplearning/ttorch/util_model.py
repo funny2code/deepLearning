@@ -217,7 +217,19 @@ def test3():
 
 
 def test4():
-    pass
+   class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
+   layers_dim=[512, 256]
+
+   batch_size       = 64
+   X       = torch.rand(batch_size, 512)
+   y_true  = { 'gender': torch.rand(batch_size, 2),
+               'season': torch.rand(batch_size, 4) ,
+               'age':    torch.rand(batch_size, 5) }
+
+   model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
+   y_pred = model(X)
+   loss = model.get_loss(y_pred, y_true)
+
 
 
 
@@ -684,37 +696,61 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-    """    
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
+    """
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
+                 use_first_head_only= None ):
 
         super().__init__()
         self.dropout     = nn.Dropout(dropout)
         self.activation  = nn.ReLU() if activation_custom is None else activation_custom
-        self.class_label_dict = class_label_dict
+        self.use_first_head_only = use_first_head_only
+
+        if self.use_first_head_only:
+            for key,val in class_label_dict.items() :
+              break
+            self.class_label_dict = {key: val}
+        else :
+            self.class_label_dict = class_label_dict
+
 
         ########Common part #################################################################
+        self.linear_list = []
         out_dimi = layers_dim[0]
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
             in_dimi  = out_dimi
             out_dimi = layers_dim[i]
-            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
+            self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
+        self.linear_list = nn.Sequential(*self.linear_list)
+
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
         for classname, n_unique_label in class_label_dict.items():
-            self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
+            self.head_task_dict[classname] = []
+            self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
+            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
+
+
+        #########Multi-Class ################################################################
+        #self.head_task_dict = {}
+        #for classname, n_unique_label in class_label_dict.items():
+        #    self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
 
 
     def forward(self, x):
         for lin_layer in self.linear_list:
            x = self.activation(lin_layer(self.dropout(x)))
 
-        yout  = {}
+        yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
+            if self.use_first_head_only:
+               return yout[ class_i ]
+
         return yout
 
 
