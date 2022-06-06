@@ -297,7 +297,7 @@ def pd_read_file(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=False
             
     ### Parallel run #################################
     import concurrent.futures
-    dfall  = pd.DataFrame()
+    dfall  = pd.DataFrame(columns=cols) if cols is not None else pd.DataFrame()
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_pool) as executor:
         futures = []
         for i,fi in enumerate(file_list) :
@@ -384,7 +384,7 @@ def pd_read_file2(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=Fals
         return dfi
 
     pool   = ThreadPool(processes=n_pool)
-    dfall  = pd.DataFrame()
+    dfall  = pd.DataFrame(columns=cols) if cols is not None else pd.DataFrame()
     for j in range(0, m_job ) :
         if verbose : log("Pool", j, end=",")
         job_list = []
