@@ -725,9 +725,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
-
-        if self.use_first_head_only: 
-            return yout[ yout.keys()[0] ]    
+            if self.use_first_head_only: 
+               return yout[ class_i ]    
         return yout
 
 
