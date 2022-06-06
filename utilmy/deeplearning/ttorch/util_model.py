@@ -686,7 +686,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
     """    
     def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
-                 use_first_head_only= False ):
+                 use_first_head_only= None ):
 
         super().__init__()
         self.dropout     = nn.Dropout(dropout)
@@ -708,7 +708,7 @@ class MultiClassMultiLabel_Head(nn.Module):
             # Layer 1
             in_dimi  = out_dimi
             out_dimi = layers_dim[i]
-            self.linear_list[i] = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
+            self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
 
