@@ -840,7 +840,9 @@ def test3():
    
    class_label_dict =  {'gender': 2}  ##5 n_unique_label
    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
-   head_custom = MultiClassMultiLabel_Head(ARG.merge_model.architect.head_layers_dim,class_label_dict)
+   head_custom = MultiClassMultiLabel_Head(ARG.merge_model.architect.head_layers_dim,
+                                        class_label_dict=class_label_dict,
+                                        use_first_head_only= True)
    ARG.merge_model.architect.head_custom      = head_custom
  
  

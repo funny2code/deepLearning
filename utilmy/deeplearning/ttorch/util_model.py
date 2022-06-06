@@ -685,20 +685,23 @@ class MultiClassMultiLabel_Head(nn.Module):
         class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
     """    
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None):
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
+                 use_first_head_only= False ):
 
         super().__init__()
         self.dropout     = nn.Dropout(dropout)
         self.activation  = nn.ReLU() if activation_custom is None else activation_custom
         self.class_label_dict = class_label_dict
+        self.use_first_head_only = use_first_head_only
 
         ########Common part #################################################################
+        self.linear_list = []
         out_dimi = layers_dim[0]
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
             in_dimi  = out_dimi
             out_dimi = layers_dim[i]
-            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
+            self.linear_list[i] = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
 
         dim_final = layers_dim[-1]
 
@@ -712,9 +715,11 @@ class MultiClassMultiLabel_Head(nn.Module):
         for lin_layer in self.linear_list:
            x = self.activation(lin_layer(self.dropout(x)))
 
-        yout  = {}
+        yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
+
+        if self.use_first_head_only: return yout    
         return yout
 
 
