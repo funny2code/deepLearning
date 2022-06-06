@@ -691,8 +691,15 @@ class MultiClassMultiLabel_Head(nn.Module):
         super().__init__()
         self.dropout     = nn.Dropout(dropout)
         self.activation  = nn.ReLU() if activation_custom is None else activation_custom
-        self.class_label_dict = class_label_dict
         self.use_first_head_only = use_first_head_only
+
+        if self.use_first_head_only:
+            for key,val in class_label_dict.items() :
+              break
+            self.class_label_dict = {key: val}
+        else :
+            self.class_label_dict = class_label_dict
+
 
         ########Common part #################################################################
         self.linear_list = []
@@ -719,7 +726,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
 
-        if self.use_first_head_only: return yout    
+        if self.use_first_head_only: 
+            return yout[ yout.keys()[0] ]    
         return yout
 
 
