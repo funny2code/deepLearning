@@ -9,53 +9,17 @@ python model_bayesian_pyro.py      test
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
 
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs
-verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
+from utilmy import global_verbosity, os_makedirs, log, log2, log3
+verbosity = global_verbosity(__file__,default= 5)
 
-def log(*s):
-    """function log.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    print(*s, flush=True)
 
-def log2(*s):
-    """function log2.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 2 : print(*s, flush=True)
-
-def log3(*s):
-    """function log3.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 3 : print(*s, flush=True)
 
 ####################################################################################################
 global model, session
 def init(*kw, **kwargs):
     """function init.
     Doc::
-            
-            Args:
-                *kw:   
-                **kwargs:   
-            Returns:
-                
+
     """
     global model, session
     model = Model(*kw, **kwargs)
@@ -64,9 +28,6 @@ def init(*kw, **kwargs):
 def reset():
     """function reset.
     Doc::
-            
-            Args:
-            Returns:
                 
     """
     global model, session
