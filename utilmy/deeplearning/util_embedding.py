@@ -1176,8 +1176,7 @@ if 'custom_code':
 
                 log('### Writing images on disk  ###########################################')
                 import diskcache as dc
-                # db_path = "/data/workspaces/noelkevin01/img/data/fashion/train_npz/small/img_train_r2p2_70k_clean_nobg_256_256-100000.cache"
-                db_path = "/dev/shm/train_npz/small//img_train_r2p2_1000k_clean_nobg_256_256-1000000.cache"
+                db_path = "/dev/shm/train_npz/small//img_tean_nobg_256_256-1000000.cache"
                 cache   = dc.Cache(db_path)
                 print('Nimages', len(cache) )
 
