@@ -1,3 +1,4 @@
+# pylint: disable=C0321,C0103,C0301,E1305,E1121,C0302,C0330,C0111,W0613,W0611,R1705
 # -*- coding: utf-8 -*-
 """
 
@@ -6,6 +7,71 @@ python model_bayesian_pyro.py      test
 
 """
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
+
+####################################################################################################
+from utilmy import global_verbosity, os_makedirs
+verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
+
+def log(*s):
+    """function log.
+    Doc::
+            
+            Args:
+                *s:   
+            Returns:
+                
+    """
+    print(*s, flush=True)
+
+def log2(*s):
+    """function log2.
+    Doc::
+            
+            Args:
+                *s:   
+            Returns:
+                
+    """
+    if verbosity >= 2 : print(*s, flush=True)
+
+def log3(*s):
+    """function log3.
+    Doc::
+            
+            Args:
+                *s:   
+            Returns:
+                
+    """
+    if verbosity >= 3 : print(*s, flush=True)
+
+####################################################################################################
+global model, session
+def init(*kw, **kwargs):
+    """function init.
+    Doc::
+            
+            Args:
+                *kw:   
+                **kwargs:   
+            Returns:
+                
+    """
+    global model, session
+    model = Model(*kw, **kwargs)
+    session = None
+
+def reset():
+    """function reset.
+    Doc::
+            
+            Args:
+            Returns:
+                
+    """
+    global model, session
+    model, session = None, None
+
 
 ########Custom Model ################################################################################
 import matplotlib.pyplot as plt
@@ -17,171 +83,6 @@ from pyro.infer.autoguide import AutoDiagonalNormal
 from pyro.nn import PyroModule, PyroSample
 import torch
 from torch import nn
-
-
-
-
-####################################################################################################
-from utilmy.utilmy import global_verbosity, os_makedirs, log, log2, log3
-verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
-
-
-####################################################################################################
-global model, session
-def init(*kw, **kwargs):
-    """function init.
-    Doc::
-    """
-    global model, session
-    model = Model(*kw, **kwargs)
-    session = None
-
-def reset():
-    """function reset.
-    Doc::
-                
-    """
-    global model, session
-    model, session = None, None
-
-
-
-
-
-
-####################################################################################################
-def test_dataset_regress_fake(nrows=500):
-    """function test_dataset_regress_fake.
-    Doc::
-            
-            Args:
-                nrows:   
-            Returns:
-                
-    """
-    from sklearn import datasets as sklearn_datasets
-    coly   = ['y']
-    # 16 num features
-    colnum = ["colnum_" +str(i) for i in range(0, 16) ]
-    # 1 cat features
-    colcat = ['colcat_1']
-
-    # Generate a regression dataset
-    X, y    = sklearn_datasets.make_regression( n_samples=nrows, n_features=17, n_targets=1, n_informative=15,noise=0.1)
-    df      = pd.DataFrame(X,  columns= colnum+colcat)
-    df[coly]= y.reshape(-1, 1)
-    df[coly] = (df[coly] -df[coly].min() ) / (df[coly].max() -df[coly].min() )
-
-    # Assign categ values the cat columns 
-    for ci in colcat :
-      df[ci] = np.random.randint(    low=0, high=1, size=df[ci].shape )
-
-    return df, colnum, colcat, coly
-
-
-def test(nrows=1000):
-    """.
-    Doc::
-            
-                nrows : take first nrows from dataset
-    """
-    global model, session
-
-    #### Regression PLEASE RANDOM VALUES AS TEST
-    ### Fake Regression dataset
-    df, colcat, colnum, coly = test_dataset_regress_fake(nrows=nrows)
-    X = df[colcat + colnum]
-    y = df[coly]
-
-
-    # Split the df into train/test subsets
-    X_train_full, X_test, y_train_full, y_test = train_test_split(X, y, test_size=0.05, random_state=2021, )#stratify=y) Regression no classes to stratify to
-    X_train, X_valid, y_train, y_valid         = train_test_split(X_train_full, y_train_full, random_state=2021,)# stratify=y_train_full)
-    log("X_train", X_train)
-    log("y_train", y_train)
-
-    cols_input_type_1 = []
-    n_sample = 100
-    def post_process_fun(y):
-        return y_norm(y, inverse=True, mode='norm')
-
-    def pre_process_fun(y):
-        return y_norm(y, inverse=False, mode='norm')
-
-
-    m = {'model_pars': {
-
-        # Input features, output features
-        'model_pars' : {},
-
-        'post_process_fun' : post_process_fun   ### After prediction  ##########################################
-     
-        },
-
-        'compute_pars': { 'metric_list': ['accuracy_score', 'median_absolute_error']
-                        },
-
-        'data_pars': { 
-            'n_sample' : n_sample,
-        ###################################################  
-        'train': {  'Xtrain': X_train,
-                    'ytrain': y_train,
-                    'Xtest': X_valid,
-                    'ytest': y_valid
-        },
-        'eval': {   'X': X_valid,
-                    'y': y_valid
-        },
-        'predict': {'X': X_valid}
-
-        ### Filter data rows   ##################################################################
-        ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 },
-
-        }
-    }
-
-    ##### Running loop
-    ll = [
-        ('model_bayesian_pyro.py::BayesianRegression', {'X_dim': 17,  'y_dim': 1 } )
-    ]
-    for cfg in ll:
-        # Set the ModelConfig
-        m['model_pars']['model_class'] = cfg[0]
-        m['model_pars']['model_pars']  = cfg[1]
-
-        log('Setup model..')
-        model = Model(model_pars=m['model_pars'], data_pars=m['data_pars'], compute_pars= m['compute_pars'] )
-
-        log('\n\nTraining the model..')
-        fit(data_pars=m['data_pars'], compute_pars= m['compute_pars'], out_pars=None)
-        log('Training completed!\n\n')
-
-        log('Predict data..')
-        ypred, ypred_proba = predict(Xpred=None, data_pars=m['data_pars'], compute_pars=m['compute_pars'])
-        log(f'Top 5 y_pred: {np.squeeze(ypred)[:5]}')
-
-
-        log('Saving model..')
-        save(path= "ztmp/data/output/torch_tabular")
-
-        log('Load model..')
-        model, session = load_model(path="ztmp/data/output/torch_tabular")
-        
-        log('Model architecture:')
-        log(model.model)
-
-        log('Predict data..check')
-        ypred, ypred_proba = predict(Xpred=None, data_pars=m['data_pars'], compute_pars=m['compute_pars'])
-
-        reset()
-
-
-
-
-
-
-
-
 
 
 ####################################################################################################
@@ -514,6 +415,132 @@ def y_norm(y, inverse=True, mode='boxcox'):
                 return y2
     else:
             return y
+
+
+def test_dataset_regress_fake(nrows=500):
+    """function test_dataset_regress_fake.
+    Doc::
+            
+            Args:
+                nrows:   
+            Returns:
+                
+    """
+    from sklearn import datasets as sklearn_datasets
+    coly   = ['y']
+    # 16 num features
+    colnum = ["colnum_" +str(i) for i in range(0, 16) ]
+    # 1 cat features
+    colcat = ['colcat_1']
+
+    # Generate a regression dataset
+    X, y    = sklearn_datasets.make_regression( n_samples=nrows, n_features=17, n_targets=1, n_informative=15,noise=0.1)
+    df      = pd.DataFrame(X,  columns= colnum+colcat)
+    df[coly]= y.reshape(-1, 1)
+    df[coly] = (df[coly] -df[coly].min() ) / (df[coly].max() -df[coly].min() )
+
+    # Assign categ values the cat columns 
+    for ci in colcat :
+      df[ci] = np.random.randint(    low=0, high=1, size=df[ci].shape )
+
+    return df, colnum, colcat, coly
+
+
+def test(nrows=1000):
+    """.
+    Doc::
+            
+                nrows : take first nrows from dataset
+    """
+    global model, session
+
+    #### Regression PLEASE RANDOM VALUES AS TEST
+    ### Fake Regression dataset
+    df, colcat, colnum, coly = test_dataset_regress_fake(nrows=nrows)
+    X = df[colcat + colnum]
+    y = df[coly]
+
+
+    # Split the df into train/test subsets
+    X_train_full, X_test, y_train_full, y_test = train_test_split(X, y, test_size=0.05, random_state=2021, )#stratify=y) Regression no classes to stratify to
+    X_train, X_valid, y_train, y_valid         = train_test_split(X_train_full, y_train_full, random_state=2021,)# stratify=y_train_full)
+    log("X_train", X_train)
+    log("y_train", y_train)
+
+    cols_input_type_1 = []
+    n_sample = 100
+    def post_process_fun(y):
+        return y_norm(y, inverse=True, mode='norm')
+
+    def pre_process_fun(y):
+        return y_norm(y, inverse=False, mode='norm')
+
+
+    m = {'model_pars': {
+
+        # Input features, output features
+        'model_pars' : {},
+
+        'post_process_fun' : post_process_fun   ### After prediction  ##########################################
+     
+        },
+
+        'compute_pars': { 'metric_list': ['accuracy_score', 'median_absolute_error']
+                        },
+
+        'data_pars': { 
+            'n_sample' : n_sample,
+        ###################################################  
+        'train': {  'Xtrain': X_train,
+                    'ytrain': y_train,
+                    'Xtest': X_valid,
+                    'ytest': y_valid
+        },
+        'eval': {   'X': X_valid,
+                    'y': y_valid
+        },
+        'predict': {'X': X_valid}
+
+        ### Filter data rows   ##################################################################
+        ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 },
+
+        }
+    }
+
+    ##### Running loop
+    ll = [
+        ('model_bayesian_pyro.py::BayesianRegression', {'X_dim': 17,  'y_dim': 1 } )
+    ]
+    for cfg in ll:
+        # Set the ModelConfig
+        m['model_pars']['model_class'] = cfg[0]
+        m['model_pars']['model_pars']  = cfg[1]
+
+        log('Setup model..')
+        model = Model(model_pars=m['model_pars'], data_pars=m['data_pars'], compute_pars= m['compute_pars'] )
+
+        log('\n\nTraining the model..')
+        fit(data_pars=m['data_pars'], compute_pars= m['compute_pars'], out_pars=None)
+        log('Training completed!\n\n')
+
+        log('Predict data..')
+        ypred, ypred_proba = predict(Xpred=None, data_pars=m['data_pars'], compute_pars=m['compute_pars'])
+        log(f'Top 5 y_pred: {np.squeeze(ypred)[:5]}')
+
+
+        log('Saving model..')
+        save(path= "ztmp/data/output/torch_tabular")
+
+        log('Load model..')
+        model, session = load_model(path="ztmp/data/output/torch_tabular")
+        
+        log('Model architecture:')
+        log(model.model)
+
+        log('Predict data..check')
+        ypred, ypred_proba = predict(Xpred=None, data_pars=m['data_pars'], compute_pars=m['compute_pars'])
+
+        reset()
 
 
 

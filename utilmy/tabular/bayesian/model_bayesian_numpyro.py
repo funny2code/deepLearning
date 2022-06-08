@@ -1,8 +1,64 @@
+# pylint: disable=C0321,C0103,C0301,E1305,E1121,C0302,C0330,C0111,W0613,W0611,R1705
 # -*- coding: utf-8 -*-
-"""  Numpyro bayesian linear regression
+"""
 
 """
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
+
+####################################################################################################
+from utilmy import global_verbosity, os_makedirs
+verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
+
+def log(*s):
+    """function log
+    Args:
+        *s:   
+    Returns:
+        
+    """
+    print(*s, flush=True)
+
+def log2(*s):
+    """function log2
+    Args:
+        *s:   
+    Returns:
+        
+    """
+    if verbosity >= 2 : print(*s, flush=True)
+
+def log3(*s):
+    """function log3
+    Args:
+        *s:   
+    Returns:
+        
+    """
+    if verbosity >= 3 : print(*s, flush=True)
+
+####################################################################################################
+global model, session
+def init(*kw, **kwargs):
+    """function init
+    Args:
+        *kw:   
+        **kwargs:   
+    Returns:
+        
+    """
+    global model, session
+    model = Model(*kw, **kwargs)
+    session = None
+
+def reset():
+    """function reset
+    Args:
+    Returns:
+        
+    """
+    global model, session
+    model, session = None, None
+
 
 ########Custom Model ################################################################################
 from functools import partial
@@ -29,54 +85,28 @@ from pyro.infer import SVI, Trace_ELBO
 from pyro.infer.autoguide import AutoDiagonalNormal
 from pyro.nn import PyroSample
 
-
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs, log, log2, log3
-verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
 VERBOSE = False
 
 
+# MODEL_URI = get_model_uri(__file__)
 
 
-
-def test_all():
-    pass
-
-
-
-def test1():
-    pass
-
-
+# from mlmodels.util import log, path_norm, get_model_uri
+def log(*s):
+    print(*s, flush=True)
 
 
 ####################################################################################################
 global model, session
+
+
 def init(*kw, **kwargs):
-    """function init
-    Args:
-        *kw:   
-        **kwargs:   
-    Returns:
-        
-    """
     global model, session
     model = Model(*kw, **kwargs)
     session = None
 
-def reset():
-    """function reset
-    Args:
-    Returns:
-        
-    """
-    global model, session
-    model, session = None, None
 
-
-
-
-####################################################################################################
 class Model(object):
     def __init__(self, model_pars=None, data_pars=None, compute_pars=None):
         """ Model:__init__
