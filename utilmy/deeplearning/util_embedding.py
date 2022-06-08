@@ -864,9 +864,9 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
    ####### Parallel Mode ################################################
    if npool > 1 and len(flist) > npool :
         log('Parallel mode')
-        from utilmy.parallel  import multiproc_run
+        from utilmy.parallel  import multiproc_run, multiproc_tochunk
         ll_list = multiproc_tochunk(flist, npool = npool)
-        multiproc_run(faiss_topk,  ll_list,  npool, verbose=True, start_delay= 5, 
+        multiproc_run(faiss_topk_calc,  ll_list,  npool, verbose=True, start_delay= 5,
                       input_fixed = { 'faiss_index': faiss_path }, )      
         return 1
    
@@ -962,6 +962,31 @@ if 'utils_matplotlib':
 
 
 if 'utils_vector':
+    def db_load_dict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
+        ### load Pandas into dict
+        if isinstance(df, str):
+           dirin = df
+           log('loading', dirin)
+           flist = glob_glob( dirin , 1000)
+           log(  colkey, colval )
+           df    = pd_read_file(flist, cols=[ colkey, colval  ], nrows=nrows,  n_pool=npool, verbose=True)
+
+        log( df.columns )
+        df = df.drop_duplicates(colkey)
+        df = df.fillna(naval)
+        log(df.shape)
+
+        df[colkey] = df[colkey].astype(colkey_type)
+        df[colval] = df[colval].astype(colval_type)
+
+
+        df = df.set_index(colkey)
+        df = df[[ colval ]].to_dict()
+        df = df[colval] ### dict
+        if verbose: log('Dict Loaded', len(df), str(df)[:100])
+        return df
+
+
     def np_array_to_str(vv, ):
         """ array/list into  "," delimited string """
         vv= np.array(vv, dtype='float32')
