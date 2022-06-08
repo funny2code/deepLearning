@@ -63,31 +63,55 @@ def test_all() -> None:
 def test1() -> None:
     """function test1     
     """
-    d = Box({})
     dirtmp ="./ztmp/"
-    embedding_create_vizhtml(dirin=dirtmp + "/model.vec", dirout=dirtmp + "out/", dim_reduction='umap', nmax=100, ntrain=10)
+
+    dd = test_create_fake_df(dirout= dirtmp)
+    log(dd)
+
+    embedding_create_vizhtml(dirin=dirtmp + "/word2vec_export.vec",
+                             dirout=dirtmp + "/out/", dim_reduction='umap', nmax=100, ntrain=10)
 
 
 
 
 
-def test_create_fake_df():
+def test_create_fake_df(dirout="./ztmp/"):
     """ Creates a fake embeddingdataframe
     """
+    res  =Box({})
     n = 30
 
-    emb_list = []
     # Create fake user ids
-    userid = [i for i in range(n)]
+    word_list = [ 'a' + str(i) for i in range(n)]
 
+    emb_list = []
     for i in range(n):
         emb_list.append( ','.join([str(x) for x in np.random.random( (0,1,120)) ])  )
 
-    # Populate a dataframe with fake data
+
+    ####
     df = pd.DataFrame()
-    df['wordid']  = userid
-    df['emb']     = emb_list
-    return df
+    df['id']   = word_list
+    df['emb']  = emb_list
+    res.df = df
+
+
+    #### export on disk
+    res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
+    pd_to_file(df, res.dir_parquet , show=1)
+
+    #### Write on text:
+    res.dir_text = dirout + "/word2vec_export.vec"
+    log( res.dir_text )
+    with open(res.dir_text, mode='w') as fp:
+        fp.write("word2vec export format\n")
+
+        for i,x in df.iterrows():
+          emb  = x['emb'].replace(",", "")
+          fp.write(  f"{x['id']}  {emb}\n")
+
+
+    return res
 
 
 
