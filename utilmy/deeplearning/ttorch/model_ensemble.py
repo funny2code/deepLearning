@@ -846,7 +846,7 @@ def test3():
                                         class_label_dict= class_label_dict,
                                         use_first_head_only= True)
    ARG.merge_model.architect.head_custom      = head_custom
-   ARG.merge_model.architect.loss_merge_custom = torch.nn.L1Loss()
+   ARG.merge_model.architect.loss_merge_custom = torch.nn.BCELoss() ###another loss func torch.nn.L1Loss()
  
  
    ARG.merge_model.dataset       = {}
