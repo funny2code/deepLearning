@@ -122,20 +122,20 @@ def test(nrows=1000):
                         },
 
         'data_pars': { 
-            'n_sample' : n_sample,
-        ###################################################  
-        'train': {  'Xtrain': X_train,
-                    'ytrain': y_train,
-                    'Xtest': X_valid,
-                    'ytest': y_valid
-        },
-        'eval': {   'X': X_valid,
-                    'y': y_valid
-        },
-        'predict': {'X': X_valid}
+                'n_sample' : n_sample,
+                ###################################################  
+                'train': {  'Xtrain': X_train,
+                            'ytrain': y_train,
+                            'Xtest': X_valid,
+                            'ytest': y_valid
+                },
+                'eval': {   'X': X_valid,
+                            'y': y_valid
+                },
+                'predict': {'X': X_valid}
 
-        ### Filter data rows   ##################################################################
-        ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 },
+                ### Filter data rows   ##################################################################
+                ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 },
 
         }
     }
