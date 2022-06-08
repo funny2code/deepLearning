@@ -69,6 +69,29 @@ def test1() -> None:
 
 
 
+
+
+def test_create_fake_df():
+    """ Creates a fake embeddingdataframe
+    """
+    n = 30
+
+    emb_list = []
+    # Create fake user ids
+    userid = [i for i in range(n)]
+
+    for i in range(n):
+        emb_list.append( ','.join([str(x) for x in np.random.random( (0,1,120)) ])  )
+
+    # Populate a dataframe with fake data
+    df = pd.DataFrame()
+    df['wordid']  = userid
+    df['emb']     = emb_list
+    return df
+
+
+
+
 #########################################################################################################
 ############### Visualize the embeddings ################################################################
 def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10):
