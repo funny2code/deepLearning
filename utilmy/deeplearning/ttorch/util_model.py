@@ -734,7 +734,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         for classname, n_unique_label in class_label_dict.items():
             self.head_task_dict[classname] = []
             self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
-            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            if self.use_first_head_only:
+               self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
             self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
 
         #########Multi-Class ################################################################
@@ -751,8 +752,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
 
-            if self.use_first_head_only:
-               return yout[ class_i ]
+            if self.use_first_head_only: 
+               return yout[ class_i ]    
 
 
         return yout
@@ -770,7 +771,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         loss_list = []
         for ypred_col, ytrue_col in zip(ypred, ytrue) :
-           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+           loss_list.append(loss_calc_fun(ypred[ypred_col], ytrue[ytrue_col]) )
 
         if sum_loss:
             weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
