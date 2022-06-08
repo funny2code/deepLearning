@@ -804,29 +804,34 @@ def faiss_load_index(faiss_index_path=""):
 
 
 
-def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=None, topk=200, npool=1, nrows=10**7, nfile=1000) :  ##  python prepro.py  faiss_topk   2>&1 | tee -a zlog_faiss_topk.txt
+def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
+                    faiss_index:str="", topk=200, npool=1, nrows=10**7, nfile=1000,
+                    return_simscore=False
+
+                    ) :
    """#
    Doc::
-   
-       id, dist_list, id_list 
-       
+
+       df : path or DF
+
+
+       return on disk
+         id  :     word id
+         id_list : topk from word id
+         dist_list, sim_list:
+
+
+
        https://github.com/facebookresearch/faiss/issues/632
-       
-       This represents the quantization error for vectors inside the dataset.
-        For vectors in denser areas of the space, the quantization error is lower because the quantization centroids are bigger and vice versa.
-        Therefore, there is no limit to this error that is valid over the whole space. However, it is possible to recompute the exact distances once you have the nearest neighbors, by accessing the uncompressed vectors.
-
-        distance -> similarity in uncompressed space is
-
-        dis = 2 - 2 * sim
+       dis = 2 - 2 * sim
   
    """
    # nfile  = 1000      ; nrows= 10**7
    # topk   = 500 
  
    if faiss_index is None : 
-      faiss_index = ""  
-      # faiss_index = root + "/faiss/faiss_trained_9808032.index"
+      faiss_index = ""
+
    log('Faiss Index: ', faiss_index)
    if isinstance(faiss_index, str) :
         faiss_path  = faiss_index
@@ -854,12 +859,12 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
         dir_out = root + "/topk/"  
         flist   = sorted(glob.glob(dirin))
         
-   log('dir_in',  dirin) ;        
+   log('dir_in',  dirin)
    log('dir_out', dir_out) ; time.sleep(2)     
    flist = flist[:nfile]
    if len(flist) < 1: return 1 
    log('Nfile', len(flist), flist )
-   # return 1
+
 
    ####### Parallel Mode ################################################
    if npool > 1 and len(flist) > npool :
@@ -869,7 +874,8 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
         multiproc_run(faiss_topk_calc,  ll_list,  npool, verbose=True, start_delay= 5,
                       input_fixed = { 'faiss_index': faiss_path }, )      
         return 1
-   
+
+
    ####### Single Mode #################################################
    dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')  
    map_idx_dict = db_load_dict(dirmap,  colkey = 'idx', colval = 'item_tag_vran' )
@@ -899,9 +905,9 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
            log('X', topk_idx.shape) 
                 
            dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
-           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to item_tag_vran           
+           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
            # dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
-           dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
+           if return_simscore: dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
         
            dfall = pd.concat((dfall, dfi))
 
