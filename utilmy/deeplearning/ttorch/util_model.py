@@ -224,11 +224,13 @@ def test4():
    X       = torch.rand(batch_size, 512)
    y_true  = { 'gender': torch.rand(batch_size, 2),
                'season': torch.rand(batch_size, 4) ,
-               'age':    torch.rand(batch_size, 5) } 
+               'age':    torch.rand(batch_size, 5) }
+
 
    model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
    y_pred = model(X)
    loss = model.get_loss(y_pred, y_true)
+
 
 
 
@@ -723,7 +725,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         dim_final = layers_dim[-1]
         self.linear_list = nn.Sequential(*self.linear_list)
-       
+
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
@@ -747,8 +749,10 @@ class MultiClassMultiLabel_Head(nn.Module):
         yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
-            if self.use_first_head_only: 
-               return yout[ class_i ]    
+
+            if self.use_first_head_only:
+               return yout[ class_i ]
+
 
         return yout
 

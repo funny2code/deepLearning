@@ -16,19 +16,18 @@ Doc::
        pyspark
        conda  install libhdfs3 pyarrow
        https://stackoverflow.com/questions/53087752/unable-to-load-libhdfs-when-using-pyarrow
-
+       2) export CLASSPATH=`$HADOOP_HOME/bin/hdfs classpath --glob`
 
 
     utilmy/sspark/src/util_spark.py
     -------------------------functions----------------------
     analyze_parquet(dirin, dirout, tag = '', nfiles = 1, nrows = 10, minimal = True, random_sample = True, verbose = 1, cols = None)
+    config_load(config_path:str)
     config_parser_yaml(config)
     date_get_month_days(dt)
     date_get_timekey(unix_ts)
-    date_get_unix_day_from_datetime(dt_with_timezone)
-    date_get_unix_from_datetime(dt_with_timezone)
     date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
-    hdfs_dir_stats(dirin, recursive = True)
+    help()
     hive_check_table(tables:Union[list, str], add_jar_cmd = "")
     hive_db_dumpall()
     hive_get_dblist()
@@ -38,30 +37,34 @@ Doc::
     hive_run_sql(query_or_sqlfile = "", nohup:int = 1, test = 0, end0 = None)
     json_compress(raw_obj)
     json_decompress(data)
+    os_file_replace(dirin = ["myfolder/**/*.sh", "myfolder/**/*.conf", ], textold = '/mypath2/', textnew = '/mypath2/', test = 1)
+    os_subprocess(args_list, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    os_system(cmd, doprint = False)
+    run_cli_sspark()
     show_parquet(path, nfiles = 1, nrows = 10, verbose = 1, cols = None)
     spark_add_jar(sparksession, hive_jar_cmd = None)
     spark_config_check()
     spark_config_create(mode = '', dirout = "./conf_spark/")
     spark_config_print(sparksession)
-    spark_df_check(df:sp_dataframe, tag = "check", conf:dict = None, dirout:str =  "", nsample:int = 10, save = True, verbose = True, returnval = False)
+    spark_df_check(df:sp_dataframe, tag = "check", conf:dict = None, dirout:str =  "", nsample:int = 10, save = True, verbose = True, returnval = False, pandasonly = False)
     spark_df_filter_mostrecent(df:sp_dataframe, colid = 'userid', col_orderby = 'date', decreasing = 1, rank = 1)
-    spark_df_sampleover(df:sp_dataframe, coltarget:str, major_label, minor_label, target_ratio, )
-    spark_df_sample(df, fraction = 0.1, col_stratify = None, with_replace = True)
+    spark_df_isempty(df:sp_dataframe)
+    spark_df_sample(df, fraction:Union[dict, float] = 0.1, col_stratify = None, with_replace = True)
+    spark_df_sampleover(df:sp_dataframe, coltarget:str = 'animal', major_label = 'dog', minor_label = 'frog', target_ratio = 0.2, )
+    spark_df_sampleunder(df:sp_dataframe, coltarget:str = 'animal', major_label = 'dog', minor_label = 'frog', target_ratio = 0.2)
+    spark_df_split_timeseries(df_m:sp_dataframe, splitRatio:float, sparksession:object)
     spark_df_stats_all(df:sp_dataframe, cols:Union[list, str], sample_fraction = -1, metric_list = ['null', 'n5', 'n95' ], doprint = True)
+    spark_df_stats_freq(df:sp_dataframe, cols_cat:Union[list, str], sample_fraction = -1, doprint = True)
     spark_df_stats_null(df:sp_dataframe, cols:Union[list, str], sample_fraction = -1, doprint = True)
-    spark_df_timeseries_split(df_m:sp_dataframe, splitRatio:float, sparksession:object)
-    spark_df_sampleunder(df:sp_dataframe, coltarget, major_label, minor_label, target_ratio, )
-    spark_df_write(df:sp_dataframe, dirout:str =  "", show:int = 0, npartitions:int = None, mode:str =  "append", format:str =  "parquet")
+    spark_df_write(df:sp_dataframe, dirout:str =  "", npartitions:int = None, mode:str =  "overwrite", format:str =  "parquet", show:int = 0, check = 0)
     spark_get_session(config:dict, config_key_name = 'spark_config', verbose = 0)
+    spark_get_session_local(config:str = "/default.yaml", keyfield = 'sparkconfig')
     spark_metrics_classifier_summary(df_labels_preds)
     spark_metrics_roc_summary(labels_and_predictions_df)
-    spark_read(sparksession = None, dirin="hdfs = "hdfs://", **kw)
+    spark_read(sparksession = None, dirin="hdfs = "hdfs://", format = None, **kw)
     spark_run_sqlfile(sparksession = None, spark_config:dict = None, sql_path:str = "", map_sql_variables:dict = None)
 
-    os_file_replace(dirin = ["myfolder/**/*.sh", "myfolder/**/*.conf", ], textold = '/mypath2/', textnew = '/mypath2/', test = 1)
-    os_subprocess(args_list, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    os_system(cmd, doprint = False)
-    run_cli_sspark()
+
 
 
     ### More docs:
@@ -108,17 +111,20 @@ from utilmy.sspark.src.util_hadoop import (
    hdfs_mkdir,
    hdfs_download,
    hdfs_ls,
+
    hdfs_dir_rm,
-   hdfs_dir_list,
+   hdfs_dir_list,  ### == hdfs_ls
    hdfs_dir_exists,
    hdfs_dir_info,
    hdfs_dir_stats,
 
-### parquet
+### read HDFS into Pandas
 hdfs_pd_read_parquet,
 hdfs_pd_write_parquet,
 pd_read_parquet_hdfs,
 pd_write_parquet_hdfs,
+pd_read_csv_hdfs,
+pd_read_json_hdfs,
 
 
 ### hive
@@ -371,7 +377,9 @@ def show_parquet(path, nfiles=1, nrows=10, verbose=1, cols=None):
     """ Us pyarrow
     Doc::
 
-       conda  install libhdfs3 pyarrow
+       1) conda  install libhdfs3 pyarrow
+       2) export CLASSPATH=`$HADOOP_HOME/bin/hdfs classpath --glob`
+
        https://stackoverflow.com/questions/53087752/unable-to-load-libhdfs-when-using-pyarrow
 
 
@@ -588,12 +596,13 @@ def spark_add_jar(sparksession, hive_jar_cmd=None):
 
 #########################################################################################
 ###### Dataframe ########################################################################
-#from pyspark.sql.functions import col, explode, array, lit
-def spark_df_isempty(df:sp_dataframe):
-    """
+def spark_df_isempty(df:sp_dataframe)->bool:
+    """ True: spark DataFrame is empty
+
     Doc::
-        True: spark DataFrame is empty
-        False: spark DataFrame is not empty
+
+        Tested as Fastest way, 30 sec for 70Gb dataset.
+        https://stackoverflow.com/questions/32707620/how-to-check-if-spark-dataframe-is-empty
     """
     try :
         return len(df.head(1)) == 0
