@@ -226,6 +226,7 @@ def test4():
                'season': torch.rand(batch_size, 4) ,
                'age':    torch.rand(batch_size, 5) }
 
+
    model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
    y_pred = model(X)
    loss = model.get_loss(y_pred, y_true)
@@ -696,7 +697,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-    """
+    """    
     def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
                  use_first_head_only= None ):
 
@@ -748,8 +749,10 @@ class MultiClassMultiLabel_Head(nn.Module):
         yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
+
             if self.use_first_head_only:
                return yout[ class_i ]
+
 
         return yout
 
