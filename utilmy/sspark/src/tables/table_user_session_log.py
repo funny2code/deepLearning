@@ -79,6 +79,10 @@ def run(spark:SparkSession, config_name='config.yaml' ):
     spark_check(sessionDF, path= f"{check_path}/sessionDF", nsample=1100000 ,
                             save=True, verbose=True)
 
+
+    spark_check(sessionDF, conf=conf, fieldname='spark_checkpoint')
+
+
     # sessionDF.repartition(1).write.parquet(conf['Test']['expected_usersession_path'],  mode="overwrite")
 
 

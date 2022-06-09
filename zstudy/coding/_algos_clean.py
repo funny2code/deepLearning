@@ -82,6 +82,344 @@
 
 
 
+##########################################################################################    
+########################################################################################## 
+1297. Maximum Number of Occurrences of a Substring
+      Medium
+
+      Given a string s, return the maximum number of ocurrences of any substring under the following rules:
+
+      The number of unique characters in the substring must be less than or equal to maxLetters.
+      The substring size must be between minSize and maxSize inclusive.
+
+      Example 1:
+          Input: s = "aababcaab", maxLetters = 2, minSize = 3, maxSize = 4
+          Output: 2
+          Explanation: Substring "aab" has 2 ocurrences in the original string.
+          It satisfies the conditions, 2 unique letters and size 3 (between minSize and maxSize).
+
+      Example 2:
+          Input: s = "aaaa", maxLetters = 1, minSize = 3, maxSize = 3
+          Output: 2
+          Explanation: Substring "aaa" occur 2 times in the string. It can overlap.
+
+
+      Constraints:
+
+      1 <= s.length <= 105
+      1 <= maxLetters <= 26
+      1 <= minSize <= maxSize <= min(26, s.length)
+      s consists of only lowercase English letters.
+
+
+
+
+    def checkfreq(freq_dict: dict, maxLettes: int) -> bool: 
+    ### Unique frequency.  
+    unique = 0   
+    for ch, freq in freq_dict.items(): 
+        if freq > 0: 
+        unique += 1   
+    return unique <= maxLetters
+
+
+    def solution(s: str, maxLetters: int, minSize: int, maxSize: int) -> int: 
+    
+    freq = {} 
+    left , ans = 0 , 0  
+    for right in range(len(s))
+        freq[s[right]] += 1   ### increase freq on s[right] char.
+        
+        substring_len = right - left + 1
+        
+        while substring_len > maxSize or not checkfreq(freq, maxLetters) and left < right:
+        ### move left by +1
+        freq[s[left]] -= 1
+        left += 1 
+        substring_len = right - left + 1
+
+        if checkfreq(freq, maxLetters) and substring_len >= minSize and substring_len <= maxSize: 
+        ans += 1 
+        
+    
+    return ans 
+
+
+    ###### Goood point :BE Careful
+    My solution is counting the number of substrings that satisfy the condition. 
+
+    The other solution is counting the max occurance of a substring that satisfy the condition. 
+
+
+    #################
+        Main thing here is to understand the intuition behind way we need not care about maxSize.
+        Here the goal is to count max number of substrings with atleast minSize. 
+        We only care about the count and not the substring itself!
+
+        If number of (S1) substrings with size = maxSize is 4, then there will be substrings(s2) which is part of S1 with count equal or greater than 4 for sure.
+
+        
+    class Solution:
+        def maxFreq(self, s: str, maxLetters: int, minSize: int, maxSize: int) -> int:
+            '''
+            Trick :
+            If a string have occurrences x times, any of its substring must appear at least x times.
+
+            There must be a substring of length minSize, that has the most occurrences.
+            So that we just need to count the occurrences of all substring with length minSize.
+            
+            size is FIXED == minSize --> reduce the problem to O(N)
+            
+            '''        
+            w_lookup = defaultdict(int)
+            
+            for i in range(minSize, len(s)+1):
+                w = s[i-minSize:i]  ### subtring
+                
+                if len(set(w)) <= maxLetters:
+                    w_lookup[w] += 1  #### suntring count, hash to save  memory
+            
+            if w_lookup:
+                return max(w_lookup.values())
+            else:
+                return 0
+        
+        
+    
+    string of length 10^5 
+    minSize = 1000 
+    
+    minSize is 26 at Maxiumum 
+    
+    How many substrings in dict? ((10^5 - 1000) * 1000) bytes in dict  
+        
+        
+    
+
+    
+    
+    
+    
+    
+    
+ 
+#############################################################################################    
+############################################################################################# 
+https://leetcode.com/problems/sort-characters-by-frequency/
+
+
+    class Solution:
+        def frequencySort(self, s: str) -> str:
+            cnt = Counter(s)
+            arr = [[freq, c] for c, freq in cnt.items()]
+            arr.sort(key=lambda x:-x[0])  # sort in decreasing order by frequency
+            ans = []
+            for freq, c in arr:
+                ans.append(freq * c)
+            return "".join(ans)
+
+
+
+
+
+
+##########################################################################################    
+##########################################################################################  
+https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters/discuss/414172/PythonC%2B%2BJava-Set-Solution
+1239. Maximum Length of a Concatenated String with Unique Characters
+        Medium
+
+        You are given an array of strings arr. A string s is formed by the concatenation of a subsequence of arr that has unique characters.
+        Return the maximum possible length of s.
+        A subsequence is an array that can be derived from another array by deleting some or no elements without changing the order of the remaining elements.
+
+
+        Example 1:
+            Input: arr = ["un","iq","ue"]
+            Output: 4
+            Explanation: All the valid concatenations are:
+            - ""
+            - "un"
+            - "iq"
+            - "ue"
+            - "uniq" ("un" + "iq")
+            - "ique" ("iq" + "ue")
+            Maximum length is 4.
+
+            
+        Example 2:
+            Input: arr = ["cha","r","act","ers"]
+            Output: 6
+            Explanation: Possible longest valid concatenations are "chaers" ("cha" + "ers") and "acters" ("act" + "ers").
+            
+            
+        Example 3:
+            Input: arr = ["abcdefghijklmnopqrstuvwxyz"]
+            Output: 26
+            Explanation: The only string in arr has all 26 characters.
+
+
+        2 conditions :
+            Unique Char in the word -- freq_dict
+            concatenate any lenghth.
+    
+        sort by length of words.
+    
+        pick 1the   'un'
+                pick2 the 2nd one and check ,
+                    if OK, append        
+                    pick the 3 rd one. if not.
+                        skip,
+                
+                example Longest:   from the right
+        
+        Max letters is 26 
+                
+            max size word <= 26    ---> otherwise duplicate char.
+            
+            str1 -- >  aray([ 0-26])          
+            Intersection          
+            convert_to_flag(s1) = flag1 
+            
+            A | C
+                
+            |: or operator but bitwise
+                OR
+            1 | 1 = 1
+                OR
+            0 | 0  = 0
+            
+            
+        
+        
+        
+    https://us05web.zoom.us/j/2933746463?pwd=WUhRWkx0NWNZRVBFVjZ4enV6Y1R2QT09
+        
+        
+        ##### seems good, Reading  code is better than explanation...
+    
+        
+        def ones(flag) -> int: 
+        ### nb of ones in the
+        #I am going through flag which is of type integer and check ones bits       
+        return sum(flag)      
+        
+        ones(3) -> 2 because 3 in binary is '011' 2 ones in the binary repres. 
+        
+        
+        
+        def string_to_flag(s: str) -> int: 
+        res = [False] * len(s) 
+        for ch in s: 
+            # res |= 1 << (ch - 'a') #not sure if will work in Python ### ok no pb.
+            res[ hash(ch) % 26 ] = True
+        return res 
+
+
+        def unique_chars(s: str) -> bool: 
+            freq = {}   
+            for ch in s:
+            if freq[ch] >= 0:
+                return False         
+            freq[ch] += 1     
+        return True
+        
+        
+        def solution(A: list) -> int:       
+        available_flags = {} 
+        max1 = 0 
+        for s in A:
+            
+            if not unique_chars(s): 
+            continue 
+            
+            flag = string_to_flag(s)  ### ok
+            avilabe_flags.append(flag)  ###  'fghmnopab' 
+            
+            for occurance in available_flags: 
+            
+            if  has_duplicate(flag , occurane) : ### Duplicate Character, skip
+                continue 
+
+                            
+                #####  defds  
+                new_flag = concatenate(occurance , flag)   ### concatenate the new word, with no duplicate.            
+                available_flags.append(new_flag) ### add to the list.            
+                max1 = max(count_ones(new_flag) , max1)  ### Check the max size.
+                
+                        
+                
+                
+            new_flag =  concatendate( occurance, flag)   ### concatenate the new word.
+            
+            flag = bin('fghmnopab')           
+            occurenc = 'abc'  'de' 'abcde','defghmnopab'
+                
+                new_flag = concatenate('abc' , 'fghmnopab') = 
+            
+            
+                available_flags : table is extending.....
+                
+                
+                
+                
+        
+        
+        
+        [  'abc', 'de',  'fghmnopab' ,      'yz',]  --->  de  fgmnopab yz
+        
+        available -> ['abc' , 'de', 'abcde', 'defghmnopab']
+        
+        #### flag = [0,1,0,1,01]
+        
+        
+        
+        
+        
+        
+        
+
+        Explanation
+        Initial the result res to include the case of empty string "".
+        res include all possible combinations we find during we iterate the input.
+
+        Itearte the the input strings,
+        but skip the word that have duplicate characters.
+        The examples is kind of misleading,
+        but the input string can have duplicate characters,
+        no need to considerate these strings.
+
+        For each string,
+        we check if it's conflit with the combination that we found.
+        If they have intersection of characters, we skip it.
+        If not, we append this new combination to result.
+
+        return the maximum length from all combinations.
+
+
+        Python:
+
+            def maxLength(self, A):
+                ll = [set()]
+                for a in A:
+                    
+                    if len(set(a)) < len(a): continue  ### Duplicate in word a
+                    
+                    a = set(a)
+                    for c in ll[:]:
+                        if a & c: continue  ### Duplicate with others
+                        ll.append(a | c)     ### concatenate the set.
+                return max(len(a) for a in ll)
+
+    N**2 log(N ^ 2)
+        
+        
+        
+
+
+
+
+
 
 
 
@@ -267,6 +605,11 @@ https://leetcode.com/problems/recover-the-original-array/
                     if k != 0 and k % 2 == 0:
                         a, b = check(nums, k)
                         if a: return b  
+
+
+
+
+
 
 
 
