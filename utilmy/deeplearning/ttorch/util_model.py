@@ -229,7 +229,7 @@ def test4():
 
    model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
    y_pred = model(X)
-   loss = model.get_loss(y_pred, y_true)
+   loss = model.get_loss(y_pred=y_pred, ytrue=y_true, weights=None, )
 
 
 
