@@ -216,6 +216,7 @@ def test3():
     plt.colorbar()
 
 
+
 def test4():
    class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
    layers_dim=[512, 256]
@@ -724,6 +725,7 @@ class MultiClassMultiLabel_Head(nn.Module):
             self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
+        self.linear_list.append(nn.Linear(in_features=out_dimi, out_features=dim_final, bias=False))
         self.linear_list = nn.Sequential(*self.linear_list)
 
 
@@ -732,9 +734,9 @@ class MultiClassMultiLabel_Head(nn.Module):
         for classname, n_unique_label in class_label_dict.items():
             self.head_task_dict[classname] = []
             self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
-            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            if self.use_first_head_only:
+               self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
             self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
-
 
         #########Multi-Class ################################################################
         #self.head_task_dict = {}
@@ -750,8 +752,8 @@ class MultiClassMultiLabel_Head(nn.Module):
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
 
-            if self.use_first_head_only:
-               return yout[ class_i ]
+            if self.use_first_head_only: 
+               return yout[ class_i ]    
 
 
         return yout
@@ -769,17 +771,15 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         loss_list = []
         for ypred_col, ytrue_col in zip(ypred, ytrue) :
-           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+           loss_list.append(loss_calc_fun(ypred[ypred_col], ytrue[ytrue_col]) )
 
         if sum_loss:
             weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
             lsum = 0.0
-            for li in loss_list:
-                lsum = lsum + weights[i]* li
+            for li,wi in zip(loss_list,weights):
+                lsum = lsum + wi * li
             return lsum
         return loss_list
-
-
 
 
 class LSTM(nn.Module):
