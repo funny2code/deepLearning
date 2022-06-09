@@ -609,10 +609,19 @@ def spark_df_isempty(df:sp_dataframe)->bool:
     except: return True
 
 
+
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
     """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
+
+
+        spark_df_check(df, 'mydf')   ### conf loaded automatically
+
+
+        if conf=none, use environmment variable 'sspark_checkpoint'
+
+        export sspark_checkpoint='sspark_checkpoint.yanml'
 
         Args:
             conf:  Configuration in dict
@@ -623,14 +632,22 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
                 returnval:
         Returns:
     """
-    if conf is not None :
-        if   'test' in conf :       confc = conf.get('test', {})
-        elif 'checkpoint' in conf : confc = conf.get('checkpoint', {})
+    if conf is None :
+        conf_yaml_path = os.environ.get('sspark_checkpoint',  "~/sspark_checkpoint.yaml")
+        conf = config_load(conf_yaml_path)
 
-        dirout    = confc.get('path_check', dirout)
-        save      = confc.get('save', save)
-        returnval = confc.get('returnval', returnval)
-        verbose   = confc.get('verbose', verbose)
+    elif isinstance(conf, str) :
+        conf_yaml_path = conf  #### path
+        conf = config_load(conf_yaml_path)
+
+    else :
+        conf = Box({})
+
+    dirout     = conf.get('path_check', dirout)
+    save       = conf.get('save', save)
+    returnval  = conf.get('returnval', returnval)
+    verbose    = conf.get('verbose', verbose)
+    pandasonly = conf.get('pandasonly', pandasonly)
 
     if save or returnval or verbose:
         df1 =   df.limit(nsample).toPandas()
