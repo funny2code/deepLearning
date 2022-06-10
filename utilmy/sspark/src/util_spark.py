@@ -615,22 +615,27 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
     """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
 
+        Use Case 1: with config
+                spark_df_check(df, 'mydfname')   ### conf loaded automatically
 
-        spark_df_check(df, 'mydf')   ### conf loaded automatically
+                export sspark_checkpoint='~/conf_test.yanml'
+                conf_test.yaml :
+                      dirout  : /user/myname/checkpoint/
+                      nsample : 100
+                      save    : true
+                      pandasonly: false
+                      returnval : false
 
 
-        if conf=none, use environmment variable 'sspark_checkpoint'
+        Use Case 2: with config in dict
+                spark_df_check(df, 'mydfname', conf=conf)
 
-        export sspark_checkpoint='sspark_checkpoint.yanml'
 
-        Args:
-            conf:  Configuration in dict
-                dirout:
-                nsample:
-                save:
-                verbose:
-                returnval:
-        Returns:
+        Use Case 3: with params:
+            spark_df_check(df, 'mydfname',  dirout= "hdfs/mypath/", nsample=100,
+                   save=True, verbose=True, returnval=False, pandasonly=False)
+
+
     """
     if conf is None :
         conf_yaml_path = os.environ.get('sspark_checkpoint',  "~/sspark_checkpoint.yaml")
@@ -643,7 +648,7 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
     else :
         conf = Box({})
 
-    dirout     = conf.get('path_check', dirout)
+    dirout     = conf.get('dirout', dirout)
     save       = conf.get('save', save)
     returnval  = conf.get('returnval', returnval)
     verbose    = conf.get('verbose', verbose)
@@ -655,13 +660,13 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
     if save and pandasonly :
         os.makedirs(dirout, exist_ok=True)
         df1.to_csv(dirout + f'/table_{tag}.csv', sep='\t', index=False)
+        log(df1.head(2).T)
+
 
     if save and not pandasonly :
         spark_df_write(df.limit(nsample), dirout= dirout + f'/table_{tag}.csv', format='csv')
 
-
     if verbose :
-        log(df1.head(2).T)
         df.printSchema()
 
     if returnval :
