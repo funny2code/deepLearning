@@ -638,19 +638,23 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
 
 
     """
-    if conf is None :
-        conf_yaml_path = os.environ.get('sspark_checkpoint',  "~/sspark_checkpoint.yaml")
-        conf = config_load(conf_yaml_path)
 
-    elif isinstance(conf, str) :
-        conf_yaml_path = conf  #### path
-        conf = config_load(conf_yaml_path)
+    try:
+        if conf is None :
+            conf_yaml_path = os.environ.get('sspark_checkpoint',  "~/sspark_checkpoint.yaml")
+            conf           = config_load(conf_yaml_path)
+        elif isinstance(conf, str) :
+            conf_yaml_path = conf  #### path
+            conf           = config_load(conf_yaml_path)
 
-    else :
-        conf = Box({})
+        else :
+            conf = Box({})
+    except :
+        conf = {}
 
-    dirout     = conf.get('dirout', dirout)
-    save       = conf.get('save', save)
+
+    dirout     = conf.get('dirout',    dirout)
+    save       = conf.get('save',      save)
     returnval  = conf.get('returnval', returnval)
     verbose    = conf.get('verbose', verbose)
     pandasonly = conf.get('pandasonly', pandasonly)
