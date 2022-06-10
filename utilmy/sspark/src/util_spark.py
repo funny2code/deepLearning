@@ -118,6 +118,7 @@ from utilmy.sspark.src.util_hadoop import (
    hdfs_dir_info,
    hdfs_dir_stats,
 
+
 ### read HDFS into Pandas
 hdfs_pd_read_parquet,
 hdfs_pd_write_parquet,
@@ -609,28 +610,54 @@ def spark_df_isempty(df:sp_dataframe)->bool:
     except: return True
 
 
+
 def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
     """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
 
-        Args:
-            conf:  Configuration in dict
-                dirout:
-                nsample:
-                save:
-                verbose:
-                returnval:
-        Returns:
-    """
-    if conf is not None :
-        if   'test' in conf :       confc = conf.get('test', {})
-        elif 'checkpoint' in conf : confc = conf.get('checkpoint', {})
+        Use Case 1: with config
+                spark_df_check(df, 'mydfname')   ### conf loaded automatically
 
-        dirout    = confc.get('path_check', dirout)
-        save      = confc.get('save', save)
-        returnval = confc.get('returnval', returnval)
-        verbose   = confc.get('verbose', verbose)
+                export sspark_checkpoint='~/conf_test.yanml'
+                conf_test.yaml :
+                      dirout  : /user/myname/checkpoint/
+                      nsample : 100
+                      save    : true
+                      pandasonly: false    #### Save in local
+                      returnval : false    ####
+
+
+        Use Case 2: with config in dict
+                spark_df_check(df, 'mydfname', conf=conf)
+
+
+        Use Case 3: with params:
+            spark_df_check(df, 'mydfname',  dirout= "hdfs/mypath/", nsample=100,
+                   save=True, verbose=True, returnval=False, pandasonly=False)
+
+
+    """
+
+    try:
+        if conf is None :
+            conf_yaml_path = os.environ.get('sspark_checkpoint',  "~/sspark_checkpoint.yaml")
+            conf           = config_load(conf_yaml_path)
+        elif isinstance(conf, str) :
+            conf_yaml_path = conf  #### path
+            conf           = config_load(conf_yaml_path)
+
+        else :
+            conf = Box({})
+    except :
+        conf = {}
+
+
+    dirout     = conf.get('dirout',    dirout)
+    save       = conf.get('save',      save)
+    returnval  = conf.get('returnval', returnval)
+    verbose    = conf.get('verbose', verbose)
+    pandasonly = conf.get('pandasonly', pandasonly)
 
     if save or returnval or verbose:
         df1 =   df.limit(nsample).toPandas()
@@ -638,13 +665,13 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
     if save and pandasonly :
         os.makedirs(dirout, exist_ok=True)
         df1.to_csv(dirout + f'/table_{tag}.csv', sep='\t', index=False)
+        log(df1.head(2).T)
+
 
     if save and not pandasonly :
         spark_df_write(df.limit(nsample), dirout= dirout + f'/table_{tag}.csv', format='csv')
 
-
     if verbose :
-        log(df1.head(2).T)
         df.printSchema()
 
     if returnval :
@@ -813,11 +840,11 @@ def spark_df_split_timeseries(df_m:sp_dataframe, splitRatio:float, sparksession:
             Returns: df_train, df_test
 
     """
-    from pyspark.sql import types as T
+
     newSchema  = T.StructType(df_m.schema.fields + \
                 [T.StructField("Row Number", T.LongType(), False)])
     new_rdd        = df_m.rdd.zipWithIndex().map(lambda x: list(x[0]) + [x[1]])
-    df_m2          = SparkSession.createDataFrame(new_rdd, newSchema)
+    df_m2          = sparksession.createDataFrame(new_rdd, newSchema)
     total_rows     = df_m2.count()
     splitFraction  =int(total_rows*splitRatio)
     df_train       = df_m2.where(df_m2["Row Number"] >= 0)\
