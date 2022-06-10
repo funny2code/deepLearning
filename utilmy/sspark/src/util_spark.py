@@ -623,8 +623,8 @@ def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "",
                       dirout  : /user/myname/checkpoint/
                       nsample : 100
                       save    : true
-                      pandasonly: false
-                      returnval : false
+                      pandasonly: false    #### Save in local
+                      returnval : false    ####
 
 
         Use Case 2: with config in dict
@@ -835,11 +835,11 @@ def spark_df_split_timeseries(df_m:sp_dataframe, splitRatio:float, sparksession:
             Returns: df_train, df_test
 
     """
-    from pyspark.sql import types as T
+
     newSchema  = T.StructType(df_m.schema.fields + \
                 [T.StructField("Row Number", T.LongType(), False)])
     new_rdd        = df_m.rdd.zipWithIndex().map(lambda x: list(x[0]) + [x[1]])
-    df_m2          = SparkSession.createDataFrame(new_rdd, newSchema)
+    df_m2          = sparksession.createDataFrame(new_rdd, newSchema)
     total_rows     = df_m2.count()
     splitFraction  =int(total_rows*splitRatio)
     df_train       = df_m2.where(df_m2["Row Number"] >= 0)\
