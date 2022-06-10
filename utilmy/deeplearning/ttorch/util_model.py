@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
-import os,sys, pickle
+import os, pickle
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
+
 import numpy as np
+from torch.utils.data import DataLoader
+from typing import Optional, Sequence
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
+from torch import Tensor
+from torch import nn
+from torch.nn import functional as F
+
+
+#################################################################################################
+from utilmy import log
+
 
 #################################################################################################
 def test_all():
@@ -216,6 +224,7 @@ def test3():
     plt.colorbar()
 
 
+
 def test4():
    class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
    layers_dim=[512, 256]
@@ -226,9 +235,12 @@ def test4():
                'season': torch.rand(batch_size, 4) ,
                'age':    torch.rand(batch_size, 5) }
 
+
    model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
    y_pred = model(X)
-   loss = model.get_loss(y_pred, y_true)
+   log(y_pred)
+   loss = model.get_loss(ypred=y_pred, ytrue=y_true, weights=None, sum_loss=True )
+   log(loss)
 
 
 
@@ -587,6 +599,144 @@ class model_getlayer():
 
 
 
+
+
+
+
+
+
+
+
+
+##################################################################################################
+########### Custom Losses ######################################################################
+class FocalLoss(nn.Module):
+    """ Focal Loss, as described in https://arxiv.org/abs/1708.02002.
+    Docs::
+
+        It is essentially an enhancement to cross entropy loss and is
+        useful for classification tasks when there is a large class imbalance.
+        x is expected to contain raw, unnormalized scores for each class.
+        y is expected to contain class labels.
+        Shape:
+            - x: (batch_size, C) or (batch_size, C, d1, d2, ..., dK), K > 0.
+            - y: (batch_size,) or (batch_size, d1, d2, ..., dK), K > 0.
+    """
+
+    def __init__(self,
+                 alpha: Optional[Tensor] = None,
+                 gamma: float = 0.,
+                 reduction: str = 'mean',
+                 ignore_index: int = -100):
+        """Constructor.
+        Args:
+            alpha (Tensor, optional): Weights for each class. Defaults to None.
+            gamma (float, optional): A constant, as described in the paper.
+                Defaults to 0.
+            reduction (str, optional): 'mean', 'sum' or 'none'.
+                Defaults to 'mean'.
+            ignore_index (int, optional): class label to ignore.
+                Defaults to -100.
+        """
+        if reduction not in ('mean', 'sum', 'none'):
+            raise ValueError(
+                'Reduction must be one of: "mean", "sum", "none".')
+
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+
+        self.nll_loss = nn.NLLLoss(
+            weight=alpha, reduction='none', ignore_index=ignore_index)
+
+    def __repr__(self):
+        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
+        arg_vals = [self.__dict__[k] for k in arg_keys]
+        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
+        arg_str = ', '.join(arg_strs)
+        return f'{type(self).__name__}({arg_str})'
+
+    def forward(self, x: Tensor, y: Tensor) -> Tensor:
+        if x.ndim > 2:
+            # (N, C, d1, d2, ..., dK) --> (N * d1 * ... * dK, C)
+            c = x.shape[1]
+            x = x.permute(0, *range(2, x.ndim), 1).reshape(-1, c)
+            # (N, d1, d2, ..., dK) --> (N * d1 * ... * dK,)
+            y = y.view(-1)
+
+        unignored_mask = y != self.ignore_index
+        y = y[unignored_mask]
+        if len(y) == 0:
+            return 0.
+        x = x[unignored_mask]
+
+        # compute weighted cross entropy term: -alpha * log(pt)
+        # (alpha is already part of self.nll_loss)
+        log_p = F.log_softmax(x, dim=-1)
+        ce = self.nll_loss(log_p, y)
+
+        # get true class column from each row
+        all_rows = torch.arange(len(x))
+        log_pt = log_p[all_rows, y]
+
+        # compute focal term: (1 - pt)^gamma
+        pt = log_pt.exp()
+        focal_term = (1 - pt)**self.gamma
+
+        # the full loss: -alpha * ((1 - pt)^gamma) * log(pt)
+        loss = focal_term * ce
+
+        if self.reduction == 'mean':
+            loss = loss.mean()
+        elif self.reduction == 'sum':
+            loss = loss.sum()
+
+        return loss
+
+
+def focal_loss(alpha: Optional[Sequence] = None,
+               gamma: float = 0.,
+               reduction: str = 'mean',
+               ignore_index: int = -100,
+               device='cpu',
+               dtype=torch.float32) -> FocalLoss:
+    """Factory function for FocalLoss.
+    Docs::
+
+            alpha (Sequence, optional): Weights for each class. Will be converted
+                to a Tensor if not None. Defaults to None.
+            gamma (float, optional): A constant, as described in the paper.
+                Defaults to 0.
+            reduction (str, optional): 'mean', 'sum' or 'none'.
+                Defaults to 'mean'.
+            ignore_index (int, optional): class label to ignore.
+                Defaults to -100.
+            device (str, optional): Device to move alpha to. Defaults to 'cpu'.
+            dtype (torch.dtype, optional): dtype to cast alpha to.
+                Defaults to torch.float32.
+        Returns:
+            A FocalLoss object
+    """
+    if alpha is not None:
+        if not isinstance(alpha, Tensor):
+            alpha = torch.tensor(alpha)
+        alpha = alpha.to(device=device, dtype=dtype)
+
+    fl = FocalLoss(
+        alpha=alpha,
+        gamma=gamma,
+        reduction=reduction,
+        ignore_index=ignore_index)
+    return
+
+
+
+
+
+
+
 ##################################################################################################
 ########### Gradient Checks ######################################################################
 def model_is_gradient_needed(net_model):
@@ -696,7 +846,7 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-    """
+    """    
     def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
                  use_first_head_only= None ):
 
@@ -723,6 +873,7 @@ class MultiClassMultiLabel_Head(nn.Module):
             self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
+        self.linear_list.append(nn.Linear(in_features=out_dimi, out_features=dim_final, bias=False))
         self.linear_list = nn.Sequential(*self.linear_list)
 
 
@@ -731,9 +882,9 @@ class MultiClassMultiLabel_Head(nn.Module):
         for classname, n_unique_label in class_label_dict.items():
             self.head_task_dict[classname] = []
             self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
-            self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            if self.use_first_head_only:
+               self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
             self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
-
 
         #########Multi-Class ################################################################
         #self.head_task_dict = {}
@@ -748,8 +899,10 @@ class MultiClassMultiLabel_Head(nn.Module):
         yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
-            if self.use_first_head_only:
-               return yout[ class_i ]
+
+            if self.use_first_head_only: 
+               return yout[ class_i ]    
+
 
         return yout
 
@@ -766,17 +919,15 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         loss_list = []
         for ypred_col, ytrue_col in zip(ypred, ytrue) :
-           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+           loss_list.append(loss_calc_fun(ypred[ypred_col], ytrue[ytrue_col]) )
 
         if sum_loss:
             weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
             lsum = 0.0
-            for li in loss_list:
-                lsum = lsum + weights[i]* li
+            for li,wi in zip(loss_list,weights):
+                lsum = lsum + wi * li
             return lsum
         return loss_list
-
-
 
 
 class LSTM(nn.Module):
