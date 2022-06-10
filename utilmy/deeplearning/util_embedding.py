@@ -9,6 +9,7 @@ Doc::
 
 """
 import os, glob, sys, math, time, json, functools, random, yaml, gc, copy, pandas as pd, numpy as np
+import datetime
 from pathlib import Path; from collections import defaultdict, OrderedDict ;
 from typing import List, Optional, Tuple, Union  ; from numpy import ndarray
 from box import Box
@@ -18,7 +19,6 @@ from warnings import simplefilter  ; simplefilter(action='ignore', category=Futu
 with warnings.catch_warnings():
     import matplotlib.pyplot as plt
     import mpld3
-
     from scipy.cluster.hierarchy import ward, dendrogram
     import sklearn
 
@@ -63,9 +63,56 @@ def test_all() -> None:
 def test1() -> None:
     """function test1     
     """
-    d = Box({})
     dirtmp ="./ztmp/"
-    embedding_create_vizhtml(dirin=dirtmp + "/model.vec", dirout=dirtmp + "out/", dim_reduction='umap', nmax=100, ntrain=10)
+
+    dd = test_create_fake_df(dirout= dirtmp)
+    log(dd)
+
+    embedding_create_vizhtml(dirin=dirtmp + "/word2vec_export.vec",
+                             dirout=dirtmp + "/out/", dim_reduction='umap', nmax=100, ntrain=10)
+
+
+
+
+
+def test_create_fake_df(dirout="./ztmp/"):
+    """ Creates a fake embeddingdataframe
+    """
+    res  =Box({})
+    n = 30
+
+    # Create fake user ids
+    word_list = [ 'a' + str(i) for i in range(n)]
+
+    emb_list = []
+    for i in range(n):
+        emb_list.append( ','.join([str(x) for x in np.random.random( (0,1,120)) ])  )
+
+
+    ####
+    df = pd.DataFrame()
+    df['id']   = word_list
+    df['emb']  = emb_list
+    res.df = df
+
+
+    #### export on disk
+    res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
+    pd_to_file(df, res.dir_parquet , show=1)
+
+    #### Write on text:
+    res.dir_text = dirout + "/word2vec_export.vec"
+    log( res.dir_text )
+    with open(res.dir_text, mode='w') as fp:
+        fp.write("word2vec export format\n")
+
+        for i,x in df.iterrows():
+          emb  = x['emb'].replace(",", "")
+          fp.write(  f"{x['id']}  {emb}\n")
+
+
+    return res
+
 
 
 
@@ -507,66 +554,6 @@ def embedding_load_pickle(dirin=None, skip=0, nmax=10 ** 8,
 
 
 
-def embedding_compare_plotlabels(embeddings_1:list, embeddings_2:list, labels_1:list, labels_2:list,
-                                 plot_title,
-                                 plot_width=1200, plot_height=600,
-                                 xaxis_font_size='12pt', yaxis_font_size='12pt'):
-        """ Compare embedding from disk
-           list of vectors    vs list of labels
-           list of vectors    vs list tof labels
-
-
-        """
-        import bokeh
-        import bokeh.models
-        import bokeh.plotting
-
-        assert len(embeddings_1) == len(labels_1)
-        assert len(embeddings_2) == len(labels_2)
-
-        # arccos based text similarity (Yang et al. 2019; Cer et al. 2019)
-        sim = 1 - np.arccos(
-            sklearn.metrics.pairwise.cosine_similarity(embeddings_1,
-                                                       embeddings_2))/np.pi
-
-        embeddings_1_col, embeddings_2_col, sim_col = [], [], []
-        for i in range(len(embeddings_1)):
-          for j in range(len(embeddings_2)):
-            embeddings_1_col.append(labels_1[i])
-            embeddings_2_col.append(labels_2[j])
-            sim_col.append(sim[i][j])
-        df = pd.DataFrame(zip(embeddings_1_col, embeddings_2_col, sim_col),
-                          columns=['embeddings_1', 'embeddings_2', 'sim'])
-
-        mapper = bokeh.models.LinearColorMapper(
-            palette=[*reversed(bokeh.palettes.YlOrRd[9])], low=df.sim.min(),
-            high=df.sim.max())
-
-        p = bokeh.plotting.figure(title=plot_title, x_range=labels_1,
-                                  x_axis_location="above",
-                                  y_range=[*reversed(labels_2)],
-                                  plot_width=plot_width, plot_height=plot_height,
-                                  tools="save",toolbar_location='below', tooltips=[
-                                      ('pair', '@embeddings_1 ||| @embeddings_2'),
-                                      ('sim', '@sim')])
-        p.rect(x="embeddings_1", y="embeddings_2", width=1, height=1, source=df,
-               fill_color={'field': 'sim', 'transform': mapper}, line_color=None)
-
-        p.title.text_font_size = '12pt'
-        p.axis.axis_line_color = None
-        p.axis.major_tick_line_color = None
-        p.axis.major_label_standoff = 16
-        p.xaxis.major_label_text_font_size = xaxis_font_size
-        p.xaxis.major_label_orientation = 0.25 * np.pi
-        p.yaxis.major_label_text_font_size = yaxis_font_size
-        p.min_border_right = 300
-
-        bokeh.io.output_notebook()
-        bokeh.io.show(p)
-
-
-
-
 
 def embedding_extract_fromtransformer(model,Xinput:list):
     """ Transformder require Pooling layer to extract word level embedding.
@@ -619,7 +606,7 @@ def embedding_extract_fromtransformer(model,Xinput:list):
 
 ########################################################################################################
 ######## Top-K retrieval ###############################################################################
-def sim_scores_fast(embs:np.ndarray, idlist:list, is_symmetric=False):
+def sim_scores_pairwise(embs:np.ndarray, word_list:list, is_symmetric=False):
     """ Pairwise Cosinus Sim scores
     Example:
         Doc::
@@ -632,15 +619,15 @@ def sim_scores_fast(embs:np.ndarray, idlist:list, is_symmetric=False):
     """
     from sklearn.metrics.pairwise import cosine_similarity    
     dfsim = []
-    for i in  range(0, len(idlist) -1) :
+    for i in  range(0, len(word_list) - 1) :
         vi = embs[i,:]
         normi = np.sqrt(np.dot(vi,vi))
-        for j in range(i+1, len(idlist) ) :
+        for j in range(i+1, len(word_list)) :
             # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
             vj = embs[j,:]
             normj = np.sqrt(np.dot(vj, vj))
             simij = np.dot( vi ,  vj  ) / (normi * normj)
-            dfsim.append([ words[i], words[j],  simij   ])
+            dfsim.append([ word_list[i], word_list[j],  simij   ])
             # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
     
     dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )   
@@ -654,23 +641,6 @@ def sim_scores_fast(embs:np.ndarray, idlist:list, is_symmetric=False):
 
 
 
-def sim_scores_faiss(embs:np.ndarray, idlist:list, is_symmetric=False):
-    """ Sim Score using FAISS
-        #To Tally the results check the cosine similarity of the following example
-        #from scipy import spatial
-        #result = 1 - spatial.distance.cosine(dataSetI, dataSetII)
-        #print('Distance by FAISS:{}'.format(result))
-    
-    """
-    import faiss
-    x  = np.array([x0]).astype(np.float32)
-
-    index = faiss.index_factory(3, "Flat", faiss.METRIC_INNER_PRODUCT)
-    log(index.ntotal)
-    faiss.normalize_L2(x)
-    index.add(x)
-    distance, index = index.search(x, 5)
-    return distance, index
     
 
 
@@ -688,9 +658,16 @@ def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss',
 
 
 def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_dim=200, tag=None, debug=True):
-    """ Get Topk vector per each element vector of dirin
+    """ Get Topk vector per each element vector of dirin.
     Example:
         Doc::
+
+           Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
+             id : id of the emb
+             emb : [342,325345,343]   X0 embdding
+             topk:  2,5,6,5,6
+             distL 0,3423.32424.,
+
     
            python $utilmy/deeplearning/util_embedding.py  topk_calc   --diremb     --dirout
     
@@ -708,7 +685,8 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_di
 
 
     ##### Element X0 ####################################################
-    vectors = np_str_to_array(df['emb'].values,  mdim= emb_dim)   
+    vectors = np_str_to_array(df['emb'].values,  mdim= emb_dim)
+    del df ; gc.collect()
 
     llids = idlist
     if idlist is None :    
@@ -736,14 +714,16 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_di
 
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
-def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200):
-    """ 1 billion size vector creation
-      ####  python prepro.py   faiss_create_index      2>&1 | tee -a log_faiss.txt    
+def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
+                       nrows=-1):
+    """ 1 billion size vector Index creation
+    Docs::
+
+          python util_embedding.py   faiss_create_index    --df_or_path myemb/
     """
     import faiss
 
     
-    if df_or_path is None :  df_or_path = "/emb/emb//ichib000000000/df/*.parquet"
     dirout    =  "/".join( os.path.dirname(df_or_path).split("/")[:-1]) + "/faiss/" if dirout is None else dirout
 
     os.makedirs(dirout, exist_ok=True) ; 
@@ -756,7 +736,8 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
        df = pd_read_file(flist, n_pool=20, verbose=False)
     else :
        df = df_or_path
-    # df  = df.iloc[:9000, :]        
+
+    df  = df.iloc[:nrows, :]   if nrows>0  else df
     log(df)
         
     tag = f"_" + str(len(df))    
@@ -766,7 +747,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
                 dirout + f"/map_idx{tag}.parquet", show=1)   #### Keeping maping faiss idx, item_tag
     
 
-    log("### Convert parquet to numpy   ", dirout)
+    log("#### Convert parquet to numpy   ", dirout)
     X  = np.zeros((len(df), emb_dim  ), dtype=np.float32 )    
     vv = df[col].values
     del df; gc.collect()
@@ -777,7 +758,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
         except Exception as e:
           log(i, e)
             
-    log("Preprocess X")
+    log("#### Preprocess X")
     faiss.normalize_L2(X)  ### Inplace L2 normalization
     log( X ) 
     
@@ -823,29 +804,34 @@ def faiss_load_index(faiss_index_path=""):
 
 
 
-def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=None, topk=200, npool=1, nrows=10**7, nfile=1000) :  ##  python prepro.py  faiss_topk   2>&1 | tee -a zlog_faiss_topk.txt
+def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
+                    faiss_index:str="", topk=200, npool=1, nrows=10**7, nfile=1000,
+                    return_simscore=False
+
+                    ) :
    """#
    Doc::
-   
-       id, dist_list, id_list 
-       
+
+       df : path or DF
+
+
+       return on disk
+         id  :     word id
+         id_list : topk from word id
+         dist_list, sim_list:
+
+
+
        https://github.com/facebookresearch/faiss/issues/632
-       
-       This represents the quantization error for vectors inside the dataset.
-        For vectors in denser areas of the space, the quantization error is lower because the quantization centroids are bigger and vice versa.
-        Therefore, there is no limit to this error that is valid over the whole space. However, it is possible to recompute the exact distances once you have the nearest neighbors, by accessing the uncompressed vectors.
-
-        distance -> similarity in uncompressed space is
-
-        dis = 2 - 2 * sim
+       dis = 2 - 2 * sim
   
    """
    # nfile  = 1000      ; nrows= 10**7
    # topk   = 500 
  
    if faiss_index is None : 
-      faiss_index = ""  
-      # faiss_index = root + "/faiss/faiss_trained_9808032.index"
+      faiss_index = ""
+
    log('Faiss Index: ', faiss_index)
    if isinstance(faiss_index, str) :
         faiss_path  = faiss_index
@@ -873,22 +859,23 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
         dir_out = root + "/topk/"  
         flist   = sorted(glob.glob(dirin))
         
-   log('dir_in',  dirin) ;        
+   log('dir_in',  dirin)
    log('dir_out', dir_out) ; time.sleep(2)     
    flist = flist[:nfile]
    if len(flist) < 1: return 1 
    log('Nfile', len(flist), flist )
-   # return 1
+
 
    ####### Parallel Mode ################################################
    if npool > 1 and len(flist) > npool :
         log('Parallel mode')
-        from utilmy.parallel  import multiproc_run
+        from utilmy.parallel  import multiproc_run, multiproc_tochunk
         ll_list = multiproc_tochunk(flist, npool = npool)
-        multiproc_run(faiss_topk,  ll_list,  npool, verbose=True, start_delay= 5, 
+        multiproc_run(faiss_topk_calc,  ll_list,  npool, verbose=True, start_delay= 5,
                       input_fixed = { 'faiss_index': faiss_path }, )      
         return 1
-   
+
+
    ####### Single Mode #################################################
    dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')  
    map_idx_dict = db_load_dict(dirmap,  colkey = 'idx', colval = 'item_tag_vran' )
@@ -918,9 +905,9 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb', faiss_index=No
            log('X', topk_idx.shape) 
                 
            dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
-           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to item_tag_vran           
+           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
            # dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
-           dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
+           if return_simscore: dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
         
            dfall = pd.concat((dfall, dfi))
 
@@ -981,6 +968,31 @@ if 'utils_matplotlib':
 
 
 if 'utils_vector':
+    def db_load_dict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
+        ### load Pandas into dict
+        if isinstance(df, str):
+           dirin = df
+           log('loading', dirin)
+           flist = glob_glob( dirin , 1000)
+           log(  colkey, colval )
+           df    = pd_read_file(flist, cols=[ colkey, colval  ], nrows=nrows,  n_pool=npool, verbose=True)
+
+        log( df.columns )
+        df = df.drop_duplicates(colkey)
+        df = df.fillna(naval)
+        log(df.shape)
+
+        df[colkey] = df[colkey].astype(colkey_type)
+        df[colval] = df[colval].astype(colval_type)
+
+
+        df = df.set_index(colkey)
+        df = df[[ colval ]].to_dict()
+        df = df[colval] ### dict
+        if verbose: log('Dict Loaded', len(df), str(df)[:100])
+        return df
+
+
     def np_array_to_str(vv, ):
         """ array/list into  "," delimited string """
         vv= np.array(vv, dtype='float32')
@@ -1170,8 +1182,7 @@ if 'custom_code':
 
                 log('### Writing images on disk  ###########################################')
                 import diskcache as dc
-                # db_path = "/data/workspaces/noelkevin01/img/data/fashion/train_npz/small/img_train_r2p2_70k_clean_nobg_256_256-100000.cache"
-                db_path = "/dev/shm/train_npz/small//img_train_r2p2_1000k_clean_nobg_256_256-1000000.cache"
+                db_path = "/dev/shm/train_npz/small//img_tean_nobg_256_256-1000000.cache"
                 cache   = dc.Cache(db_path)
                 print('Nimages', len(cache) )
 

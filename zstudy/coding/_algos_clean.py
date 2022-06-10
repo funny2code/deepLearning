@@ -75,6 +75,1040 @@
 
 
 
+
+
+
+
+
+
+
+##########################################################################################    
+########################################################################################## 
+1297. Maximum Number of Occurrences of a Substring
+      Medium
+
+      Given a string s, return the maximum number of ocurrences of any substring under the following rules:
+
+      The number of unique characters in the substring must be less than or equal to maxLetters.
+      The substring size must be between minSize and maxSize inclusive.
+
+      Example 1:
+          Input: s = "aababcaab", maxLetters = 2, minSize = 3, maxSize = 4
+          Output: 2
+          Explanation: Substring "aab" has 2 ocurrences in the original string.
+          It satisfies the conditions, 2 unique letters and size 3 (between minSize and maxSize).
+
+      Example 2:
+          Input: s = "aaaa", maxLetters = 1, minSize = 3, maxSize = 3
+          Output: 2
+          Explanation: Substring "aaa" occur 2 times in the string. It can overlap.
+
+
+      Constraints:
+
+      1 <= s.length <= 105
+      1 <= maxLetters <= 26
+      1 <= minSize <= maxSize <= min(26, s.length)
+      s consists of only lowercase English letters.
+
+
+
+
+    def checkfreq(freq_dict: dict, maxLettes: int) -> bool: 
+    ### Unique frequency.  
+    unique = 0   
+    for ch, freq in freq_dict.items(): 
+        if freq > 0: 
+        unique += 1   
+    return unique <= maxLetters
+
+
+    def solution(s: str, maxLetters: int, minSize: int, maxSize: int) -> int: 
+    
+    freq = {} 
+    left , ans = 0 , 0  
+    for right in range(len(s))
+        freq[s[right]] += 1   ### increase freq on s[right] char.
+        
+        substring_len = right - left + 1
+        
+        while substring_len > maxSize or not checkfreq(freq, maxLetters) and left < right:
+        ### move left by +1
+        freq[s[left]] -= 1
+        left += 1 
+        substring_len = right - left + 1
+
+        if checkfreq(freq, maxLetters) and substring_len >= minSize and substring_len <= maxSize: 
+        ans += 1 
+        
+    
+    return ans 
+
+
+    ###### Goood point :BE Careful
+    My solution is counting the number of substrings that satisfy the condition. 
+
+    The other solution is counting the max occurance of a substring that satisfy the condition. 
+
+
+    #################
+        Main thing here is to understand the intuition behind way we need not care about maxSize.
+        Here the goal is to count max number of substrings with atleast minSize. 
+        We only care about the count and not the substring itself!
+
+        If number of (S1) substrings with size = maxSize is 4, then there will be substrings(s2) which is part of S1 with count equal or greater than 4 for sure.
+
+        
+    class Solution:
+        def maxFreq(self, s: str, maxLetters: int, minSize: int, maxSize: int) -> int:
+            '''
+            Trick :
+            If a string have occurrences x times, any of its substring must appear at least x times.
+
+            There must be a substring of length minSize, that has the most occurrences.
+            So that we just need to count the occurrences of all substring with length minSize.
+            
+            size is FIXED == minSize --> reduce the problem to O(N)
+            
+            '''        
+            w_lookup = defaultdict(int)
+            
+            for i in range(minSize, len(s)+1):
+                w = s[i-minSize:i]  ### subtring
+                
+                if len(set(w)) <= maxLetters:
+                    w_lookup[w] += 1  #### suntring count, hash to save  memory
+            
+            if w_lookup:
+                return max(w_lookup.values())
+            else:
+                return 0
+        
+        
+    
+    string of length 10^5 
+    minSize = 1000 
+    
+    minSize is 26 at Maxiumum 
+    
+    How many substrings in dict? ((10^5 - 1000) * 1000) bytes in dict  
+        
+        
+    
+
+    
+    
+    
+    
+    
+    
+ 
+#############################################################################################    
+############################################################################################# 
+https://leetcode.com/problems/sort-characters-by-frequency/
+
+
+    class Solution:
+        def frequencySort(self, s: str) -> str:
+            cnt = Counter(s)
+            arr = [[freq, c] for c, freq in cnt.items()]
+            arr.sort(key=lambda x:-x[0])  # sort in decreasing order by frequency
+            ans = []
+            for freq, c in arr:
+                ans.append(freq * c)
+            return "".join(ans)
+
+
+
+
+
+
+##########################################################################################    
+##########################################################################################  
+https://leetcode.com/problems/maximum-length-of-a-concatenated-string-with-unique-characters/discuss/414172/PythonC%2B%2BJava-Set-Solution
+1239. Maximum Length of a Concatenated String with Unique Characters
+        Medium
+
+        You are given an array of strings arr. A string s is formed by the concatenation of a subsequence of arr that has unique characters.
+        Return the maximum possible length of s.
+        A subsequence is an array that can be derived from another array by deleting some or no elements without changing the order of the remaining elements.
+
+
+        Example 1:
+            Input: arr = ["un","iq","ue"]
+            Output: 4
+            Explanation: All the valid concatenations are:
+            - ""
+            - "un"
+            - "iq"
+            - "ue"
+            - "uniq" ("un" + "iq")
+            - "ique" ("iq" + "ue")
+            Maximum length is 4.
+
+            
+        Example 2:
+            Input: arr = ["cha","r","act","ers"]
+            Output: 6
+            Explanation: Possible longest valid concatenations are "chaers" ("cha" + "ers") and "acters" ("act" + "ers").
+            
+            
+        Example 3:
+            Input: arr = ["abcdefghijklmnopqrstuvwxyz"]
+            Output: 26
+            Explanation: The only string in arr has all 26 characters.
+
+
+        2 conditions :
+            Unique Char in the word -- freq_dict
+            concatenate any lenghth.
+    
+        sort by length of words.
+    
+        pick 1the   'un'
+                pick2 the 2nd one and check ,
+                    if OK, append        
+                    pick the 3 rd one. if not.
+                        skip,
+                
+                example Longest:   from the right
+        
+        Max letters is 26 
+                
+            max size word <= 26    ---> otherwise duplicate char.
+            
+            str1 -- >  aray([ 0-26])          
+            Intersection          
+            convert_to_flag(s1) = flag1 
+            
+            A | C
+                
+            |: or operator but bitwise
+                OR
+            1 | 1 = 1
+                OR
+            0 | 0  = 0
+            
+            
+        
+        
+        
+    https://us05web.zoom.us/j/2933746463?pwd=WUhRWkx0NWNZRVBFVjZ4enV6Y1R2QT09
+        
+        
+        ##### seems good, Reading  code is better than explanation...
+    
+        
+        def ones(flag) -> int: 
+        ### nb of ones in the
+        #I am going through flag which is of type integer and check ones bits       
+        return sum(flag)      
+        
+        ones(3) -> 2 because 3 in binary is '011' 2 ones in the binary repres. 
+        
+        
+        
+        def string_to_flag(s: str) -> int: 
+        res = [False] * len(s) 
+        for ch in s: 
+            # res |= 1 << (ch - 'a') #not sure if will work in Python ### ok no pb.
+            res[ hash(ch) % 26 ] = True
+        return res 
+
+
+        def unique_chars(s: str) -> bool: 
+            freq = {}   
+            for ch in s:
+            if freq[ch] >= 0:
+                return False         
+            freq[ch] += 1     
+        return True
+        
+        
+        def solution(A: list) -> int:       
+        available_flags = {} 
+        max1 = 0 
+        for s in A:
+            
+            if not unique_chars(s): 
+            continue 
+            
+            flag = string_to_flag(s)  ### ok
+            avilabe_flags.append(flag)  ###  'fghmnopab' 
+            
+            for occurance in available_flags: 
+            
+            if  has_duplicate(flag , occurane) : ### Duplicate Character, skip
+                continue 
+
+                            
+                #####  defds  
+                new_flag = concatenate(occurance , flag)   ### concatenate the new word, with no duplicate.            
+                available_flags.append(new_flag) ### add to the list.            
+                max1 = max(count_ones(new_flag) , max1)  ### Check the max size.
+                
+                        
+                
+                
+            new_flag =  concatendate( occurance, flag)   ### concatenate the new word.
+            
+            flag = bin('fghmnopab')           
+            occurenc = 'abc'  'de' 'abcde','defghmnopab'
+                
+                new_flag = concatenate('abc' , 'fghmnopab') = 
+            
+            
+                available_flags : table is extending.....
+                
+                
+                
+                
+        
+        
+        
+        [  'abc', 'de',  'fghmnopab' ,      'yz',]  --->  de  fgmnopab yz
+        
+        available -> ['abc' , 'de', 'abcde', 'defghmnopab']
+        
+        #### flag = [0,1,0,1,01]
+        
+        
+        
+        
+        
+        
+        
+
+        Explanation
+        Initial the result res to include the case of empty string "".
+        res include all possible combinations we find during we iterate the input.
+
+        Itearte the the input strings,
+        but skip the word that have duplicate characters.
+        The examples is kind of misleading,
+        but the input string can have duplicate characters,
+        no need to considerate these strings.
+
+        For each string,
+        we check if it's conflit with the combination that we found.
+        If they have intersection of characters, we skip it.
+        If not, we append this new combination to result.
+
+        return the maximum length from all combinations.
+
+
+        Python:
+
+            def maxLength(self, A):
+                ll = [set()]
+                for a in A:
+                    
+                    if len(set(a)) < len(a): continue  ### Duplicate in word a
+                    
+                    a = set(a)
+                    for c in ll[:]:
+                        if a & c: continue  ### Duplicate with others
+                        ll.append(a | c)     ### concatenate the set.
+                return max(len(a) for a in ll)
+
+    N**2 log(N ^ 2)
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+########################################################################################################################################                                               
+########################################################################################################################################                        
+https://leetcode.com/problems/recover-the-original-array/                        
+      2122. Recover the Original Array
+      Hard
+      Alice had a 0-indexed array arr consisting of n positive integers. 
+      She chose an arbitrary positive integer k and created two new 0-indexed integer arrays lower
+      and higher in the following manner:
+
+         lower[i]  = arr[i] - k, for every index i where 0 <= i < n
+         higher[i] = arr[i] + k, for every index i where 0 <= i < n
+      Unfortunately, Alice lost all three arrays. 
+      However, she remembers the integers that were present in the arrays lower and higher, 
+      but not the array each integer belonged to. Help Alice and recover the original array.
+
+      Given an array nums consisting of 2n integers, where exactly n of the integers were present in lower and the remaining in higher, 
+      return the original array arr. In case the answer is not unique, return any valid array.
+
+      Note: The test cases are generated such that there exists at least one valid array arr.
+
+
+      Example 1:
+          Input: nums = [2,10,6,4,8,12]
+          Output: [3,7,11]
+          Explanation:
+          If arr = [3,7,11] and k = 1, we get lower = [2,6,10] and higher = [4,8,12].
+          Combining lower and higher gives us [2,6,10,4,8,12], which is a permutation of nums.
+          Another valid possibility is that arr = [5,7,9] and k = 3. In that case, lower = [2,4,6] and higher = [8,10,12]. 
+          
+            
+                                  
+
+            
+          
+      Example 2:
+        Input: nums = [1,1,3,3]
+        Output: [2,2]
+        Explanation:
+        If arr = [2,2] and k = 1, we get lower = [1,1] and higher = [3,3].
+        Combining lower and higher gives us [1,1,3,3], which is equal to nums.
+        Note that arr cannot be [1,3] because in that case, the only possible way to obtain [1,1,3,3] is with k = 0.
+        This is invalid since k must be positive.
+
+      Example 3:
+
+          Input: nums = [5,435]
+          Output: [220]
+          Explanation:
+          The only possible combination is arr = [220] and k = 215. Using them, we get lower = [5] and higher = [435].
+
+
+      Constraints:
+          2 * n == nums.length
+          1 <= n <= 1000
+          1 <= nums[i] <= 10^9
+          The test cases are generated such that there exists at least one valid array arr.
+
+      
+    [Python] Short solution, explained
+
+    Notice, that what we have in the end is sum array X and array X + 2k.
+    It seems very familiar and you can use the greedy idea of 954.
+    Array of Doubled Pairs, but now pairs are not doubled but with constant difference.
+    How to find difference? It can be one of n-1 numbers: a1 - a0, a2 - a0, .... 
+      Also we need to make sure that difference is positive and can be divided by 2.
+
+    Complexity
+    Time complexity is O(n^2), space is O(n).
+
+
+    Yaki Solution :
+
+          k is unknwon
+ 
+          lower[i] + k = arr[i]
+          upper[i] - k = arr[i]
+          
+          1)  lower + k = upper -k   --->   upper-lower = 2k  = cst
+          
+          2) another relatin :   
+               sort(nums)  -->  lower <= upper
+          
+             nums = [2,10,6,4,8,12]   lower, upper mixed:
+              
+                 2 and 10 
+                    2 cases :  both in lower, both in upper or 1 in upper, 1 in lower.
+                    
+                      size(lower)  = size(upper) 
+                      
+                      arr = [3,7,11] and k = 1, we get lower = [2,6,10] and higher = [4,8,12].
+                      
+                      arr = [5,7,9] and k = 3. In that case, lower = [2,4,6] and higher = [8,10,12]. 
+              
+          
+             sort   2,4,6,8,10,12  -->  
+                             min=2  --->  lower   
+                                4  if upper,     k = (4-2 )/2   = 1 
+                                     
+                                    6 --> lower  because minmum value, 
+                                         upper = lower + 2k =  6 + 2 = 8   should be in num ,
+                                            If not failed,  k <> 1
+                        
+                                           8 in upper
+                                       
+                                      10 ---> lower since min
+                                               upper = 10 + 2*k  = 12   in nums  (if not failed)
+                                
+                                           finished.
+                                                                    
+                                  
+                                 2--> lower
+                                   4 --> lower
+                                        6  --> upper  :     k =  (6-2) /2 = 2
+                              
+                      
+                      
+                      def check(A, k):                        
+                          lower   = upper = []
+                          
+                          dict_A = {}
+                          for ci in A:                         
+                             dict_A[ci]  = dict_A.get(ci, 0)  +  1
+                          
+                          
+                          N      = len(A)
+                          for i in range(0, N):
+                              if dict_A.get(A[i], 0) == 0 : continue
+                              
+                              lower.append( A[i])
+                              dict_A[ A[i] ] -= 1
+                              
+                              upper_new = lower[-1] + 2*k 
+                              if dict_A.get(upper_new, 0)  ==0 :
+                                  return []
+                              else :
+                                  upper.append(upper_new) 
+                                  dict_A[upper_new] -= 1
+                                    
+                          return lower
+                        
+                        
+                      A = sorted(A)        
+
+                      # maxk = max(A) - min(A),   for i in range(0, maxk)  
+                      ### Solution too large to iterate : vvmax(A) = 10**9                      
+                      for i in range(1, len(A)):                        
+                          k = A[i] - A[0]    ### more resonable
+                          if k % 2= != 0:  continue    #### upper-lower = 2*k 
+                            
+                          lower = check(A, k)                                
+                          
+                          if len(lower)>0 :
+                               break
+                              
+                      arr = lower+k        
+                      
+
+
+        Code
+        class Solution:
+            def recoverArray(self, nums):
+            
+                def check(nums, k):
+                    cnt, ans = Counter(nums), []
+                    for num in nums:
+                        if cnt[num] == 0: continue
+                        if cnt[num + k] == 0: return False, []
+                        cnt[num] -= 1
+                        cnt[num + k] -= 1
+                        ans += [num + k//2]
+                    return True, ans
+
+                
+                nums = sorted(nums)
+                n = len(nums)
+                for i in range(1, n):
+                    k = nums[i] - nums[0]
+                    if k != 0 and k % 2 == 0:
+                        a, b = check(nums, k)
+                        if a: return b  
+
+
+
+
+
+
+
+
+                                                                       
+                        
+################################################################################################                                                
+################################################################################################                        
+2111. Minimum Operations to Make the Array K-Increasing
+      Hard
+
+      You are given a 0-indexed array arr consisting of n positive integers, and a positive integer k.
+
+      The array arr is called K-increasing 
+         if arr[i-k] <= arr[i] holds for every index i, where k <= i <= n-1.
+
+      For example, arr = [4, 1, 5, 2, 6, 2] is K-increasing for k = 2 because:
+      arr[0] <= arr[2] (4 <= 5)
+      arr[1] <= arr[3] (1 <= 2)
+      arr[2] <= arr[4] (5 <= 6)
+      arr[3] <= arr[5] (2 <= 2)
+      However, the same arr is not K-increasing for k = 1 (because arr[0] > arr[1]) or k = 3 (because arr[0] > arr[3]).
+      In one operation, you can choose an index i and change arr[i] into any positive integer.
+
+      Return the minimum number of operations required to make the array K-increasing for the given k.
+
+
+      Example 1:
+
+            Input: arr = [5,4,3,2,1], k = 1
+            Output: 4
+            
+            Explanation:
+            For k = 1, the resultant array has to be non-decreasing.
+            Some of the K-increasing arrays that can be formed are [5,6,7,8,9], [1,1,1,1,1], [2,2,3,4,4]. All of them require 4 operations.
+            It is suboptimal to change the array to, for example, [6,7,8,9,10] because it would take 5 operations.
+            It can be shown that we cannot make the array K-increasing in less than 4 operations.
+
+
+      Example 2:
+
+            Input: arr = [4,1,5,2,6,2], k = 2
+            Output: 0
+            
+            Explanation:
+            This is the same example as the one in the problem description.
+            Here, for every index i where 2 <= i <= 5, arr[i-2] <= arr[i].
+            Since the given array is already K-increasing, we do not need to perform any operations.
+      
+
+      Example 3:
+            Input: arr = [4,1,5,2,6,2], k = 3
+            Output: 2
+            Explanation:
+            Indices 3 and 5 are the only ones not satisfying arr[i-3] <= arr[i] for 3 <= i <= 5.
+            One of the ways we can make the array K-increasing is by changing arr[3] to 4 and arr[5] to 5.
+            The array will now be [4,1,5,4,6,5].
+            Note that there can be other ways to make the array K-increasing, but none of them require less than 2 operations.
+
+      Constraints:
+
+            1 <= arr.length <= 105
+            1 <= arr[i], k <= arr.length                        
+
+
+
+    [Python] Short LIS, explained
+    There are two observations we need to make.
+
+    1) It is independent to consider subproblems on 0, k, 2k, ..., 1, k+1, 2k+1, ... and so on.
+    
+    2) For each subproblem it is enough to solve LIS (longest increasing(not strictly) subsequence) problem.
+       Indeed, if we have LIS of length t,
+       than we need to change not more than R-t elements, where R is size of our subproblem. 
+    From the other side, we can not change less number of elements, because if we changed < R- t elements it means that > t elements were unchanged
+    and it means we found LIS of length > t. This is called estimate + example technique in math.
+    
+    Complexity
+    It is O(n log n) for time and O(n) for space.
+
+
+    Code
+    from bisect import bisect  ### binary search
+
+
+    class Solution:
+
+        #LIS: Longest increasing subsequence 
+        #There is an algorithm for computing the LIS using dp, various implementations are found
+        
+        #[5, 2 , 3] -> [2, 3]     1 operation == change a value in the array to any other desired value. 
+        # 1 operation only, changing 5 to 1 and that's it
+        #[5,2,3]     -> [1,2,3] I did only one operation. 
+        
+              Text: In one operation, you can choose an index i and change arr[i] into any positive integer.
+        
+        
+        #### Srandard implementation of LIS using DP.
+        def lenght_LIS(self, nums):
+            ### Lenght of longest sub-array
+            
+            dp = [10**10] * (len(nums) + 1)
+                        
+            for elem in nums: 
+              dp[bisect(dp, elem)] = elem  #### insert elent in correct order in Log(n)    , bisect(list, elt) : find index where to insert
+                          
+            return dp.index(10**10)  ####Location of the biggest numner == Length longest increasing sub-array
+
+
+        def kIncreasing(self, arr, k):
+            
+            ans = 0 # init ans
+            ### A[0], A[k], A[2k]
+            # A[1], A[k + 1], A[2k + 1],  
+            
+            for i in range(k): # Why?:  problem is divided to `k` subsequences, 
+                               ### one starts from A[0], A[k],    A[2k] .. 
+                               ### the 2nd is      A[1], A[k + 1], A[2k + 1] and so on... 
+                
+                #### arr[i::k] = [a[i], a[i + k] , a[i + 2k] and so on] 
+                A = arr[i::k]  
+            
+            
+                ####  ans =  Nb of operation needed (values to be changed) top make increasing.              
+                ans += len(A) - self.lenght_LIS(A)
+
+            return ans                       
+
+                        
+                        
+                        
+                        
+                        
+##########################################################################################################                        
+https://leetcode.com/problems/interval-list-intersections/discuss/1594033/python-two-pointers-approach-explained                        
+                        
+      986. Interval List Intersections
+      Medium
+      Share
+      You are given two lists of closed intervals, firstList and secondList, 
+          where firstList[i] = [starti, endi] and 
+                secondList[j] = [startj, endj].
+          
+        Each list of intervals is pairwise disjoint and in sorted order.
+
+      Return the intersection of these two interval lists.
+
+      A closed interval [a, b] (with a <= b) denotes the set of real numbers x with a <= x <= b.
+
+      The intersection of two closed intervals is a set of real numbers that are either empty or represented as a closed interval. For example, the intersection of [1, 3] and [2, 4] is [2, 3].
+
+
+
+      Example 1:
+
+
+      Input: 
+         firstList =   [[0,2],[5,10],[13,23],[24,25]], 
+          secondList = [[1,5],[8,12],[15,24],[25,26]]
+      
+      Output: [[1,2], 
+               [5,5],  #### why ?   [1,5]  and [5,10]
+               [8,10],
+               [15,23],
+               [24,24],[25,25]]
+      
+      
+      
+      Example 2:
+
+      Input: firstList = [[1,3],[5,9]], secondList = []
+      Output: []
+
+
+      Constraints:
+          0 <= firstList.length, secondList.length <= 1000
+          firstList.length + secondList.length >= 1
+          0 <= starti < endi <= 109
+          endi < starti+1
+          0 <= startj < endj <= 109
+          endj < startj+1                        
+
+          
+      [Python] two pointers approach, explained
+      The idea is to traverse both list of intervals one by one with two pointers approach. We can have options:
+
+      If we have curr[0] <= curr[1], it means that we have new intersection piece, add it to answer.
+      if A[i][1] <= B[j][1], it means, that we need to move pointer for A, in the opposite case we move pointer for B.
+      Complexity
+      It is O(n + m) for time and the same for space.
+
+      
+      Code
+      class Solution:
+          def intervalIntersection(self, A, B):
+              i, j, ans = 0, 0, []
+
+              while i < len(A) and j < len(B):
+                
+                   #### pairwise compeison between A and B
+                  curr = [ max(A[i][0], B[j][0]),    #####  Intersection of left side, ---> take the Max
+                          
+                          min(A[i][1], B[j][1])]    ##### Intersection of right side  --> take the Min
+                  
+                  
+                  if curr[0] <= curr[1]:  ### Valid interval
+                      ans.append(curr)
+                      
+                  if A[i][1] <= B[j][1]:  B is greater than A,  skip A, go to next A  to catch B
+                      i += 1
+                      
+                  else:   ## otherwise nxt B
+                      j += 1
+
+              return ans
+
+
+                        
+                        
+                        
+
+                        
+                        
+                        
+                        
+                        
+####################################################################################################                        
+https://leetcode.com/problems/longest-common-subsequence/                        
+                        
+       1143. Longest Common Subsequence
+      Medium
+
+
+      Add to List
+
+      Share
+      Given two strings text1 and text2, return the length of their longest common subsequence. If there is no common subsequence, return 0.
+
+      A subsequence of a string is a new string generated from the original string with some characters (can be none) deleted without changing the relative order of the remaining characters.
+
+      For example, "ace" is a subsequence of "abcde".
+      A common subsequence of two strings is a subsequence that is common to both strings.
+
+
+
+      Example 1:
+          Input: text1 = "abcde", text2 = "ace" 
+          Output: 3  
+          Explanation: The longest common subsequence is "ace" and its length is 3.
+
+      
+      Example 2:
+          Input: text1 = "abc", text2 = "abc"
+          Output: 3
+          Explanation: The longest common subsequence is "abc" and its length is 3.
+
+            
+      Example 3:
+        Input: text1 = "abc", text2 = "def"
+        Output: 0
+        Explanation: There is no such common subsequence, so the result is 0.
+
+
+      Constraints:
+        1 <= text1.length, text2.length <= 1000
+        text1 and text2 consist of only lowercase English characters.                       
+
+
+      [Python] dp solution, explained
+
+      It is quite classical dynamic programming problem. Let dp[i][j] be the answer for substrings text1[:i] and text2[:i]. 
+      Notice that we also add ! symbol in the beginning of both strings to avoid edge cases. Then we an have two options:
+
+         if text1[i] == text2[j], then dp[i][j] = dp[i-1][j-1] + 1.
+         in the opposite case, we need to choose maximum between dp[i-1][j] and dp[i][j-1].
+
+      Complexity
+      Time complexity is O(mn), space complexity O(mn) as well.
+
+      Code
+      class Solution:
+          def longestCommonSubsequence(self, text1, text2):
+              text1 = "!" + text1   ### edge case 1st characterhas to match
+              text2 = "!" + text2
+              
+              m, n = len(text1), len(text2)
+              dp = [[0] * n for _ in range(m)]
+              dp[0][0] = 1 ### 1st characer
+              
+              for i, j in product(range(m), range(n)):
+                
+                
+                  if text1[i] == text2[j]:
+                      dp[i][j] = dp[i-1][j-1] + 1
+                  
+                  else:
+                      dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+              return dp[-1][-1] - 1   ####   "!"  needs to be removed.
+
+
+
+from functools import lru_cache
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        
+        ###what p1 and p2 refers to ????
+        ## why increaisn in that case, in DP we decrease it....
+        
+        memo_solve(N1, N2)  ---> decrease version ??? YES! 
+        memo_solve(0, 0)   ---> increase version,
+        
+        ok, both recuvsion and DP looks very similar,   
+        in DP we manage the STATE .  recursion we pass the valies.
+      
+        I should memorize those algos.
+        
+        thansk for today. thats all.
+        let me close miletone last one and today in one short
+        thank you.
+        
+        
+        
+        #You can increase or decrease it's up to you and your implementaiton. 
+        #This solution is starting from index 0 and going up to n 
+        # pointer1 and pointer2 for text1 and text2 alterntively 
+        @lru_cache(maxsize=None)
+        def memo_solve(p1, p2):
+            
+            # Base case: If either string is now empty, we can't match
+            # up anymore characters.
+            if p1 == len(text1) or p2 == len(text2):
+                return 0
+            
+            # Recursive case 1.
+            if text1[p1] == text2[p2]:
+                return 1 + memo_solve(p1 + 1, p2 + 1)
+            
+            # Recursive case 2.
+            else:
+                return max(memo_solve(p1, p2 + 1), memo_solve(p1 + 1, p2))
+            
+        return memo_solve(0, 0)
+      
+
+      
+      
+      
+      
+      
+      
+      
+      
+
+
+
+
+
+
+
+#####################################################################################3                            
+#####################################################################################3   
+https://leetcode.com/problems/permutation-in-string/                            
+        567. Permutation in String
+
+            Share
+            Given two strings s1 and s2, return true if s2 contains a permutation of s1, or false otherwise.
+
+            In other words, return true if one of s1's permutations is the substring of s2.
+
+            Example 1:
+
+            Input: s1 = "ab", s2 = "eidbaooo"
+            Output: true
+            Explanation: s2 contains one permutation of s1 ("ba").
+            Example 2:
+
+            Input: s1 = "ab", s2 = "eidboaoo"
+            Output: false
+
+
+            Constraints:
+
+            1 <= s1.length, s2.length <= 104
+            s1 and s2 consist of lowercase English letters.                       
+
+                                                                                                
+        Let us use sliding window, where we count frequencies of each letter. 
+        We can just remove old letter and add new one and check if frequencies are what we need in O(26) for each step,
+        then we have O(26n) complexity, where n is length of string s2. We can do smarter if we also have num_to_correct variable which count number of letters for which we need to fix frequencies.
+
+        Complexity
+        Then time complexity will be O(n), space complexity is O(n) to keep A and B, which can be reduced to O(26) if we do it on the fly.
+
+
+        Now I see you  sfsfsfksnfksfkds hdsjfs hdsfs hksf fhkdsfh  fkhfs kfdshsfhkfds
+        sdkfshdhhf
+        Can you write your solution HERE:
+        
+
+        def check_equal_freq(first_dict: dict, second_dict: dict) -> bool: 
+                
+            for key in first_dict: 
+                if first_dict[key] != second_dict[key]: 
+                return False 
+            
+            return True 
+        
+        def solution(s1: str, s2: str) -> bool: 
+            ### init	s1 dict
+            s1_counts = s2_counts = {}      
+            for ch in s1: 
+                s1_counts[ch] += 1 
+            
+            ### init win s2 dict
+            window_len = len(s1)      
+            for i in range(window_len): 
+                s2_counts[s2[i]] += 1 
+            
+            
+            for ii in range(window_len, len(s2)): 
+                if check_equal_freq(s1_counts, s2_counts): 
+                return True 
+            
+                s2_counts[s2[ii - window_len]] -= 1           #### decrease 1st element
+                s2_counts[s2[window_len]]      += 1           #### decrease 1st element
+            
+            ###         win_start += 1  #### move start
+            Why THEY INCREMENT win_start ???
+            Why they do
+            chekc Line 169 
+            you see line 141 ii-window_len ? is the same as the start of the window 
+            
+            Answer :
+                they use a double pointer as generic solution .  
+                you shortcut the 2nd pointer  === ii -window_len
+            give me 30 sec
+            
+            return False 
+                
+
+            
+        #### 2 pinters      
+        def checkInclusion(self, s1: str, s2: str) -> bool:  
+            s1_dict  = collections.dict(s1)  ## Dict of freq
+            win_dict = collections.dict(s2[:len(s1)])  ### dict of freq
+            if win_dict == s1_dict:
+                return True
+
+            i1 = 0
+
+            for i2, value in enumerate(s2[len(s1):]):
+                win_dict[value] += 1  ### add current
+
+                i1_char = s2[i1]        
+                
+                win_dict[i1_char] -= 1  #### remove        
+                if win_dict[i1_char] == 0: ### Remove if zero
+                    del win_dict[i1_char]
+                    
+                i1 += 1  #### move start
+
+                if win_dict == s1_dict:
+                    return True
+
+            return False
+
+
+
+
+
+        
+
+
+        
+        def checkInclusion(self, s1: str, s2: str) -> bool:
+            """ O(N+M)TS """
+            win, l = collections.Counter(s1), len(s1)
+            for i, s in enumerate(s2):
+                win.update({s: -1})
+                i >= l and win.update({s2[i - l]: 1})
+                if not any(win.values()):
+                    return True
+            return False
+
+                                
+                                
+                                
+                                
+        Internet is bad, internet is bad
+
+        I am reading the problem cannot heard you, lets got to solution,
+        it;s hard problem
+
+
+
+
+
+
+
 ###################################################################################################### 
 ######################################################################################################
 https://leetcode.com/problems/kth-largest-element-in-a-stream/
@@ -171,8 +1205,31 @@ https://leetcode.com/problems/kth-largest-element-in-a-stream/
         
         
 
-  
-  
+        #### idea :
+        heap : head[0] = min == k-largest element  , heap size k 
+        build the heap to ensure heap[0] == k-largest
+        heappushpop(heap1, val)  ## val > min
+
+
+        def init():
+            heap = heapify(v[:k])
+            n = len(v)
+            for i in range(k, n):
+                if v[i] > heap[0]:
+                    heappushpop(heap, v[i])  ### v[i] is inserted to replace the min
+                else :    
+                    pass
+        
+        def add(x):
+            if len(heap) < k :
+                heappush(heap, val)  #### just becuease
+
+            if x > heap[0] :
+                heappushpop(heap, x)
+
+
+
+
   
 ###################################################################################################### 
 ###################################################################################################### 
@@ -204,8 +1261,6 @@ https://leetcode.com/problems/valid-palindrome-ii/
           s consists of lowercase English letters.
 
 
-
-
       What we need to do is to start to traverse our string from both sides and if elements are equal, we are OK,
       we need to take both (we can not remove both, because we allowed only delete one. 
      There are couple of tricks we can use: all(...) to check if all elements in list are True. 
@@ -222,7 +1277,7 @@ https://leetcode.com/problems/valid-palindrome-ii/
             remove the left chacrter and check again if not 
                                     return False 
 
-    def check(s: str) -> bool:         
+    def check(s: str) :         
           for i in range(len(s) // 2): 
                 if s[i] != s[~i]:
                      return False 
@@ -231,17 +1286,15 @@ https://leetcode.com/problems/valid-palindrome-ii/
 
 
     def solution(s: str) -> bool: 
-
         for i in range(len(s) // 2): 
              if s[i] != s[~i]: 
                   tmp1 = tmp2 = s
-                  tmp1.remove(i)
-                  tmp2.remove(len(s) - i - 1)
-                  return check(tmp1) or check(tmp2)
+                  tmp1.remove(i)   ### remove current
+                  tmp2.remove(len(s) - i - 1)  #### remove symmetric
+                  return check(tmp1) or check(tmp2)   #### check one of the 2 cases
 
         return True 
 
-    yes, clearer process, thanks
 
 
 
@@ -252,7 +1305,7 @@ https://leetcode.com/problems/valid-palindrome-ii/
 ######################################################################################################                        
 https://leetcode.com/problems/split-array-largest-sum/                                                
       410. Split Array Largest Sum
-      Hard
+
       Given an array nums which consists of non-negative integers and an integer m, 
           you can split the array into m non-empty continuous subarrays.
 
@@ -282,9 +1335,7 @@ https://leetcode.com/problems/split-array-largest-sum/
       0 <= nums[i] <= 106
       1 <= m <= min(50, nums.length)
 
-
-                                                     
-                        
+                            
         Solution 1
             One way is to use binary search for Q: check 
                 if we can split numbers into m groups such that the largest sum <= Q. We do it in greedy way.
@@ -334,42 +1385,7 @@ https://leetcode.com/problems/split-array-largest-sum/
                 return end
 
                                     
-                                    
-                            
-                            
-                        
-        Solution 2
-        Another solution is use DP: let dp[i][j] be an answer for first i numbers and j groups. 
-        Then to evaluate dp[i][j] we need to look find min_k[max(dp[k][j-1], S_k-S_i)],
-        where S_k are cumulative sums. To find this minimum we can either use linear search with O(m n^2), but it will give TLE.
-        Alternative is to use binary search, where we use the property that first term of max is increasing and the second is decreasing.
-
-        Complexity
-        Time complexity is O(mn log n), space is O(n).
-
-        Code
-        class Solution:
-            def splitArray(self, nums, m):
-                n = len(nums)
-                acc = [0] + list(accumulate(nums))
-                dp = list(acc)
-                
-                for j in range(1, m):
-                    for i in range(n, j, -1):
-                        beg, end = j - 1, i
-                        while beg + 1 < end:
-                            mid = (beg + end)//2
-                            if dp[mid] >= acc[i] - acc[mid]:
-                                end = mid
-                            else:
-                                beg = mid
-                            dp[i] = min(max(dp[end], acc[i] - acc[end]), max(dp[beg], acc[i] - acc[beg]))
-                
-                return dp[-1]
-
-                                    
-                                    
-                    
+         
 
                  
                         

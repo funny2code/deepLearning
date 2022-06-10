@@ -10,6 +10,7 @@
     https://packagegalaxy.com/python/utilmy
 
 
+    https://arita37.github.io/myutil/en/zdocs_y23487teg65f6/genindex.html
 
 
 ### Install for development

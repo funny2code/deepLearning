@@ -118,7 +118,8 @@ from utilmy.sspark.src.util_hadoop import (
    hdfs_dir_info,
    hdfs_dir_stats,
 
-### read HDFS into Pandas 
+
+### read HDFS into Pandas
 hdfs_pd_read_parquet,
 hdfs_pd_write_parquet,
 pd_read_parquet_hdfs,
@@ -600,7 +601,7 @@ def spark_df_isempty(df:sp_dataframe)->bool:
     """ True: spark DataFrame is empty
 
     Doc::
-        
+
         Tested as Fastest way, 30 sec for 70Gb dataset.
         https://stackoverflow.com/questions/32707620/how-to-check-if-spark-dataframe-is-empty
     """

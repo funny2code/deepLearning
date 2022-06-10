@@ -284,6 +284,48 @@ def test_dataset_regression_boston_traintest():
 
 
 
+####################################################################################################
+def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num_workers=8, transform_custom=None):
+    """
+       return dataloader_train,  dataloader_test
+
+
+    """
+    from torchvision import transforms, datasets, models
+    from torch.utils import data
+
+    transform = transform_custom
+    if transform_custom is None :
+        # transform to normalize the data
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0.5,), (0.5,))])
+
+
+    dataset_train = datasets.FashionMNIST(root='fashion-mnist',
+                                          train=True, download=True,transform=transform)
+
+    dataset_test  = datasets.FashionMNIST(root='fashion-mnist',
+                                         train=False, download=True, transform=transform)
+
+    permutation = np.random.permutation(np.arange(len(dataset_train)))
+    indices_rnd = permutation[:nrows]
+    dt_train_rnd = data.DataLoader(dataset_train,
+                                   batch_size=batch_size,
+                                   sampler=data.SubsetRandomSampler(indices_rnd),
+                                   num_workers= num_workers)
+
+    permutation = np.random.permutation(np.arange(len(dataset_train)))
+    indices_rnd = permutation[:nrows]
+    dt_test_rnd  = data.DataLoader(dataset_test,
+                                   batch_size=batch_size,
+                                   sampler=data.SubsetRandomSampler(indices_rnd),
+                                   num_workers= num_workers)
+
+    return dt_train_rnd, dt_test_rnd
+
+
+
+
 ###################################################################################################
 if 'utils':
     """
@@ -362,7 +404,7 @@ if 'utils':
 
         if "drive.google.com" in url_dataset:
             full_filename = os.path.join(path_target, file_target)
-            from util import download_googledrive
+            from util_download import download_googledrive
             urlx    = urlparse(url_dataset)
             file_id = parse_qs(urlx.query)['id'][0]
             download_googledrive([{'fileid': file_id, "path_target":
@@ -482,6 +524,7 @@ if 'utils':
             True if a match was found and an archive extraction was completed,
             False otherwise.
         """
+        import tarfile, zipfile
         if archive_format is None:
             return False
         if archive_format == "auto":

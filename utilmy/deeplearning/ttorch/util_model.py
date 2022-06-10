@@ -1,14 +1,22 @@
 # -*- coding: utf-8 -*-
-import os,sys, pickle
+import os, pickle
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
+
 import numpy as np
+from torch.utils.data import DataLoader
+from typing import Optional, Sequence
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
+from torch import Tensor
+from torch import nn
+from torch.nn import functional as F
+
+
+#################################################################################################
+from utilmy import log
+
 
 #################################################################################################
 def test_all():
@@ -141,7 +149,7 @@ def test2():
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
         # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
+        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
         # Delete the last linear layer of an Elman RNN
         simple_rnn = nn.Sequential(
@@ -152,7 +160,7 @@ def test2():
             nn.Linear(100, 10),
         )
 
-        simple_rnn = util_model.model_delete_layers(simple_rnn, del_ids = [1])
+        simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
 
 
 
@@ -160,7 +168,7 @@ def test2():
         model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
         # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_delete_layers(model.classifier, del_ids = [6])
+        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
         # Add back to the model the deleted layer
         module = {
@@ -169,7 +177,7 @@ def test2():
                 'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
                 }
 
-        model.classifier = util_model.model_add_layers(model.classifier, modules = [module])
+        model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
 
 
 
@@ -216,37 +224,55 @@ def test3():
     plt.colorbar()
 
 
+
 def test4():
-    pass
+   class_label_dict =  {'gender': 2,'season': 4,'age':5 }  ##5 n_unique_label
+   layers_dim=[512, 256]
+
+   batch_size       = 64
+   X       = torch.rand(batch_size, 512)
+   y_true  = { 'gender': torch.rand(batch_size, 2),
+               'season': torch.rand(batch_size, 4) ,
+               'age':    torch.rand(batch_size, 5) }
+
+
+   model  = MultiClassMultiLabel_Head(layers_dim = layers_dim, class_label_dict = class_label_dict)
+   y_pred = model(X)
+   log(y_pred)
+   loss = model.get_loss(ypred=y_pred, ytrue=y_true, weights=None, sum_loss=True )
+   log(loss)
+
+
+
 
 #################################################################################################
 ################ Model tooling ##################################################################
 def model_getparams(model, params_to_get = None, detach = True):
-    '''Extracts the parameters, names, and 'requires gradient' status from a
-    model
+    '''Extracts the parameters, names, and 'requires gradient' status from  model
+    Docs::
 
-    Input
-    -----
-    model: class instance based on the base class torch.nn.Module
+        Input
+        -----
+        model: class instance based on the base class torch.nn.Module
 
-    params_to_get: list of str, default=None, specifying the names of the
-        parameters to be extracted
-        If None, then all parameters and names of parameters from the model
-        will be extracted
+        params_to_get: list of str, default=None, specifying the names of the
+            parameters to be extracted
+            If None, then all parameters and names of parameters from the model
+            will be extracted
 
-    detach: bool, default True, detach the tensor from the computational graph
+        detach: bool, default True, detach the tensor from the computational graph
 
-    Output
-    ------
-    params_name: list, contaning one str for each extracted parameter
+        Output
+        ------
+        params_name: list, contaning one str for each extracted parameter
 
-    params_values: list, containg one tensor corresponding to each
-        parameter.
-        NOTE: The tensor is detached from the computation graph
+        params_values: list, containg one tensor corresponding to each
+            parameter.
+            NOTE: The tensor is detached from the computation graph
 
-    req_grad: list, containing one Boolean variable for each parameter
-        denoting the requires_grad status of the tensor/parameter
-        of the model
+        req_grad: list, containing one Boolean variable for each parameter
+            denoting the requires_grad status of the tensor/parameter
+            of the model
     '''
     params_names = []
     params_values = []
@@ -271,26 +297,25 @@ def model_getparams(model, params_to_get = None, detach = True):
     return params_values, params_names, req_grad
 
 
-def model_freezeparams(model,
-                  params_to_freeze = None,
-                  freeze = True):
+def model_freezeparams(model,  params_to_freeze = None,  freeze = True):
     '''Freeze or unfreeze the parametrs of a model
+    Docs::
 
-    Input
-    -----
-    model:  class instance based on the base class torch.nn.Module
+        Input
+        -----
+        model:  class instance based on the base class torch.nn.Module
 
-    params_to_freeze: list of str specifying the names of the params to be
-        frozen or unfrozen
+        params_to_freeze: list of str specifying the names of the params to be
+            frozen or unfrozen
 
-    freeze: bool, default True, specifying the freeze or
-        unfreeze of model params
+        freeze: bool, default True, specifying the freeze or
+            unfreeze of model params
 
-    Output
-    ------
-    model: class instance based on the base class torch.nn.Module with changed
-        requires_grad param for the anmes params in params_to_freeze
-        (freeze = requires_grad is False unfreeze = requires_grad is True)
+        Output
+        ------
+        model: class instance based on the base class torch.nn.Module with changed
+            requires_grad param for the anmes params in params_to_freeze
+            (freeze = requires_grad is False unfreeze = requires_grad is True)
     '''
     for name, param in zip(model.named_parameters(), model.parameters()):
         if params_to_freeze is not None:
@@ -300,7 +325,7 @@ def model_freezeparams(model,
             param.requires_grad = True if freeze is False else False
 
 
-def model_delete_layers(model, del_ids = []):
+def model_layers_delete(model, del_ids = []):
     '''Delete layers from model
 
     Input
@@ -324,7 +349,7 @@ def model_delete_layers(model, del_ids = []):
     return model
 
 
-def model_add_layers(model, modules = []):
+def model_layers_add(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
 
     Input
@@ -380,55 +405,81 @@ def model_add_layers(model, modules = []):
     return model
 
 
+def model_layers_getall(model):
+    '''
+    Get all the children (layers) from a model, even the ones that are nested
+
+    Input
+    -----
+    model: class instance based on the base class torch.nn.Module
+
+    Output
+    ------
+    all_layers: list of all layers of the model
+
+    Adapted from:
+    https://stackoverflow.com/questions/54846905/pytorch-get-all-layers-of-model
+    '''
+    children = list(model.children())
+    all_layers = []
+    if not children:#if model has no children model is last child
+        return model
+    else:
+       # Look for children from children to the last child
+       for child in children:
+            try:
+                all_layers.extend(model_layers_getall(child))
+            except TypeError:
+                all_layers.append(model_layers_getall(child))
+
+    return all_layers
 
 
 
 class model_LayerRecorder():
-    '''Get input, output or parameters to a module/layer
-    by registering forward or backward hooks
+    '''Get input, output or parameters to a module/layer by registering forward or backward hooks
+    Docs ::
 
-    Input
-    -----
-    module: a module of a class in torch.nn.modules
+        module: a module of a class in torch.nn.modules
 
-    record_input: bool, default False, deciding if input to module will be
-        recorded
+        record_input: bool, default False, deciding if input to module will be
+            recorded
 
-    record_output: bool, default False, deciding if output to module will be
-        recorded
+        record_output: bool, default False, deciding if output to module will be
+            recorded
 
-    record_params: bool, default False, deciding if params of module will be
-        recorded
+        record_params: bool, default False, deciding if params of module will be
+            recorded
 
-    params_to_get: list of str, default None, specifying the parameters to be
-        recorded from the module (if None all parameters are recorded)
-        NOTE: meaningful only if record_params
+        params_to_get: list of str, default None, specifying the parameters to be
+            recorded from the module (if None all parameters are recorded)
+            NOTE: meaningful only if record_params
 
-    backward: bool, default False, deciding if a forward or backward hook
-        will be registered and the recprding will be performed accordingly
+        backward: bool, default False, deciding if a forward or backward hook
+            will be registered and the recprding will be performed accordingly
 
-    custom_fn: function, default None, to be executed in the forward or backward
-        pass.
+        custom_fn: function, default None, to be executed in the forward or backward
+            pass.
 
-        It must have the following signature:
+            It must have the following signature:
 
-        custom_fn(module, output, input, **kwars)
+            custom_fn(module, output, input, **kwars)
 
-        with kwars optional
+            with kwars optional
 
-        The signature follows the signature of functions to be registered
-        in hooks. See for more details:
-        https://pytorch.org/docs/stable/generated/torch.nn.modules.module.register_module_forward_hook.html
+            The signature follows the signature of functions to be registered
+            in hooks. See for more details:
+            https://pytorch.org/docs/stable/generated/torch.nn.modules.module.register_module_forward_hook.html
 
-     save_to: str, default None, specifying a path to a folder for all recordings
-         to be saved.
-         NOTE: recodrings are saved with filename: recording_0, recording_1, recording_N
+         save_to: str, default None, specifying a path to a folder for all recordings
+             to be saved.
+             NOTE: recodrings are saved with filename: recording_0, recording_1, recording_N
 
-     **kwargs: if keyword args are specified they will be passed as to the
-         custom_fn
+         **kwargs: if keyword args are specified they will be passed as to the
+             custom_fn
 
 
-    The attribute recording contains the output, input or params of a module
+        The attribute recording contains the output, input or params of a module
     '''
     def __init__(self,
                  module,
@@ -508,36 +559,6 @@ class model_LayerRecorder():
         if att: self.counter = 0
 
 
-def model_get_alllayers(model):
-    '''
-    Get all the children (layers) from a model, even the ones that are nested
-
-    Input
-    -----
-    model: class instance based on the base class torch.nn.Module
-
-    Output
-    ------
-    all_layers: list of all layers of the model
-
-    Adapted from:
-    https://stackoverflow.com/questions/54846905/pytorch-get-all-layers-of-model
-    '''
-    children = list(model.children())
-    all_layers = []
-    if not children:#if model has no children model is last child
-        return model
-    else:
-       # Look for children from children to the last child
-       for child in children:
-            try:
-                all_layers.extend(model_get_alllayers(child))
-            except TypeError:
-                all_layers.append(model_get_alllayers(child))
-
-    return all_layers
-
-
 class model_getlayer():
     """ Get a specific layer for embedding output
     Doc::
@@ -561,7 +582,7 @@ class model_getlayer():
         self.last_layer = self.layers[pos_layer]
         self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
 
-    def hook_fn(self, module, input, output):
+    def hook_fn(self, module1, input, output):
         self.input = input
         self.output = output
 
@@ -574,6 +595,145 @@ class model_getlayer():
         return
       for layer in network.children():
         self.get_layers_in_order(layer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################################################
+########### Custom Losses ######################################################################
+class FocalLoss(nn.Module):
+    """ Focal Loss, as described in https://arxiv.org/abs/1708.02002.
+    Docs::
+
+        It is essentially an enhancement to cross entropy loss and is
+        useful for classification tasks when there is a large class imbalance.
+        x is expected to contain raw, unnormalized scores for each class.
+        y is expected to contain class labels.
+        Shape:
+            - x: (batch_size, C) or (batch_size, C, d1, d2, ..., dK), K > 0.
+            - y: (batch_size,) or (batch_size, d1, d2, ..., dK), K > 0.
+    """
+
+    def __init__(self,
+                 alpha: Optional[Tensor] = None,
+                 gamma: float = 0.,
+                 reduction: str = 'mean',
+                 ignore_index: int = -100):
+        """Constructor.
+        Args:
+            alpha (Tensor, optional): Weights for each class. Defaults to None.
+            gamma (float, optional): A constant, as described in the paper.
+                Defaults to 0.
+            reduction (str, optional): 'mean', 'sum' or 'none'.
+                Defaults to 'mean'.
+            ignore_index (int, optional): class label to ignore.
+                Defaults to -100.
+        """
+        if reduction not in ('mean', 'sum', 'none'):
+            raise ValueError(
+                'Reduction must be one of: "mean", "sum", "none".')
+
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.ignore_index = ignore_index
+        self.reduction = reduction
+
+        self.nll_loss = nn.NLLLoss(
+            weight=alpha, reduction='none', ignore_index=ignore_index)
+
+    def __repr__(self):
+        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
+        arg_vals = [self.__dict__[k] for k in arg_keys]
+        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
+        arg_str = ', '.join(arg_strs)
+        return f'{type(self).__name__}({arg_str})'
+
+    def forward(self, x: Tensor, y: Tensor) -> Tensor:
+        if x.ndim > 2:
+            # (N, C, d1, d2, ..., dK) --> (N * d1 * ... * dK, C)
+            c = x.shape[1]
+            x = x.permute(0, *range(2, x.ndim), 1).reshape(-1, c)
+            # (N, d1, d2, ..., dK) --> (N * d1 * ... * dK,)
+            y = y.view(-1)
+
+        unignored_mask = y != self.ignore_index
+        y = y[unignored_mask]
+        if len(y) == 0:
+            return 0.
+        x = x[unignored_mask]
+
+        # compute weighted cross entropy term: -alpha * log(pt)
+        # (alpha is already part of self.nll_loss)
+        log_p = F.log_softmax(x, dim=-1)
+        ce = self.nll_loss(log_p, y)
+
+        # get true class column from each row
+        all_rows = torch.arange(len(x))
+        log_pt = log_p[all_rows, y]
+
+        # compute focal term: (1 - pt)^gamma
+        pt = log_pt.exp()
+        focal_term = (1 - pt)**self.gamma
+
+        # the full loss: -alpha * ((1 - pt)^gamma) * log(pt)
+        loss = focal_term * ce
+
+        if self.reduction == 'mean':
+            loss = loss.mean()
+        elif self.reduction == 'sum':
+            loss = loss.sum()
+
+        return loss
+
+
+def focal_loss(alpha: Optional[Sequence] = None,
+               gamma: float = 0.,
+               reduction: str = 'mean',
+               ignore_index: int = -100,
+               device='cpu',
+               dtype=torch.float32) -> FocalLoss:
+    """Factory function for FocalLoss.
+    Docs::
+
+            alpha (Sequence, optional): Weights for each class. Will be converted
+                to a Tensor if not None. Defaults to None.
+            gamma (float, optional): A constant, as described in the paper.
+                Defaults to 0.
+            reduction (str, optional): 'mean', 'sum' or 'none'.
+                Defaults to 'mean'.
+            ignore_index (int, optional): class label to ignore.
+                Defaults to -100.
+            device (str, optional): Device to move alpha to. Defaults to 'cpu'.
+            dtype (torch.dtype, optional): dtype to cast alpha to.
+                Defaults to torch.float32.
+        Returns:
+            A FocalLoss object
+    """
+    if alpha is not None:
+        if not isinstance(alpha, Tensor):
+            alpha = torch.tensor(alpha)
+        alpha = alpha.to(device=device, dtype=dtype)
+
+    fl = FocalLoss(
+        alpha=alpha,
+        gamma=gamma,
+        reduction=reduction,
+        ignore_index=ignore_index)
+    return
+
+
+
+
 
 
 
@@ -622,7 +782,7 @@ def plot_grad_flow(named_parameters):
 
 
 def plot_grad_flow_v2(named_parameters):
-    '''
+    '''  Check Grad Flow
     Docs::
 
         Plots the gradients flowing through different layers in the net during training.
@@ -655,6 +815,10 @@ def plot_grad_flow_v2(named_parameters):
                 Line2D([0], [0], color="k", lw=4)], ['max-gradient', 'mean-gradient', 'zero-gradient'])
 
 
+
+
+
+
 ##################################################################################################
 ########### Computer vision ######################################################################
 def vision_prediction_check():
@@ -677,46 +841,75 @@ def vision_prediction_check():
 ###############################################################################################
 ########### Custom layer ######################################################################
 class MultiClassMultiLabel_Head(nn.Module):
-    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0,):
-        """
+    """  Multi Class Multi Label head
+    Docs::
 
-           class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
+        class_label_dict :  {'gender': 2,  'age' : 5}  ##5 n_unique_label
 
-        """
+    """    
+    def __init__(self, layers_dim=[256,64],  class_label_dict=None, dropout=0, activation_custom=None,
+                 use_first_head_only= None ):
+
         super().__init__()
-        self.dropout = nn.Dropout(dropout)
-        self.relu    = nn.ReLU()
-        self.class_label_dict = class_label_dict
+        self.dropout     = nn.Dropout(dropout)
+        self.activation  = nn.ReLU() if activation_custom is None else activation_custom
+        self.use_first_head_only = use_first_head_only
+
+        if self.use_first_head_only:
+            for key,val in class_label_dict.items() :
+              break
+            self.class_label_dict = {key: val}
+        else :
+            self.class_label_dict = class_label_dict
+
 
         ########Common part #################################################################
+        self.linear_list = []
         out_dimi = layers_dim[0]
         for i,dimi in enumerate(layers_dim[1:]) :
             # Layer 1
             in_dimi  = out_dimi
             out_dimi = layers_dim[i]
-            self.linear_list[i]        = nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False)
+            self.linear_list.append(nn.Linear(in_features=in_dimi, out_features=out_dimi, bias=False) )
 
         dim_final = layers_dim[-1]
+        self.linear_list.append(nn.Linear(in_features=out_dimi, out_features=dim_final, bias=False))
+        self.linear_list = nn.Sequential(*self.linear_list)
+
 
         ########Multi-Class ################################################################
         self.head_task_dict = {}
         for classname, n_unique_label in class_label_dict.items():
-            self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
+            self.head_task_dict[classname] = []
+            self.head_task_dict[classname].append(nn.Linear(dim_final, n_unique_label))
+            if self.use_first_head_only:
+               self.head_task_dict[classname].append(nn.Linear(n_unique_label, 1))
+            self.head_task_dict[classname] = nn.Sequential( *self.head_task_dict[classname])
+
+        #########Multi-Class ################################################################
+        #self.head_task_dict = {}
+        #for classname, n_unique_label in class_label_dict.items():
+        #    self.head_task_dict[classname] = nn.Linear(dim_final, n_unique_label)
 
 
     def forward(self, x):
         for lin_layer in self.linear_list:
-           x = self.relu(lin_layer(self.dropout(x)))
+           x = self.activation(lin_layer(self.dropout(x)))
 
-        yout  = {}
+        yout = {}
         for class_i in self.class_label_dict.keys():
             yout[class_i] = self.head_task_dict[class_i](x)
+
+            if self.use_first_head_only: 
+               return yout[ class_i ]    
+
+
         return yout
 
 
     def get_loss(self,ypred, ytrue, loss_calc_custom=None,
                  weights=None, sum_loss=True):
-        """
+        """ Get losses
 
         """
         if loss_calc_custom is None :
@@ -726,17 +919,15 @@ class MultiClassMultiLabel_Head(nn.Module):
 
         loss_list = []
         for ypred_col, ytrue_col in zip(ypred, ytrue) :
-           loss_list.append(loss_calc_fun(ypred_col, ytrue_col) )
+           loss_list.append(loss_calc_fun(ypred[ypred_col], ytrue[ytrue_col]) )
 
         if sum_loss:
             weights = 1.0 / len(loss_list) * np.ones(len(loss_list))  if weights is None else weights
             lsum = 0.0
-            for li in loss_list:
-                lsum = lsum + weights[i]* li
+            for li,wi in zip(loss_list,weights):
+                lsum = lsum + wi * li
             return lsum
         return loss_list
-
-
 
 
 class LSTM(nn.Module):
@@ -763,17 +954,17 @@ class LSTM(nn.Module):
 
 
 class SequenceReshaper(nn.Module):
-	def __init__(self, from_ = 'vision'):
-		super(SequenceReshaper,self).__init__()
-		self.from_ = from_
+    def __init__(self, from_ = 'vision'):
+        super(SequenceReshaper,self).__init__()
+        self.from_ = from_
 
-	def forward(self, x):
-		if self.from_ == 'vision':
-			x = x[:,0,:,:]
-			x = x.squeeze()
-			return x
-		else:
-			return x
+    def forward(self, x):
+        if self.from_ == 'vision':
+            x = x[:,0,:,:]
+            x = x.squeeze()
+            return x
+        else:
+            return x
 
 
 ###############################################################################################
