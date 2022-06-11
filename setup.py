@@ -43,39 +43,21 @@ githash = get_current_githash()
 #####################################################################################
 ss1 = f"""
 
-1000's of One Liner functions for 
-   Visualization
-   Data processing
-   Data pipelining
-   Batching
-   Pytorch
-   Keras
-   Image
-   NLP Transformers
-   Tabular Transformers
+1000's of utilities functions.
 
-   
+
 Stats usage:
    > 1 million Donwload !
    https://pepy.tech/project/utilmy
-
 
    https://pypistats.org/packages/utilmy
 
 
 
-Details:
-   https://packagegalaxy.com/python/utilmy
-
-
-
-To get access to the docs, 
-please Follow me on Github:
-
+Doc Access:
    https://tinyurl.com/2p848smu
 
 
-Then, you will receive invite for the doc here:
    https://groups.google.com/g/utilmy
 
 
