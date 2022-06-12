@@ -1046,18 +1046,18 @@ def parquet_to_hive_parquet2(dirin, dirout="/ztmp_hive_parquet/", nfile=1, verbo
 
 
 def hive_schema(df):
-        if isinstance(df, str):
-            df = pd_read_parquet_schema(df)
+    if isinstance(df, str):
+        df = pd_read_parquet_schema(df)
 
-        tt = ""
-        for ci in df.columns :
-            ss = str(df[ci].dtypes).lower()
-            if 'object'  in ss:   tt = tt +  f"{ci} STRING ,\n"
-            elif 'int64' in ss:   tt = tt +  f"{ci} BIGINT ,\n"
-            elif 'float' in ss:   tt = tt +  f"{ci} DOUBLE ,\n"
-            elif 'int'   in ss:   tt = tt +  f"{ci} INT ,\n"
-        #log(tt[:-2])
-        return tt[:-2]
+    tt = ""
+    for ci in df.columns :
+        ss = str(df[ci].dtypes).lower()
+        if 'object'  in ss:   tt = tt +  f"{ci} STRING ,\n"
+        elif 'int64' in ss:   tt = tt +  f"{ci} BIGINT ,\n"
+        elif 'float' in ss:   tt = tt +  f"{ci} DOUBLE ,\n"
+        elif 'int'   in ss:   tt = tt +  f"{ci} INT ,\n"
+    #log(tt[:-2])
+    return tt[:-2]
 
 
 
