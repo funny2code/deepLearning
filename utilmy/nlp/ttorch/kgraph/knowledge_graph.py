@@ -1,4 +1,24 @@
+"""
 
+Separate in 3 parts  (classes)
+
+  raw text --> NER extraction
+
+
+  NER  --> KGraph training + embedding generation/
+
+
+  KG Embedding Losses
+
+
+
+Reason :
+   make the code modular, easy to change when needed.
+   make thing independant.
+
+
+
+"""
 import os
 import spacy
 import numpy as np
@@ -10,6 +30,8 @@ from typing import Tuple
 from spacy.matcher import Matcher 
 
 from node2vec import Node2Vec as n2v
+
+
 
 class knowledge_grapher():
     def __init__(self, data, embedding_dim:int=14, load_spacy:bool=False) -> None:
