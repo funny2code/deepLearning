@@ -31,6 +31,8 @@ from spacy.matcher import Matcher
 
 from node2vec import Node2Vec as n2v
 
+### pip install python-box
+from box import Box
 
 
 class knowledge_grapher():
@@ -241,3 +243,20 @@ class knowledge_grapher():
         data_kgf.to_csv('pykeen_data/data_kgf.tsv', sep="\t")
         
         return train_df, test_df, val_df
+
+
+
+
+
+
+
+###############################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+    ### python  
+
+
+
+
+
