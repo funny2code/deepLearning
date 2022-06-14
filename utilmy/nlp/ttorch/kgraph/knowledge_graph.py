@@ -32,12 +32,15 @@ from node2vec import Node2Vec as n2v
 
 ### pip install python-box
 from box import Box
+from utilmy import util_donwload as ud
+
+
 
 def test1(path=""):
     """
       cd utilmy/nlp/tttorch/kgraph/
       python knoweledge_graph test1 --path  mydirdata/
-      
+
 
     """
     #Path to dataset
@@ -53,7 +56,7 @@ def test1(path=""):
 
 
 
-
+#######################################################################################################
 class knowledge_grapher():
     def __init__(self, data_kgf, embeddingDF:pd.DataFrame, embedding_dim:int=14, load_spacy:bool=False) -> None:
         self.data_kgf = data_kgf
