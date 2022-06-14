@@ -33,6 +33,26 @@ from node2vec import Node2Vec as n2v
 ### pip install python-box
 from box import Box
 
+def test1(path=""):
+    """
+      cd utilmy/nlp/tttorch/kgraph/
+      python knoweledge_graph test1 --path  mydirdata/
+      
+
+    """
+    #Path to dataset
+    path = ''
+    data = pd.read_csv(path, delimiter='\t')
+    grapher = knowledge_grapher(data_kgf=data,embedding_dim=10, load_spacy=True)
+
+    data_kgf = grapher.extractTriples(-1)
+    grapher.buildGraph(data_kgf)
+    grapher.plot_graph()
+    grapher.prepare_data(data_kgf)
+
+
+
+
 
 class knowledge_grapher():
     def __init__(self, data_kgf, embeddingDF:pd.DataFrame, embedding_dim:int=14, load_spacy:bool=False) -> None:
@@ -228,17 +248,10 @@ class KGEmbedder:
             BATCH_WORDS = 10 # Node2Vec batch words
             self.compute_embeddings(path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS )
 
+
+
+
 if __name__=="__main__":
-    #Path to dataset
-    path = ''
-    data = pd.read_csv(path, delimiter='\t')
-    grapher = knowledge_grapher(data_kgf=data,embedding_dim=10, load_spacy=True)
-
-    data_kgf = grapher.extractTriples(-1)
-    grapher.buildGraph(data_kgf)
-    grapher.plot_graph()
-    grapher.prepare_data(data_kgf)
-
     import fire
     fire.Fire()
     ### python  
