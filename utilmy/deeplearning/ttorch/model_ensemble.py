@@ -123,6 +123,7 @@ def test_all():
     test2c()
     test2d()
     test3()
+    test4()
     test2_lstm()
 
 
@@ -846,7 +847,7 @@ def test3():
                                         class_label_dict= class_label_dict,
                                         use_first_head_only= True)
    ARG.merge_model.architect.head_custom      = head_custom
-   ARG.merge_model.architect.loss_merge_custom = torch.nn.BCELoss() ###another loss func torch.nn.L1Loss()
+   ARG.merge_model.architect.loss_custom = torch.nn.BCELoss() ###another loss func torch.nn.L1Loss()
  
  
    ARG.merge_model.dataset       = {}
@@ -869,6 +870,170 @@ def test3():
    outputs = model.predict(inputs)
    print(outputs)
 
+def test4():    
+   from box import Box ; from copy import deepcopy
+   from torch.utils.data import DataLoader, TensorDataset
+   
+   ARG = Box({
+       'MODE'   : 'mode1',
+       'DATASET': {},
+       'MODEL_INFO' : {},
+   })
+   PARAMS = {}
+
+
+   ##################################################################
+   if ARG.MODE == 'mode1':
+       ARG.MODEL_INFO.TYPE = 'dataonly' 
+       train_config                           = Box({})
+       train_config.LR                        = 0.001
+       train_config.SEED                      = 42
+       train_config.DEVICE                    = 'cpu'
+       train_config.BATCH_SIZE                = 64
+       train_config.EPOCHS                    = 1
+       train_config.EARLY_STOPPING_THLD       = 10
+       train_config.VALID_FREQ                = 1
+       train_config.SAVE_FILENAME             = './model.pt'
+       train_config.TRAIN_RATIO               = 0.7
+       train_config.VAL_RATIO                 = 0.2
+       train_config.TEST_RATIO                = 0.1
+
+
+   ####################################################################
+   samples = 1000 ##Fake data samples
+   def prepro_dataset():
+      train_X = torch.rand(int(samples*train_config.TRAIN_RATIO),3,28,28)
+      valid_X = torch.rand(int(samples*train_config.VAL_RATIO),3,28,28)
+      test_X = torch.rand(int(samples*train_config.TEST_RATIO),3,28,28)
+      train_y =  { 'gender': torch.rand(int(samples*train_config.TRAIN_RATIO), 2),
+                   'season': torch.rand(int(samples*train_config.TRAIN_RATIO), 4),
+                   'style': torch.rand(int(samples*train_config.TRAIN_RATIO), 3),
+                   'age': torch.rand(int(samples*train_config.TRAIN_RATIO), 5),
+                   'colour': torch.rand(int(samples*train_config.TRAIN_RATIO), 7)
+                  }
+
+      valid_y =  { 'gender': torch.rand(int(samples*train_config.VAL_RATIO), 2),
+                   'season': torch.rand(int(samples*train_config.VAL_RATIO), 4),
+                   'style': torch.rand(int(samples*train_config.VAL_RATIO), 3),
+                   'age': torch.rand(int(samples*train_config.VAL_RATIO), 5),
+                   'colour': torch.rand(int(samples*train_config.VAL_RATIO), 7)
+                  }
+
+      test_y =  { 'gender': torch.rand(int(samples*train_config.TEST_RATIO), 2),
+                   'season': torch.rand(int(samples*train_config.TEST_RATIO), 4),
+                   'style': torch.rand(int(samples*train_config.TEST_RATIO), 3),
+                   'age': torch.rand(int(samples*train_config.TEST_RATIO), 5),
+                   'colour': torch.rand(int(samples*train_config.TEST_RATIO), 7)}
+
+      return train_X ,train_y,valid_X ,valid_y,test_X,test_y
+
+
+  
+   train_X ,train_y,valid_X ,valid_y,test_X,test_y = prepro_dataset()
+   class_label_dict =  {'gender': 2,'season':4, 'colour': 7}  ##5 n_unique_label
+
+
+   ############## Custom Data Loader #############################
+   def custom_dataloader():
+       class CustomImageDataset(Dataset):
+           def __init__(self,data=None,lables=None,class_lable_dict=None): 
+               self.data    = data
+               self.lables  = lables
+               self.classes = class_lable_dict
+
+           def __len__(self):
+               return len(self.data)
+
+           def __getitem__(self, idx):
+               train_X = self.data[idx]
+               train_y = {}
+               assert(len(self.classes) != 0)
+               for classname, n_unique_label in self.classes.items():
+                   train_y[classname] = self.lables[classname][idx]
+               return (train_X, train_y)
+
+       if train_X is not None and valid_X is not None and test_X is not None:
+            train_dataloader = DataLoader(CustomImageDataset(data=train_X,lables=train_y,class_lable_dict=class_label_dict), batch_size=64,
+                                            shuffle=True, num_workers=0,drop_last=True)
+            valid_dataloader = DataLoader(CustomImageDataset(data=valid_X,lables=valid_y,class_lable_dict=class_label_dict), batch_size=64,
+                                            shuffle=True, num_workers=0,drop_last=True)
+            test_dataloader  = DataLoader(CustomImageDataset(data=test_X, lables=test_y,class_lable_dict=class_label_dict), batch_size=64,
+                                            shuffle=True, num_workers=0,drop_last=True)
+       else :
+            raise Exception("Can't read data and lables, Custom Dataset")
+       return train_dataloader, valid_dataloader, test_dataloader
+
+
+   ### modelA  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet18(pretrained=True)
+   embA_dim = model_ft.fc.in_features  ###
+
+   ARG.modelA               = {}   
+   ARG.modelA.name          = 'resnet18'
+   ARG.modelA.nn_model      = model_ft
+   ARG.modelA.layer_emb_id  = 'fc'
+   ARG.modelA.architect     = [ embA_dim]  ### head s
+   ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
+   modelA = model_create(ARG.modelA)
+   
+
+
+   ### modelB  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet50(pretrained=True)
+   embB_dim = int(model_ft.fc.in_features)
+
+   ARG.modelB               = {}   
+   ARG.modelB.name          = 'resnet50'
+   ARG.modelB.nn_model      = model_ft
+   ARG.modelB.layer_emb_id  = 'fc'
+   ARG.modelB.architect     = [embB_dim ]   ### head size
+   ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
+   modelB = model_create(ARG.modelB )
+
+
+   ### merge_model  ###################################################
+   ### EXPLICIT DEPENDENCY  
+   ARG.merge_model           = {}
+   ARG.merge_model.name      = 'modelmerge1'
+
+   ARG.merge_model.architect                  = {}
+   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+
+   ARG.merge_model.architect.merge_type       = 'cat'
+   ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
+   ARG.merge_model.architect.merge_custom     = None
+
+
+   ### Custom head
+   from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+
+   ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+   head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
+                                        class_label_dict= class_label_dict,
+                                        use_first_head_only= False)
+   ARG.merge_model.architect.head_custom      = head_custom
+   ARG.merge_model.architect.loss_custom = head_custom.get_loss
+ 
+ 
+   ARG.merge_model.dataset       = {}
+   ARG.merge_model.dataset.dirin = "/"
+   ARG.merge_model.dataset.coly = 'ytarget'
+   ARG.merge_model.train_config  = train_config
+
+
+   model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+   model.build()
+
+
+   #### Run Model   ###################################################
+   model.training(dataloader_custom = custom_dataloader ) 
+   model.save_weight('ztmp/model_x5.pt')
+   model.load_weights('ztmp/model_x5.pt')
+   inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+   outputs = model.predict(inputs)
+   print(outputs)
 
 ##### LSTM #################################################################################
 def test2_lstm():
@@ -1513,7 +1678,8 @@ class MergeModel_create(BaseModel):
                 for inputs,targets in train_loader:
                     self.optimizer.zero_grad()
                     predict = self.predict(inputs)
-                    predict = torch.reshape(predict,(predict.shape[0],))
+                    if torch.is_tensor(predict) and predict.size() != targets.size():
+                       predict = torch.reshape(predict,(predict.shape[0],))
                     loss    = self.loss_calc(predict, targets)
                     # loss.grad
                     loss.backward()
@@ -1528,7 +1694,8 @@ class MergeModel_create(BaseModel):
             with torch.no_grad():
                 for inputs,targets in valid_loader:
                     predict = self.predict(inputs)
-                    predict = torch.reshape(predict,(predict.shape[0],))
+                    if torch.is_tensor(predict) and predict.size() != targets.size():
+                       predict = torch.reshape(predict,(predict.shape[0],))
                     self.optimizer.zero_grad()
                     loss = self.loss_calc(predict,targets)
                     loss_val += loss * inputs.size(0)
