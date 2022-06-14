@@ -872,7 +872,7 @@ def test3():
 
 def test4():    
    from box import Box ; from copy import deepcopy
-   from torch.utils.data import DataLoader, TensorDataset
+   from torch.utils.data import DataLoader, TensorDataset, Dataset
    
    ARG = Box({
        'MODE'   : 'mode1',
