@@ -425,7 +425,7 @@ def donwload_kaggle(names="", dirout="", n_dataset=5):
     print(f"Extracted {len(dataset_names)} dataset's names.")
 
     # now we can remove the downloaded text files along with the directory itself
-    !rm -r -f dataset-names
+    # !rm -r -f dataset-names
 
     for dataset_name in dataset_names:
         author, name = dataset_name.split("/")[-2:]
