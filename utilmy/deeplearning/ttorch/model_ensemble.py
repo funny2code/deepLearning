@@ -124,6 +124,7 @@ def test_all():
     test2d()
     test3()
     test4()
+    test5()
     test2_lstm()
 
 
@@ -1033,6 +1034,195 @@ def test4():
    model.load_weights('ztmp/model_x5.pt')
    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
    outputs = model.predict(inputs)
+   print(outputs)
+
+def test5():    
+   from box import Box
+   from torch.utils.data import DataLoader, Dataset
+   
+   ARG = Box({
+       'MODE'   : 'mode1',
+       'DATASET': {},
+       'MODEL_INFO' : {},
+   })
+   PARAMS = {}
+
+
+   ##################################################################
+   if ARG.MODE == 'mode1':
+       ARG.MODEL_INFO.TYPE = 'dataonly' 
+       train_config                           = Box({})
+       train_config.LR                        = 0.001
+       train_config.SEED                      = 42
+       train_config.DEVICE                    = 'cpu'
+       train_config.BATCH_SIZE                = 64
+       train_config.EPOCHS                    = 1
+       train_config.EARLY_STOPPING_THLD       = 10
+       train_config.VALID_FREQ                = 1
+       train_config.SAVE_FILENAME             = './model.pt'
+       train_config.TRAIN_RATIO               = 0.7
+       train_config.VAL_RATIO                 = 0.2
+       train_config.TEST_RATIO                = 0.1
+
+###FASHION MNIST
+   class_dict = {
+       "T-shirt/Top" : 5,"Trouser" : 2,"Pullover" : 3,"Dress" : 7,
+       "Coat" : 8, "Sandal" : 5, "Shirt" : 6,"Sneaker" : 5,"Bag" : 3,"Ankle Boot" : 7
+   }
+
+   def test_dataset_f_mnist(samples=70000):
+       """function test_dataset_f_mnist
+       """
+       from sklearn.model_selection import train_test_split
+       from torchvision import transforms, datasets
+       # Generate the transformations
+       train_list_transforms = [transforms.ToTensor(),transforms.Lambda(lambda x: x.repeat(3, 1, 1))]   
+       tr_dataset = datasets.FashionMNIST(root="data",train=True,
+                                        transform=transforms.Compose(train_list_transforms),download=True,)   
+
+       test_dataset = datasets.FashionMNIST(root="data",train=True,
+                                        transform=transforms.Compose(train_list_transforms),download=True,)   
+
+       #sampling the requred no. of samples from dataset       
+       train_dataset = torch.utils.data.Subset(tr_dataset, list(range(0,int(samples*train_config.TRAIN_RATIO))))
+       valid_dataset = torch.utils.data.Subset(tr_dataset, list(range(int(samples*train_config.TRAIN_RATIO),samples)))
+       test_dataset  = torch.utils.data.Subset(test_dataset, np.arange(int(samples*train_config.TEST_RATIO)))
+
+
+       ###Custom Dataset  #####
+       class FashionDataset(Dataset):
+           def __init__(self,dataset =None, multi_lables = None):
+               
+               assert(multi_lables is not None)
+
+               self.data    = []
+               self.classes = list(multi_lables.keys()) 
+               self.lables = multi_lables
+               img_cnt = 0
+               ####Labeling with 1 at one of multilable
+               for data, target in dataset:
+                   self.data.append(data)
+                   self.lables[self.classes[target]][img_cnt][0] = 1
+                   img_cnt +=1
+
+           def __getitem__(self, idx):
+                data = self.data[idx]
+                lables = {}
+                assert(len(self.classes) != 0 )
+                for classname in self.classes:
+                    lables[classname] = self.lables[classname][idx]
+                return (data,lables)
+
+           def __len__(self):
+               return len(self.data)
+
+       assert(len(train_dataset) != 0)
+       assert(len(valid_dataset) != 0)
+       assert(len(test_dataset) != 0)
+       
+       valid_samples = samples - int(samples*train_config.TRAIN_RATIO)
+       #########initializing lables with zeros
+       multi_lables_train = {}
+       multi_lables_valid = {}
+       multi_lables_test  = {}
+       for key,val in class_dict.items():
+           multi_lables_train[key] = torch.zeros(int(samples*train_config.TRAIN_RATIO),val)
+           multi_lables_valid[key] = torch.zeros(valid_samples,val)
+           multi_lables_test[key]  = torch.zeros(int(samples*train_config.TEST_RATIO),val)
+
+       train_dataloader = DataLoader(FashionDataset(train_dataset, multi_lables = multi_lables_train), batch_size=train_config.BATCH_SIZE,
+                                            shuffle=True, num_workers=0,drop_last=True)
+
+       valid_dataloader = DataLoader(FashionDataset(valid_dataset, multi_lables = multi_lables_valid), batch_size=train_config.BATCH_SIZE,
+                                            shuffle=True, num_workers=0,drop_last=True)
+
+       test_dataloader = DataLoader(FashionDataset(test_dataset, multi_lables = multi_lables_test), batch_size=train_config.BATCH_SIZE,
+                                            shuffle=True, num_workers=0,drop_last=True)
+       return train_dataloader, valid_dataloader, test_dataloader
+
+###FASHION MNIST
+
+   def custom_dataloader():
+        train_dataloader,valid_dataloader,test_dataloader = test_dataset_f_mnist(samples=1000)
+        return train_dataloader,valid_dataloader,test_dataloader
+
+
+   ### modelA  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet18(pretrained=True)
+   embA_dim = model_ft.fc.in_features  ###
+
+   ARG.modelA               = {}   
+   ARG.modelA.name          = 'resnet18'
+   ARG.modelA.nn_model      = model_ft
+   ARG.modelA.layer_emb_id  = 'fc'
+   ARG.modelA.architect     = [ embA_dim]  ### head s
+   ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
+   modelA = model_create(ARG.modelA)
+   
+   ### modelB  ########################################################
+   from torchvision import  models
+   model_ft = models.resnet50(pretrained=True)
+   embB_dim = int(model_ft.fc.in_features)
+
+   ARG.modelB               = {}   
+   ARG.modelB.name          = 'resnet50'
+   ARG.modelB.nn_model      = model_ft
+   ARG.modelB.layer_emb_id  = 'fc'
+   ARG.modelB.architect     = [embB_dim ]   ### head size
+   ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
+   modelB = model_create(ARG.modelB )
+
+
+   ### merge_model  ###################################################
+   ### EXPLICIT DEPENDENCY  
+   ARG.merge_model           = {}
+   ARG.merge_model.name      = 'modelmerge1'
+
+   ARG.merge_model.architect                  = {}
+   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+
+   ARG.merge_model.architect.merge_type       = 'cat'
+   ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
+   ARG.merge_model.architect.merge_custom     = None
+
+
+   ### Custom head
+   from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+
+   ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+   head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
+                                        class_label_dict= class_dict,
+                                        use_first_head_only= False)
+   ARG.merge_model.architect.head_custom      = head_custom
+   ARG.merge_model.architect.loss_custom = head_custom.get_loss
+ 
+ 
+   ARG.merge_model.dataset       = {}
+   ARG.merge_model.dataset.dirin = "/"
+   ARG.merge_model.dataset.coly = 'ytarget'
+   ARG.merge_model.train_config  = train_config
+
+
+   model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+   model.build()
+
+
+   #### Run Model   ###################################################
+   model.training(dataloader_custom = custom_dataloader ) 
+   model.save_weight('ztmp/model_x5.pt')
+   model.load_weights('ztmp/model_x5.pt')
+   inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+   outputs = model.predict(inputs)
+   
+   ######To predict class
+   for i in range(train_config.BATCH_SIZE):
+        sum = {}
+        for key, val in outputs.items():
+            sum[key] = outputs[key].sum()
+        Keymax = max(zip(sum.values(), sum.keys()))[1]
+        print(Keymax)
+
    print(outputs)
 
 ##### LSTM #################################################################################
