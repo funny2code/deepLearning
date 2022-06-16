@@ -18,11 +18,6 @@ from utilmy import log, log2
 
 def help():
     """function help.
-    Doc::
-            
-            Args:
-            Returns:
-                
     """
     from utilmy import help_create
     print( HELP + help_create(__file__) )
@@ -30,12 +25,7 @@ def help():
 
 ##############################################################################################
 def test_all():
-    """function test_all.
-    Doc::
-            
-            Args:
-            Returns:
-                
+    """function test_all.                
     """
     log(MNAME)
     test()
@@ -44,11 +34,6 @@ def test_all():
 
 def test():
     """function test.
-    Doc::
-            
-            Args:
-            Returns:
-                
     """
     test_dataset_regression_fake(nrows=500, n_features=17)
     test_dataset_classifier_fake(nrows=10)
@@ -59,11 +44,6 @@ def test():
 
 def test1():
     """function test1.
-    Doc::
-            
-            Args:
-            Returns:
-                
     """
     fetch_dataset("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz",path_target="./testdata/tmp/test")
     df = pd.read_csv("./testdata/tmp/test/crop.data.csv")
@@ -75,9 +55,6 @@ def test1():
 ####################################################################################################
 def template_dataset_classifier_XXXXX(nrows=500, **kw):
     """.
-    Doc::
-            
-        
     """
     colnum = []
     colcat = []
@@ -280,6 +257,28 @@ def test_dataset_regression_boston_traintest():
     feature_names = load_boston()['feature_names']
     X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(X_reg, y_reg, test_size=0.75) # split
     return X_train_reg, X_test_reg, y_train_reg, y_test_reg, feature_names
+
+
+
+
+#####################################################################################################
+######  Image  ######################################################################################
+def test_dataset_fashion_40ksmall(dirout="./ztmp/"):
+    """ Images + multilabel csv: genre,....
+    Doc::
+
+       https://drive.google.com/drive/folders/1UJ4UvxIMD2boDOz5lGx3YTouhUuKAsp9
+
+    """
+    from utilmy.util_download import download_google
+
+    url = "https://drive.google.com/drive/folders/1UJ4UvxIMD2boDOz5lGx3YTouhUuKAsp9"
+    fileout = download_google(url, fileout="./ztmp/", unzip=True )
+    log(fileout)
+    return fileout
+
+
+
 
 
 
