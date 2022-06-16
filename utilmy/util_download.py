@@ -364,7 +364,7 @@ def upload_google(src_folder_name , dst_folder_name, auth_key ):
 
 
 
-def donwload_kaggle(names="", dirout="", n_dataset=5):
+def download_kaggle(names="", dirout="", n_dataset=5):
     """
     docs::
             from google.colab import drive
