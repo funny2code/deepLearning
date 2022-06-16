@@ -364,6 +364,93 @@ def upload_google(src_folder_name , dst_folder_name, auth_key ):
 
 
 
+def donwload_kaggle(names="", dirout="", n_dataset=5):
+    """
+    docs::
+
+            # download kaggle to get the datasets
+            !pip install kaggle -q
+            # 
+            !mkdir /root/.kaggle
+
+            with open(os.path.join(dataset_dir, "kaggle.json"), "r") as token_file:
+                token = eval(token_file.read()) # using eval to let python to convert the data to dictionary automatically
+
+            with open('/root/.kaggle/kaggle.json', 'w') as f:
+            json.dump(token, f)
+
+            !chmod 600 /root/.kaggle/kaggle.json    
+
+    """
+    #@markdown ex. https://www.kaggle.com/datasets/moezabid/bottles-and-cans
+    unzip = True #@param {type:"boolean"}
+    number_of_datasets = n_dataset #@param{type:"integer"}
+
+    download_dir = dirout
+
+   
+    total_pages = number_of_datasets//20
+    remainder = number_of_datasets%20
+
+    dataset_names = []
+
+    if not os.path.isdir("dataset-names"):
+        os.mkdir("dataset-names")
+
+    for i in range(1, total_pages+2): # include an extra page for both remainder cases
+        os.system( f"kaggle datasets list --page {i} > dataset-names/{i}.txt")
+
+
+    # this block will process the remainder's page too (if remainder>0)
+    for i in range(1, total_pages + 2):
+        # using os module to construct the file paths
+        dir = "dataset-names"
+        filepath = os.path.join(dir, f"{i}.txt")
+        # open the text file and read all the lines
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+        # pick the first dash bar's length as maximum length
+        max_line_length = len(lines[1].split(" ")[0]) + 1 
+        # filter out the `ref` and dash bar rows from the lines
+        lines = lines[2:]
+        for line in lines:
+            # now process the line
+            # truncate the text and clean the whitespaces
+            # finally, append it to the dataset_names list 
+            l = line[:max_line_length].strip() 
+            dataset_names.append(l)
+
+    # filter out the unwanted datasets
+    dataset_names = dataset_names[:number_of_datasets]
+    print(f"Extracted {len(dataset_names)} dataset's names.")
+
+    # now we can remove the downloaded text files along with the directory itself
+    !rm -r -f dataset-names
+
+    for dataset_name in dataset_names:
+        author, name = dataset_name.split("/")[-2:]
+        target_dir = os.path.join(download_dir, name)
+
+        if os.path.isdir(target_dir):
+            print("Dataset directory is already created, passing the download phase.")
+            continue
+        else:
+            os.mkdir(target_dir)
+
+        os.system(f"kaggle datasets download -q {author}/{name}")
+
+        if unzip:
+            with ZipFile(f"{name}.zip", 'r') as zip:
+                zip.extractall(target_dir)
+        else:
+            shutil.move(f"{name}.zip", target_dir)
+        
+        os.remove(f"{name}.zip")
+        print("Downloaded and moved the %s"%dataset_name)
+
+
+
+
 
 ################################################################################################################
 def donwload_and_extract(url, dirout='./ztmp/', unzip=True):
