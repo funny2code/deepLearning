@@ -367,6 +367,19 @@ def upload_google(src_folder_name , dst_folder_name, auth_key ):
 def donwload_kaggle(names="", dirout="", n_dataset=5):
     """
     docs::
+            from google.colab import drive
+            import json
+            import os
+            from zipfile import ZipFile
+            import shutil
+
+
+            drive.mount("drive")
+            #@markdown Enter the path of the dataset that will be saved on the google drive.
+            #@markdown The kaggle.json file also should be in this directory.
+            dataset_dir_path = "Colab Notebooks/datasets/test_dir" #@param {type:"string"}
+            dataset_dir = os.path.join("drive/MyDrive/", dataset_dir_path)
+
 
             # download kaggle to get the datasets
             !pip install kaggle -q
@@ -382,6 +395,11 @@ def donwload_kaggle(names="", dirout="", n_dataset=5):
             !chmod 600 /root/.kaggle/kaggle.json    
 
     """
+    import json
+    import os
+    from zipfile import ZipFile
+    import shutil
+
     #@markdown ex. https://www.kaggle.com/datasets/moezabid/bottles-and-cans
     unzip = True #@param {type:"boolean"}
     number_of_datasets = n_dataset #@param{type:"integer"}
