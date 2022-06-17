@@ -373,17 +373,12 @@ def download_kaggle(names="", dirout="", n_dataset=5):
             from zipfile import ZipFile
             import shutil
 
-
             drive.mount("drive")
-            #@markdown Enter the path of the dataset that will be saved on the google drive.
-            #@markdown The kaggle.json file also should be in this directory.
-            dataset_dir_path = "Colab Notebooks/datasets/test_dir" #@param {type:"string"}
+            dataset_dir_path = "Colab Notebooks/datasets/test_dir"
             dataset_dir = os.path.join("drive/MyDrive/", dataset_dir_path)
-
 
             # download kaggle to get the datasets
             !pip install kaggle -q
-            # 
             !mkdir /root/.kaggle
 
             with open(os.path.join(dataset_dir, "kaggle.json"), "r") as token_file:
