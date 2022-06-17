@@ -23,30 +23,21 @@ import os
 import spacy
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plot
 import networkx as ntx
 from tqdm import tqdm
 from typing import Tuple
 from spacy.matcher import Matcher
 from node2vec import Node2Vec as n2v
 
-import torch
-
-from pykeen.triples import TriplesFactory
-from pykeen.pipeline import pipeline
-from pykeen.models import TransE,ERModel
-from torch.optim import Adam
-from pykeen.training import SLCWATrainingLoop, LCWATrainingLoop
-from pykeen.evaluation import RankBasedEvaluator
-from pykeen.nn.representation import LabelBasedTransformerRepresentation
-
 ### pip install python-box
 from box import Box
 
 
 class knowledge_grapher():
-    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
+    def __init__(self, data_kgf, embeddingDF:pd.DataFrame, embedding_dim:int=14, load_spacy:bool=False) -> None:
         self.data_kgf = data_kgf
+        self.embedding_df = embeddingDF
         self.embedding_dim = embedding_dim
 
     def buildGraph(self, relation = None)->None:
@@ -57,12 +48,12 @@ class knowledge_grapher():
             self.graph = ntx.from_pandas_edgelist(self.data_kgf, "source", "target",
                          edge_attr=True, create_using=ntx.MultiDiGraph())
 
-    def plot_graph(self, plotFolder)->None:
-        plt.figure(figsize=(14, 14))
+    def plot_graph(self)->None:
+        plot.figure(figsize=(14, 14))
         posn = ntx.spring_layout(self.graph)
-        ntx.draw(self.graph, with_labels=True, node_color='green', edge_cmap=plt.cm.Blues, pos = posn)
-        plt.savefig(os.path.join(plotFolder,'graphPlot.jpg'))
-        plt.close()
+        ntx.draw(self.graph, with_labels=True, node_color='green', edge_cmap=plot.cm.Blues, pos = posn)
+        plot.savefig('plots/graph_plot.png')
+        plot.close()
 
     def compute_centrality(self,)->None:
         self.centrality_dict = ntx.degree_centrality(self.graph)
@@ -94,12 +85,12 @@ class knowledge_grapher():
                             'in_degree':{'centers':in_degree_centers, 'adjacency': in_degree_adjacency},
                             'out_degree':{'centers':out_degree_centers, 'adjacency':out_degree_adjacency},}
 
-    def map_centers_anchors(self,embedding_df:pd.DataFrame, _type:str):
+    def map_centers_anchors(self, _type:str):
 
-       self.embedding_df = embedding_df
        _aux = self.center_dict[_type]
        centers = _aux['centers']
        adjacency = _aux['adjacency']
+    #    self.load_embeddings()
 
        self.mean_anchor_dict = {}
        for center, _ in centers:
@@ -220,90 +211,22 @@ class NERExtractor:
 
 
 class KGEmbedder:
-    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
-
-        self.dataFolder = dataFolder
+    def __init__(self, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
         self.graph = graph
         self.embedding_dim = embedding_dim
 
-        train_path =os.path.join(dataFolder,'train_data.tsv')
-        test_path =os.path.join(dataFolder,'test_data.tsv')
-        val_path =os.path.join(dataFolder,'validation_data.tsv')
-        data_path = os.path.join(dataFolder,'data_kgf.tsv')
-
-
-        self.training = TriplesFactory.from_path(train_path)
-
-        self.testing = TriplesFactory.from_path(test_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
-
-        self.validation = TriplesFactory.from_path(val_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
-
-
-    def set_up_embeddings(self,):
-        # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
-
-        if os.path.exists(os.path.join(self.dataFolder, 'trained_model.pkl')):
-            self.model = torch.load(os.path.join(self.dataFolder, 'trained_model.pkl'))
-        else:
-            self.model = ERModel(triples_factory=self.training,
-                                 interaction='distmult',
-                               # entity_representations=entity_representations
-                               entity_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1),
-                               relation_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1)
-                               )
-
-            self.optimizer = Adam(params=self.model.get_grad_params())
-
-            self.training_loop = LCWATrainingLoop(
-                model=self.model,
-                triples_factory=self.training,
-                optimizer=self.optimizer,
-            )
-
-
-    def compute_embeddings(self, path_to_embeddings, batch_size=1024):
-
-        self.set_up_embeddings()
-        losses = self.training_loop.train(
-                                triples_factory=self.training,
-                                num_epochs=10,
-                                checkpoint_name='myCheckpoint.pt',
-                                checkpoint_frequency=5,
-                                batch_size=256,
-                                )
-
-        # Pick an evaluator
-        evaluator = RankBasedEvaluator()
-        # Get triples to test
-
-        mapped_triples = self.testing.mapped_triples
-        # Evaluate
-        results = evaluator.evaluate(
-            model=self.model,
-            mapped_triples=mapped_triples,
-            batch_size=batch_size,
-            additional_filter_triples=[
-                self.training.mapped_triples,
-                self.validation.mapped_triples,
-            ],
-        )
-        torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
-        return losses, results
+    def compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS):
+        raise NotImplementedError('Need to implement pyKeen embedding code!')
 
     def load_embeddings(self, path_to_embeddings:str):
 
         if os.path.exists(path_to_embeddings):
            self.embedding_df = pd.read_csv(path_to_embeddings)
-           return None, None
         else:
-            return self.compute_embeddings(path_to_embeddings, batch_size=1024)
-
-    def save_embeddings(self,):
-        return self.training
+            WINDOW = 4 # Node2Vec fit window
+            MIN_COUNT = 1 # Node2Vec min. count
+            BATCH_WORDS = 10 # Node2Vec batch words
+            self.compute_embeddings(path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS )
 
 if __name__=="__main__":
     #Path to dataset
