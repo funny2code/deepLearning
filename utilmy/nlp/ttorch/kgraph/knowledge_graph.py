@@ -19,16 +19,21 @@ Reason :
 
 
 """
+<<<<<<< HEAD
 import os
 import spacy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as ntx
+=======
+import os, spacy, numpy as np, pandas as pd, networkx as ntx
+import matplotlib.pyplot as plot
+>>>>>>> edf44a710938bde5c59297b9802703fc6142aafc
 from tqdm import tqdm
 from typing import Tuple
 from spacy.matcher import Matcher
-from node2vec import Node2Vec as n2v
+# from node2vec import Node2Vec as n2v
 
 import torch
 
@@ -42,8 +47,55 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
+from utilmy import util_download as ud
+from utilmy import log
 
 
+
+
+#######################################################################################################
+def test_all():
+    #test1
+    pass
+
+
+
+def test1(path=""):
+    """
+
+
+
+    """
+    runall()
+
+
+
+
+#######################################################################################################
+def runall(dirin='final_dataset_clean_v2 .tsv') :
+    """
+    Doc::
+
+      cd utilmy/nlp/tttorch/kgraph/
+      python knoweledge_graph.py runall --dirin  mydirdata/
+
+
+    """
+    df = pd.read_csv(dirin, delimiter='\t')
+    grapher = knowledge_grapher(data_kgf=df,embedding_dim=10, load_spacy=True)
+
+    data_kgf = grapher.extractTriples(-1)
+    grapher.buildGraph(data_kgf)
+    grapher.plot_graph()
+    grapher.prepare_data(data_kgf)
+
+
+
+
+
+
+
+#######################################################################################################
 class knowledge_grapher():
     def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
         self.data_kgf = data_kgf
@@ -109,6 +161,7 @@ class knowledge_grapher():
             for i, (node, adj_dict) in enumerate(adjacency[center].items()):
                 adjacency_embeddings[i,:] = self.embedding_df[str(node)]
             self.mean_anchor_dict[center] = {'center': center_embedding.values, 'anchor':adjacency_embeddings.mean(axis = 0)}
+
 
 
 class NERExtractor:
@@ -219,6 +272,7 @@ class NERExtractor:
 
 
 
+
 class KGEmbedder:
     def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
 
@@ -226,6 +280,7 @@ class KGEmbedder:
         self.graph = graph
         self.embedding_dim = embedding_dim
 
+<<<<<<< HEAD
         train_path =os.path.join(dataFolder,'train_data.tsv')
         test_path =os.path.join(dataFolder,'test_data.tsv')
         val_path =os.path.join(dataFolder,'validation_data.tsv')
@@ -304,18 +359,26 @@ class KGEmbedder:
 
     def save_embeddings(self,):
         return self.training
+=======
+    def compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS):
+        raise NotImplementedError('Need to implement pyKeen embedding code!')
+        WINDOW = 4 # Node2Vec fit window
+        MIN_COUNT = 1 # Node2Vec min. count
+        BATCH_WORDS = 10 # Node2Vec batch words
+
+
+
+    def load_embeddings(self, path_to_embeddings:str):
+
+        self.embedding_df = pd.read_csv(path_to_embeddings)
+        log(self.embedding_df)
+
+>>>>>>> edf44a710938bde5c59297b9802703fc6142aafc
+
+
+
 
 if __name__=="__main__":
-    #Path to dataset
-    path = ''
-    data = pd.read_csv(path, delimiter='\t')
-    grapher = knowledge_grapher(data_kgf=data,embedding_dim=10, load_spacy=True)
-
-    data_kgf = grapher.extractTriples(-1)
-    grapher.buildGraph(data_kgf)
-    grapher.plot_graph()
-    grapher.prepare_data(data_kgf)
-
     import fire
     fire.Fire()
     ### python  
