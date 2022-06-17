@@ -20,38 +20,56 @@ Reason :
 
 """
 import os
-import spacy
-import numpy as np
-import pandas as pd
+import spacy, numpy as np, pandas as pd, networkx as ntx
 import matplotlib.pyplot as plot
-import networkx as ntx
 from tqdm import tqdm
 from typing import Tuple
 from spacy.matcher import Matcher
-from node2vec import Node2Vec as n2v
+# from node2vec import Node2Vec as n2v
 
 ### pip install python-box
 from box import Box
-from utilmy import util_donwload as ud
+from utilmy import util_download as ud
+
+
+
+def test_all():
+    #test1
+    pass
 
 
 
 def test1(path=""):
     """
-      cd utilmy/nlp/tttorch/kgraph/
-      python knoweledge_graph test1 --path  mydirdata/
+
 
 
     """
-    #Path to dataset
-    path = ''
-    data = pd.read_csv(path, delimiter='\t')
-    grapher = knowledge_grapher(data_kgf=data,embedding_dim=10, load_spacy=True)
+    run_all()
+
+
+
+
+#######################################################################################################
+def runall(dirin='final_dataset_clean_v2 .tsv') :
+    """
+    Doc::
+
+      cd utilmy/nlp/tttorch/kgraph/
+      python knoweledge_graph runall --dirin  mydirdata/
+
+
+    """
+    df = pd.read_csv(dirin, delimiter='\t')
+    grapher = knowledge_grapher(data_kgf=df,embedding_dim=10, load_spacy=True)
 
     data_kgf = grapher.extractTriples(-1)
     grapher.buildGraph(data_kgf)
     grapher.plot_graph()
     grapher.prepare_data(data_kgf)
+
+
+
 
 
 
