@@ -19,8 +19,7 @@ Reason :
 
 
 """
-import os
-import spacy, numpy as np, pandas as pd, networkx as ntx
+import os, spacy, numpy as np, pandas as pd, networkx as ntx
 import matplotlib.pyplot as plot
 from tqdm import tqdm
 from typing import Tuple
@@ -30,9 +29,12 @@ from spacy.matcher import Matcher
 ### pip install python-box
 from box import Box
 from utilmy import util_download as ud
+from utilmy import log
 
 
 
+
+#######################################################################################################
 def test_all():
     #test1
     pass
@@ -45,7 +47,7 @@ def test1(path=""):
 
 
     """
-    run_all()
+    runall()
 
 
 
@@ -56,7 +58,7 @@ def runall(dirin='final_dataset_clean_v2 .tsv') :
     Doc::
 
       cd utilmy/nlp/tttorch/kgraph/
-      python knoweledge_graph runall --dirin  mydirdata/
+      python knoweledge_graph.py runall --dirin  mydirdata/
 
 
     """
@@ -141,6 +143,7 @@ class knowledge_grapher():
             for i, (node, adj_dict) in enumerate(adjacency[center].items()):
                 adjacency_embeddings[i,:] = self.embedding_df[str(node)]
             self.mean_anchor_dict[center] = {'center': center_embedding.values, 'anchor':adjacency_embeddings.mean(axis = 0)}
+
 
 
 class NERExtractor:
@@ -251,6 +254,7 @@ class NERExtractor:
 
 
 
+
 class KGEmbedder:
     def __init__(self, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
         self.graph = graph
@@ -258,16 +262,17 @@ class KGEmbedder:
 
     def compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS):
         raise NotImplementedError('Need to implement pyKeen embedding code!')
+        WINDOW = 4 # Node2Vec fit window
+        MIN_COUNT = 1 # Node2Vec min. count
+        BATCH_WORDS = 10 # Node2Vec batch words
+
+
 
     def load_embeddings(self, path_to_embeddings:str):
 
-        if os.path.exists(path_to_embeddings):
-           self.embedding_df = pd.read_csv(path_to_embeddings)
-        else:
-            WINDOW = 4 # Node2Vec fit window
-            MIN_COUNT = 1 # Node2Vec min. count
-            BATCH_WORDS = 10 # Node2Vec batch words
-            self.compute_embeddings(path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS )
+        self.embedding_df = pd.read_csv(path_to_embeddings)
+        log(self.embedding_df)
+
 
 
 
