@@ -19,17 +19,9 @@ Reason :
 
 
 """
-<<<<<<< HEAD
-import os
-import spacy
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import networkx as ntx
-=======
+
 import os, spacy, numpy as np, pandas as pd, networkx as ntx
-import matplotlib.pyplot as plot
->>>>>>> edf44a710938bde5c59297b9802703fc6142aafc
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from typing import Tuple
 from spacy.matcher import Matcher
@@ -280,7 +272,6 @@ class KGEmbedder:
         self.graph = graph
         self.embedding_dim = embedding_dim
 
-<<<<<<< HEAD
         train_path =os.path.join(dataFolder,'train_data.tsv')
         test_path =os.path.join(dataFolder,'test_data.tsv')
         val_path =os.path.join(dataFolder,'validation_data.tsv')
@@ -359,21 +350,6 @@ class KGEmbedder:
 
     def save_embeddings(self,):
         return self.training
-=======
-    def compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS):
-        raise NotImplementedError('Need to implement pyKeen embedding code!')
-        WINDOW = 4 # Node2Vec fit window
-        MIN_COUNT = 1 # Node2Vec min. count
-        BATCH_WORDS = 10 # Node2Vec batch words
-
-
-
-    def load_embeddings(self, path_to_embeddings:str):
-
-        self.embedding_df = pd.read_csv(path_to_embeddings)
-        log(self.embedding_df)
-
->>>>>>> edf44a710938bde5c59297b9802703fc6142aafc
 
 
 
