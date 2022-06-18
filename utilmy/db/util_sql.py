@@ -406,7 +406,7 @@ Doc::
 
 
     3)   --------   Write an SQL query to find the employees who are high earners in each of the departments.
-    https://leetcode.com/problems/department-top-three-salaries/submissions/
+    https:///department-top-three-salaries/submissions/
 
     WITH topk_employee AS (
         SELECT   
@@ -839,33 +839,8 @@ Doc::
 
 
 
-
-
-
-    New ones 
-      Problems	Solutions	Concept
-    1	Facebook Advertiser Status		Transition diagram; conditional update
-    2	Spotify Listening History		Update cumulative sum
-    3	Monthly Active User		Functional dependency; aggregation; filtering
-    4	Page Recommendation		Undirected edge; aggregation; existance
-    5	Pivoting Numeric Data		Pivoting numeric data with case statement
-    6	Pivoting Text Data		Pivoting text data with self-join
-    7	Un-pivoting Tables		Un-pivoting tables using cross-join
-    8	Group by Bins		Create custom column to group by
-    9	Consecutive Active Users		Self-join, LAG()
-    10	Recommend Friends		Self-join, de-duplication, aggregation
-    11	Spotify Similar Friends		Three-way join, de-duplication, aggregation
-    12	Invalid Search		NULL handling, rate calculation
-    13	Text Confirmation		Rate calculation
-    14	Facebook Common Friends		self join, three-way join
-    15	Facebook Recommend Friend		Self join, four-way join
-    16	Instagram Common Follower		Self join, Directed edge
-
-
-
-
     ______________________________________________________________________________
-    https://leetcode.com/problems/average-salary-departments-vs-company/
+    https:///average-salary-departments-vs-company/
     Output: 
     +-----------+---------------+------------+
     | pay_month | department_id | comparison |
@@ -919,7 +894,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/finding-the-topic-of-each-post/
+    https:///finding-the-topic-of-each-post/
     Write an SQL query to find the topics of each post according to the following rules:
 
     If the post does not have keywords FROM any topic, its topic should be "Ambiguous!".
@@ -945,7 +920,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/new-users-daily-count/
+    https:///new-users-daily-count/
     Write an SQL query to reports for every date within at most 90 days FROM today, the number of users that logged in for the first time on that date. Assume today is 2019-06-30.
 
     +---------+----------+---------------+
@@ -973,7 +948,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/unpopular-books/
+    https:///unpopular-books/
 
     Write an SQL query that reports the books that have sold less than 10 copies in the last year, excluding books that have been available for less than one month FROM today. Assume today is 2019-06-23.
 
@@ -1026,7 +1001,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/first-and-last-call-on-the-same-day/
+    https:///first-and-last-call-on-the-same-day/
     +--------------+----------+
     | Column Name  | Type     |
     +--------------+----------+
@@ -1125,7 +1100,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/number-of-transactions-per-visit/
+    https:///number-of-transactions-per-visit/
 
     Visits table:
     | user_id | visit_date |
@@ -1233,7 +1208,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/report-contiguous-dates/
+    https:///report-contiguous-dates/
 
     | fail_date         |
     +-------------------+
@@ -1335,7 +1310,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/get-the-second-most-recent-activity/
+    https:///get-the-second-most-recent-activity/
     Input: 
     UserActivity table:
     +------------+--------------+-------------+-------------+
@@ -1436,7 +1411,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/page-recommendations-ii/
+    https:///page-recommendations-ii/
 
     Input:  Friendship table:
     +----------+----------+
@@ -1541,7 +1516,7 @@ Doc::
                 AND t2.recipient_id = t3.recipient_id
 
 
-    https://leetcode.com/problems/market-analysis-ii/
+    https:///market-analysis-ii/
 
     Write an SQL query to find for each user whether the brand of the second item (by date) they sold is their favorite brand. If a user sold less than two items, report the answer for that user as no. It is guaranteed that no seller sold more than one item on a day.
 
@@ -1651,7 +1626,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/the-number-of-seniors-and-juniors-to-join-the-company/
+    https:///the-number-of-seniors-and-juniors-to-join-the-company/
 
     1) Hiring the largest number of seniors.
     2) After hiring the maximum number of seniors, use the remaining budget to hire the largest number of juniors.
@@ -1738,7 +1713,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/sales-by-day-of-the-week/
+    https:///sales-by-day-of-the-week/
     Write an SQL query to report how many units in each category have been ordered on each day of the week.
 
     table: Orders
@@ -1855,7 +1830,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/page-recommendations-ii/
+    https:///page-recommendations-ii/
 
     Friendship table:
     +----------+----------+
@@ -2175,7 +2150,7 @@ Doc::
     | 2         | 3         |
     | 3         | 1         |
     +-----------+-----------+
-    https://leetcode.com/problems/game-play-analysis-ii/
+    https:///game-play-analysis-ii/
 
 
 
@@ -2183,7 +2158,7 @@ Doc::
 
     Write an SQL query to report the names of all sellers who did not make any sales in 2020. Return the result table ordered by seller_name in ascending order. The query result format is in the following example.
 
-    https://leetcode.com/problems/sellers-with-no-sales/
+    https:///sellers-with-no-sales/
 
 
 
@@ -2201,7 +2176,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/active-users/submissions/
+    https:///active-users/submissions/
     Active users are those who logged in to their accounts for five or more consecutive days.
     Write an SQL query to find the id and the name of active users.
 
@@ -2308,7 +2283,7 @@ Doc::
 
 
 
-    https://leetcode.com/problems/products-with-three-or-more-orders-in-two-consecutive-years/submissions/
+    https:///products-with-three-or-more-orders-in-two-consecutive-years/submissions/
 
     Write an SQL query to report the IDs of all the products that were ordered three or more times
     in two consecutive years.
@@ -3095,7 +3070,7 @@ Doc::
 
 
     ------ CHURN %
-    https://leetcode.com/problems/active-users/
+    https:///active-users/
     current not  current mont but previous
     t2 AS (
     SELECT  t1.id
