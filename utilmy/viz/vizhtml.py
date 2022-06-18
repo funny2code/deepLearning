@@ -92,15 +92,18 @@ def test_all():
    test_tseries_dateformat()
    
 #####################################################################################
-def show(file_csv_parquet:str="myfile.parquet", title='table',format: str='blue_light',dir_out='table.html', css_class=None, use_datatable=True, table_id=None,):
+def show(file_csv_parquet:str="myfile.parquet", title='table',format: str='blue_light',dir_out='table.html', css_class=None, use_datatable=True, 
+         table_id=None,):
     """  Open HTML file with the parquet file data.
-         Args:
-            file_csv_parquet: str, path to the parquet file
-            title: str, title of the table
-            format: str, format of the table
-            dir_out: str, path to the output file
-            css_class: str, css class of the table
+    Docs::
 
+            file_csv_parquet="myfile.parquet":   path to the parquet file
+            title='my title':           title of table
+            format='blue_light':        format of table
+            dir_out="./myexport/":      path to the output file
+            css_class=None:             css class of the table
+            use_datatable=True   :      Use datable interactive
+            table_id=None        :      custom table id in str
 
     """
     from utilmy import pd_read_file
@@ -117,17 +120,17 @@ def show(file_csv_parquet:str="myfile.parquet", title='table',format: str='blue_
 def show_table_image(df, colgroup= None, colimage = None,title=None,format: str='blue_light',dir_out='print_table_image.html', 
                      custom_css_class=None, use_datatable=False, table_id=None,):
     """ Show table images
+    Docs::
 
-        Args:
             df (df): Panda  dataframe .
-            title (str, optional): Title of the html file. Defaults to "".
-            colgroup (list, optional): List of the group which you want to add to table.
-            colimage (str, optional): List of the image row.
-            format (str, optional): Format of the table. Defaults to "blue_light".
-            dir_out (str, optional): Path to the output file. Defaults to "print_table_image.html".
-            custom_css_class (str, optional): Custom css class. Defaults to None.
-            use_datatable (bool, optional): Use datatable. Defaults to False.
-            table_id (str, optional): Table id. Defaults to None.
+            title= "mytitle: Title of the html file. Defaults to "".
+            colgroup='': List of the group which you want to add to table.
+            colimage='img_url': colum where .
+            format (str): Format of the table. Defaults to "blue_light".
+            dir_out (str): Path to the output file. Defaults to "print_table_image.html".
+            custom_css_class (str): Custom css class. Defaults to None.
+            use_datatable (bool): Use datatable. Defaults to False.
+            table_id (str): Table id. Defaults to None.
     """                
     if isinstance(df, str) : ## path
        from utilmy import pd_read_file
@@ -169,14 +172,15 @@ class htmlDoc(object):
         """Generate HTML page to display graph/Table.
         Combine pages together.
 
-        Args:
-            dir_out (str, optional): Nmae of the output directory. Defaults to "".
-            title (str, optional): Title of the html file. Defaults to "".
-            cfg (dict, optional): Graph title and image size in object. Defaults to None.
-            css_name (str, optional): Add prebuilt css to html page (default, a4, border, a3d, grey). Defaults to "default".
-            css_file (str, optional): path to extenal css file if any. Defaults to None.
-            jscript_file (str, optional): path to extenal css file if any. Defaults to None.
-            verbose (bool, optional): Print log. Defaults to True.
+    Docs::
+
+            dir_out="./": Nmae of the output directory. Defaults to "".
+            title (str): Title of the html file. Defaults to "".
+            cfg (dict): Graph title and image size in object. Defaults to None.
+            css_name (str): Add prebuilt css to html page (default, a4, border, a3d, grey). Defaults to "default".
+            css_file (str): path to extenal css file if any. Defaults to None.
+            jscript_file (str): path to extenal css file if any. Defaults to None.
+            verbose (bool): Print log. Defaults to True.
 
         """
         import mpld3
@@ -243,8 +247,9 @@ class htmlDoc(object):
     def save(self, dir_out=None):
         """Save html file
 
-        Args:
-            dir_out (_type_, optional): Name of the output file. Defaults to None.
+    Docs::
+
+            dir_out (_type_): Name of the output file. Defaults to None.
         """ 
 
         self.dir_out = dir_out if dir_out is not None else self.dir_out
@@ -264,7 +269,8 @@ class htmlDoc(object):
     def add_css(self, css):
 
         """Add custom to file
-        Args:
+    Docs::
+
             css (str): css str
         """ 
         data = f"\n<style>\n{css}\n</style>\n"
@@ -273,7 +279,8 @@ class htmlDoc(object):
     def add_js(self,js):
 
         """Add custom js to file
-        Args:
+    Docs::
+
             js (str): js str
         """ 
         data = f"\n<script>\n{js}\n</script>\n"
@@ -301,7 +308,8 @@ class htmlDoc(object):
     def table(self, df:pd.DataFrame, format: str='blue_light', custom_css_class=None,colimage = None, use_datatable=False, table_id=None, **kw):
         """ Show Pandas in HTML and interactive
         ## show table in HTML : https://pypi.org/project/pretty-html-table/
-        Args:
+    Docs::
+
             format:             List of colors available at https://pypi.org/project/pretty-html-table/
             custom_css_class:   [Option] Add custom class for table
             use_datatable:      [Option] Create html table as a database
@@ -351,23 +359,24 @@ class htmlDoc(object):
                      
                      cfg: dict = {}, mode: str='highcharts', save_img="",  **kw):
         """Create html time series chart.
-        Args:
+    Docs::
+
             df (pd.DataFrame): Dataframe with date and columns of interest.
             coldate (str): Column name for date.
             coly1 (list): List of column names for y1.
-            coly2 (list, optional): List of column names for y2. Defaults to [].
-            title (str, optional): Title of the chart. Defaults to "".
-            xlabel (str, optional): Label for x-axis. Defaults to None.
-            y1label (str, optional): Label for y1-axis. Defaults to None.
-            y2label (str, optional): Label for y2-axis. Defaults to None.
-            figsize (tuple, optional): Size of the figure. Defaults to (14,7).
-            plot_type (str, optional): Type of plot. Defaults to "".
-            spacing (float, optional): Spacing between subplots. Defaults to 0.1.
-            date_format (str, optional): Date format. Defaults to None.
-            nsample (int, optional): Number of samples. Defaults to 10000.
-            cfg (dict, optional): Configuration for plot. Defaults to {}.
-            mode (str, optional): Mode of plot. Defaults to "highcharts".
-            save_img (str, optional): Name of the image to save. Defaults to "".   
+            coly2 (list): List of column names for y2. Defaults to [].
+            title (str): Title of the chart. Defaults to "".
+            xlabel (str): Label for x-axis. Defaults to None.
+            y1label (str): Label for y1-axis. Defaults to None.
+            y2label (str): Label for y2-axis. Defaults to None.
+            figsize (tuple): Size of the figure. Defaults to (14,7).
+            plot_type (str): Type of plot. Defaults to "".
+            spacing (float): Spacing between subplots. Defaults to 0.1.
+            date_format (str): Date format. Defaults to None.
+            nsample (int): Number of samples. Defaults to 10000.
+            cfg (dict): Configuration for plot. Defaults to {}.
+            mode (str): Mode of plot. Defaults to "highcharts".
+            save_img (str): Name of the image to save. Defaults to "".   
         """
         html_code = ''
         if mode == 'matplot':
@@ -398,22 +407,23 @@ class htmlDoc(object):
                        nbin=10, q5=0.005, q95=0.95,cfg: dict = {}, 
                        mode: str='matplot', save_img="",  **kw):
         """Create html histogram chart.
-        Args:
+    Docs::
+
             df (pd.DataFrame): Dataframe with date and columns of interest.
             col (str): Column name for histogram.
-            title (str, optional): Title of the chart. Defaults to "".
-            xlabel (str, optional): Label for x-axis. Defaults to None.
-            ylabel (str, optional): Label for y-axis. Defaults to None.
-            figsize (tuple, optional): Size of the figure. Defaults to (14,7).
-            colormap (str, optional): Colormap. Defaults to 'RdYlBu'.
-            nsample (int, optional): Number of samples. Defaults to 10000.
-            binWidth (float, optional): Bin width. Defaults to None.
-            color (str, optional): Color of the histogram. Defaults to '#7CB5EC'.
-            nbin (int, optional): Number of bins. Defaults to 10.
-            q5 (float, optional): Quantile 5. Defaults to 0.005.
-            q95 (float, optional): Quantile 95. Defaults to 0.95.
-            cfg (dict, optional): Configuration for plot. Defaults to {}.
-            mode (str, optional): Mode of plot. Defaults to "matplot".
+            title (str): Title of the chart. Defaults to "".
+            xlabel (str): Label for x-axis. Defaults to None.
+            ylabel (str): Label for y-axis. Defaults to None.
+            figsize (tuple): Size of the figure. Defaults to (14,7).
+            colormap (str): Colormap. Defaults to 'RdYlBu'.
+            nsample (int): Number of samples. Defaults to 10000.
+            binWidth (float): Bin width. Defaults to None.
+            color (str): Color of the histogram. Defaults to '#7CB5EC'.
+            nbin (int): Number of bins. Defaults to 10.
+            q5 (float): Quantile 5. Defaults to 0.005.
+            q95 (float): Quantile 95. Defaults to 0.95.
+            cfg (dict): Configuration for plot. Defaults to {}.
+            mode (str): Mode of plot. Defaults to "matplot".
         """
         html_code = ''
         if mode == 'matplot':
@@ -441,16 +451,17 @@ class htmlDoc(object):
                      nsample: int=10000,
                      cfg: dict = {}, mode: str='matplot', save_img='', **kw):
         """Create html scatter chart.
-        Args:
+    Docs::
+
             df (pd.DataFrame): Dataframe with date and columns of interest.
             colx (str): Column name for x-axis.
             coly (str): Column name for y-axis.
-            collabel (str, optional): Label for x-axis. Defaults to None.
-            title (str, optional): Title of the chart. Defaults to "".
-            figsize (tuple, optional): Size of the figure. Defaults to (14,7).
-            nsample (int, optional): Number of samples. Defaults to 10000.
-            cfg (dict, optional): Configuration for plot. Defaults to {}.
-            mode (str, optional): Mode of plot. Defaults to "matplot".
+            collabel (str): Label for x-axis. Defaults to None.
+            title (str): Title of the chart. Defaults to "".
+            figsize (tuple): Size of the figure. Defaults to (14,7).
+            nsample (int): Number of samples. Defaults to 10000.
+            cfg (dict): Configuration for plot. Defaults to {}.
+            mode (str): Mode of plot. Defaults to "matplot".
         """
         html_code = ''
         if mode == 'matplot':
@@ -474,18 +485,19 @@ class htmlDoc(object):
                      figsize: tuple = (460, 460), xlabel: str = 'x-axis', ylabel: str = 'y-axis', color: str = '#69b3a2',
                      cfg: dict = {}, mode: str = 'd3', **kw):
         """Create html density chart.
-        Args:
+    Docs::
+
             df (pd.DataFrame): Dataframe with date and columns of interest.
             colx (str): Column name for x-axis.
             coly (str): Column name for y-axis.
-            radius (int, optional): Radius of the circle. Defaults to 9.
-            title (str, optional): Title of the chart. Defaults to "Plot Density".
-            figsize (tuple, optional): Size of the figure. Defaults to (460, 460).
-            xlabel (str, optional): Label for x-axis. Defaults to 'x-axis'.
-            ylabel (str, optional): Label for y-axis. Defaults to 'y-axis'.
-            color (str, optional): Color of the circle. Defaults to '#69b3a2'.
-            cfg (dict, optional): Configuration for plot. Defaults to {}.
-            mode (str, optional): Mode of plot. Defaults to "d3".
+            radius (int): Radius of the circle. Defaults to 9.
+            title (str): Title of the chart. Defaults to "Plot Density".
+            figsize (tuple): Size of the figure. Defaults to (460, 460).
+            xlabel (str): Label for x-axis. Defaults to 'x-axis'.
+            ylabel (str): Label for y-axis. Defaults to 'y-axis'.
+            color (str): Color of the circle. Defaults to '#69b3a2'.
+            cfg (dict): Configuration for plot. Defaults to {}.
+            mode (str): Mode of plot. Defaults to "d3".
         """
       
         html_code = ''
@@ -498,14 +510,15 @@ class htmlDoc(object):
                     figsize: tuple = (460, 460), color: str = '#69b3a2',
                     cfg: dict = {}, mode: str = 'd3', **kw):
       """Create html density chart.
-      Args:
+  Docs::
+
             df (pd.DataFrame): Dataframe with date and columns of interest.
-            col (list, optional): List of columns. Defaults to [].
-            title (str, optional): Title of the chart. Defaults to "".
-            figsize (tuple, optional): Size of the figure. Defaults to (460, 460).
-            color (str, optional): Color of the circle. Defaults to '#69b3a2'.
-            cfg (dict, optional): Configuration for plot. Defaults to {}.
-            mode (str, optional): Mode of plot. Defaults to "d3".
+            col (list): List of columns. Defaults to [].
+            title (str): Title of the chart. Defaults to "".
+            figsize (tuple): Size of the figure. Defaults to (460, 460).
+            color (str): Color of the circle. Defaults to '#69b3a2'.
+            cfg (dict): Configuration for plot. Defaults to {}.
+            mode (str): Mode of plot. Defaults to "d3".
       """
 
       html_code = ''
@@ -524,11 +537,12 @@ class htmlDoc(object):
                         colb: str='col_node2', coledge: str='col_edge'):
         """Add graph to html page
 
-        Args:
+    Docs::
+
             df (pd.DataFrame): Panda dataframe
-            cola (str, optional): cola from df. Defaults to 'col_node1'.
-            colweight (str, optional): weigth of edges. Defaults to "weight".
-            colb (str, optional): colb from df. Defaults to 'col_node2'.
+            cola (str): cola from df. Defaults to 'col_node1'.
+            colweight (str): weigth of edges. Defaults to "weight".
+            colb (str): colb from df. Defaults to 'col_node2'.
         """ 
 
         head, body = pd_plot_network(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
@@ -578,7 +592,8 @@ class mpld3_TopToolbar(mpld3.plugins.PluginBase):
 def mlpd3_add_tooltip(fig, points, labels):
     """
     Add tooltip to a figure.
-    Args:
+Docs::
+
         fig (mpld3.Figure): Figure to add tooltip to.
         points (list): List of points to add tooltip to.
         labels (list): List of labels to add tooltip to.
@@ -1345,7 +1360,8 @@ def pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str=None,
 def html_show_chart_highchart(html_code, verbose=True):
     """
     Function to display highcharts graph
-    Args:
+Docs::
+
         html_code (str): html code of highcharts graph
         verbose (bool): if True, print html code
 
@@ -1366,7 +1382,8 @@ def html_show(html_code, verbose=True):
     # Function to display HTML
     """
     Function to display HTML
-    Args:
+Docs::
+
         html_code (str): html code of HTML
         verbose (bool): if True, print html code
     """
@@ -1380,7 +1397,8 @@ def html_show(html_code, verbose=True):
 def images_to_html(dir_input="*.png",  title="", verbose=False):
     """
     Function to convert images to html code
-    Args:
+Docs::
+
         dir_input (str): directory of images
         title (str): title of html code
         verbose (bool): if True, print html code
@@ -1462,20 +1480,22 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
                     colweight: str="weight",html_code:bool = True):
     """
     Function to plot network https://pyviz.org/tools.html
-    Args:
+Docs::
+
         df (pd.DataFrame): dataframe with nodes and edges
-        cola (str, optional): column name of node1
-        colb (str, optional): column name of node2
-        coledge (str, optional): column name of edge
-        colweight (str, optional): column name of weight
-        html_code (bool, optional): if True, return html code
+        cola (str): column name of node1
+        colb (str): column name of node2
+        coledge (str): column name of edge
+        colweight (str): column name of weight
+        html_code (bool): if True, return html code
     """
 
     def convert_to_networkx(df:pd.DataFrame, cola: str="", colb: str="", colweight: str=None):
         """
            Convert a panadas dataframe into a networkx graph
            and return a networkx graph
-        Args:
+    Docs::
+
             df ([type]): [description]
         """
         import networkx as nx
@@ -1498,7 +1518,8 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
             "size", "value", "title", "x", "y", "label", "color".
             (For more info: https://pyvis.readthedocs.io/en/latest/documentation.html#pyvis.network.Network.add_node)
 
-        Args:
+    Docs::
+
             networkx_graph: The graph to convert and display
             notebook: Display in Jupyter?
             output_filename: Where to save the converted network
@@ -1639,7 +1660,8 @@ x.onclick = function() {
 def help_get_codesource(func):
     """ 
     Extract code source from func name
-    Args:
+Docs::
+
         func: function to extract code source from
     """
     import inspect
@@ -1654,7 +1676,8 @@ def help_get_codesource(func):
 def to_float(x):
     """
     Convert x to float if possible
-    Args:
+Docs::
+
         x: object to convert to float
     """
     try: return float(x)
@@ -1677,7 +1700,8 @@ if __name__ == "__main__":
 def zz_css_get_template(css_name:str= "A4_size"):
     """
     Get CSS code for template
-    Args:
+Docs::
+
         css_name: name of the CSS template
     """
     css_code = """
@@ -1731,7 +1755,8 @@ def zz_css_get_template(css_name:str= "A4_size"):
 def zz_test_get_random_data(n=100):
     """
     Get random data
-    Args:
+Docs::
+
         n: number of data points
     """
     ### return  random data
