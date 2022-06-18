@@ -214,8 +214,6 @@ def test2():
 
 
 
-
-
 def test_get_dataframe_fake(mode='city'):
     sparksession = spark_get_session_local()
 
