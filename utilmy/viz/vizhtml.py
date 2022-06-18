@@ -1,25 +1,47 @@
 # -*- coding: utf-8 -*-
-HELP= """ Converter python Graph ---> HTML page
-
-https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=Rrho08zYe6Gj
-https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
+""" Converter python Graph ---> HTML page
+Docs::
 
 
-!pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
-!pip install utilmy 
-!
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=Rrho08zYe6Gj
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
 
-https://try2explore.com/questions/10109123
-https://mpld3.github.io/examples/index.html
-issue: mpld3.fig_to_html throws AttributeError: module 'matplotlib.dates' has no attribute '_SwitchableDateConverter'
-solved by adding matplotlib==3.2.1 mpld3==0.5.5
-https://stackoverflow.com/questions/70132396/mpld3-fig-to-html-throws-attributeerror-module-matplotlib-dates-has-no-attrib
-github isuue link : https://github.com/mpld3/mpld3/issues/504#event-5681391653
 
-https://notebook.community/johnnycakes79/pyops/dashboard/pandas-highcharts-examples
-https://datatables.net/
+    !pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
+    !pip install utilmy
+    !
 
-https://www.highcharts.com/docs/getting-started/how-to-set-options
+    https://try2explore.com/questions/10109123
+    https://mpld3.github.io/examples/index.html
+    issue: mpld3.fig_to_html throws AttributeError: module 'matplotlib.dates' has no attribute '_SwitchableDateConverter'
+    solved by adding matplotlib==3.2.1 mpld3==0.5.5
+    https://stackoverflow.com/questions/70132396/mpld3-fig-to-html-throws-attributeerror-module-matplotlib-dates-has-no-attrib
+    github isuue link : https://github.com/mpld3/mpld3/issues/504#event-5681391653
+
+    https://notebook.community/johnnycakes79/pyops/dashboard/pandas-highcharts-examples
+    https://datatables.net/
+
+    https://www.highcharts.com/docs/getting-started/how-to-set-options
+
+
+    https://pyviz.org/tools.html
+            Name        Stars   Contributors    Downloads       License Docs    PyPI    Conda   Sponsors
+            networkx                                        -
+            graphviz                                        -
+            pydot                           -           -
+            pygraphviz                                      -
+            python-igraph                                       -
+            pyvis                                       -
+            pygsp                                       -
+            graph-tool              -       -       -       -
+            nxviz                                       -
+            Py3Plex                 -               -   -
+            py2cytoscape                                        -
+            ipydagred3                          -           -
+            ipycytoscape                            -           -
+            webweb                                      -
+            netwulf                 -               -   -
+            ipysigma                    -       -       -
 
 """
 import os, sys, random, numpy as np, pandas as pd, fire, time
@@ -65,9 +87,8 @@ def help():
     ss += help_get_codesource(test_table ) + suffix
     ss += help_get_codesource(test_colimage_table ) + suffix
     ss += help_get_codesource(test_page ) + suffix
-    ss +=  "Template CSS: \n\n " + str( CSS_TEMPLATE.keys()) + suffix
+    # ss +=  "Template CSS: \n\n " + str( CSS_TEMPLATE.keys()) + suffix
     ss +=  "colormap_list : \n\n " + str(colormap_get_names()) + suffix
-    ss +=  HELP
     print(ss)
 
 
@@ -847,7 +868,17 @@ def pd_plot_parallel_d3(df: pd.DataFrame,
                          figsize: tuple = (460, 460),
                          color: str = '#69b3a2',
                         cfg: dict = {}):
+    """
+    Docs::
 
+        df: pd.DataFrame,
+        col = [],
+         title: str = '',
+         figsize: tuple = (460, 460),
+         color: str = '#69b3a2',
+        cfg: dict = {}):
+
+    """
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     html_code = f'<div id="{container_id}"></div>'
 
@@ -958,16 +989,10 @@ def pd_plot_parallel_d3(df: pd.DataFrame,
 def pd_plot_histogram_matplot(df:pd.DataFrame, col: str='' ,colormap:str='RdYlBu', title: str='', nbin=20.0, q5=0.005, q95=0.995, nsample=-1,
                               save_img: str="",xlabel: str=None,ylabel: str=None, verbose=True, **kw):
     """
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.hist(df[config['x']].values,
-    bins=config['bins'], color='red', alpha=0.5)
-    ax.set_xlabel(config['x'])
-    ax.set_ylabel(config['y'])
-    ax.set_title(config['title'])
-    ax.set_xlim(config['xlim'])
-    ax.set_ylim(config['ylim'])
-    return fig
+    Docs::
+
+
+
     """
     cm = plt.cm.get_cmap(colormap)
     df.loc[:,col] = df[col].fillna(0)
@@ -1372,7 +1397,7 @@ def html_show_chart_highchart(html_code, verbose=True):
 
 
 
-def html_show(html_code, verbose):
+def html_show(html_code, verbose=1):
     # Function to display HTML
     """
     Function to display HTML
@@ -1687,106 +1712,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-def zz_css_get_template(css_name:str= "A4_size"):
-    """
-    Get CSS code for template
-Docs::
-
-        css_name: name of the CSS template
-    """
-    css_code = """
-              body{margin:25px;font-family: 'Open Sans', sans-serif;}
-              h1,h2,h3,h4,h5,h6{margin-bottom: 0.5rem;font-family: 'Arvo', serif;line-height: 1.5;color: #32325d;}
-              .dataTables_wrapper{overflow-x: auto;}
-              hr{border-top: dotted 4px rgba(26, 47, 51, 0.7);opacity:0.3 ;}
-              div{margin-top: 5px;margin-bottom: 5px;}
-              table {border-collapse: collapse;}
-              table th,table td {border: 1px solid lightgrey;}         
-    """
-    if css_name == "A4_size":
-          css_code = css_code + """
-            body {background: rgb(204,204,204); }
-            page {
-              background: white;display: block;padding:15px;margin: 0 auto;margin-bottom: 0.5cm;
-              box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
-            }
-            page[size="A4"] {width: 21cm; }
-            #mynetwork {float: none !important;}
-            #config{float: none !important;height: auto !important;}
-            @media print {body, page {margin: 0;box-shadow: 0;}}
-        """
-    if css_name == "border":
-          css_code = css_code + """
-            .highcharts-container {border: 3px dotted grey;}
-            .mpld3-figure {border: 3px dotted grey;}
-        """
-    if css_name == "3d":
-          css_code = css_code + """
-            div {
-            background: white;display: block;margin: 0 auto;
-            margin-bottom: 0.5cm;box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);}
-          h1,h2,h3,h4,h5,h6 {box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
-            padding: 5px;} 
-        """
-    if css_name == "css_8px":
-          css_code = css_code + """
-            body,table th,table td,text,
-            .highcharts-title,.highcharts-axis-title,
-            #mynetwork,#config{
-               font-size:8px !important;
-            } 
-        """
-    return css_code
-
-
-
-
-
-def zz_test_get_random_data(n=100):
-    """
-    Get random data
-    Docs::
-
-            n:        number of data points
-    """
-    ### return  random data
-    df = {'date' :pd.date_range("1/1/2018", "1/1/2020")[:n] }
-    df = pd.DataFrame(df)
-    df['col1'] = np.random.choice( a=[0, 1, 2],  size=len(df),    p=[0.5, 0.3, 0.2]   )
-    df['col2'] = np.random.choice( a=['a0', 'a1', 'a2'],  size=len(df),    p=[0.5, 0.3, 0.2]   )
-    for ci in ['col3', 'col4', 'col5'] :
-        df[ci] = np.random.random(len(df))
-    return df
-
-
-
-
-
-def zz_pd_plot_histogram_highcharts_old(df, col, figsize=None,
-                                 title=None,
-                                 cfg:dict={}, mode='d3', save_img=''):
-    from box import Box
-    cc = Box(cfg)
-    cc.title        = cc.get('title',    'Histogram' + col ) if title is None else title
-    cc.figsize      = cc.get('figsize', (25, 15) )    if figsize is None else figsize
-    cc.subtitle     = cc.get('subtitle', '')
-    xlabel         = col+'-bins'
-    ylabel         = col+'-frequency'
-
-    #### Get data, calculate histogram and bar centers
-    hist, bin_edges = np.histogram( df[col].values )
-    bin_centers     = [float(bin_edges[i+1] + bin_edges[i]) / 2 for i in range(len(hist))]
-    hist_val        = hist.tolist()
-
-    #### Plot
-    pd_plot_histogram_highcharts_base(bins    = bin_centers,
-                                      vals    = hist_val,
-                                      figsize = figsize,
-                                      title   = title,
-                                      xlabel = xlabel, ylabel=ylabel, cfg=cfg, mode=mode, save_img=save_img)
 
 
 """
