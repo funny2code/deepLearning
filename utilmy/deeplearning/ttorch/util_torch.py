@@ -250,7 +250,7 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
 
 
 def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
-                     dirout = ""):
+                     dirout = "./"):
     ####Downloading Dataset######
     import requests, zipfile
     from zipfile import ZipFile
@@ -272,29 +272,6 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
             raise Exception("Dataset is not downloaded")
     else:
         print("dataset is already presented")
-
-
-
-def zzz_dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
-    ###FASHION MNIST
-    train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-    df[col_img] = pd.DataFrame(train_files, columns=[col_img])
-    df = df.dropna(how='any',axis=0)
-
-    samples  = len(train_files)
-    df_train = df.iloc[0:int(samples* ratio),:]
-    df_val   = df.iloc[int(samples* ratio):,:]
-
-    test_files = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-    test_files_len  = len(df) if len(test_files) > len(df) else len(test_files)
-    test_files = test_files[0:test_files_len]
-    df_test   = df.iloc[0:test_files_len,:]
-
-    df_test[col_img] = pd.DataFrame(test_files, columns=[col_img])
-
-    df_test = df.dropna(how='any',axis=0)
-    return df_train, df_val, df_test
-
 
 
 

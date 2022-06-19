@@ -1110,27 +1110,27 @@ def test5():
 
         df[col_img] = img_list_ok
         df = df[ df[col_img] != '' ]
-
-
-
-
-
-        ratio =0.6
-        train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-        df[col_img] = pd.DataFrame(train_files, columns=[col_img])
         df = df.dropna(how='any',axis=0)
 
-        samples  = len(train_files)
-        df_train = df.iloc[0:int(samples* ratio),:]
-        df_val   = df.iloc[int(samples* ratio):,:]
 
+        samples = len(df)
+        itrain  = int(samples* 0.6)
+        ival    = int(samples* 0.8)
 
-        test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-        test_files_len = len(df) if len(test_files) > len(df) else len(test_files)
-        test_files     = test_files[0:test_files_len]
-        df_test        = df.iloc[0:test_files_len,:]
-        df_test[col_img]    = pd.DataFrame(test_files, columns=[col_img])
-        df_test = df.dropna(how='any',axis=0)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+
+        #train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
+        #df[col_img] = pd.DataFrame(train_files, columns=[col_img])
+
+        #samples  = len(train_files)
+
+        # test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
+        # test_files_len = len(df) if len(test_files) > len(df) else len(test_files)
+        # test_files     = test_files[0:test_files_len]
+        # df_test[col_img] = pd.DataFrame(test_files, columns=[col_img])
+        # df_test = df.dropna(how='any',axis=0)
 
         return df_train, df_val, df_test, label_dict, label_dict_count
 
