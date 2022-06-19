@@ -1134,7 +1134,7 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        global df_train, df_val, df_test, label_dict
+        #global df_train, df_val, df_test, label_dict
         col_img    = 'id'
         batch_size =  train_config.BATCH_SIZE
         from util_torch import ImageDataset
