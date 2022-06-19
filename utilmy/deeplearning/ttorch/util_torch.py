@@ -257,16 +257,17 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
     fname = url.split("/")[-1]
     dname = dirout +"/" +  "_".join( fname.split(".")[:-1])
+    log(fname, dname)
 
     isdir = os.path.isdir(dname)
     if isdir == 0:
         r = requests.get(url)
-        fname = "data_fashion_small.zip"
-        open(fname , 'wb').write(r.content)
-        flag = os.path.exists(fname)
+        #fname = "data_fashion_small.zip"
+        open(dname , 'wb').write(r.content)
+        flag = os.path.exists(dname)
         if(flag):
             print("Dataset is Downloaded")
-            zip_file = ZipFile('data_fashion_small.zip')
+            zip_file = ZipFile(fname)
             zip_file.extractall()
         else:
             raise Exception("Dataset is not downloaded")
