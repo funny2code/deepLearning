@@ -262,7 +262,6 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
     isdir = os.path.isdir(dname)
     if isdir == 0:
         r = requests.get(url)
-        fname = "data_fashion_small.zip"
         open(fname , 'wb').write(r.content)
         flag = os.path.exists(dname)
         if(flag):
