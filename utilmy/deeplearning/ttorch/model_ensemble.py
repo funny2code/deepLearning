@@ -1042,7 +1042,9 @@ def test4():
 
 
 def test5():
-    
+    from util_torch import ImageDataset, dataset_download
+    import glob
+    from util_torch import ImageDataloader
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -1066,10 +1068,10 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
-
-    def custom_label():
+    train_img_path  = 'data_fashion_small/train'
+    test_img_path  = 'data_fashion_small/test'
+    def custom_label(col_img = 'id'):
         from util_torch import dataset_download
-        import glob
 
         dirtmp = "./"
 
@@ -1092,7 +1094,6 @@ def test5():
 
         ###FASHION MNIST
         ratio =0.6
-        train_img_path  = 'data_fashion_small/train'
         train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
         df[col_img] = pd.DataFrame(train_files, columns=[col_img])
         df = df.dropna(how='any',axis=0)
@@ -1101,20 +1102,23 @@ def test5():
         df_train = df.iloc[0:int(samples* ratio),:]
         df_val   = df.iloc[int(samples* ratio):,:]
 
-        test_img_path  = 'data_fashion_small/test'
         test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-        df[col_img]    = pd.DataFrame(test_files, columns=[col_img])
+        test_files_len  = len(df) if len(test_files) > len(df) else len(test_files)
+        test_files = test_files[0:test_files_len]
+        df_test   = df.iloc[0:test_files_len,:]
+
+        df_test[col_img]    = pd.DataFrame(test_files, columns=[col_img])
         df_test = df.dropna(how='any',axis=0)
 
         return df_train, df_val, df_test, label_dict, class_dict
 
 
-    df_train, df_val, df_test, label_dict, class_dict = custom_label()
+    df_train, df_val, df_test, label_dict, class_dict = custom_label(col_img = 'id')
 
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        from util_torch import ImageDataset, ImageDataloader
+        from util_torch import ImageDataset
         FashionDataset = ImageDataset
         train_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
         transform_train       = transforms.Compose(train_list_transforms)
