@@ -313,6 +313,24 @@ def dataset_get_image_fullpath(df, col_img='id', train_img_path="", test_img_pat
     return df
 
 
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.8):
+    #### Split anything
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
+
 
 
 class ImageDataset(Dataset):
@@ -327,7 +345,7 @@ class ImageDataset(Dataset):
                 label_dict:dict =None,
 
                 transforms=None, transforms_image_size_default=64,
-                check_ifimage_exist=True
+                check_ifimage_exist=False
 
                  ):
         """
@@ -352,6 +370,7 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
 
         if check_ifimage_exist :
+           #### Bugggy  
            dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
