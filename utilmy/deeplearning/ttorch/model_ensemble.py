@@ -1069,6 +1069,7 @@ def test5():
 
     def custom_label():
         from util_torch import dataset_download
+        import glob
 
         dirtmp = "./"
 
