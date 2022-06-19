@@ -275,7 +275,7 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
-def zzz_ dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
+def zzz_dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
     ###FASHION MNIST
     train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
     df[col_img] = pd.DataFrame(train_files, columns=[col_img])
