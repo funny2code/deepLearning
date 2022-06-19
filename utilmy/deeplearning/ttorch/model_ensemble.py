@@ -1038,6 +1038,9 @@ def test4():
    outputs = model.predict(inputs)
    print(outputs)
 
+
+
+
 def test5():
     from util_torch import ImageDataset, dataset_download, dataset_fashionimage_prepro
     from util_torch import ImageDataloader
@@ -1064,49 +1067,74 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
-    ####Downloading Dataset######
-    url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-    dataset_download(url)
-    ###########MULTICLASSES TO FINETUNE####################
-    class_list = ['gender', 'masterCategory', 'subCategory' ]
 
-    ##############CSV_FILE_PATH################
-    csv_file_path = "data_fashion_small/csv/styles.csv"
-    df = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
-    df_dict = {ci: df[ci].unique() for ci in class_list}
+    def custom_label():
+        from util_torch import dataset_download
 
-    class_dict = {}
-    for key, val in df_dict.items():
-        class_dict[key] = len(val)
+        dirtmp = "./"
+
+        ####Downloading Dataset######
+        url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+        dataset_download(url, dirout=dirtmp)
+
+        ###########MULTICLASSES TO FINETUNE####################
+        class_list = ['gender', 'masterCategory', 'subCategory' ]
+
+        ##############CSV_FILE_PATH################
+        csv_file_path = "data_fashion_small/csv/styles.csv"
+        df         = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
+        label_dict = {ci: df[ci].unique() for ci in class_list}    ### 
+        class_dict = {ci: df[ci].nunique() for ci in class_list}   ### count
+
+        
+        #################TRAIN DATA##################
+        # df_train, df_val, df_test = dataset_fashionimage_prepro(df, train_img_path, test_img_path = test_img_path, col_img='id')
+
+        ###FASHION MNIST
+        ratio =0.6
+        train_img_path  = 'data_fashion_small/train'
+        train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
+        df[col_img] = pd.DataFrame(train_files, columns=[col_img])
+        df = df.dropna(how='any',axis=0)
+
+        samples  = len(train_files)
+        df_train = df.iloc[0:int(samples* ratio),:]
+        df_val   = df.iloc[int(samples* ratio):,:]
+
+        test_img_path  = 'data_fashion_small/test'
+        test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
+        df[col_img]    = pd.DataFrame(test_files, columns=[col_img])
+        df_test = df.dropna(how='any',axis=0)
+
+        return df_train, df_val, df_test, label_dict, class_dict
+
+
+     df_train, df_val, df_test, label_dict, class_dict = custom_label()
+
 
     def custom_dataloader():
-        ############TRAINING DICT OF MULTICLASSES#######
-        #########TRANSFROM###############
-        train_list_transforms = [transforms.ToTensor(),transforms.Resize((224,224))]
-        transform_train = transforms.Compose(train_list_transforms)
-
-        ###TRAIN_IMAGE DIMENSION######
-        test_list_transforms = [transforms.ToTensor(),transforms.Resize((224,224))]
-        transform_test = transforms.Compose(test_list_transforms)
-
-        #################TRAIN DATA##################
-        train_img_path  = 'data_fashion_small/train'
-        test_img_path  = 'data_fashion_small/test'
-
-        df_train, df_val, df_test = dataset_fashionimage_prepro(df, train_img_path, test_img_path = test_img_path, col_img='id')
+        ######CUSTOM DATASET#############################################
+        from util_torch import ImageDataset
         FashionDataset = ImageDataset
+        train_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_train       = transforms.Compose(train_list_transforms)
 
-        ######CUSTOM DATASET#########
-        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=df_dict, col_img='id', transforms=transform_train), 
+        test_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_test       = transforms.Compose(test_list_transforms)
+
+        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform_train), 
                         batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
 
-        val_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_val, label_dict=df_dict, col_img='id', transforms=transform_train), 
+        val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img='id', transforms=transform_train), 
                         batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
  
-        test_dataloader = DataLoader(FashionDataset(test_img_path, label_dir=df_test, label_dict=df_dict, col_img='id', transforms=transform_test), 
+        test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img='id', transforms=transform_test), 
                 batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
 
+
         return train_dataloader,val_dataloader,test_dataloader
+
+
 
     ### modelA  ########################################################
     from torchvision import  models
@@ -1153,8 +1181,8 @@ def test5():
 
     ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
     head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
-                                        class_label_dict= class_dict,
-                                        use_first_head_only= False)
+                                            class_label_dict= class_dict,
+                                           use_first_head_only= False)
     ARG.merge_model.architect.head_custom      = head_custom
     ARG.merge_model.architect.loss_custom = head_custom.get_loss
 

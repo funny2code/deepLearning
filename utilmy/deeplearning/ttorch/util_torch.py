@@ -249,13 +249,14 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
     return dflabels
 
 
-def dataset_download(url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"):
+def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+                     dirout = ""):
     ####Downloading Dataset######
     import requests, zipfile
     from zipfile import ZipFile
 
     fname = url.split("/")[-1]
-    dname = "_".join( fname.split(".")[:-1])
+    dname = dirout +"/" +  "_".join( fname.split(".")[:-1])
 
     isdir = os.path.isdir(dname)
     if isdir == 0:
@@ -274,7 +275,7 @@ def dataset_download(url = "https://github.com/arita37/data/raw/main/fashion_40k
 
 
 
-def dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
+def zzz_ dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
     ###FASHION MNIST
     train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
     df[col_img] = pd.DataFrame(train_files, columns=[col_img])
