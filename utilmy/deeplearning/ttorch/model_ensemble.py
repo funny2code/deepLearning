@@ -1087,7 +1087,7 @@ def test5():
         col_img    = 'id'
 
         ########## Downloading Dataset######
-        from util_torch import dataset_download
+        from utilmy.deeplearning.ttorch.util_torch import dataset_download
         dataset_download(dataset_url, dirout=dirtmp)
 
 
@@ -1098,6 +1098,8 @@ def test5():
 
         
         ########### Image files FASHION MNIST   #########################
+        from utilmy.deeplearning.ttorch.util_torch import  dataset_get_image_fullpath
+
         img_list = df[col_img].values
 
         img_list_ok = []
@@ -1119,6 +1121,8 @@ def test5():
 
 
         ############ Train Test Split ####################################
+        from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
+
         itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
 
         df_train = df.iloc[0:itrain,:]

@@ -280,13 +280,13 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
-def dataset_get_image_fullpath(df, col_img='id', train_img_path="", test_img_path=''):
+def dataset_get_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
     """ Get Correct image path from image id
 
     """
     img_list = df[col_img].values
 
-    if "/" in img_list[0].split("/") :
+    if "/" in img_list[0] :
         train_img_path = ''
         test_img_path  = ''
         log('id already contains the path')
@@ -370,7 +370,7 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
 
         if check_ifimage_exist :
-           #### Bugggy  
+           #### Bugggy
            dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
