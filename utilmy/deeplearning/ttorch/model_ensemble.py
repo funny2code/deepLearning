@@ -1076,25 +1076,26 @@ def test5():
     train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
     def custom_label(col_img = 'id'):
-        from util_torch import dataset_download
 
         dirtmp = "./"
+        url           = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+        csv_file_path = "data_fashion_small/csv/styles.csv"
+        class_list    = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
+
+
 
         ####Downloading Dataset######
-        url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+        from util_torch import dataset_download
         dataset_download(url, dirout=dirtmp)
 
-        ########### MULTICLASSES TO FINETUNE####################
-        class_list = ['gender', 'masterCategory', 'subCategory' ]
 
         ########### label file in CSV  ########################
-        csv_file_path = "data_fashion_small/csv/styles.csv"
         df         = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in class_list}   ### list of cat values
         label_dict_count = {ci: df[ci].nunique() for ci in class_list}   ### count unique
 
         
-        ########### Image files FASHION MNIST   ##############
+        ########### Image files FASHION MNIST   ################
         img_list = df[col_img].values
 
         img_list_ok = []
@@ -1115,6 +1116,7 @@ def test5():
         df = df.dropna(how='any',axis=0)
 
 
+        ############ Train Test Split ########################
         samples = len(df)
         itrain  = int(samples* 0.6)
         ival    = int(samples* 0.8)
@@ -1125,9 +1127,7 @@ def test5():
 
         #train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
         #df[col_img] = pd.DataFrame(train_files, columns=[col_img])
-
         #samples  = len(train_files)
-
         # test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
         # test_files_len = len(df) if len(test_files) > len(df) else len(test_files)
         # test_files     = test_files[0:test_files_len]
@@ -1142,22 +1142,25 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
+        batch_size =  train_config.BATCH_SIZE
         from util_torch import ImageDataset
         FashionDataset = ImageDataset
-        train_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
-        transform_train       = transforms.Compose(train_list_transforms)
 
-        test_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
-        transform_test       = transforms.Compose(test_list_transforms)
+
+        tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_train       = transforms.Compose(tlist)
+
+        tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_test       = transforms.Compose(tlist)
 
         train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform_train), 
-                        batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+                           batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
         val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img='id', transforms=transform_train), 
-                        batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+                           batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
  
         test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img='id', transforms=transform_test), 
-                batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+                           batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
 
         return train_dataloader,val_dataloader,test_dataloader
@@ -1206,11 +1209,12 @@ def test5():
 
     ### Custom head
     from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+
     head_custom = MultiClassMultiLabel_Head(layers_dim          = ARG.merge_model.architect.head_layers_dim,
                                             class_label_dict    = label_dict_count,
                                             use_first_head_only = False)
 
-    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
     ARG.merge_model.architect.head_custom = head_custom
     ARG.merge_model.architect.loss_custom = head_custom.get_loss
 
