@@ -1100,11 +1100,11 @@ def test5():
         img_list_ok = []
         for fi in img_list :
             fifull = ''
-            flist = glob.glob(train_img_path + "/" + fi + "*"  )
+            flist = glob.glob(train_img_path + "/" + str(fi) + "*"  )
             if len(flist) >0  :
                fifull = flist[0]
 
-            flist = glob.glob(test_img_path + "/" + fi + "*"  )
+            flist = glob.glob(test_img_path + "/" + str(fi) + "*"  )
             if len(flist) >0  :
                fifull = flist[0]
 
