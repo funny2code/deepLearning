@@ -1083,9 +1083,8 @@ def sql_generatedate():
         #### Create Calendar date series in SQL
         WITH
             tdates AS (
-                WITH t0 AS (
-                    SELECT 0 UNION SELECT 1 union select 2 union select 3 union select 4 union select 5 union select 6 union
-                    SELECT 7 UNION SELECT 8 union select 9 )
+                WITH t0(i) AS ( SELECT 0 UNION SELECT 1 union select 2 union select 3 union select 4 union select 5 union select 6 union
+                                SELECT 7 UNION SELECT 8 union select 9 )
 
             SELECT date_add('1970-01-01',t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) datei
             FROM t0, t0 AS t1, t0 AS t2, t0 AS t3, t0 AS t4
