@@ -1078,21 +1078,21 @@ def test5():
     def custom_label(col_img = 'id'):
 
         dirtmp = "./"
-        url           = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-        csv_file_path = "data_fashion_small/csv/styles.csv"
-        class_list    = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
+        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+        label_path  = "data_fashion_small/csv/styles.csv"
+        label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
 
         ####Downloading Dataset######
         from util_torch import dataset_download
-        dataset_download(url, dirout=dirtmp)
+        dataset_download(dataset_url, dirout=dirtmp)
 
 
         ########### label file in CSV  ########################
-        df         = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
-        label_dict       = {ci: df[ci].unique()  for ci in class_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in class_list}   ### count unique
+        df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
+        label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
 
         
         ########### Image files FASHION MNIST   ################
@@ -1148,10 +1148,10 @@ def test5():
 
 
         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
-        transform_train       = transforms.Compose(tlist)
+        transform_train  = transforms.Compose(tlist)
 
         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
-        transform_test       = transforms.Compose(tlist)
+        transform_test   = transforms.Compose(tlist)
 
         train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform_train), 
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
