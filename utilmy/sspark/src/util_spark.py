@@ -1084,8 +1084,10 @@ def sql_generatedate2():
 
         WITH 
           tdates as (
-            select  date_add('2020-01-01',pe.i) as datei
-            from tmp
+            WITH tmp AS (select 1 )
+
+            SELECT  date_add('2020-01-01',pe.i) as datei
+            FROM tmp
             lateral view  posexplode(split(space(datediff('2021-11-01','2020-01-01')),' ')) pe as i,x
           )
 
