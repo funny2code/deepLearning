@@ -1078,6 +1078,23 @@ def date_get_timekey(unix_ts):
 
 #########################################################################################
 ###### SQL useful #############################################################################
+def sql_generatedate2():
+    ss =""" 
+        #### Create Calendar date series in SQL
+
+        WITH 
+          tdates as (
+            select  date_add('2020-01-01',pe.i) as datei
+            from tmp
+            lateral view  posexplode(split(space(datediff('2021-11-01','2020-01-01')),' ')) pe as i,x
+          )
+
+        select * from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+    """
+    print(ss)
+
+
+
 def sql_generatedate():
     ss =""" 
         #### Create Calendar date series in SQL
