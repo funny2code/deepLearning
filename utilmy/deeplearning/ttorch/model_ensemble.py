@@ -1037,193 +1037,237 @@ def test4():
    print(outputs)
 
 def test5():    
-   from box import Box
-   from torch.utils.data import DataLoader, Dataset
+    from box import Box
+    from torch.utils.data import DataLoader, Dataset
+    from PIL import Image
+    import glob, requests
+    from utilmy.deeplearning.kkeras.util_dataloader_img import pd_to_onehot
+    from pandas.core.frame import DataFrame
+    from zipfile import ZipFile
+
+    ARG = Box({
+        'MODE'   : 'mode1',
+        'DATASET': {},
+        'MODEL_INFO' : {},
+    })
+    PARAMS = {}
+
+
+    ##################################################################
+    if ARG.MODE == 'mode1':
+        ARG.MODEL_INFO.TYPE = 'dataonly' 
+        train_config                           = Box({})
+        train_config.LR                        = 0.001
+        train_config.SEED                      = 42
+        train_config.DEVICE                    = 'cpu'
+        train_config.BATCH_SIZE                = 8
+        train_config.EPOCHS                    = 1
+        train_config.EARLY_STOPPING_THLD       = 10
+        train_config.VALID_FREQ                = 1
+        train_config.SAVE_FILENAME             = './model.pt'
+        train_config.TRAIN_RATIO               = 0.7
+        train_config.VAL_RATIO                 = 0.2
+        train_config.TEST_RATIO                = 0.1
+
+    ####Downloading Dataset######
+    isdir = os.path.isdir("data_fashion_small")
+    if isdir == 0:
+        url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+        r = requests.get(url)
+        fname = "data_fashion_small.zip"
+        open(fname , 'wb').write(r.content)
+        flag = os.path.exists(fname)
+        if(flag):
+            zip_file = ZipFile('data_fashion_small.zip')
+            zip_file.extractall()
+        else:
+            raise Exception("Dataset is not downloaded")
+
+    ###FASHION MNIST
+    def prepro_dataset( df, train_img_path, test_img_path=None): 
+        train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
+        df['id'] = pd.DataFrame(train_files, columns=['id'])
+        df = df.dropna(how='any',axis=0) 
+
+        samples  = len(train_files)
+        df_train = df.iloc[0:int(samples*train_config.TRAIN_RATIO),:]
+        df_val   = df.iloc[int(samples*train_config.TRAIN_RATIO):,:]
+
+        test_files = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
+        df['id'] = pd.DataFrame(test_files, columns=['id'])
+        df_test = df.dropna(how='any',axis=0)
+        return df_train, df_val, df_test
+
+    class FahionProduct(Dataset):
+        """Custom DataGenerator using Pytorch Sequence for images
+            df_label format :
+            id, gender, gender_onehot_onehot, ....
+        """
+        def __init__(self, img_dir:str="images/", label_dir:str=None, label_dict:dict=None,
+                    col_img: str='id',transforms=None):
+            """
+            Args:
+                img_dir (Path(str)): String path to images directory
+                label_dir (DataFrame): Dataset for Generator
+                label_cols (list): list of cols for the label (multi label)
+                label_dict (dict):    {label_name : list of values }
+                transforms (str, optional): type of transformations to perform on images. Defaults to None.
+            """
+            self.transforms = transforms
+            self.image_dir  = img_dir
+            self.col_img    = col_img
+
+            from utilmy import pd_read_file
+            dflabel     = pd_read_file(label_dir)
+            dflabel     = dflabel.dropna()
+
+            self.dflabel    = dflabel
+            self.label_cols = list(label_dict.keys())
+            self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+
+            self.data = []
+            ######data prep
+            for ii, x in self.label_df.iterrows():
+                img =  Image.open(x[self.col_img])
+                img = self.transforms(img)
+                self.data.append(img)
+            self.data = torch.stack(self.data)
+
+            ####lable Prep
+            self.label_dict = {}
+            for ci in self.label_cols:
+                v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+                v = np.array([[int(t) for t in vlist] for vlist in v])
+                self.label_dict[ci] = torch.tensor(v,dtype=torch.float)         
+            assert col_img in self.label_df.columns
+
+        def __len__(self) -> int:
+            return len(self.data)
+
+        def __getitem__(self, idx: int):
+            train_X = self.data[idx]
+            train_y = {}
+            assert(len(self.label_dict) != 0)
+            for classname, n_unique_label in self.label_dict.items():
+                train_y[classname] = self.label_dict[classname][idx]
+            return (train_X, train_y)
+
+    ###########MULTICLASSES TO FINETUNE####################
+    class_list = ['gender', 'masterCategory', 'subCategory' ]
+
+    ##############CSV_FILE_PATH################
+    csv_file_path = "data_fashion_small\\csv\\styles.csv"
+    df = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
+    df_dict = {ci: df[ci].unique() for ci in class_list}
+
+    class_dict = {}
+    for key, val in df_dict.items():
+        class_dict[key] = len(val)
+
+    def custom_dataloader():
+        ############TRAINING DICT OF MULTICLASSES#######
+        #########TRANSFROM###############
+        train_list_transforms = [transforms.ToTensor(),transforms.Resize((224,224))]
+        transform_train = transforms.Compose(train_list_transforms)
+
+        ###TRAIN_IMAGE DIMENSION######
+        test_list_transforms = [transforms.ToTensor(),transforms.Resize((224,224))]
+        transform_test = transforms.Compose(test_list_transforms)
+
+        #################TRAIN DATA##################
+        train_img_path  = 'data_fashion_small\\train'
+        test_img_path  = 'data_fashion_small\\test'
+
+        df_train, df_val, df_test = prepro_dataset(df, train_img_path, test_img_path = test_img_path)
    
-   ARG = Box({
-       'MODE'   : 'mode1',
-       'DATASET': {},
-       'MODEL_INFO' : {},
-   })
-   PARAMS = {}
+        ######CUSTOM DATASET#########
+        train_dataloader = DataLoader(FahionProduct(train_img_path, label_dir=df_train, label_dict=df_dict, col_img='id', transforms=transform_train), 
+                        batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+
+        val_dataloader = DataLoader(FahionProduct(train_img_path, label_dir=df_val, label_dict=df_dict, col_img='id', transforms=transform_train), 
+                        batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+ 
+        test_dataloader = DataLoader(FahionProduct(test_img_path, label_dir=df_test, label_dict=df_dict, col_img='id', transforms=transform_test), 
+                batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
+
+        return train_dataloader,val_dataloader,test_dataloader
+
+    ### modelA  ########################################################
+    from torchvision import  models
+    model_ft = models.resnet18(pretrained=True)
+    embA_dim = model_ft.fc.in_features  ###
+
+    ARG.modelA               = {}   
+    ARG.modelA.name          = 'resnet18'
+    ARG.modelA.nn_model      = model_ft
+    ARG.modelA.layer_emb_id  = 'fc'
+    ARG.modelA.architect     = [ embA_dim]  ### head s
+    ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
+    modelA = model_create(ARG.modelA)
+
+    ### modelB  ########################################################
+    from torchvision import  models
+    model_ft = models.resnet50(pretrained=True)
+    embB_dim = int(model_ft.fc.in_features)
+
+    ARG.modelB               = {}   
+    ARG.modelB.name          = 'resnet50'
+    ARG.modelB.nn_model      = model_ft
+    ARG.modelB.layer_emb_id  = 'fc'
+    ARG.modelB.architect     = [embB_dim ]   ### head size
+    ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
+    modelB = model_create(ARG.modelB )
 
 
-   ##################################################################
-   if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly' 
-       train_config                           = Box({})
-       train_config.LR                        = 0.001
-       train_config.SEED                      = 42
-       train_config.DEVICE                    = 'cpu'
-       train_config.BATCH_SIZE                = 64
-       train_config.EPOCHS                    = 1
-       train_config.EARLY_STOPPING_THLD       = 10
-       train_config.VALID_FREQ                = 1
-       train_config.SAVE_FILENAME             = './model.pt'
-       train_config.TRAIN_RATIO               = 0.7
-       train_config.VAL_RATIO                 = 0.2
-       train_config.TEST_RATIO                = 0.1
+    ### merge_model  ###################################################
+    ### EXPLICIT DEPENDENCY  
+    ARG.merge_model           = {}
+    ARG.merge_model.name      = 'modelmerge1'
 
-###FASHION MNIST
-   class_dict = {
-       "T-shirt/Top" : 5,"Trouser" : 2,"Pullover" : 3,"Dress" : 7,
-       "Coat" : 8, "Sandal" : 5, "Shirt" : 6,"Sneaker" : 5,"Bag" : 3,"Ankle Boot" : 7
-   }
+    ARG.merge_model.architect                  = {}
+    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
 
-   def test_dataset_f_mnist(samples=70000):
-       """function test_dataset_f_mnist
-       """
-       from sklearn.model_selection import train_test_split
-       from torchvision import transforms, datasets
-       # Generate the transformations
-       train_list_transforms = [transforms.ToTensor(),transforms.Lambda(lambda x: x.repeat(3, 1, 1))]   
-       tr_dataset = datasets.FashionMNIST(root="data",train=True,
-                                        transform=transforms.Compose(train_list_transforms),download=True,)   
-
-       test_dataset = datasets.FashionMNIST(root="data",train=True,
-                                        transform=transforms.Compose(train_list_transforms),download=True,)   
-
-       #sampling the requred no. of samples from dataset       
-       train_dataset = torch.utils.data.Subset(tr_dataset, list(range(0,int(samples*train_config.TRAIN_RATIO))))
-       valid_dataset = torch.utils.data.Subset(tr_dataset, list(range(int(samples*train_config.TRAIN_RATIO),samples)))
-       test_dataset  = torch.utils.data.Subset(test_dataset, np.arange(int(samples*train_config.TEST_RATIO)))
+    ARG.merge_model.architect.merge_type       = 'cat'
+    ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
+    ARG.merge_model.architect.merge_custom     = None
 
 
-       ###Custom Dataset  #####
-       class FashionDataset(Dataset):
-           def __init__(self,dataset =None, multi_lables = None):
-               
-               assert(multi_lables is not None)
+    ### Custom head
+    from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
 
-               self.data    = []
-               self.classes = list(multi_lables.keys()) 
-               self.lables = multi_lables
-               img_cnt = 0
-               ####Labeling with 1 at one of multilable
-               for data, target in dataset:
-                   self.data.append(data)
-                   self.lables[self.classes[target]][img_cnt][0] = 1
-                   img_cnt +=1
-
-           def __getitem__(self, idx):
-                data = self.data[idx]
-                lables = {}
-                assert(len(self.classes) != 0 )
-                for classname in self.classes:
-                    lables[classname] = self.lables[classname][idx]
-                return (data,lables)
-
-           def __len__(self):
-               return len(self.data)
-
-       assert(len(train_dataset) != 0)
-       assert(len(valid_dataset) != 0)
-       assert(len(test_dataset) != 0)
-       
-       valid_samples = samples - int(samples*train_config.TRAIN_RATIO)
-       #########initializing lables with zeros
-       multi_lables_train = {}
-       multi_lables_valid = {}
-       multi_lables_test  = {}
-       for key,val in class_dict.items():
-           multi_lables_train[key] = torch.zeros(int(samples*train_config.TRAIN_RATIO),val)
-           multi_lables_valid[key] = torch.zeros(valid_samples,val)
-           multi_lables_test[key]  = torch.zeros(int(samples*train_config.TEST_RATIO),val)
-
-       train_dataloader = DataLoader(FashionDataset(train_dataset, multi_lables = multi_lables_train), batch_size=train_config.BATCH_SIZE,
-                                            shuffle=True, num_workers=0,drop_last=True)
-
-       valid_dataloader = DataLoader(FashionDataset(valid_dataset, multi_lables = multi_lables_valid), batch_size=train_config.BATCH_SIZE,
-                                            shuffle=True, num_workers=0,drop_last=True)
-
-       test_dataloader = DataLoader(FashionDataset(test_dataset, multi_lables = multi_lables_test), batch_size=train_config.BATCH_SIZE,
-                                            shuffle=True, num_workers=0,drop_last=True)
-       return train_dataloader, valid_dataloader, test_dataloader
-
-###FASHION MNIST
-
-   def custom_dataloader():
-        train_dataloader,valid_dataloader,test_dataloader = test_dataset_f_mnist(samples=1000)
-        return train_dataloader,valid_dataloader,test_dataloader
-
-
-   ### modelA  ########################################################
-   from torchvision import  models
-   model_ft = models.resnet18(pretrained=True)
-   embA_dim = model_ft.fc.in_features  ###
-
-   ARG.modelA               = {}   
-   ARG.modelA.name          = 'resnet18'
-   ARG.modelA.nn_model      = model_ft
-   ARG.modelA.layer_emb_id  = 'fc'
-   ARG.modelA.architect     = [ embA_dim]  ### head s
-   ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
-   modelA = model_create(ARG.modelA)
-   
-   ### modelB  ########################################################
-   from torchvision import  models
-   model_ft = models.resnet50(pretrained=True)
-   embB_dim = int(model_ft.fc.in_features)
-
-   ARG.modelB               = {}   
-   ARG.modelB.name          = 'resnet50'
-   ARG.modelB.nn_model      = model_ft
-   ARG.modelB.layer_emb_id  = 'fc'
-   ARG.modelB.architect     = [embB_dim ]   ### head size
-   ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
-   modelB = model_create(ARG.modelB )
-
-
-   ### merge_model  ###################################################
-   ### EXPLICIT DEPENDENCY  
-   ARG.merge_model           = {}
-   ARG.merge_model.name      = 'modelmerge1'
-
-   ARG.merge_model.architect                  = {}
-   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
-
-   ARG.merge_model.architect.merge_type       = 'cat'
-   ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
-   ARG.merge_model.architect.merge_custom     = None
-
-
-   ### Custom head
-   from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
-
-   ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
-   head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
+    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+    head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
                                         class_label_dict= class_dict,
                                         use_first_head_only= False)
-   ARG.merge_model.architect.head_custom      = head_custom
-   ARG.merge_model.architect.loss_custom = head_custom.get_loss
- 
- 
-   ARG.merge_model.dataset       = {}
-   ARG.merge_model.dataset.dirin = "/"
-   ARG.merge_model.dataset.coly = 'ytarget'
-   ARG.merge_model.train_config  = train_config
+    ARG.merge_model.architect.head_custom      = head_custom
+    ARG.merge_model.architect.loss_custom = head_custom.get_loss
 
 
-   model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
-   model.build()
+    ARG.merge_model.dataset       = {}
+    ARG.merge_model.dataset.dirin = "/"
+    ARG.merge_model.dataset.coly = 'ytarget'
+    ARG.merge_model.train_config  = train_config
 
 
-   #### Run Model   ###################################################
-   model.training(dataloader_custom = custom_dataloader ) 
-   model.save_weight('ztmp/model_x5.pt')
-   model.load_weights('ztmp/model_x5.pt')
-   inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
-   outputs = model.predict(inputs)
-   
-   ######To predict class
-   for i in range(train_config.BATCH_SIZE):
+    model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+    model.build()
+
+
+    #### Run Model   ###################################################
+    model.training(dataloader_custom = custom_dataloader ) 
+    model.save_weight('ztmp/model_x5.pt')
+    model.load_weights('ztmp/model_x5.pt')
+    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+    outputs = model.predict(inputs)
+    ######To predict lables
+    for i in range(train_config.BATCH_SIZE):
         sum = {}
         for key, val in outputs.items():
             sum[key] = outputs[key].sum()
         Keymax = max(zip(sum.values(), sum.keys()))[1]
         print(Keymax)
 
-   print(outputs)
+    print(outputs)
 
 ##### LSTM #################################################################################
 def test2_lstm():
