@@ -1041,7 +1041,7 @@ def test5():
     from torch.utils.data import DataLoader, Dataset
     from PIL import Image
     import glob, requests
-    from utilmy.deeplearning.kkeras.util_dataloader_img import pd_to_onehot
+    #from utilmy.deeplearning.kkeras.util_dataloader_img import pd_to_onehot
     from pandas.core.frame import DataFrame
     from zipfile import ZipFile
 
@@ -1082,6 +1082,21 @@ def test5():
             zip_file.extractall()
         else:
             raise Exception("Dataset is not downloaded")
+    else:
+        print("dataset is already presented")
+
+    def pd_to_onehot(dflabels: DataFrame, labels_dict: dict = None) -> DataFrame: 
+        if labels_dict is not None:
+            for ci, catval in labels_dict.items():
+                dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+        labels_col = labels_dict.keys()
+
+        for ci in labels_col:
+            dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
+            dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
+            dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
+            #####  0,0,1,0 format   log(dfi_1hot)
+        return dflabels  
 
     ###FASHION MNIST
     def prepro_dataset( df, train_img_path, test_img_path=None): 
