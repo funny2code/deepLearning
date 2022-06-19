@@ -289,7 +289,7 @@ def dataset_get_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     """
     img_list = df[col_img].values
 
-    if "/" in img_list[0] :
+    if "/" in str(img_list[0]) :
         train_img_path = ''
         test_img_path  = ''
         log('id already contains the path')
@@ -371,6 +371,8 @@ class ImageDataset(Dataset):
         from utilmy import pd_read_file
         dflabel     = pd_read_file(label_dir)
         dflabel     = dflabel.dropna()
+        assert col_img in dflabel.columns
+
 
         if check_ifimage_exist :
            #### Bugggy, not working
@@ -400,7 +402,7 @@ class ImageDataset(Dataset):
             v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
             v = np.array([[int(t) for t in vlist] for vlist in v])
             self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
-        assert col_img in self.label_df.columns
+
 
 
     def __len__(self) -> int:
