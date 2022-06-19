@@ -99,9 +99,11 @@ from sklearn.utils import shuffle
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, Dataset
 import torchvision
 from torchvision import transforms, datasets, models
+from pandas.core.frame import DataFrame
+
 #############################################################################################
 from utilmy import log
 
@@ -1036,13 +1038,11 @@ def test4():
    outputs = model.predict(inputs)
    print(outputs)
 
-def test5():    
-    from box import Box
+def test5():
     from torch.utils.data import DataLoader, Dataset
     from PIL import Image
     import glob, requests
     #from utilmy.deeplearning.kkeras.util_dataloader_img import pd_to_onehot
-    from pandas.core.frame import DataFrame
     from zipfile import ZipFile
 
     ARG = Box({
@@ -1086,6 +1086,7 @@ def test5():
     else:
         print("dataset is already presented")
 
+
     def pd_to_onehot(dflabels: DataFrame, labels_dict: dict = None) -> DataFrame: 
         if labels_dict is not None:
             for ci, catval in labels_dict.items():
@@ -1098,6 +1099,7 @@ def test5():
             dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
             #####  0,0,1,0 format   log(dfi_1hot)
         return dflabels  
+
 
     ###FASHION MNIST
     def prepro_dataset( df, train_img_path, test_img_path=None): 
@@ -1167,6 +1169,7 @@ def test5():
             for classname, n_unique_label in self.label_dict.items():
                 train_y[classname] = self.label_dict[classname][idx]
             return (train_X, train_y)
+
 
     ###########MULTICLASSES TO FINETUNE####################
     class_list = ['gender', 'masterCategory', 'subCategory' ]
