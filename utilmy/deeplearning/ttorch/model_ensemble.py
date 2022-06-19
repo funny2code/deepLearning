@@ -1039,19 +1039,14 @@ def test4():
    print(outputs)
 
 def test5():
-    from torch.utils.data import DataLoader, Dataset
-    from PIL import Image
-    import glob, requests
-    #from utilmy.deeplearning.kkeras.util_dataloader_img import pd_to_onehot
-    from zipfile import ZipFile
-
+    from util_torch import ImageDataset, dataset_download, dataset_fashionimage_prepro
+    from util_torch import ImageDataloader
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
         'MODEL_INFO' : {},
     })
     PARAMS = {}
-
 
     ##################################################################
     if ARG.MODE == 'mode1':
@@ -1070,107 +1065,8 @@ def test5():
         train_config.TEST_RATIO                = 0.1
 
     ####Downloading Dataset######
-    isdir = os.path.isdir("data_fashion_small")
-    if isdir == 0:
-        url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-        r = requests.get(url)
-        fname = "data_fashion_small.zip"
-        open(fname , 'wb').write(r.content)
-        flag = os.path.exists(fname)
-        if(flag):
-            print("Dataset is Downloaded")
-            zip_file = ZipFile('data_fashion_small.zip')
-            zip_file.extractall()
-        else:
-            raise Exception("Dataset is not downloaded")
-    else:
-        print("dataset is already presented")
-
-
-    def pd_to_onehot(dflabels: DataFrame, labels_dict: dict = None) -> DataFrame: 
-        if labels_dict is not None:
-            for ci, catval in labels_dict.items():
-                dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
-        labels_col = labels_dict.keys()
-
-        for ci in labels_col:
-            dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
-            dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
-            dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
-            #####  0,0,1,0 format   log(dfi_1hot)
-        return dflabels  
-
-
-    ###FASHION MNIST
-    def prepro_dataset( df, train_img_path, test_img_path=None): 
-        train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-        df['id'] = pd.DataFrame(train_files, columns=['id'])
-        df = df.dropna(how='any',axis=0) 
-
-        samples  = len(train_files)
-        df_train = df.iloc[0:int(samples*train_config.TRAIN_RATIO),:]
-        df_val   = df.iloc[int(samples*train_config.TRAIN_RATIO):,:]
-
-        test_files = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-        df['id'] = pd.DataFrame(test_files, columns=['id'])
-        df_test = df.dropna(how='any',axis=0)
-        return df_train, df_val, df_test
-
-    class FahionProduct(Dataset):
-        """Custom DataGenerator using Pytorch Sequence for images
-            df_label format :
-            id, gender, gender_onehot_onehot, ....
-        """
-        def __init__(self, img_dir:str="images/", label_dir:str=None, label_dict:dict=None,
-                    col_img: str='id',transforms=None):
-            """
-            Args:
-                img_dir (Path(str)): String path to images directory
-                label_dir (DataFrame): Dataset for Generator
-                label_cols (list): list of cols for the label (multi label)
-                label_dict (dict):    {label_name : list of values }
-                transforms (str, optional): type of transformations to perform on images. Defaults to None.
-            """
-            self.transforms = transforms
-            self.image_dir  = img_dir
-            self.col_img    = col_img
-
-            from utilmy import pd_read_file
-            dflabel     = pd_read_file(label_dir)
-            dflabel     = dflabel.dropna()
-
-            self.dflabel    = dflabel
-            self.label_cols = list(label_dict.keys())
-            self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-
-            self.data = []
-            ######data prep
-            for ii, x in self.label_df.iterrows():
-                img =  Image.open(x[self.col_img])
-                img = self.transforms(img)
-                self.data.append(img)
-            self.data = torch.stack(self.data)
-
-            ####lable Prep
-            self.label_dict = {}
-            for ci in self.label_cols:
-                v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
-                v = np.array([[int(t) for t in vlist] for vlist in v])
-                self.label_dict[ci] = torch.tensor(v,dtype=torch.float)         
-            assert col_img in self.label_df.columns
-
-        def __len__(self) -> int:
-            return len(self.data)
-
-        def __getitem__(self, idx: int):
-            train_X = self.data[idx]
-            train_y = {}
-            assert(len(self.label_dict) != 0)
-            for classname, n_unique_label in self.label_dict.items():
-                train_y[classname] = self.label_dict[classname][idx]
-            return (train_X, train_y)
-
-
+    url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+    dataset_download(url)
     ###########MULTICLASSES TO FINETUNE####################
     class_list = ['gender', 'masterCategory', 'subCategory' ]
 
@@ -1197,16 +1093,17 @@ def test5():
         train_img_path  = 'data_fashion_small/train'
         test_img_path  = 'data_fashion_small/test'
 
-        df_train, df_val, df_test = prepro_dataset(df, train_img_path, test_img_path = test_img_path)
-   
+        df_train, df_val, df_test = dataset_fashionimage_prepro(df, train_img_path, test_img_path = test_img_path, col_img='id')
+        FashionDataset = ImageDataset
+
         ######CUSTOM DATASET#########
-        train_dataloader = DataLoader(FahionProduct(train_img_path, label_dir=df_train, label_dict=df_dict, col_img='id', transforms=transform_train), 
+        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=df_dict, col_img='id', transforms=transform_train), 
                         batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
 
-        val_dataloader = DataLoader(FahionProduct(train_img_path, label_dir=df_val, label_dict=df_dict, col_img='id', transforms=transform_train), 
+        val_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_val, label_dict=df_dict, col_img='id', transforms=transform_train), 
                         batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
  
-        test_dataloader = DataLoader(FahionProduct(test_img_path, label_dir=df_test, label_dict=df_dict, col_img='id', transforms=transform_test), 
+        test_dataloader = DataLoader(FashionDataset(test_img_path, label_dir=df_test, label_dict=df_dict, col_img='id', transforms=transform_test), 
                 batch_size=train_config.BATCH_SIZE, shuffle= True ,num_workers=0, drop_last=True)
 
         return train_dataloader,val_dataloader,test_dataloader

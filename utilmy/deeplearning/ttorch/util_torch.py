@@ -274,10 +274,10 @@ def dataset_download(url = "https://github.com/arita37/data/raw/main/fashion_40k
 
 
 
-def dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, ratio=0.5):
+def dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, col_img='id', ratio=0.5):
     ###FASHION MNIST
     train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-    df['id'] = pd.DataFrame(train_files, columns=['id'])
+    df[col_img] = pd.DataFrame(train_files, columns=[col_img])
     df = df.dropna(how='any',axis=0)
 
     samples  = len(train_files)
@@ -285,7 +285,7 @@ def dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, ratio=0
     df_val   = df.iloc[int(samples* ratio):,:]
 
     test_files = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-    df['id'] = pd.DataFrame(test_files, columns=['id'])
+    df[col_img] = pd.DataFrame(test_files, columns=[col_img])
     df_test = df.dropna(how='any',axis=0)
     return df_train, df_val, df_test
 
