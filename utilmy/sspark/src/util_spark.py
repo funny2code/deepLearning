@@ -1094,6 +1094,24 @@ def sql_generatedate():
     print(ss)
 
 
+def sql_generateint():
+    ss =""" 
+        #### Create Calendar date series in SQL
+        WITH
+            tint AS (
+                  select 1 as start_id, 29 as end_id)          
+                  lateral view posexplode(split(space(start_r - end_r),' ')) pe as i,s
+        )
+        select i_int from tint 
+
+    """
+    print(ss)
+
+
+
+
+
+
 
 #########################################################################################
 def config_load(config_path:str):
