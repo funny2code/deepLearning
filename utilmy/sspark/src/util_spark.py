@@ -1106,7 +1106,7 @@ def sql_generatedate():
             SELECT date_add('1970-01-01',t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) datei
             FROM t0, t0 AS t1, t0 AS t2, t0 AS t3, t0 AS t4
         )
-        select * from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+        select datei from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
     """
     print(ss)
 
