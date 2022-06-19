@@ -1078,6 +1078,7 @@ def test5():
         open(fname , 'wb').write(r.content)
         flag = os.path.exists(fname)
         if(flag):
+            print("Dataset is Downloaded")
             zip_file = ZipFile('data_fashion_small.zip')
             zip_file.extractall()
         else:
@@ -1171,7 +1172,7 @@ def test5():
     class_list = ['gender', 'masterCategory', 'subCategory' ]
 
     ##############CSV_FILE_PATH################
-    csv_file_path = "data_fashion_small\\csv\\styles.csv"
+    csv_file_path = "data_fashion_small/csv/styles.csv"
     df = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
     df_dict = {ci: df[ci].unique() for ci in class_list}
 
@@ -1190,8 +1191,8 @@ def test5():
         transform_test = transforms.Compose(test_list_transforms)
 
         #################TRAIN DATA##################
-        train_img_path  = 'data_fashion_small\\train'
-        test_img_path  = 'data_fashion_small\\test'
+        train_img_path  = 'data_fashion_small/train'
+        test_img_path  = 'data_fashion_small/test'
 
         df_train, df_val, df_test = prepro_dataset(df, train_img_path, test_img_path = test_img_path)
    
