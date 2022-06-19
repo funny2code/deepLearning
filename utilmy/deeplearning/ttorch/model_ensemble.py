@@ -1075,16 +1075,17 @@ def test5():
 
     train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
+
+
     def custom_label(col_img = 'id'):
 
         dirtmp = "./"
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-        label_path  = "data_fashion_small/csv/styles.csv"
+        label_path  = dirtmp + "data_fashion_small/csv/styles.csv"
         label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
+        col_img    = 'id'
 
-
-
-        ####Downloading Dataset######
+        ########## Downloading Dataset######
         from util_torch import dataset_download
         dataset_download(dataset_url, dirout=dirtmp)
 
@@ -1125,15 +1126,6 @@ def test5():
         df_val   = df.iloc[itrain:ival,:]
         df_test  = df.iloc[ival:,:]
 
-        #train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-        #df[col_img] = pd.DataFrame(train_files, columns=[col_img])
-        #samples  = len(train_files)
-        # test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-        # test_files_len = len(df) if len(test_files) > len(df) else len(test_files)
-        # test_files     = test_files[0:test_files_len]
-        # df_test[col_img] = pd.DataFrame(test_files, columns=[col_img])
-        # df_test = df.dropna(how='any',axis=0)
-
         return df_train, df_val, df_test, label_dict, label_dict_count
 
 
@@ -1142,6 +1134,8 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
+        global df_train, df_val, df_test, label_dict
+        col_img    = 'id'
         batch_size =  train_config.BATCH_SIZE
         from util_torch import ImageDataset
         FashionDataset = ImageDataset
@@ -1153,15 +1147,14 @@ def test5():
         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
         transform_test   = transforms.Compose(tlist)
 
-        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform_train), 
+        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
-        val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img='id', transforms=transform_train), 
+        val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
  
-        test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img='id', transforms=transform_test), 
+        test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                            batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
-
 
         return train_dataloader,val_dataloader,test_dataloader
 
