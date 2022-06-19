@@ -373,7 +373,7 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
 
         if check_ifimage_exist :
-           #### Bugggy
+           #### Bugggy, not working
            dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
@@ -385,13 +385,13 @@ class ImageDataset(Dataset):
 
 
         ###### Image data prep  ################################################################
-        self.data = []
-        from PIL import Image
-        for ii, x in self.label_df.iterrows():
-            img =  Image.open(x[self.col_img])
-            img = self.transforms(img)
-            self.data.append(img)
-        self.data = torch.stack(self.data)
+        # self.data = []
+        # from PIL import Image
+        # for ii, x in self.label_df.iterrows():
+        #     img =  Image.open(x[self.col_img])
+        #     img = self.transforms(img)
+        #     self.data.append(img)
+        # self.data = torch.stack(self.data)
 
 
         ####lable Prep
@@ -404,7 +404,7 @@ class ImageDataset(Dataset):
 
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.label_img_dir)
 
 
     def __getitem__(self, idx: int):
@@ -414,7 +414,7 @@ class ImageDataset(Dataset):
 
         from PIL import Image
         img_dir = self.label_img_dir[idx]
-        img     =  Image.open(img_dir)
+        img     = Image.open(img_dir)
         train_X = self.transforms(img)
 
 

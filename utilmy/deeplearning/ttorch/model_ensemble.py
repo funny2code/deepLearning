@@ -1100,34 +1100,36 @@ def test5():
         ########### Image files FASHION MNIST   #########################
         from utilmy.deeplearning.ttorch.util_torch import  dataset_get_image_fullpath
 
-        img_list = df[col_img].values
+        df = dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
-        img_list_ok = []
-        for fi in img_list :
-            fifull = ''
-            flist = glob.glob(train_img_path + "/" + str(fi) + "*"  )
-            if len(flist) >0  :
-               fifull = flist[0]
-
-            flist = glob.glob(test_img_path + "/" + str(fi) + "*"  )
-            if len(flist) >0  :
-               fifull = flist[0]
-
-            img_list_ok.append(fifull)
-
-        df[col_img] = img_list_ok
-        df = df[ df[col_img] != '' ]
-        df = df.dropna(how='any',axis=0)
+        # img_list = df[col_img].values
+        #
+        # img_list_ok = []
+        # for fi in img_list :
+        #     fifull = ''
+        #     flist = glob.glob(train_img_path + "/" + str(fi) + "*"  )
+        #     if len(flist) >0  :
+        #        fifull = flist[0]
+        #
+        #     flist = glob.glob(test_img_path + "/" + str(fi) + "*"  )
+        #     if len(flist) >0  :
+        #        fifull = flist[0]
+        #
+        #     img_list_ok.append(fifull)
+        #
+        # df[col_img] = img_list_ok
+        # df = df[ df[col_img] != '' ]
+        # df = df.dropna(how='any',axis=0)
 
 
         ############ Train Test Split ####################################
         from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
+        df_train, df_val, df_test = dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
 
-        itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
-
-        df_train = df.iloc[0:itrain,:]
-        df_val   = df.iloc[itrain:ival,:]
-        df_test  = df.iloc[ival:,:]
+        # itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
+        # df_train = df.iloc[0:itrain,:]
+        # df_val   = df.iloc[itrain:ival,:]
+        # df_test  = df.iloc[ival:,:]
 
         return df_train, df_val, df_test, label_dict, label_dict_count
 
