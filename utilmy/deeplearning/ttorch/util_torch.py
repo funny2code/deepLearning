@@ -277,6 +277,9 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
             raise Exception("Dataset is not downloaded")
     else:
         print("dataset is already presented")
+    return dname
+
+
 
 
 
@@ -377,6 +380,8 @@ class ImageDataset(Dataset):
         self.label_cols = list(label_dict.keys())
         self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
 
+        self.label_img_dir = self.label_df[self.col_img].values
+
 
 
         ###### Image data prep  ################################################################
@@ -405,12 +410,12 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx: int):
 
         ##### Load Image
-        train_X = self.data[idx]
+        # train_X = self.data[idx]
 
-        # from PIL import Image
-        # img_dir = self.label_df[self.col_img].iloc[idx]
-        # img     =  Image.open(img_dir)
-        # train_X = self.transforms(img)
+        from PIL import Image
+        img_dir = self.label_img_dir[idx]
+        img     =  Image.open(img_dir)
+        train_X = self.transforms(img)
 
 
         train_y = {}

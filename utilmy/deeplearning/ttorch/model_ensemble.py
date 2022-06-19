@@ -1088,7 +1088,7 @@ def test5():
 
         ########## Downloading Dataset######
         from utilmy.deeplearning.ttorch.util_torch import dataset_download
-        dataset_download(dataset_url, dirout=dirtmp)
+        dataset_path = dataset_download(dataset_url, dirout=dirtmp)
 
 
         ########### label file in CSV  ########################
