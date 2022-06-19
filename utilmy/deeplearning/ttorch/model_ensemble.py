@@ -873,6 +873,7 @@ def test3():
    outputs = model.predict(inputs)
    print(outputs)
 
+
 def test4():    
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset, Dataset
@@ -1042,6 +1043,10 @@ def test4():
 
 
 def test5():
+    """ Multihead class fine tuning with Fashion Dataset
+
+
+    """
     from util_torch import ImageDataset, dataset_download
     import glob
     from util_torch import ImageDataloader
@@ -1079,20 +1084,37 @@ def test5():
         url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
         dataset_download(url, dirout=dirtmp)
 
-        ###########MULTICLASSES TO FINETUNE####################
+        ########### MULTICLASSES TO FINETUNE####################
         class_list = ['gender', 'masterCategory', 'subCategory' ]
 
-        ##############CSV_FILE_PATH################
+        ########### label file in CSV  ########################
         csv_file_path = "data_fashion_small/csv/styles.csv"
         df         = pd.read_csv(csv_file_path,error_bad_lines=False, warn_bad_lines=False)
-        label_dict = {ci: df[ci].unique() for ci in class_list}    ### 
-        class_dict = {ci: df[ci].nunique() for ci in class_list}   ### count
+        label_dict       = {ci: df[ci].unique()  for ci in class_list}   ### list of cat values
+        label_dict_count = {ci: df[ci].nunique() for ci in class_list}   ### count unique
 
         
-        #################TRAIN DATA##################
-        # df_train, df_val, df_test = dataset_fashionimage_prepro(df, train_img_path, test_img_path = test_img_path, col_img='id')
+        ########### Image files FASHION MNIST   ##############
+        img_list = df[col_img].values
 
-        ###FASHION MNIST
+        img_list_ok = []
+        for fi in img_list :
+            fifull = ''
+            if os.path.isfile(train_img_path + fi ):
+               fifull = train_img_path + fi
+
+            if os.path.isfile(test_img_path + fi ):
+               fifull = test_img_path + fi
+
+            img_list_ok.append(fifull)
+
+        df[col_img] = img_list_ok
+        df = df[ df[col_img] != '' ]
+
+
+
+
+
         ratio =0.6
         train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
         df[col_img] = pd.DataFrame(train_files, columns=[col_img])
@@ -1102,18 +1124,18 @@ def test5():
         df_train = df.iloc[0:int(samples* ratio),:]
         df_val   = df.iloc[int(samples* ratio):,:]
 
-        test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-        test_files_len  = len(df) if len(test_files) > len(df) else len(test_files)
-        test_files = test_files[0:test_files_len]
-        df_test   = df.iloc[0:test_files_len,:]
 
+        test_files     = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
+        test_files_len = len(df) if len(test_files) > len(df) else len(test_files)
+        test_files     = test_files[0:test_files_len]
+        df_test        = df.iloc[0:test_files_len,:]
         df_test[col_img]    = pd.DataFrame(test_files, columns=[col_img])
         df_test = df.dropna(how='any',axis=0)
 
-        return df_train, df_val, df_test, label_dict, class_dict
+        return df_train, df_val, df_test, label_dict, label_dict_count
 
 
-    df_train, df_val, df_test, label_dict, class_dict = custom_label(col_img = 'id')
+    df_train, df_val, df_test, label_dict, label_dict_count = custom_label(col_img = 'id')
 
 
     def custom_dataloader():
@@ -1182,12 +1204,12 @@ def test5():
 
     ### Custom head
     from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+    head_custom = MultiClassMultiLabel_Head(layers_dim          = ARG.merge_model.architect.head_layers_dim,
+                                            class_label_dict    = label_dict_count,
+                                            use_first_head_only = False)
 
     ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
-    head_custom = MultiClassMultiLabel_Head(layers_dim=    ARG.merge_model.architect.head_layers_dim,
-                                            class_label_dict= class_dict,
-                                           use_first_head_only= False)
-    ARG.merge_model.architect.head_custom      = head_custom
+    ARG.merge_model.architect.head_custom = head_custom
     ARG.merge_model.architect.loss_custom = head_custom.get_loss
 
 
@@ -1216,6 +1238,8 @@ def test5():
         print(Keymax)
 
     print(outputs)
+
+
 
 ##### LSTM #################################################################################
 def test2_lstm():
