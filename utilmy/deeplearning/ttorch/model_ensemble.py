@@ -1073,7 +1073,7 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
-    train_img_path  = 'data_fashion_small/train'
+    train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
     def custom_label(col_img = 'id'):
         from util_torch import dataset_download
@@ -1100,11 +1100,13 @@ def test5():
         img_list_ok = []
         for fi in img_list :
             fifull = ''
-            if os.path.isfile(train_img_path + fi ):
-               fifull = train_img_path + fi
+            flist = glob.glob(train_img_path + "/" + fi + "*"  )
+            if len(flist) >0  :
+               fifull = flist[0]
 
-            if os.path.isfile(test_img_path + fi ):
-               fifull = test_img_path + fi
+            flist = glob.glob(test_img_path + "/" + fi + "*"  )
+            if len(flist) >0  :
+               fifull = flist[0]
 
             img_list_ok.append(fifull)
 
