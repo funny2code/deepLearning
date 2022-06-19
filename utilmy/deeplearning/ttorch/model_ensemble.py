@@ -1129,7 +1129,7 @@ def test5():
         return df_train, df_val, df_test, label_dict, label_dict_count
 
 
-    df_train, df_val, df_test, label_dict, label_dict_count = custom_label(col_img = 'id')
+    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
 
 
     def custom_dataloader():

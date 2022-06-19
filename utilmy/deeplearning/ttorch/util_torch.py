@@ -252,7 +252,7 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
 def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
                      dirout = "./"):
     ####Downloading Dataset######
-    import requests, zipfile
+    import requests
     from zipfile import ZipFile
 
     fname = url.split("/")[-1]
@@ -262,8 +262,8 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
     isdir = os.path.isdir(dname)
     if isdir == 0:
         r = requests.get(url)
-        #fname = "data_fashion_small.zip"
-        open(dname , 'wb').write(r.content)
+        fname = "data_fashion_small.zip"
+        open(fname , 'wb').write(r.content)
         flag = os.path.exists(dname)
         if(flag):
             print("Dataset is Downloaded")
