@@ -255,15 +255,14 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
     import requests
     from zipfile import ZipFile
 
-    fname = url.split("/")[-1]
-    dname = dirout +"/" +  "_".join( fname.split(".")[:-1])
-    log(fname, dname)
+    fname = dirout + url.split("/")[-1]
+    dname = dirout + "/".join( fname.split(".")[:-1])
 
     isdir = os.path.isdir(dname)
     if isdir == 0:
         r = requests.get(url)
         open(fname , 'wb').write(r.content)
-        flag = os.path.exists(dname)
+        flag = os.path.exists(fname)
         if(flag):
             print("Dataset is Downloaded")
             zip_file = ZipFile(fname)
