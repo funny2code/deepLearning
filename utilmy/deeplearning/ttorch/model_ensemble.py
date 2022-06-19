@@ -1042,8 +1042,7 @@ def test4():
 
 
 def test5():
-    from util_torch import ImageDataset, dataset_download, dataset_fashionimage_prepro
-    from util_torch import ImageDataloader
+    
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -1114,7 +1113,7 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        from util_torch import ImageDataset
+        from util_torch import ImageDataset, ImageDataloader
         FashionDataset = ImageDataset
         train_list_transforms = [transforms.ToTensor(),transforms.Resize((64,64))]
         transform_train       = transforms.Compose(train_list_transforms)
