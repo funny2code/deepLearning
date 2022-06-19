@@ -1073,13 +1073,14 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
+    dirtmp = "./"
     train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
 
 
     def custom_label(col_img = 'id'):
 
-        dirtmp = "./"
+
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
         label_path  = dirtmp + "data_fashion_small/csv/styles.csv"
         label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
@@ -1096,7 +1097,7 @@ def test5():
         label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
 
         
-        ########### Image files FASHION MNIST   ################
+        ########### Image files FASHION MNIST   #########################
         img_list = df[col_img].values
 
         img_list_ok = []
@@ -1117,10 +1118,8 @@ def test5():
         df = df.dropna(how='any',axis=0)
 
 
-        ############ Train Test Split ########################
-        samples = len(df)
-        itrain  = int(samples* 0.6)
-        ival    = int(samples* 0.8)
+        ############ Train Test Split ####################################
+        itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
 
         df_train = df.iloc[0:itrain,:]
         df_val   = df.iloc[itrain:ival,:]
@@ -1134,10 +1133,9 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        #global df_train, df_val, df_test, label_dict
-        col_img    = 'id'
-        batch_size =  train_config.BATCH_SIZE
         from util_torch import ImageDataset
+        col_img        = 'id'
+        batch_size     =  train_config.BATCH_SIZE
         FashionDataset = ImageDataset
 
 

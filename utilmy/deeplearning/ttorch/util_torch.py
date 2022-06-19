@@ -235,7 +235,10 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
 ###############################################################################################
 ####### Image #################################################################################
 def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
-    ### Label INTO 1-hot encoding
+    """ Label INTO 1-hot encoding
+
+
+    """
     if labels_dict is not None:
         for ci, catval in labels_dict.items():
             dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
@@ -251,7 +254,10 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
 
 def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
                      dirout = "./"):
-    ####Downloading Dataset######
+    """ Downloading Dataset from github  and unzip it
+
+
+    """
     import requests
     from zipfile import ZipFile
 
@@ -274,6 +280,41 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
+def dataset_get_image_fullpath(df, col_img='id', train_img_path="", test_img_path=''):
+    """ Get Correct image path from image id
+
+    """
+    img_list = df[col_img].values
+
+    if "/" in img_list[0].split("/") :
+        train_img_path = ''
+        test_img_path  = ''
+        log('id already contains the path')
+    else :
+        train_img_path = train_img_path + "/"
+        test_img_path  = test_img_path  + "/"
+
+    img_list_ok = []
+    for fi in img_list :
+        fifull = ''
+        flist = glob.glob(train_img_path + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        flist = glob.glob(test_img_path  + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        img_list_ok.append(fifull)
+
+    df[col_img] = img_list_ok
+    df = df[ df[col_img] != '' ]
+    # df = df.dropna(how='any',axis=0)
+    return df
+
+
+
+
 class ImageDataset(Dataset):
     """Custom DataGenerator using Pytorch Sequence for images
         df_label format :
@@ -282,10 +323,13 @@ class ImageDataset(Dataset):
     def __init__(self, img_dir:str="images/",
                 col_img: str='id',
 
-                label_dir:str="labels/mylabel.csv",
-                label_dict:dict=None,
+                label_dir:str   ="labels/mylabel.csv",
+                label_dict:dict =None,
 
-                transforms=None, transforms_image_size_default=64):
+                transforms=None, transforms_image_size_default=64,
+                check_ifimage_exist=True
+
+                 ):
         """
         Args:
             img_dir (Path(str)): String path to images directory
@@ -306,6 +350,9 @@ class ImageDataset(Dataset):
         from utilmy import pd_read_file
         dflabel     = pd_read_file(label_dir)
         dflabel     = dflabel.dropna()
+
+        if check_ifimage_exist :
+           dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
@@ -337,7 +384,16 @@ class ImageDataset(Dataset):
 
 
     def __getitem__(self, idx: int):
+
+        ##### Load Image
         train_X = self.data[idx]
+
+        # from PIL import Image
+        # img_dir = self.label_df[self.col_img].iloc[idx]
+        # img     =  Image.open(img_dir)
+        # train_X = self.transforms(img)
+
+
         train_y = {}
         assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
