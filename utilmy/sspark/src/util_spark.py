@@ -201,6 +201,9 @@ def test2():
     df2 = spark_df_sampleover(df=df, coltarget="city", major_label="LA", minor_label='LI', target_ratio=0.1 )
     log(df2.show())
 
+    df2 = spark_df_split_timeseries(df_m=df.select('residency_date','ord'), splitRatio=0.7, sparksession=sparksession)
+    log(df2)
+
 
 
 
@@ -218,8 +221,8 @@ def test_get_dataframe_fake(mode='city'):
     sparksession = spark_get_session_local()
 
     if mode == 'city':
-        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01"},{"id": 'B', "city": "LA","residency_date":"2018-01-01"},
-            {"id": 'C', "city": "LA","residency_date":"2019-01-01"},{"id": 'A', "city": "LI","residency_date":"2022-01-01"},{"id":'E',"city":None,"residency_date":"2017-01-01"},{"id":'C',"city":"NY","residency_date":"2017-01-01"}]
+        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01","ord":"0"},{"id": 'B', "city": "LA","residency_date":"2018-01-01",,"ord":"1"},
+            {"id": 'C', "city": "LA","residency_date":"2019-01-01","ord":"2"},{"id": 'A', "city": "LI","residency_date":"2022-01-01","ord":"3"},{"id":'E',"city":None,"residency_date":"2017-01-01","ord":"4"},{"id":'C',"city":"NY","residency_date":"2017-01-01","ord":"5"}]
         df = sparksession.createDataFrame(data)
 
 
