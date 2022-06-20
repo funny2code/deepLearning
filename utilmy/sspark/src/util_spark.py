@@ -1090,11 +1090,14 @@ def sql_generatedate():
     ss =""" #### Create Calendar date series in hive SQL
         WITH 
            ztmp AS (select 1 )
-          ,tdates as ( SELECT  date_add('2001-01-01',pe.i) as datei   FROM ztmp
+          ,tdates as ( SELECT  date_add('2001-01-01',pe.i) as datei FROM ztmp
                        lateral view  posexplode(split(space(datediff('2030-01-01','2001-01-01')),' ')) pe as i,x
           )
 
-        SELECT  * from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+        select  DISTINCT date_format(datei, "Y-MM-01" )  AS dtmonth,
+                         date_format(datei, "Y-MM-DD" )  AS dtday  
+
+        FROM tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'        
                 
     """
     print(ss)
