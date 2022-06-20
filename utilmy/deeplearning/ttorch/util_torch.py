@@ -467,13 +467,13 @@ def ImageDataloader(df=None, batch_size=64,
     # tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
     # transform_test   = transforms.Compose(tlist)
 
-    train_dataloader = DataLoader(ImageDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
+    train_dataloader = DataLoader(ImageDataset( label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
                        batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
-    val_dataloader   = DataLoader(ImageDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
+    val_dataloader   = DataLoader(ImageDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                        batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
-    test_dataloader  = DataLoader(ImageDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
+    test_dataloader  = DataLoader(ImageDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                        batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
     return train_dataloader,val_dataloader,test_dataloader

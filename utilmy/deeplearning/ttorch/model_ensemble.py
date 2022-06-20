@@ -1077,6 +1077,7 @@ def test5():
     label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
+
     def custom_label(arg:dict=None):
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
@@ -1097,9 +1098,9 @@ def test5():
         ########### Image files FASHION MNIST
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
+
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
-
 
         return df_train, df_val, df_test, label_dict, label_dict_count
 
@@ -1110,7 +1111,7 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        # assert df_train and df_test and df_val and label_dict and col_img
+        # isexist(df_train, df_test, df_val, label_dict, col_img)
 
         from util_torch import ImageDataset
         # col_img        = 'id'
