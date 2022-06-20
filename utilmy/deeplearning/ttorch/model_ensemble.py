@@ -1087,8 +1087,8 @@ def test5():
         col_img    = 'id'
 
         ########## Downloading Dataset######
-        from utilmy.deeplearning.ttorch.util_torch import dataset_download
-        dataset_path = dataset_download(dataset_url, dirout=dirtmp)
+        from utilmy.deeplearning.ttorch import  util_torch as ut
+        dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
 
 
         ########### label file in CSV  ########################
@@ -1098,9 +1098,7 @@ def test5():
 
         
         ########### Image files FASHION MNIST   #########################
-        from utilmy.deeplearning.ttorch.util_torch import  dataset_get_image_fullpath
-
-        df = dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
         # img_list = df[col_img].values
         #
@@ -1123,8 +1121,8 @@ def test5():
 
 
         ############ Train Test Split ####################################
-        from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
-        df_train, df_val, df_test = dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
+        #from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
 
         # itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
         # df_train = df.iloc[0:itrain,:]
