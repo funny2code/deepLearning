@@ -90,7 +90,7 @@ from pyspark.sql.window import Window
 
 sp_dataframe= pyspark.sql.DataFrame
 ##################################################################################
-from utilmy import log, log2, os_module_name
+from utilmy.utilmy import log, log2, os_module_name
 MNAME = os_module_name(__file__)
 
 def help():
@@ -201,7 +201,8 @@ def test2():
     df2 = spark_df_sampleover(df=df, coltarget="city", major_label="LA", minor_label='LI', target_ratio=0.1 )
     log(df2.show())
 
-
+    df2 = spark_df_split_timeseries(df_m=df.select('residency_date','ord'), splitRatio=0.7, sparksession=sparksession)
+    log(df2)
 
 
 
@@ -220,8 +221,8 @@ def test_get_dataframe_fake(mode='city'):
     sparksession = spark_get_session_local()
 
     if mode == 'city':
-        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01"},{"id": 'B', "city": "LA","residency_date":"2018-01-01"},
-            {"id": 'C', "city": "LA","residency_date":"2019-01-01"},{"id": 'A', "city": "LI","residency_date":"2022-01-01"},{"id":'E',"city":None,"residency_date":"2017-01-01"},{"id":'C',"city":"NY","residency_date":"2017-01-01"}]
+        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01","ord":"0"},{"id": 'B', "city": "LA","residency_date":"2018-01-01",,"ord":"1"},
+            {"id": 'C', "city": "LA","residency_date":"2019-01-01","ord":"2"},{"id": 'A', "city": "LI","residency_date":"2022-01-01","ord":"3"},{"id":'E',"city":None,"residency_date":"2017-01-01","ord":"4"},{"id":'C',"city":"NY","residency_date":"2017-01-01","ord":"5"}]
         df = sparksession.createDataFrame(data)
 
 
@@ -1014,6 +1015,8 @@ def spark_metrics_roc_summary(labels_and_predictions_df):
 
 
 
+
+
 ##########################################################################################
 ###### Dates  ############################################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d", add_days=0, add_hours=0,
@@ -1073,6 +1076,57 @@ def date_get_month_days(dt):
 
 def date_get_timekey(unix_ts):
     return int(unix_ts+9*3600)/86400
+
+
+
+#########################################################################################
+###### SQL useful #############################################################################
+def sql_generatedate2():
+    ss =""" 
+        #### Create Calendar date series in SQL
+        WITH 
+          tdates as (
+            WITH tmp AS (select 1 )
+
+            SELECT  date_add('2020-01-01',pe.i) as datei
+            FROM tmp
+            lateral view  posexplode(split(space(datediff('2024-11-01','2020-01-01')),' ')) pe as i,x
+          )
+
+        select * from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+    """
+    print(ss)
+
+
+
+def sql_generatedate():
+    ss =""" 
+        #### Create Calendar date series in SQL
+        WITH
+            tdates AS (
+                WITH t0(i) AS ( SELECT 0 UNION SELECT 1 union select 2 union select 3 union select 4 union select 5 union select 6 union
+                                SELECT 7 UNION SELECT 8 union select 9 )
+
+            SELECT date_add('1970-01-01',t4.i*10000 + t3.i*1000 + t2.i*100 + t1.i*10 + t0.i) datei
+            FROM t0, t0 AS t1, t0 AS t2, t0 AS t3, t0 AS t4
+        )
+        select datei from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+    """
+    print(ss)
+
+
+def sql_generateint():
+    ss =""" 
+        #### Create Calendar date series in SQL
+        WITH
+            tint AS (
+                  select 1 as start_id, 29 as end_id)          
+                  lateral view posexplode(split(space(start_r - end_r),' ')) pe as i,s
+        )
+        select i_int from tint 
+
+    """
+    print(ss)
 
 
 
