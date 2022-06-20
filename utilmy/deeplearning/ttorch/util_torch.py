@@ -235,7 +235,10 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
 ###############################################################################################
 ####### Image #################################################################################
 def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
-    ### Label INTO 1-hot encoding
+    """ Label INTO 1-hot encoding
+
+
+    """
     if labels_dict is not None:
         for ci, catval in labels_dict.items():
             dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
@@ -249,45 +252,87 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
     return dflabels
 
 
-def dataset_download(url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"):
-    ####Downloading Dataset######
-    import requests, zipfile
+def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+                     dirout = "./"):
+    """ Downloading Dataset from github  and unzip it
+
+
+    """
+    import requests
     from zipfile import ZipFile
 
-    fname = url.split("/")[-1]
-    dname = "_".join( fname.split(".")[:-1])
+    fname = dirout + url.split("/")[-1]
+    dname = dirout + "/".join( fname.split(".")[:-1])
 
     isdir = os.path.isdir(dname)
     if isdir == 0:
         r = requests.get(url)
-        fname = "data_fashion_small.zip"
         open(fname , 'wb').write(r.content)
         flag = os.path.exists(fname)
         if(flag):
             print("Dataset is Downloaded")
-            zip_file = ZipFile('data_fashion_small.zip')
+            zip_file = ZipFile(fname)
             zip_file.extractall()
         else:
             raise Exception("Dataset is not downloaded")
     else:
         print("dataset is already presented")
+    return dname
 
 
 
-def dataset_fashionimage_prepro( df, train_img_path, test_img_path=None, ratio=0.5):
-    ###FASHION MNIST
-    train_files = [fi.replace("\\", "/") for fi in glob.glob(train_img_path + '/*.jpg')]
-    df['id'] = pd.DataFrame(train_files, columns=['id'])
-    df = df.dropna(how='any',axis=0)
 
-    samples  = len(train_files)
-    df_train = df.iloc[0:int(samples* ratio),:]
-    df_val   = df.iloc[int(samples* ratio):,:]
 
-    test_files = [fi.replace("\\", "/") for fi in glob.glob(test_img_path + '/*.jpg')]
-    df['id'] = pd.DataFrame(test_files, columns=['id'])
-    df_test = df.dropna(how='any',axis=0)
-    return df_train, df_val, df_test
+def dataset_get_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
+    """ Get Correct image path from image id
+
+    """
+    img_list = df[col_img].values
+
+    if "/" in str(img_list[0]) :
+        train_img_path = ''
+        test_img_path  = ''
+        log('id already contains the path')
+    else :
+        train_img_path = train_img_path + "/"
+        test_img_path  = test_img_path  + "/"
+
+    img_list_ok = []
+    for fi in img_list :
+        fifull = ''
+        flist = glob.glob(train_img_path + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        flist = glob.glob(test_img_path  + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        img_list_ok.append(fifull)
+
+    df[col_img] = img_list_ok
+    df = df[ df[col_img] != '' ]
+    # df = df.dropna(how='any',axis=0)
+    return df
+
+
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.8):
+    #### Split anything
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
 
 
 
@@ -299,10 +344,13 @@ class ImageDataset(Dataset):
     def __init__(self, img_dir:str="images/",
                 col_img: str='id',
 
-                label_dir:str="labels/mylabel.csv",
-                label_dict:dict=None,
+                label_dir:str   ="labels/mylabel.csv",
+                label_dict:dict =None,
 
-                transforms=None, transforms_image_size_default=64):
+                transforms=None, transforms_image_size_default=64,
+                check_ifimage_exist=False
+
+                 ):
         """
         Args:
             img_dir (Path(str)): String path to images directory
@@ -323,21 +371,29 @@ class ImageDataset(Dataset):
         from utilmy import pd_read_file
         dflabel     = pd_read_file(label_dir)
         dflabel     = dflabel.dropna()
+        assert col_img in dflabel.columns
+
+
+        if check_ifimage_exist :
+           #### Bugggy, not working
+           dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
         self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
 
+        self.label_img_dir = self.label_df[self.col_img].values
+
 
 
         ###### Image data prep  ################################################################
-        self.data = []
-        from PIL import Image
-        for ii, x in self.label_df.iterrows():
-            img =  Image.open(x[self.col_img])
-            img = self.transforms(img)
-            self.data.append(img)
-        self.data = torch.stack(self.data)
+        # self.data = []
+        # from PIL import Image
+        # for ii, x in self.label_df.iterrows():
+        #     img =  Image.open(x[self.col_img])
+        #     img = self.transforms(img)
+        #     self.data.append(img)
+        # self.data = torch.stack(self.data)
 
 
         ####lable Prep
@@ -346,15 +402,24 @@ class ImageDataset(Dataset):
             v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
             v = np.array([[int(t) for t in vlist] for vlist in v])
             self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
-        assert col_img in self.label_df.columns
+
 
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.label_img_dir)
 
 
     def __getitem__(self, idx: int):
-        train_X = self.data[idx]
+
+        ##### Load Image
+        # train_X = self.data[idx]
+
+        from PIL import Image
+        img_dir = self.label_img_dir[idx]
+        img     = Image.open(img_dir)
+        train_X = self.transforms(img)
+
+
         train_y = {}
         assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
