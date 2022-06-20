@@ -1110,7 +1110,7 @@ def test5():
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
-        assert df_train and df_test and df_val and label_dict and col_img
+        # assert df_train and df_test and df_val and label_dict and col_img
 
         from util_torch import ImageDataset
         # col_img        = 'id'
