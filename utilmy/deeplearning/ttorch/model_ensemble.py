@@ -1076,6 +1076,7 @@ def test5():
     dirtmp = "./"
     train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
+    label_dict_count = {}
 
 
     def custom_label(col_img = 'id'):
@@ -1094,7 +1095,10 @@ def test5():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
+
+
+
         ########### Image files FASHION MNIST   #########################
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
