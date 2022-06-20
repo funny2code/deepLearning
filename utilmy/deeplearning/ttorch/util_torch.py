@@ -392,15 +392,6 @@ class ImageDataset(Dataset):
         self.label_img_dir = self.label_df[self.col_img].values
 
 
-        ###### Image data prep  ################################################################
-        # self.data = []
-        # from PIL import Image
-        # for ii, x in self.label_df.iterrows():
-        #     img =  Image.open(x[self.col_img])
-        #     img = self.transforms(img)
-        #     self.data.append(img)
-        # self.data = torch.stack(self.data)
-
 
         ####lable Prep  #######################################################################
         self.label_dict = {}

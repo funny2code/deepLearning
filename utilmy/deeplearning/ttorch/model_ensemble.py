@@ -1084,7 +1084,7 @@ def test5():
     label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
-    def custom_label(col_img = 'id'):
+    def custom_label(arg:dict=None):
         ########## Downloading Dataset######
         from utilmy.deeplearning.ttorch import  util_torch as ut
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
@@ -1098,9 +1098,10 @@ def test5():
         ########### Image files FASHION MNIST   #########################
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
+
         ############ Train Test Split ####################################
-        #from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
+
 
         return df_train, df_val, df_test, label_dict, label_dict_count
 
@@ -1122,13 +1123,13 @@ def test5():
         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
         transform_test   = transforms.Compose(tlist)
 
-        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
+        train_dataloader = DataLoader(FashionDataset( label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
-        val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
+        val_dataloader   = DataLoader(FashionDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
  
-        test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
+        test_dataloader  = DataLoader(FashionDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                            batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
         return train_dataloader,val_dataloader,test_dataloader
