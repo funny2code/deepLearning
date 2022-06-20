@@ -1047,9 +1047,8 @@ def test5():
 
 
     """
-    from util_torch import ImageDataset, dataset_download
+    from util_torch import dataset_download
     import glob
-    from util_torch import ImageDataloader
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -1078,7 +1077,6 @@ def test5():
     test_img_path  = 'data_fashion_small/test'
 
 
-
     def custom_label(col_img = 'id'):
 
 
@@ -1095,46 +1093,18 @@ def test5():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
-
-
-
+        
         ########### Image files FASHION MNIST   #########################
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
-        # img_list = df[col_img].values
-        #
-        # img_list_ok = []
-        # for fi in img_list :
-        #     fifull = ''
-        #     flist = glob.glob(train_img_path + "/" + str(fi) + "*"  )
-        #     if len(flist) >0  :
-        #        fifull = flist[0]
-        #
-        #     flist = glob.glob(test_img_path + "/" + str(fi) + "*"  )
-        #     if len(flist) >0  :
-        #        fifull = flist[0]
-        #
-        #     img_list_ok.append(fifull)
-        #
-        # df[col_img] = img_list_ok
-        # df = df[ df[col_img] != '' ]
-        # df = df.dropna(how='any',axis=0)
-
-
         ############ Train Test Split ####################################
         #from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
-        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
-        # itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
-        # df_train = df.iloc[0:itrain,:]
-        # df_val   = df.iloc[itrain:ival,:]
-        # df_test  = df.iloc[ival:,:]
-
-        return df_train, df_val, df_test, label_dict, label_dict_count
+        return df_train, df_val, df_test, label_dict
 
 
-    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
+    df_train, df_val, df_test, label_dict = custom_label()
 
 
     def custom_dataloader():
@@ -1209,7 +1179,7 @@ def test5():
     ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
 
     head_custom = MultiClassMultiLabel_Head(layers_dim          = ARG.merge_model.architect.head_layers_dim,
-                                            class_label_dict    = label_dict_count,
+                                            class_label_dict    = label_dict,
                                             use_first_head_only = False)
 
     ARG.merge_model.architect.head_custom = head_custom
@@ -2307,14 +2277,6 @@ class modelD_create(BaseModel):
     def create_loss(self) -> torch.nn.Module:
         super(modelD_create,self).create_loss()
         return torch.nn.BCELoss()
-
-
-
-
-
-
-
-
 
 ###############################################################################################################
 if __name__ == "__main__":

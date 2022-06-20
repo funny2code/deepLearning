@@ -317,8 +317,9 @@ def dataset_get_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
 
 
 
-def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.8):
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
     #### Split anything
+    val_ratio = val_ratio + train_ratio
     if isinstance(anyobject, pd.DataFrame):
         df = anyobject
         itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
