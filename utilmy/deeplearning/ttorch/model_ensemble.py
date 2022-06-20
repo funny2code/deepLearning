@@ -1093,18 +1093,19 @@ def test5():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique()  for ci in label_list}   ### list of UNIQUE count
-
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
+   
         ########### Image files FASHION MNIST   #########################
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
         ############ Train Test Split ####################################
-        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
+        #from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
 
-        return df_train, df_val, df_test, label_dict
+        return df_train, df_val, df_test, label_dict, label_dict_count
 
 
-    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
+    df_train, df_val, df_test, label_dict,label_dict_count = custom_label()
 
 
     def custom_dataloader():
@@ -1179,7 +1180,7 @@ def test5():
     ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
 
     head_custom = MultiClassMultiLabel_Head(layers_dim          = ARG.merge_model.architect.head_layers_dim,
-                                            class_label_dict    = label_dict,
+                                            class_label_dict    = label_dict_count,
                                             use_first_head_only = False)
 
     ARG.merge_model.architect.head_custom = head_custom
