@@ -1073,18 +1073,18 @@ def test5():
         train_config.TEST_RATIO                = 0.1
 
     dirtmp = "./"
-    train_img_path = 'data_fashion_small/train'
-    test_img_path  = 'data_fashion_small/test'
+
+    dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+
+    train_img_path = dirtmp + 'data_fashion_small/train'
+    test_img_path  = dirtmp + 'data_fashion_small/test'
+    label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
+    col_img        = 'id'
+
+    label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
     def custom_label(col_img = 'id'):
-
-
-        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-        label_path  = dirtmp + "data_fashion_small/csv/styles.csv"
-        label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
-        col_img    = 'id'
-
         ########## Downloading Dataset######
         from utilmy.deeplearning.ttorch import  util_torch as ut
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
