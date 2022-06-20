@@ -112,7 +112,6 @@ def test1():
     })
 
 
-###################################################################################################
 def test2():
     """
     """
@@ -282,7 +281,7 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
-def dataset_get_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
+def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
     """ Get Correct image path from image id
 
     """
@@ -384,7 +383,7 @@ class ImageDataset(Dataset):
 
         if check_ifimage_exist :
            #### Bugggy, not working
-           dflabel = dataset_get_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
+           dflabel = dataset_add_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
@@ -453,7 +452,7 @@ def ImageDataloader(df=None, batch_size=64,
 
 
     ########### Check Image path   ###################################
-    df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+    df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
 
     ############ Train Test Split ####################################
@@ -594,9 +593,17 @@ def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str
         setattr(submodule, param_name, new_val)
 
 
+def model_load_partially_compatible(model, dir_weights='', device='cpu'):
+    current_model=model.state_dict()
+    keys_vin=torch.load(dir_weights,map_location=device)
+
+    new_state_dict={k:v if v.size()==current_model[k].size()  else  current_model[k] for k,v in zip(current_model.keys(), keys_vin['model_state_dict'].values())
+                    }
+    current_model.load_state_dict(new_state_dict)
+    return current_model
 
 
-###############################################################################################
+
 def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loader=None, arg:dict=None ):
     """One liner for training a pytorch model.
     Doc::
@@ -855,6 +862,36 @@ if 'metrics':
         l = loss(output, labels[:64])
 
 
+
+    def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
+        """Compare 2 list of vectors return cosine similarity score
+
+        Docs
+            cola (str): list of embedding
+            colb (str): list of embedding
+            model (model instance): Pretrained sentence transformer model
+
+        Returns:
+            pd DataFrame: 'cosine_similarity' column and return df
+        """
+        from sklearn.metrics.pairwise import cosine_similarity
+
+        results = list()
+        for emb1,emb2 in zip(emb_list1, emb_list2):
+
+            #if isinstance(emb1, torch.Tensor) :
+            #    emb1 = emb1
+
+            result = cosine_similarity([emb1],[emb2])
+            results.append(result[0])
+
+        df = pd.DataFrame(results, columns=['cos_sim'])
+
+        if name_list is not None :
+          df['name'] = name_list
+        return df
+
+
     def torch_pearson_coeff(x1, x2):
         '''Computes pearson correlation coefficient between two 1D tensors
         with torch
@@ -986,31 +1023,6 @@ if 'metrics':
 
 #############################################################################################
 #############################################################################################
-class test_model_dummy(nn.Module):
-  def __init__(self, input_dim, output_dim, hidden_dim=4):
-    super(DataEncoder, self).__init__()
-    self.input_dim = input_dim
-    self.output_dim = output_dim
-    self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
-                             nn.ReLU(),
-                             nn.Linear(hidden_dim, output_dim))
-
-  def forward(self, x):
-    return self.net(x)
-
-
-class test_model_dummy2(nn.Sequential):
-    def __init__(self):
-        super().__init__()
-        self.in_proj = nn.Linear(2, 10)
-        self.stages = nn.Sequential(
-             nn.Linear(10, 10),
-             nn.Linear(10, 10)
-        )
-        self.out_proj = nn.Linear(10, 2)
-
-
-
 if 'utils':
     def to_numpy(tensor):
         return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
@@ -1070,139 +1082,156 @@ if 'utils':
 
 
 
-def test_dataset_classification_fake(nrows=500):
-    """function test_dataset_classification_fake
-    Args:
-        nrows:   
-    Returns:
-        
-    """
-    from sklearn import datasets as sklearn_datasets
-    ndim    =11
-    coly    = 'y'
-    colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
-    colcat  = ['colcat_1']
-    X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
-                                                   n_informative=ndim-2)
-    df         = pd.DataFrame(X,  columns= colnum)
-    df[coly]   = y.reshape(-1, 1)
+if 'test_utils':
+    class test_model_dummy(nn.Module):
+      def __init__(self, input_dim, output_dim, hidden_dim=4):
+        super(DataEncoder, self).__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
+                                 nn.ReLU(),
+                                 nn.Linear(hidden_dim, output_dim))
 
-    for ci in colcat :
-      df[ci] = np.random.randint(0,1, len(df))
-
-    pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
-    return df, pars
+      def forward(self, x):
+        return self.net(x)
 
 
-def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False, 
-                            convert_to_RGB=False,val_set_ratio=0.2, test_set_ratio=0.1,num_workers=1):
-    """function test_dataset_f_mnist
-    """
-
-    from torchvision.transforms import transforms
-    from torchvision import datasets
-
-    # Generate the transformations
-    train_list_transforms = [
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-    ]
-
-    test_list_transforms = [
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-    ]
-
-    # Add random cropping to the list of transformations
-    if random_crop:
-        train_list_transforms.insert(0, transforms.RandomCrop(28, padding=4))
-
-    # Add random erasing to the list of transformations
-    if random_erasing:
-        train_list_transforms.append(
-            transforms.RandomErasing(
-                p=0.5,
-                scale=(0.02, 0.33),
-                ratio=(0.3, 3.3),
-                value="random",
-                inplace=False,
+    class test_model_dummy2(nn.Sequential):
+        def __init__(self):
+            super().__init__()
+            self.in_proj = nn.Linear(2, 10)
+            self.stages = nn.Sequential(
+                 nn.Linear(10, 10),
+                 nn.Linear(10, 10)
             )
-        )
-    #creating RGB channels
-    if convert_to_RGB:
-        convert_to_RGB = transforms.Lambda(lambda x: x.repeat(3, 1, 1))
-        train_list_transforms.append(convert_to_RGB)
-        test_list_transforms.append(convert_to_RGB)
+            self.out_proj = nn.Linear(10, 2)
 
-    # Train Data
-    train_transform = transforms.Compose(train_list_transforms)
 
-    train_dataset = datasets.FashionMNIST(
-                    root="data", train=True, transform=train_transform, download=True)
+    def test_dataset_classification_fake(nrows=500):
+        """function test_dataset_classification_fake
+        Args:
+            nrows:
+        Returns:
 
-    # Define the size of the training set and the validation set
-    train_set_length = int(  len(train_dataset) * (100 - val_set_ratio*100) / 100)
-    val_set_length = int(len(train_dataset) - train_set_length)
-    
-    train_set, val_set = torch.utils.data.random_split(
-        train_dataset, (train_set_length, val_set_length)
-    )
-    
-    #Custom data samples for ensemble model training
-    train_set_smpls = int(samples - (val_set_ratio*100))
-    val_set_smpls   = int(samples - train_set_smpls)
-    test_set_smpls  = int(samples*test_set_ratio)
+        """
+        from sklearn import datasets as sklearn_datasets
+        ndim    =11
+        coly    = 'y'
+        colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
+        colcat  = ['colcat_1']
+        X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
+                                                       n_informative=ndim-2)
+        df         = pd.DataFrame(X,  columns= colnum)
+        df[coly]   = y.reshape(-1, 1)
 
-    #train dataset loader
-    train_loader = torch.utils.data.DataLoader(
-        train_set,
-        batch_size=train_set_smpls,
-        shuffle=True,
-        num_workers=num_workers,
-    )
+        for ci in colcat :
+          df[ci] = np.random.randint(0,1, len(df))
 
-    #validation dataset dataloader
-    val_loader = torch.utils.data.DataLoader(
-                    val_set, batch_size=val_set_smpls, shuffle=True, num_workers=1,
+        pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
+        return df, pars
+
+
+    def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False,
+                                convert_to_RGB=False,val_set_ratio=0.2, test_set_ratio=0.1,num_workers=1):
+        """function test_dataset_f_mnist
+        """
+
+        from torchvision.transforms import transforms
+        from torchvision import datasets
+
+        # Generate the transformations
+        train_list_transforms = [
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,)),
+        ]
+
+        test_list_transforms = [
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,)),
+        ]
+
+        # Add random cropping to the list of transformations
+        if random_crop:
+            train_list_transforms.insert(0, transforms.RandomCrop(28, padding=4))
+
+        # Add random erasing to the list of transformations
+        if random_erasing:
+            train_list_transforms.append(
+                transforms.RandomErasing(
+                    p=0.5,
+                    scale=(0.02, 0.33),
+                    ratio=(0.3, 3.3),
+                    value="random",
+                    inplace=False,
                 )
+            )
+        #creating RGB channels
+        if convert_to_RGB:
+            convert_to_RGB = transforms.Lambda(lambda x: x.repeat(3, 1, 1))
+            train_list_transforms.append(convert_to_RGB)
+            test_list_transforms.append(convert_to_RGB)
+
+        # Train Data
+        train_transform = transforms.Compose(train_list_transforms)
+
+        train_dataset = datasets.FashionMNIST(
+                        root="data", train=True, transform=train_transform, download=True)
+
+        # Define the size of the training set and the validation set
+        train_set_length = int(  len(train_dataset) * (100 - val_set_ratio*100) / 100)
+        val_set_length = int(len(train_dataset) - train_set_length)
+
+        train_set, val_set = torch.utils.data.random_split(
+            train_dataset, (train_set_length, val_set_length)
+        )
+
+        #Custom data samples for ensemble model training
+        train_set_smpls = int(samples - (val_set_ratio*100))
+        val_set_smpls   = int(samples - train_set_smpls)
+        test_set_smpls  = int(samples*test_set_ratio)
+
+        #train dataset loader
+        train_loader = torch.utils.data.DataLoader(
+            train_set,
+            batch_size=train_set_smpls,
+            shuffle=True,
+            num_workers=num_workers,
+        )
+
+        #validation dataset dataloader
+        val_loader = torch.utils.data.DataLoader(
+                        val_set, batch_size=val_set_smpls, shuffle=True, num_workers=1,
+                    )
 
 
-    # Test Data
-    test_transform = transforms.Compose(test_list_transforms)
+        # Test Data
+        test_transform = transforms.Compose(test_list_transforms)
 
-    test_set = datasets.FashionMNIST(
-        root="./data", train=False, transform=test_transform, download=True
-    )
+        test_set = datasets.FashionMNIST(
+            root="./data", train=False, transform=test_transform, download=True
+        )
 
-    test_loader = torch.utils.data.DataLoader(
-        test_set,
-        batch_size=test_set_smpls,
-        shuffle=False,
-        num_workers=num_workers,
-    )
+        test_loader = torch.utils.data.DataLoader(
+            test_set,
+            batch_size=test_set_smpls,
+            shuffle=False,
+            num_workers=num_workers,
+        )
 
-    #Dataloader iterators, provides number of samples
-    #configured in respective dataloaders
-    #returns tensors of size- (samples*3*28*28)
-    train_X, train_y = next(iter(train_loader))
-    valid_X, valid_y = next(iter(val_loader))
-    test_X, test_y = next(iter(test_loader))
+        #Dataloader iterators, provides number of samples
+        #configured in respective dataloaders
+        #returns tensors of size- (samples*3*28*28)
+        train_X, train_y = next(iter(train_loader))
+        valid_X, valid_y = next(iter(val_loader))
+        test_X, test_y = next(iter(test_loader))
 
-    return train_X, train_y,   valid_X, valid_y,   test_X , test_y
+        return train_X, train_y,   valid_X, valid_y,   test_X , test_y
 
 
 
 
 ###################################################################################################
-def load_partially_compatible(model,device='cpu'):
-    current_model=model.state_dict()
-    keys_vin=torch.load('',map_location=device)
-
-    new_state_dict={k:v if v.size()==current_model[k].size()  else  current_model[k] for k,v in zip(current_model.keys(), keys_vin['model_state_dict'].values()) 
-                    }    
-    current_model.load_state_dict(new_state_dict)
-    return current_model
 
 
 

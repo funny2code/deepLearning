@@ -1096,7 +1096,7 @@ def test5():
         label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
    
         ########### Image files FASHION MNIST
-        df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
 
         ########### Train Test Split
