@@ -221,8 +221,13 @@ def test_get_dataframe_fake(mode='city'):
     sparksession = spark_get_session_local()
 
     if mode == 'city':
-        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01","ord":"0"},{"id": 'B', "city": "LA","residency_date":"2018-01-01",,"ord":"1"},
-            {"id": 'C', "city": "LA","residency_date":"2019-01-01","ord":"2"},{"id": 'A', "city": "LI","residency_date":"2022-01-01","ord":"3"},{"id":'E',"city":None,"residency_date":"2017-01-01","ord":"4"},{"id":'C',"city":"NY","residency_date":"2017-01-01","ord":"5"}]
+        data = [{"id": 'A', "city": "LA","residency_date":"2015-01-01","ord":"0"},
+                {"id": 'B', "city": "LA","residency_date":"2018-01-01", "ord":"1"},
+            {"id": 'C', "city": "LA","residency_date":"2019-01-01","ord":"2"},
+            {"id": 'A', "city": "LI","residency_date":"2022-01-01","ord":"3"},
+            {"id":'E',"city":None,"residency_date":"2017-01-01","ord":"4"},
+            {"id":'C',"city":"NY","residency_date":"2017-01-01","ord":"5"}]
+            
         df = sparksession.createDataFrame(data)
 
 
