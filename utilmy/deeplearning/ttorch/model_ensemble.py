@@ -1094,12 +1094,11 @@ def test5():
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
         label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
    
-        ########### Image files FASHION MNIST   #########################
+        ########### Image files FASHION MNIST
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
-
-        ############ Train Test Split ####################################
-        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
+        ########### Train Test Split
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
 
         return df_train, df_val, df_test, label_dict, label_dict_count
