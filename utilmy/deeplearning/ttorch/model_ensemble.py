@@ -1094,8 +1094,6 @@ def test5():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
-
         
         ########### Image files FASHION MNIST   #########################
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
@@ -1129,10 +1127,10 @@ def test5():
         # df_val   = df.iloc[itrain:ival,:]
         # df_test  = df.iloc[ival:,:]
 
-        return df_train, df_val, df_test, label_dict, label_dict_count
+        return df_train, df_val, df_test, label_dict
 
 
-    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
+    df_train, df_val, df_test, label_dict = custom_label()
 
 
     def custom_dataloader():
