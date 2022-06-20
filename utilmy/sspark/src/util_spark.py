@@ -227,7 +227,7 @@ def test_get_dataframe_fake(mode='city'):
             {"id": 'A', "city": "LI","residency_date":"2022-01-01","ord":"3"},
             {"id":'E',"city":None,"residency_date":"2017-01-01","ord":"4"},
             {"id":'C',"city":"NY","residency_date":"2017-01-01","ord":"5"}]
-            
+
         df = sparksession.createDataFrame(data)
 
 
@@ -1086,27 +1086,27 @@ def date_get_timekey(unix_ts):
 
 #########################################################################################
 ###### SQL useful #############################################################################
-def sql_generatedate2():
+def sql_generatedate():
     ss =""" 
-        #### Create Calendar date series in SQL
+        #### Create Calendar date series in hive SQL
         WITH 
-          tdates as (
-            WITH tmp AS (select 1 )
-
-            SELECT  date_add('2020-01-01',pe.i) as datei
-            FROM tmp
-            lateral view  posexplode(split(space(datediff('2024-11-01','2020-01-01')),' ')) pe as i,x
+           ztmp AS (select 1 )
+          ,tdates as ( SELECT  date_add('2001-01-01',pe.i) as datei
+                       FROM ztmp
+                       lateral view  posexplode(split(space(datediff('2030-01-01','2001-01-01')),' ')) pe as i,x
           )
 
+
         select * from tdates  WHERE   datei BETWEEN   '2022-01-01'  AND '2023-01-01'
+                
     """
     print(ss)
 
 
 
-def sql_generatedate():
+def sql_generatedate_mysql():
     ss =""" 
-        #### Create Calendar date series in SQL
+        #### Create Calendar date series in mySQL
         WITH
             tdates AS (
                 WITH t0(i) AS ( SELECT 0 UNION SELECT 1 union select 2 union select 3 union select 4 union select 5 union select 6 union
