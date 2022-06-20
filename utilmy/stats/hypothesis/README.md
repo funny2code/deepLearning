@@ -1,7 +1,4 @@
-# hypothetical - Hypothesis and Statistical Testing in Python
-
-library for conducting hypothesis and other group comparison tests.
-
+#Hypothesis in Python
 
 ## Available Methods
 
