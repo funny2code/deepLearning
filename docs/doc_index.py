@@ -15,6 +15,8 @@ test_dataset_classifier_diabetes_traintest()
 test_dataset_classifier_fake(nrows = 500, normalized = 0)
 test_dataset_classifier_petfinder(nrows = 1000)
 test_dataset_classifier_pmlb(name = '', return_X_y = False)
+test_dataset_fashion_40ksmall(dirout = "./ztmp/")
+test_dataset_fashionmnist_get_torchdataloader(nrows = 1000, batch_size = 64, num_workers = 8, transform_custom = None)
 test_dataset_regression_boston_traintest()
 test_dataset_regression_fake(nrows = 500, n_features = 17)
 
@@ -147,6 +149,9 @@ random_dates(start, end, size)
 random_genders(size, p = None)
 test_all()
 
+
+
+utilmy/db/__init__.py
 
 
 utilmy/db/keyvalue.py
@@ -640,6 +645,75 @@ test2a()
 test2b()
 test2c()
 test2d()
+test3()
+test4()
+test5()
+test_all()
+test_dataset_fashionmnist_get_torchdataloader(nrows = 1000, batch_size = 64, num_workers = 8, transform_custom = None)
+torch_norm_l2(X)
+
+-------------------------methods----------------------
+BaseModel.__init__(self, arg)
+BaseModel.build(self, )
+BaseModel.create_loss(self, )
+BaseModel.create_model(self, )
+BaseModel.device(self, )
+BaseModel.device(self, )
+BaseModel.device_setup(self, arg)
+BaseModel.eval(self)
+BaseModel.evaluate(self)
+BaseModel.grad_check(self, )
+BaseModel.load_DataFrame(self, path = None)
+BaseModel.load_weights(self, path)
+BaseModel.predict(self, x, **kwargs)
+BaseModel.prepro_dataset(self, csv)
+BaseModel.save_weight(self, path, meta_data = None)
+BaseModel.train(self)
+BaseModel.training(self, )
+BaseModel.validate_dim(self, train_loader, val_loader)
+MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
+MergeModel_create.build(self)
+MergeModel_create.create_loss(self, )
+MergeModel_create.create_model(self, )
+MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
+MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
+SequenceReshaper.__init__(self, from_  =  'vision')
+SequenceReshaper.forward(self, x)
+modelA_create.__init__(self, arg)
+modelA_create.create_loss(self, loss_fun = None)
+modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+modelB_create.__init__(self, arg)
+modelB_create.create_loss(self)
+modelB_create.create_model(self)
+modelC_create.__init__(self, arg)
+modelC_create.create_loss(self)
+modelC_create.create_model(self)
+modelD_create.__init__(self, arg)
+modelD_create.create_loss(self)
+modelD_create.create_model(self)
+model_create.__init__(self, arg)
+model_create.create_loss(self, loss_fun = None)
+model_create.create_model(self, modelA_nn:torch.nn.Module = None)
+model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+model_getlayer.close(self)
+model_getlayer.get_layers_in_order(self, network)
+model_getlayer.hook_fn(self, module, input, output)
+model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
+model_template_MLP.forward(self, x, **kwargs)
+
+
+utilmy/deeplearning/ttorch/model_ensemble2.py
+-------------------------functions----------------------
+dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
+device_setup(arg, device = 'cpu', seed = 67)
+help()
+test1()
+test2_lstm()
+test2a()
+test2b()
+test2c()
+test2d()
+test3()
 test_all()
 torch_norm_l2(X)
 
@@ -766,21 +840,29 @@ check_lstm()
 
 utilmy/deeplearning/ttorch/util_model.py
 -------------------------functions----------------------
-grad_check(self, )
-model_add_layers(model, modules  =  [])
-model_delete_layers(model, del_ids  =  [])
+focal_loss(alpha: Optional[Sequence]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100, device = 'cpu', dtype = torch.float32)
 model_freezeparams(model, params_to_freeze  =  None, freeze  =  True)
-model_get_alllayers(model)
 model_getparams(model, params_to_get  =  None, detach  =  True)
+model_is_gradient_needed(net_model)
+model_layers_add(model, modules  =  [])
+model_layers_delete(model, del_ids  =  [])
+model_layers_getall(model)
+plot_grad_flow(named_parameters)
+plot_grad_flow_v2(named_parameters)
 test1()
 test2()
 test3()
+test4()
 test_all()
+vision_prediction_check()
 
 -------------------------methods----------------------
+FocalLoss.__init__(self, alpha: Optional[Tensor]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100)
+FocalLoss.__repr__(self)
+FocalLoss.forward(self, x: Tensor, y: Tensor)
 LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
 LSTM.forward(self, x)
-MultiClassMultiLabel_Head.__init__(self, layers_dim = [256, 64], class_label_dict = None, dropout = 0, )
+MultiClassMultiLabel_Head.__init__(self, layers_dim = [256, 64], class_label_dict = None, dropout = 0, activation_custom = None, use_first_head_only =  None)
 MultiClassMultiLabel_Head.forward(self, x)
 MultiClassMultiLabel_Head.get_loss(self, ypred, ytrue, loss_calc_custom = None, weights = None, sum_loss = True)
 SequenceReshaper.__init__(self, from_  =  'vision')
@@ -794,7 +876,7 @@ model_LayerRecorder.close(self)
 model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
 model_getlayer.close(self)
 model_getlayer.get_layers_in_order(self, network)
-model_getlayer.hook_fn(self, module, input, output)
+model_getlayer.hook_fn(self, module1, input, output)
 
 
 utilmy/deeplearning/ttorch/util_torch.py
@@ -1165,7 +1247,6 @@ utilmy/deeplearning/tutorial/transf.py
 
 utilmy/deeplearning/util_embedding.py
 -------------------------functions----------------------
-embedding_compare_plotlabels(embeddings_1:list, embeddings_2:list, labels_1:list, labels_2:list, plot_title, plot_width = 1200, plot_height = 600, xaxis_font_size = '12pt', yaxis_font_size = '12pt')
 embedding_create_vizhtml(dirin = "in/model.vec", dirout = "ztmp/", dim_reduction = 'umap', nmax = 100, ntrain = 10)
 embedding_extract_fromtransformer(model, Xinput:list)
 embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax =  500)
@@ -1173,16 +1254,10 @@ embedding_load_pickle(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=N
 embedding_load_word2vec(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun = None)
 embedding_rawtext_to_parquet(dirin = None, dirout = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None  = Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None : #### Validate linew):)
 embedding_torchtensor_to_parquet(tensor_list, id_list:list, label_list, dirout = None, tag = "", nmax = 10 ** 8)
-faiss_create_index(df_or_path = None, col = 'emb', dirout = None, db_type  =  "IVF4096,Flat", nfile = 1000, emb_dim = 200)
-faiss_load_index(faiss_index_path = "")
-faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index = None, topk = 200, npool = 1, nrows = 10**7, nfile = 1000)
 help()
-sim_scores_faiss(embs:np.ndarray, idlist:list, is_symmetric = False)
-sim_scores_fast(embs:np.ndarray, idlist:list, is_symmetric = False)
 test1()
 test_all()
-topk_calc(diremb = "", dirout = "", topk = 100, idlist = None, nexample = 10, emb_dim = 200, tag = None, debug = True)
-topk_nearest_vector(x0:np.ndarray, vector_list:list, topk = 3, engine = 'faiss', engine_pars:dict = None)
+test_create_fake_df(dirout = "./ztmp/")
 
 -------------------------methods----------------------
 EmbeddingViz.__init__(self, path = "myembed.parquet", num_clusters = 5, sep = ";", config:dict = None)
@@ -1192,6 +1267,9 @@ EmbeddingViz.dim_reduction(self, mode = "mds", ndim = 2, nmax =  5000, dirout = 
 EmbeddingViz.draw_cluster_hiearchy(self)
 EmbeddingViz.load_data(self, col_embed = 'embed', nmax =  5000, npool = 2)
 EmbeddingViz.run_all(self, dim_reduction = "mds", col_embed = 'embed', ndim = 2, nmax =  5000, dirout = "ztmp/", ntrain = 10000)
+
+
+utilmy/deeplearning/util_hash.py
 
 
 utilmy/deeplearning/util_hyper.py
@@ -1230,6 +1308,27 @@ test3()
 test_all()
 test_helper()
 test_onnx_convert()
+
+
+
+utilmy/deeplearning/util_topk.py
+-------------------------functions----------------------
+embedding_extract_fromtransformer(model, Xinput:list)
+embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax =  500)
+embedding_load_pickle(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Noneimport pickleembs = Nonedirin)for fi in flist  = Noneimport pickleembs = Nonedirin)for fi in flist :)
+embedding_load_word2vec(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun = None)
+embedding_rawtext_to_parquet(dirin = None, dirout = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None  = Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None : #### Validate linew):)
+embedding_torchtensor_to_parquet(tensor_list, id_list:list, label_list, dirout = None, tag = "", nmax = 10 ** 8)
+faiss_create_index(df_or_path = None, col = 'emb', dirout = None, db_type  =  "IVF4096,Flat", nfile = 1000, emb_dim = 200, nrows = -1)
+faiss_load_index(faiss_index_path = "")
+faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index:str = "", topk = 200, npool = 1, nrows = 10**7, nfile = 1000, return_simscore = False)
+help()
+sim_scores_pairwise(embs:np.ndarray, word_list:list, is_symmetric = False)
+test1()
+test_all()
+test_create_fake_df(dirout = "./ztmp/")
+topk_calc(diremb = "", dirout = "", topk = 100, idlist = None, nexample = 10, emb_dim = 200, tag = None, debug = True)
+topk_nearest_vector(x0:np.ndarray, vector_list:list, topk = 3, engine = 'faiss', engine_pars:dict = None)
 
 
 
@@ -1706,6 +1805,37 @@ SentenceEncoder.call(self, inputs, **kwargs)
 
 
 utilmy/nlp/ttorch/__init__.py
+
+
+utilmy/nlp/ttorch/kgraph/kgDriverCode.py
+
+
+utilmy/nlp/ttorch/kgraph/knowledge_graph.py
+-------------------------functions----------------------
+test1(path = "")
+
+-------------------------methods----------------------
+KGEmbedder.__init__(self, graph:ntx.MultiDiGraph, embedding_dim:int)
+KGEmbedder.compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS)
+KGEmbedder.load_embeddings(self, path_to_embeddings:str)
+NERExtractor.__init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy = True)
+NERExtractor.extractTriples(self, max_text:int)
+NERExtractor.extract_entities(self, sents)
+NERExtractor.obtain_relation(self, sent)
+NERExtractor.prepare_data(self, data_kgf:pd.DataFrame)
+knowledge_grapher.__init__(self, data_kgf, embeddingDF:pd.DataFrame, embedding_dim:int = 14, load_spacy:bool = False)
+knowledge_grapher.buildGraph(self, relation  =  None)
+knowledge_grapher.compute_centrality(self, )
+knowledge_grapher.get_centers(self, max_centers:int = 5)
+knowledge_grapher.load_data(self, path)
+knowledge_grapher.map_centers_anchors(self, _type:str)
+knowledge_grapher.plot_graph(self)
+
+
+utilmy/nlp/ttorch/kgraph/mytest.py
+
+
+utilmy/nlp/ttorch/kgraph/pykeenTest.py
 
 
 utilmy/nlp/ttorch/model_patent.py
@@ -3811,6 +3941,74 @@ test_same_mean(df: pd.DataFrame, cols = None, bonferroni_adjuster = True, thresh
 utilmy/tabular/__init__.py
 
 
+utilmy/tabular/bayesian/__init__.py
+
+
+utilmy/tabular/bayesian/model_bayesian_numpyro.py
+-------------------------functions----------------------
+columns_with_null_data(df: pd.DataFrame)
+metrics(y: pd.Series, yhat: pd.Series)
+require_fitted(f)
+test()
+
+-------------------------methods----------------------
+AlreadyFittedError.__init__(self, model)
+BaseModel.__init__(self, rng_seed: int  =  None)
+BaseModel.__repr__(self)
+BaseModel.fit(self, df: pd.DataFrame, sampler: str  =  "NUTS", rng_key: np.ndarray  =  None, sampler_kwargs: typing.Dict[str, typing.Any]  =  None, **mcmc_kwargs, )
+BaseModel.formula(self)
+BaseModel.from_dict(cls, data: typing.Dict[str, typing.Any], **model_kw)
+BaseModel.grouped_metrics(self, df: pd.DataFrame, groupby: typing.Union[str, typing.List[str]], aggfunc: typing.Callable  =  onp.sum, aggerrs: bool  =  True, )
+BaseModel.likelihood_func(self, yhat)
+BaseModel.link(x)
+BaseModel.metrics(self, df: pd.DataFrame, aggerrs: bool  =  True)
+BaseModel.model(self, df: pd.DataFrame)
+BaseModel.num_chains(self)
+BaseModel.num_samples(self)
+BaseModel.predict(self, df: pd.DataFrame, ci: bool  =  False, ci_interval: float  =  0.9, aggfunc: typing.Union[str, typing.Callable]  =  "mean", )
+BaseModel.preprocess_config_dict(cls, config: dict)
+BaseModel.sample_posterior_predictive(self, df: pd.DataFrame, hdpi: bool  =  False, hdpi_interval: float  =  0.9, rng_key: np.ndarray  =  None, )
+BaseModel.samples_df(self)
+BaseModel.samples_flat(self)
+BaseModel.split_rand_key(self, n: int  =  1)
+BaseModel.to_json(self)
+BaseModel.transform(cls, df: pd.DataFrame)
+Bernoulli.likelihood_func(self, probs)
+Bernoulli.link(x)
+IncompleteFeature.__init__(self, name, key)
+IncompleteModel.__init__(self, model, attribute)
+IncompleteSamples.__init__(self, name)
+Normal.likelihood_func(self, yhat)
+Normal.link(x)
+NotFittedError.__init__(self, func = None)
+NullDataFound.__init__(self, *names)
+NumpyEncoder.default(self, obj)
+Poisson.likelihood_func(self, yhat)
+Poisson.link(x)
+ShabadooException.__str__(self)
+
+
+utilmy/tabular/bayesian/model_bayesian_pyro.py
+-------------------------functions----------------------
+fit(data_pars = None, compute_pars = None, out_pars = None, **kw)
+get_dataset(data_pars = None, task_type = "train", **kw)
+init(*kw, **kwargs)
+load_info(path = "")
+load_model(path = "")
+model_class_loader(m_name = 'BayesianRegression', class_list:list = None)
+predict(Xpred = None, data_pars = {}, compute_pars = None, out_pars = {}, **kw)
+reset()
+save(path = None, info = None)
+test(nrows = 1000)
+test_dataset_regress_fake(nrows = 500)
+y_norm(y, inverse = True, mode = 'boxcox')
+
+-------------------------methods----------------------
+BayesianRegression.__init__(self, X_dim:int = 17, y_dim:int = 1)
+BayesianRegression.forward(self, x, y = None)
+Model.__init__(self, model_pars = None, data_pars = None, compute_pars = None)
+
+
 utilmy/tabular/causal/__init__.py
 
 
@@ -3986,6 +4184,12 @@ test_xendcg()
 -------------------------methods----------------------
 UnpicklableCallback.__call__(self, env)
 UnpicklableCallback.__reduce__(self)
+
+
+utilmy/tabular/util_lineartree.py
+-------------------------functions----------------------
+sklearn_tree_to_code(tree, feature_names)
+
 
 
 utilmy/tabular/util_sampling.py
@@ -4586,29 +4790,6 @@ os_file_replacestring2(findstr, replacestr, some_dir, pattern = "*.*", dirlevel 
 utilmy/tseries/__init__.py
 
 
-utilmy/tseries/models/model_bayesian_numpyro.py
--------------------------functions----------------------
-fit(data_pars = None, compute_pars = None, out_pars = None, **kw)
-get_dataset(data_pars = None, task_type = "train", **kw)
-get_params(param_pars = {}, **kw)
-init(*kw, **kwargs)
-init(*kw, **kwargs)
-load_info(path = "")
-load_model(path = "")
-log(*s)
-log(*s)
-log2(*s)
-log3(*s)
-predict(Xpred = None, data_pars = {}, compute_pars = None, out_pars = {}, **kw)
-preprocess(prepro_pars)
-reset()
-reset()
-save(path = None, info = None)
-
--------------------------methods----------------------
-Model.__init__(self, model_pars = None, data_pars = None, compute_pars = None)
-
-
 utilmy/tseries/models/model_bayesian_pyro.py
 -------------------------functions----------------------
 fit(data_pars = None, compute_pars = None, out_pars = None, **kw)
@@ -4616,9 +4797,6 @@ get_dataset(data_pars = None, task_type = "train", **kw)
 init(*kw, **kwargs)
 load_info(path = "")
 load_model(path = "")
-log(*s)
-log2(*s)
-log3(*s)
 model_class_loader(m_name = 'BayesianRegression', class_list:list = None)
 predict(Xpred = None, data_pars = {}, compute_pars = None, out_pars = {}, **kw)
 reset()
@@ -4866,6 +5044,7 @@ donwload_and_extract(url, dirout = './ztmp/', unzip = True)
 download_custom_pageimage(query, fileout = "query1", genre_en = '', id0 = "", cat = "", npage = 1)
 download_github(url="https = "https://github.com/arita37/dsa2_data/blob/main/input/titanic/train/features.zip", dirout = "./ztmp/")
 download_google(url_or_id="https = "https://drive.google.com/file/d/1iFrhCPWRITarabHfBZvR-V9B2yTlbVhH/view?usp=sharing", fileout = "./ztmp/", unzip = True)
+download_kaggle(names = "", dirout = "", n_dataset = 5)
 download_with_progress(url, fileout)
 help()
 os_extract_archive(file_path, dirout = "./ztmp/", archive_format = "auto")
@@ -5006,20 +5185,21 @@ test_video_creator()
 utilmy/viz/vizhtml.py
 -------------------------functions----------------------
 colormap_get_names()
+help()
 help_get_codesource(func)
-html_show(html_code, verbose = True)
+html_show(html_code, verbose = 1)
 html_show_chart_highchart(html_code, verbose = True)
 images_to_html(dir_input = "*.png", title = "", verbose = False)
+log(*s)
 mlpd3_add_tooltip(fig, points, labels)
 pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {})
 pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
 pd_plot_scatter_get_data(df0:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, nmax: int = 20000, **kw)
 pd_plot_scatter_matplot(df:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, cfg: dict  =  {}, mode = 'd3', save_path: str = '', verbose = True, **kw)
+show(file_csv_parquet:str = "myfile.parquet", title = 'table', format: str = 'blue_light', dir_out = 'table.html', css_class = None, use_datatable = True, table_id = None, )
 show_table_image(df, colgroup =  None, colimage  =  None, title = None, format: str = 'blue_light', dir_out = 'print_table_image.html', custom_css_class = None, use_datatable = False, table_id = None, )
+test_all()
 to_float(x)
-zz_css_get_template(css_name:str =  "A4_size")
-zz_pd_plot_histogram_highcharts_old(df, col, figsize = None, title = None, cfg:dict = {}, mode = 'd3', save_img = '')
-zz_test_get_random_data(n = 100)
 
 -------------------------methods----------------------
 htmlDoc.__init__(self, dir_out = "", mode = "", title: str  =  "", format: str  =  None, cfg: dict  =  None, css_name: str  =  "default", css_file: str  =  None, jscript_file: str  =  None, verbose = True, **kw)
@@ -5039,9 +5219,9 @@ htmlDoc.open_browser(self)
 htmlDoc.p(self, x, css: str = '')
 htmlDoc.pd_plot_network(self, df:pd.DataFrame, cola:    str = 'col_node1', colweight:str = "weight", colb: str = 'col_node2', coledge: str = 'col_edge')
 htmlDoc.plot_density(self, df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {}, mode: str  =  'd3', **kw)
-htmlDoc.plot_histogram(self, df:pd.DataFrame, col, title: str = '', xlabel: str = None, ylabel: str = None, 14, 7), colormap:str  =  'RdYlBu', nsample = 10000, binWidth = None, color:str = '#7CB5EC', nbin = 10, q5 = 0.005, q95 = 0.95, cfg: dict  =  {}, mode: str = 'matplot', save_img = "", **kw)
-htmlDoc.plot_parallel(self, df: pd.DataFrame, col = [], title: str  =  '', 460, 460), color: str  =  '#69b3a2', cfg: dict  =  {}, mode: str  =  'd3', **kw)
-htmlDoc.plot_scatter(self, df:pd.DataFrame, colx, coly, collabel = None, colclass1 = None, colclass2 = None, colclass3 = None, title: str = '', 14, 7), nsample: int = 10000, cfg: dict  =  {}, mode: str = 'matplot', save_img = '', **kw)
+htmlDoc.plot_histogram(self, df:pd.DataFrame, col, title: str = '', xlabel: str = None, ylabel: str = None, figsize: tuple = None, colormap:str  =  'RdYlBu', nsample = 10000, binWidth = None, color:str = '#7CB5EC', nbin = 10, q5 = 0.005, q95 = 0.95, cfg: dict  =  {}, mode: str = 'matplot', save_img = "", **kw)
+htmlDoc.plot_parallel(self, df: pd.DataFrame, col = [], title: str  = [], 460, 460), color: str  =  '#69b3a2', cfg: dict  =  {}, mode: str  =  'd3', **kw)
+htmlDoc.plot_scatter(self, df:pd.DataFrame, colx, coly, collabel = None, colclass1 = None, colclass2 = None, colclass3 = None, title: str = '', figsize: tuple = '', nsample: int = 10000, cfg: dict  =  {}, mode: str = 'matplot', save_img = '', **kw)
 htmlDoc.print(self)
 htmlDoc.save(self, dir_out = None)
 htmlDoc.sep(self, css: str = '')
