@@ -1047,9 +1047,8 @@ def test5():
 
 
     """
-    from util_torch import ImageDataset, dataset_download
+    from util_torch import dataset_download
     import glob
-    from util_torch import ImageDataloader
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -1073,72 +1072,48 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
-    dirtmp = "./"
-    train_img_path = 'data_fashion_small/train'
-    test_img_path  = 'data_fashion_small/test'
+    dirtmp      = "./"
+    col_img     = 'id'
+    label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
-    def custom_label(col_img = 'id'):
-
-
-        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-        label_path  = dirtmp + "data_fashion_small/csv/styles.csv"
-        label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
-        col_img    = 'id'
-
+    def custom_label(arg:dict=None):
         ########## Downloading Dataset######
+        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+
         from utilmy.deeplearning.ttorch import  util_torch as ut
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
+
+        train_img_path = dirtmp + 'data_fashion_small/train'
+        test_img_path  = dirtmp + 'data_fashion_small/test'
+        label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
 
 
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
-
-        
-        ########### Image files FASHION MNIST   #########################
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
+   
+        ########### Image files FASHION MNIST
         df = ut.dataset_get_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
-        # img_list = df[col_img].values
-        #
-        # img_list_ok = []
-        # for fi in img_list :
-        #     fifull = ''
-        #     flist = glob.glob(train_img_path + "/" + str(fi) + "*"  )
-        #     if len(flist) >0  :
-        #        fifull = flist[0]
-        #
-        #     flist = glob.glob(test_img_path + "/" + str(fi) + "*"  )
-        #     if len(flist) >0  :
-        #        fifull = flist[0]
-        #
-        #     img_list_ok.append(fifull)
-        #
-        # df[col_img] = img_list_ok
-        # df = df[ df[col_img] != '' ]
-        # df = df.dropna(how='any',axis=0)
+        ########### Train Test Split
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
-
-        ############ Train Test Split ####################################
-        #from utilmy.deeplearning.ttorch.util_torch import dataset_traintest_split
-        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.8)
-
-        # itrain,ival = int(len(df)* 0.6), int(len(df)* 0.8)
-        # df_train = df.iloc[0:itrain,:]
-        # df_val   = df.iloc[itrain:ival,:]
-        # df_test  = df.iloc[ival:,:]
 
         return df_train, df_val, df_test, label_dict, label_dict_count
 
 
-    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
+    df_train, df_val, df_test, label_dict,label_dict_count = custom_label()
+
 
 
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
+        assert df_train and df_test and df_val and label_dict and col_img
+
         from util_torch import ImageDataset
-        col_img        = 'id'
+        # col_img        = 'id'
         batch_size     =  train_config.BATCH_SIZE
         FashionDataset = ImageDataset
 
@@ -1149,13 +1124,13 @@ def test5():
         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
         transform_test   = transforms.Compose(tlist)
 
-        train_dataloader = DataLoader(FashionDataset(train_img_path, label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
+        train_dataloader = DataLoader(FashionDataset( label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
 
-        val_dataloader   = DataLoader(FashionDataset(train_img_path, label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
+        val_dataloader   = DataLoader(FashionDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
  
-        test_dataloader  = DataLoader(FashionDataset(test_img_path, label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
+        test_dataloader  = DataLoader(FashionDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                            batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
         return train_dataloader,val_dataloader,test_dataloader
@@ -2305,14 +2280,6 @@ class modelD_create(BaseModel):
     def create_loss(self) -> torch.nn.Module:
         super(modelD_create,self).create_loss()
         return torch.nn.BCELoss()
-
-
-
-
-
-
-
-
 
 ###############################################################################################################
 if __name__ == "__main__":
