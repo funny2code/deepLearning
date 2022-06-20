@@ -1076,7 +1076,7 @@ def test5():
     dirtmp = "./"
     train_img_path = 'data_fashion_small/train'
     test_img_path  = 'data_fashion_small/test'
-    label_dict_count = {}
+
 
 
     def custom_label(col_img = 'id'):
@@ -1131,10 +1131,10 @@ def test5():
         # df_val   = df.iloc[itrain:ival,:]
         # df_test  = df.iloc[ival:,:]
 
-        return df_train, df_val, df_test, label_dict
+        return df_train, df_val, df_test, label_dict, label_dict_count
 
 
-    df_train, df_val, df_test, label_dict = custom_label()
+    df_train, df_val, df_test, label_dict, label_dict_count = custom_label()
 
 
     def custom_dataloader():
