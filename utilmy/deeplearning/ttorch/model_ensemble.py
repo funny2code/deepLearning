@@ -1072,22 +1072,21 @@ def test5():
         train_config.VAL_RATIO                 = 0.2
         train_config.TEST_RATIO                = 0.1
 
-    dirtmp = "./"
-
-    dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-
-    train_img_path = dirtmp + 'data_fashion_small/train'
-    test_img_path  = dirtmp + 'data_fashion_small/test'
-    label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
-    col_img        = 'id'
-
+    dirtmp      = "./"
+    col_img     = 'id'
     label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
 
 
     def custom_label(arg:dict=None):
         ########## Downloading Dataset######
+        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+
         from utilmy.deeplearning.ttorch import  util_torch as ut
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
+
+        train_img_path = dirtmp + 'data_fashion_small/train'
+        test_img_path  = dirtmp + 'data_fashion_small/test'
+        label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
 
 
         ########### label file in CSV  ########################
@@ -1109,10 +1108,13 @@ def test5():
     df_train, df_val, df_test, label_dict,label_dict_count = custom_label()
 
 
+
     def custom_dataloader():
         ######CUSTOM DATASET#############################################
+        assert df_train and df_test and df_val and label_dict and col_img
+
         from util_torch import ImageDataset
-        col_img        = 'id'
+        # col_img        = 'id'
         batch_size     =  train_config.BATCH_SIZE
         FashionDataset = ImageDataset
 
