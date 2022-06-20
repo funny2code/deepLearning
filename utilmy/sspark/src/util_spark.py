@@ -1087,8 +1087,7 @@ def date_get_timekey(unix_ts):
 #########################################################################################
 ###### SQL useful #############################################################################
 def sql_generatedate():
-    ss =""" 
-        #### Create Calendar date series in hive SQL
+    ss =""" #### Create Calendar date series in hive SQL
         WITH 
            ztmp AS (select 1 )
           ,tdates as ( SELECT  date_add('2001-01-01',pe.i) as datei   FROM ztmp
@@ -1103,8 +1102,7 @@ def sql_generatedate():
 
 
 def sql_generatedate_mysql():
-    ss =""" 
-        #### Create Calendar date series in mySQL
+    ss =""" #### Create Calendar date series in mySQL
         WITH
             tdates AS (
                 WITH t0(i) AS ( SELECT 0 UNION SELECT 1 union select 2 union select 3 union select 4 union select 5 union select 6 union
