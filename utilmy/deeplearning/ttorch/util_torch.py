@@ -348,19 +348,25 @@ class ImageDataset(Dataset):
                 label_dict:dict =None,
 
                 transforms=None, transforms_image_size_default=64,
-                check_ifimage_exist=False
+                check_ifimage_exist=False,
+                img_loader=None
 
                  ):
-        """
-        Args:
+        """ Image Datast :  labels + Images path on disk
+        Docs:
+        
             img_dir (Path(str)): String path to images directory
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
         """
-        self.transforms = transforms
         self.image_dir  = img_dir
         self.col_img    = col_img
+        self.transforms = transforms
+
+        if img_loader is None :  ### Use default loader
+           from PIL import Image
+           self.img_loader = Image.open
 
         if transforms is None :
               from torchvision import transforms
@@ -381,9 +387,7 @@ class ImageDataset(Dataset):
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
         self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-
         self.label_img_dir = self.label_df[self.col_img].values
-
 
 
         ###### Image data prep  ################################################################
@@ -396,7 +400,7 @@ class ImageDataset(Dataset):
         # self.data = torch.stack(self.data)
 
 
-        ####lable Prep
+        ####lable Prep  #######################################################################
         self.label_dict = {}
         for ci in self.label_cols:
             v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
@@ -416,7 +420,8 @@ class ImageDataset(Dataset):
 
         from PIL import Image
         img_dir = self.label_img_dir[idx]
-        img     = Image.open(img_dir)
+        #img     = Image.open(img_dir)
+        img     = self.img_loader(img_dir)
         train_X = self.transforms(img)
 
 
