@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-import os, pickle
+"""  Utils for torch  models
+Docs ::
+
+    All utils
+
+
+
+
+"""
+import os, pickle, numpy as np
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
-
-import numpy as np
-from torch.utils.data import DataLoader
 from typing import Optional, Sequence
 
 import torch
@@ -13,6 +19,7 @@ from torch import Tensor
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
 
 #################################################################################################
@@ -28,157 +35,157 @@ def test_all():
 
 
 def test1():
-  from utilmy.deeplearning.ttorch import util_model
+    from utilmy.deeplearning.ttorch import util_model
 
-  model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-  # and record the output of the layer during the forward pass
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#tensor of shape (64, 192, 27, 27)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    # and record the output of the layer during the forward pass
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#tensor of shape (64, 192, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Record input to the layer during the forward pass
-  recorder = util_model.model_LayerRecorder(layer, record_input = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#tensor of shape (64, 64, 27, 27)
-  recorder.close()#remove the recorder
+    # Record input to the layer during the forward pass
+    recorder = util_model.model_LayerRecorder(layer, record_input = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#tensor of shape (64, 64, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
-  # and record the output of the layer in the bacward pass
-  layer = list(model.features.named_children())[2][1]
-  # Record output to the layer during the backward pass
-  recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = True)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  loss = torch.nn.CrossEntropyLoss()
-  labels = torch.randint(1000, (64,))#random labels just to compute a bacward pass
-  l = loss(output, labels)
-  l.backward()
-  print(recorder.recording[0])#tensor of shape (64, 64, 27, 27)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    # and record the output of the layer in the bacward pass
+    layer = list(model.features.named_children())[2][1]
+    # Record output to the layer during the backward pass
+    recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = True)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    loss = torch.nn.CrossEntropyLoss()
+    labels = torch.randint(1000, (64,))#random labels just to compute a bacward pass
+    l = loss(output, labels)
+    l.backward()
+    print(recorder.recording[0])#tensor of shape (64, 64, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-  # and record the parameters of the layer in the forward pass
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(layer, record_params = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    # and record the parameters of the layer in the forward pass
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(layer, record_params = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
+    recorder.close()#remove the recorder
 
-  # A custom function can also be passed to the recorder and perform arbitrary
-  # operations. In the example below, the custom function prints the kwargs that
-  # are passed along with the custon function and also return 1 (stored in the recorder)
-  def custom_fn(*args, **kwargs):#signature of any custom fn
+    # A custom function can also be passed to the recorder and perform arbitrary
+    # operations. In the example below, the custom function prints the kwargs that
+    # are passed along with the custon function and also return 1 (stored in the recorder)
+    def custom_fn(*args, **kwargs):#signature of any custom fn
       print('custom called')
       for k,v in kwargs.items():
           print('\nkey argument:', k)
           print('\nvalue argument:', v)
       return 1
 
-  recorder = util_model.model_LayerRecorder(layer,
+    recorder = util_model.model_LayerRecorder(layer,
                                             backward = False,
                                             custom_fn = custom_fn,
                                             print_value = 5)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
-  recorder.close()#remove the recorder
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
+    recorder.close()#remove the recorder
 
-  # Record output to the layer during the forward pass and store it in folder
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(
+    # Record output to the layer during the forward pass and store it in folder
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(
       layer,
       record_params = True,
       backward = False,
       save_to = './test_recorder'#create the folder before running this example!
-  )
-  for _ in range(5):#5 passes e.g. batches, thus 5 stored "recorded" tensors
+    )
+    for _ in range(5):#5 passes e.g. batches, thus 5 stored "recorded" tensors
       data = torch.rand(64, 3, 224, 224)
       output = model(data)
-  recorder.close()#remove the recorder
+    recorder.close()#remove the recorder
 
 
 
 def test2():
-        import torch
-        from utilmy.deeplearning.ttorch import util_model
+    import torch
+    from utilmy.deeplearning.ttorch import util_model
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        # Freeze all parameters
-        util_model.model_freezeparams(model,
-                                      freeze = True)
+    # Freeze all parameters
+    util_model.model_freezeparams(model,
+                                  freeze = True)
 
-        # Unfreeze all parameters
-        util_model.model_freezeparams(model,
-                                      freeze = False)
+    # Unfreeze all parameters
+    util_model.model_freezeparams(model,
+                                  freeze = False)
 
-        # Freeze specific parameters by naming them
-        params_to_freeze = ['features.0.weight', 'classifier.1.weight']
-        util_model.model_freezeparams(model,
-                                      params_to_freeze = params_to_freeze,
-                                      freeze = True)
+    # Freeze specific parameters by naming them
+    params_to_freeze = ['features.0.weight', 'classifier.1.weight']
+    util_model.model_freezeparams(model,
+                                  params_to_freeze = params_to_freeze,
+                                  freeze = True)
 
-        # Unfreeze specific parameters by naming them
-        params_to_freeze = ['features.0.weight', 'classifier.1.weight']
-        util_model.model_freezeparams(model,
-                                      params_to_freeze = params_to_freeze,
-                                      freeze = False)
-
-
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
-
-        # Get all parameters
-        params_values, params_names, req_grad = util_model.model_getparams(model)
-
-        # Get only a subset of parameters by passing a list of named parameters
-        params_to_get = ['features.0.weight', 'classifier.1.weight']
-        params_values, params_names, req_grad = util_model.model_getparams(model,
-                                                                           params_to_get = params_to_get)
+    # Unfreeze specific parameters by naming them
+    params_to_freeze = ['features.0.weight', 'classifier.1.weight']
+    util_model.model_freezeparams(model,
+                                  params_to_freeze = params_to_freeze,
+                                  freeze = False)
 
 
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    # Get all parameters
+    params_values, params_names, req_grad = util_model.model_getparams(model)
 
-        # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
-
-        # Delete the last linear layer of an Elman RNN
-        simple_rnn = nn.Sequential(
-            nn.RNN(2,
-                100,
-                1,
-                batch_first = True),
-            nn.Linear(100, 10),
-        )
-
-        simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
+    # Get only a subset of parameters by passing a list of named parameters
+    params_to_get = ['features.0.weight', 'classifier.1.weight']
+    params_values, params_names, req_grad = util_model.model_getparams(model,
+                                                                       params_to_get = params_to_get)
 
 
 
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    # Delete the last layer of the classifier of the AlexNet model
+    model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
-        # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
+    # Delete the last linear layer of an Elman RNN
+    simple_rnn = nn.Sequential(
+        nn.RNN(2,
+            100,
+            1,
+            batch_first = True),
+        nn.Linear(100, 10),
+    )
 
-        # Add back to the model the deleted layer
-        module = {
-                'name': '6',
-                'position': 6,
-                'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
-                }
+    simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
 
-        model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
+
+
+
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+
+    # Delete the last layer of the classifier of the AlexNet model
+    model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
+
+    # Add back to the model the deleted layer
+    module = {
+            'name': '6',
+            'position': 6,
+            'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
+            }
+
+    model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
 
 
 
@@ -328,19 +335,20 @@ def model_freezeparams(model,  params_to_freeze = None,  freeze = True):
 
 def model_layers_delete(model, del_ids = []):
     '''Delete layers from model
+    Docs::
 
-    Input
-    -----
-    model: model to be modified
+        Input
+        -----
+        model: model to be modified
 
-    del_ids: list, default [], of int the modules/layers
-        that will be deleted
-        NOTE: 0, 1... denotes the 1st, 2nd etc layer
+        del_ids: list, default [], of int the modules/layers
+            that will be deleted
+            NOTE: 0, 1... denotes the 1st, 2nd etc layer
 
-    Output
-    ------
-    model: model with deleted modules/layers that is an instance of
-        torch.nn.modules.container.Sequential
+        Output
+        ------
+        model: model with deleted modules/layers that is an instance of
+            torch.nn.modules.container.Sequential
     '''
     children = [c for i,c in enumerate(model.named_children()) if i not in del_ids]
     model = torch.nn.Sequential(
@@ -352,33 +360,34 @@ def model_layers_delete(model, del_ids = []):
 
 def model_layers_add(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
+    Docs ::
 
-    Input
-    -----
-    model: instance of class of base class torch.nn.Module
+        Input
+        -----
+        model: instance of class of base class torch.nn.Module
 
-    modules: list of dict
-        each dict has key:value pairs
+        modules: list of dict
+            each dict has key:value pairs
 
-        {
-        'name': str
-        'position': int
-        'module': torch.nn.Module
-        }
+            {
+            'name': str
+            'position': int
+            'module': torch.nn.Module
+            }
 
-        with:
-            name: str, name to be added in the nn.modules.container.Sequential
+            with:
+                name: str, name to be added in the nn.modules.container.Sequential
 
-            position: int, [0,..N], with N>0, also -1, where N the total
-            nr of modules in the torch.nn.modules.container.Sequential
-            -1 denotes the module that will be appended at the end
+                position: int, [0,..N], with N>0, also -1, where N the total
+                nr of modules in the torch.nn.modules.container.Sequential
+                -1 denotes the module that will be appended at the end
 
-            module: torch.nn.Module
+                module: torch.nn.Module
 
-    Output
-    ------
-    model: model with added modules/layers that is an instance of
-        torch.nn.modules.container.Sequential
+        Output
+        ------
+        model: model with added modules/layers that is an instance of
+            torch.nn.modules.container.Sequential
     '''
     all_positions = [m['position'] for m in modules]
     current_children = [c for c in model.named_children()]
@@ -966,6 +975,7 @@ class SequenceReshaper(nn.Module):
             return x
         else:
             return x
+
 
 
 ###############################################################################################
