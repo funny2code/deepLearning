@@ -6,27 +6,14 @@ Doc::
     -------------------------functions----------------------
     dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
     device_setup(device = 'cpu', seed = 42, arg:dict = None)
-    gradwalk(x, _depth = 0)
-    gradwalk_run(graph)
     help()
-    load_partially_compatible(model, device = 'cpu')
     model_evaluation(model, loss_task_fun, test_loader, arg, )
     model_load(dir_checkpoint:str, torch_model = None, doeval = True, dotrain = False, device = 'cpu', input_shape = None, **kw)
-    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str, torch.Tensor])
+    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict[str, torch.Tensor])
     model_save(torch_model = None, dir_checkpoint:str = "./checkpoint/check.pt", optimizer = None, cc:dict = None, epoch = -1, loss_val = 0.0, show = 1, **kw)
     model_summary(model, **kw)
     model_train(model, loss_calc, optimizer = None, train_loader = None, valid_loader = None, arg:dict = None)
-    test1()
-    test3()
-    test4(dir_checkpoint, torch_model)
-    test_all()
-    test_dataset_classification_fake(nrows = 500)
-    test_dataset_fashion_mnist(samples = 100, random_crop = False, random_erasing = False, convert_to_RGB = False, val_set_ratio = 0.2, test_set_ratio = 0.1, num_workers = 1)
 
-    -------------------------methods----------------------
-    test_model_dummy2.__init__(self)
-    test_model_dummy.__init__(self, input_dim, output_dim, hidden_dim = 4)
-    test_model_dummy.forward(self, x)
 
 
     Utils for torch training
@@ -41,23 +28,18 @@ Doc::
 
 
 """
-import os, random, numpy as np, glob, pandas as pd, matplotlib.pyplot as plt ;from box import Box
+import os, random, numpy as np, os, pandas as pd
 from copy import deepcopy
-from typing import List,Dict,Union
+from box import Box
 
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
-from sklearn.metrics import mean_squared_error, accuracy_score, roc_curve, auc, roc_auc_score, precision_score, recall_score, precision_recall_curve, accuracy_score
 import sklearn.datasets
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset,Dataset
-
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 #############################################################################################
-from utilmy import log, log2, os_module_name
+from utilmy import log, os_module_name
+
 MNAME = os_module_name(__file__)
 
 def help():
@@ -141,15 +123,14 @@ def test2():
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
 
 
-    
-    model = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
-    X, y = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
+    model       = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
+    X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
     test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
 
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
     
-    model_evaluation(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
+    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
 
     model = models.resnet50()
     kwargs = {'input_size': (3, 224, 224)}
@@ -162,7 +143,34 @@ def test2():
 
 
 
+def test_metrics1():
+    model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    data   = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    labels = torch.randint(1000, (64,))#random labels 
+    acc    = torch_metric_accuracy(output = output, labels = labels) 
 
+    x1 = torch.rand(100,)
+    x2 = torch.rand(100,)
+    r = torch_pearson_coeff(x1, x2)
+
+    x = torch.rand(100, 30)
+    r_pairs = torch_pearson_coeff_pairs(x)
+
+
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    # This is just an example where class coded by 999 has more occurences
+    # No train test splits are applied to lead to the overrepresentation of class 999 
+    p = [(1-0.05)/1000]*999
+    p.append(1-sum(p))
+    labels = np.random.choice(list(range(1000)), 
+                            size = (10000,), 
+                            p = p)#imbalanced 1000-class labels
+    labels = torch.Tensor(labels).long()
+    weight, label_weight = torch_class_weights(labels)
+    loss = torch.nn.CrossEntropyLoss(weight = weight)
+    l = loss(output, labels[:64])
 
 
 
@@ -193,6 +201,12 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
     return device
 
 
+
+
+
+
+
+###############################################################################################
 def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, test_X=None, test_y=None,  
                      batch_size=64, shuffle=True, device='cpu', batch_size_val=None, batch_size_test=None):
     """dataloader_create
@@ -227,31 +241,6 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
 
 
 
-
-
-
-
-###############################################################################################
-####### Image #################################################################################
-def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
-    """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
-
-
-    """
-    if labels_dict is not None:
-        for ci, catval in labels_dict.items():
-            dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
-    labels_col = labels_dict.keys()
-
-    for ci in labels_col:
-        dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
-        dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
-        dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
-        #####  0,0,1,0 format   log(dfi_1hot)
-    return dflabels
-
-
-
 def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
                      dirout = "./"):
     """ Downloading Dataset from github  and unzip it
@@ -279,6 +268,49 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
         print("dataset is already presented")
     return dname
 
+
+
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    #### Split anything
+    val_ratio = val_ratio + train_ratio
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    else :  ## if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
+
+
+
+
+
+###############################################################################################
+####### Image #################################################################################
+def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
+    """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
+
+
+    """
+    if labels_dict is not None:
+        for ci, catval in labels_dict.items():
+            dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+    labels_col = labels_dict.keys()
+
+    for ci in labels_col:
+        dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
+        dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
+        dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
+        #####  0,0,1,0 format   log(dfi_1hot)
+    return dflabels
 
 
 def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
@@ -313,27 +345,6 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     df = df[ df[col_img] != '' ]
     # df = df.dropna(how='any',axis=0)
     return df
-
-
-
-def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
-    #### Split anything
-    val_ratio = val_ratio + train_ratio
-    if isinstance(anyobject, pd.DataFrame):
-        df = anyobject
-        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
-        df_train = df.iloc[0:itrain,:]
-        df_val   = df.iloc[itrain:ival,:]
-        df_test  = df.iloc[ival:,:]
-        return df_train, df_val, df_test
-
-    else :  ## if isinstance(anyobject, list):
-        df = anyobject
-        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
-        df_train = df[0:itrain]
-        df_val   = df[itrain:ival]
-        df_test  = df[ival:]
-        return df_train, df_val, df_test
 
 
 
@@ -437,7 +448,6 @@ def ImageDataloader(df=None, batch_size=64,
     """
 
     """
-    from torchvision import transforms
     from utilmy.deeplearning.ttorch import util_torch as ut
 
     #label_list  = label_list.split(",")   #### Actual labels
@@ -482,6 +492,27 @@ def ImageDataloader(df=None, batch_size=64,
 
 
 ###############################################################################################
+def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", optimizer=None, cc:dict=None,
+               epoch=-1, loss_val=0.0, show=1, **kw):
+    """function model_save
+    Doc::
+
+        dir_checkpoint = "./check/mycheck.pt"
+        model_save(model, dir_checkpoint, epoch=1,)
+    """
+    from copy import deepcopy
+    dd = {}
+    dd['model_state_dict'] = deepcopy(torch_model.state_dict())
+    dd['epoch'] = cc.get('epoch',   epoch)
+    dd['loss']  = cc.get('loss_val', loss_val)
+    dd['optimizer_state_dict']  = optimizer.state_dict()  if optimizer is not None else {}
+
+    torch.save(dd, dir_checkpoint)
+    if show>0: log(dir_checkpoint)
+    return dir_checkpoint
+
+
+
 def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False, device='cpu', input_shape=None, **kw):
     """function model_load from checkpoint
     Doc::
@@ -520,28 +551,7 @@ def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False,
     return torch_model 
     
 
-def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", optimizer=None, cc:dict=None,
-               epoch=-1, loss_val=0.0, show=1, **kw):
-    """function model_save
-    Doc::
-
-        dir_checkpoint = "./check/mycheck.pt"
-        model_save(model, dir_checkpoint, epoch=1,)
-    """
-    from copy import deepcopy
-    dd = {}
-    dd['model_state_dict'] = deepcopy(torch_model.state_dict())
-    dd['epoch'] = cc.get('epoch',   epoch)
-    dd['loss']  = cc.get('loss_val', loss_val)
-    dd['optimizer_state_dict']  = optimizer.state_dict()  if optimizer is not None else {}
-
-    torch.save(dd, dir_checkpoint)
-    if show>0: log(dir_checkpoint)
-    return dir_checkpoint
-
-
-
-def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str, torch.Tensor]):
+def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict):
     """  using 1x RAM for large model
     Doc::
 
@@ -553,9 +563,8 @@ def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str
 
 
     """
-    from typing import Dict
 
-    def get_keys_to_submodule(model: nn.Module) -> Dict[str, nn.Module]:
+    def get_keys_to_submodule(model: nn.Module) -> dict:
         keys_to_submodule = {}
         # iterate all submodules
         for submodule_name, submodule in model.named_modules():
@@ -601,6 +610,7 @@ def model_load_partially_compatible(model, dir_weights='', device='cpu'):
                     }
     current_model.load_state_dict(new_state_dict)
     return current_model
+
 
 
 
@@ -702,7 +712,8 @@ def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loade
               counter_early_stopping += 1
 
 
-def model_evaluation(model, loss_task_fun, test_loader, arg, ):
+
+def model_evaluate(model, loss_task_fun, test_loader, arg, ):
     """function model_evaluation
     Doc::
 
@@ -735,7 +746,6 @@ def model_evaluation(model, loss_task_fun, test_loader, arg, ):
             dfi = metrics_eval(ypred.numpy(), yval.numpy(), metric_list=['accuracy_score']) # modified by Abrham
             dfmetric = pd.concat((dfmetric, dfi, pd.DataFrame([['loss', loss_val]], columns=['name', 'metric_val'])))
     return dfmetric
-
 
 
 
@@ -824,43 +834,7 @@ def model_summary(model, **kw):
 ########### Metrics  ##########################################################################
 if 'metrics':
     #### Numpy metrics
-    from utilmy.deeplearning.util_dl import metrics_eval, metrics_plot
-
-    #### Torch metrics
-    def test_metrics1():
-        model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
-        data   = torch.rand(64, 3, 224, 224)
-        output = model(data)
-        labels = torch.randint(1000, (64,))#random labels 
-        acc    = torch_metric_accuracy(output = output, labels = labels) 
-
-
-        x1 = torch.rand(100,)
-        x2 = torch.rand(100,)
-        r = torch_pearson_coeff(x1, x2)
-
-        x = torch.rand(100, 30)
-        r_pairs = torch_pearson_coeff_pairs(x)
-
-
-
-    def test_metrics2():
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
-
-        data = torch.rand(64, 3, 224, 224)
-        output = model(data)
-        # This is just an example where class coded by 999 has more occurences
-        # No train test splits are applied to lead to the overrepresentation of class 999 
-        p = [(1-0.05)/1000]*999
-        p.append(1-sum(p))
-        labels = np.random.choice(list(range(1000)), 
-                                size = (10000,), 
-                                p = p)#imbalanced 1000-class labels
-        labels = torch.Tensor(labels).long()
-        weight, label_weight = torch_class_weights(labels)
-        loss = torch.nn.CrossEntropyLoss(weight = weight)
-        l = loss(output, labels[:64])
-
+    from utilmy.deeplearning.util_dl import metrics_eval
 
 
     def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
@@ -1085,7 +1059,7 @@ if 'utils':
 if 'test_utils':
     class test_model_dummy(nn.Module):
       def __init__(self, input_dim, output_dim, hidden_dim=4):
-        super(DataEncoder, self).__init__()
+        super(test_model_dummy, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
