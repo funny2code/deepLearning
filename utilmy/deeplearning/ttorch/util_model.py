@@ -1043,7 +1043,15 @@ class SmeLU(torch.nn.Module):
 
 
 
-
+###############################################################################################
+########### Utils #############################################################################
+def torch_norm_l2(X):
+    """
+    normalize the torch  tensor X by L2 norm.
+    """
+    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
+    X_norm = X / X_norm
+    return X_norm
 
 
 
