@@ -68,12 +68,16 @@ except :
    
 ############################################################################################
 def log(*s):
+    """  Log text to console
+    """
     print(*s, flush=True)
 
 
 ############################################################################################
 #### Test and Example usage ################################################################
 def help():
+    """  Help function
+    """
     suffix = "\n\n\n ##############################\n"
     ss  = "from utilmy.vi.vizhtml import * \n\n"
     ss += "data = test_getdata() \n\n "
@@ -96,21 +100,23 @@ def help():
     
       
 def test_all():
-   from utilmy.viz import vizhtml as vi
-   log("Visualization ")
-   log(" from utilmy.viz import vizhtml as vi     ")
-   test1()
-   test2()
-   test3()
-   test4()
-   test_scatter_and_histogram_matplot()
-   test_pd_plot_network()
-   test_cssname()
-   test_external_css()      
-   test_table()       
-   test_colimage_table()
-   test_page()
-   test_tseries_dateformat()
+    """  Test all functions in this module
+    """
+    from utilmy.viz import vizhtml as vi
+    log("Visualization ")
+    log(" from utilmy.viz import vizhtml as vi     ")
+    test1()
+    test2()
+    test3()
+    test4()
+    test_scatter_and_histogram_matplot()
+    test_pd_plot_network()
+    test_cssname()
+    test_external_css()      
+    test_table()       
+    test_colimage_table()
+    test_page()
+    test_tseries_dateformat()
    
 #####################################################################################
 def show(file_csv_parquet:str="myfile.parquet", title='table',format: str='blue_light',dir_out='table.html', css_class=None, use_datatable=True, 
@@ -241,26 +247,92 @@ class htmlDoc(object):
           self.html = self.html + '\n <page size="A4">'
           self.tail = "</page> \n" + self.tail
 
-    def tag(self, x):  self.html += "\n" + x
-    def h1(self,  x,css: str='')  : self.html += "\n" + f"<h1 style='{css}'>{x}</h1>"
-    def h2(self,  x,css: str='')  : self.html += "\n" + f"<h2 style='{css}'>{x}</h2>"
-    def h3(self,  x,css: str='')  : self.html += "\n" + f"<h3 style='{css}'>{x}</h3>"
-    def h4(self,  x,css: str='')  : self.html += "\n" + f"<h4 style='{css}'>{x}</h4>"
-    def p(self,   x,css: str='')  : self.html += "\n" + f"<p style='{css}'>{x}</p>"
-    def div(self, x,css: str='')  : self.html += "\n" + f"<div style='{css}'>{x}</div>"
-    def hr(self,    css: str='')  : self.html += "\n" + f"<hr style='{css}'/>"
-    def sep(self,   css: str='')  : self.html += "\n" + f"<hr style='{css}'/>"
-    def br(self,    css: str='')  : self.html += "\n" + f"<br style='{css}'/>"
+    def tag(self, x):  
+        """  Add tage to html
+        Docs::
+
+            x      :        Nmae of the output directory.            
+        """
+        self.html += "\n" + x
+    def h1(self,  x,css: str=''): 
+        """  Add h1 to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to h1.
+        """
+        self.html += "\n" + f"<h1 style='{css}'>{x}</h1>"
+    def h2(self,  x,css: str=''): 
+        """  Add h2 to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to h2.
+        """
+        self.html += "\n" + f"<h2 style='{css}'>{x}</h2>"
+    def h3(self,  x,css: str=''):
+        """  Add h3 to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to h3.
+        """
+        self.html += "\n" + f"<h3 style='{css}'>{x}</h3>"
+    def h4(self,  x,css: str='')  : 
+        """  Add h4 to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to h4.
+        """
+        self.html += "\n" + f"<h4 style='{css}'>{x}</h4>"
+    def p(self,   x,css: str=''):
+        """  Add p to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to p.
+        """
+        self.html += "\n" + f"<p style='{css}'>{x}</p>"
+    def div(self, x,css: str=''): 
+        """  Add div to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to div.
+        """
+        self.html += "\n" + f"<div style='{css}'>{x}</div>"
+    def hr(self,    css: str=''):
+        """  Add horizontal row to html
+        Docs::
+
+            css=""    :        css style to hr.
+        """
+        self.html += "\n" + f"<hr style='{css}'/>"
+    def sep(self,   css: str=''): 
+        """  Add separator to html
+        Docs::
+
+            css=""    :        css style to sep.
+        """
+        self.html += "\n" + f"<hr style='{css}'/>"
+    def br(self,    css: str=''): 
+        """  Add break to html
+        Docs::
+
+            css=""    :        css style to br.
+        """
+        self.html += "\n" + f"<br style='{css}'/>"
 
     def get_html(self)-> str:
-        """  funtion to return html text created
-        Returns:
-            str:        Return Html text
+        """  Funtion to return html text created
         """
         full = self.head  + self.html + self.tail
         return full
 
     def print(self):
+        """  Print html text created
+        """
         full = self.head  + self.html + self.tail
         print(full, flush=True)
 
@@ -281,6 +353,8 @@ class htmlDoc(object):
             fp.write(full)
 
     def open_browser(self):
+        """ Open html file in browser
+        """
         if os.name == 'nt':
             os.system(f'start chrome "file:///{self.dir_out}" ')
             ### file:///D:/_devs/Python01/gitdev/myutil/utilmy/viz/test_viz_table.html   
@@ -304,6 +378,12 @@ class htmlDoc(object):
         self.tail = data + self.tail
 
     def hidden(self, x,css: str=''):
+        """  Add toggled hidden div to html
+        Docs::
+
+            x         :        text to place inside html tag.
+            css=""    :        css style to hidden.
+        """
         # Hidden P paragraph
         custom_id = str(random.randint(9999,999999))
         # self.head += "\n" + js_code.js_hidden  # Hidden  javascript
@@ -529,13 +609,13 @@ class htmlDoc(object):
         """  Create html density chart.
         Docs::
 
-                    df                :        Dataframe with date and columns of interest.
-                    col=[]            :        List of columns.
-                    title=[]          :        Title of the chart.
-                    figsize=(460, 460):        Size of the figure.
-                    color='#69b3a2'   :        Color of the circle.
-                    cfg={}            :        Configuration for plot.
-                    mode='d3'         :        Mode of plot.
+            df                :        Dataframe with date and columns of interest.
+            col=[]            :        List of columns.
+            title=[]          :        Title of the chart.
+            figsize=(460, 460):        Size of the figure.
+            color='#69b3a2'   :        Color of the circle.
+            cfg={}            :        Configuration for plot.
+            mode='d3'         :        Mode of plot.
         """
 
         html_code = ''
@@ -546,6 +626,13 @@ class htmlDoc(object):
       
     def images_dir(self, dir_input="*.png",  title: str="", 
                    verbose:bool =False):
+        """  Convert images to html code and add it to html.
+        Docs::
+
+            dir_input="*.png" :        Directory with images.
+            title=''           :        Title of the chart.
+            verbose=False      :        Verbose mode.
+        """
         html_code = images_to_html(dir_input=dir_input,  title=title, verbose=verbose)
         self.html += "\n\n" + html_code
 
@@ -555,11 +642,11 @@ class htmlDoc(object):
         """  Add graph to html page
         Docs::
 
-                df:        Panda dataframe
-                cola='col_node1'  :        cola from df.
-                colweight="weight":        weigth of edges.
-                colb='col_node2'  :        colb from df.
-                coledge='col_edge':        edge from df.
+            df:        Panda dataframe
+            cola='col_node1'  :        cola from df.
+            colweight="weight":        weigth of edges.
+            colb='col_node2'  :        colb from df.
+            coledge='col_edge':        edge from df.
         """ 
 
         head, body = pd_plot_network(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
@@ -625,7 +712,15 @@ def mlpd3_add_tooltip(fig, points, labels):
 def pd_plot_scatter_get_data(df0:pd.DataFrame,colx: str=None, coly: str=None, collabel: str=None,
                             colclass1: str=None, colclass2: str=None, nmax: int=20000, **kw):
     """  Get data for scatter plot.
-        # internal function
+    Docs::
+
+            df0           :        Dataframe with data.
+            colx=None     :        Column name for x-axis.
+            coly=None     :        Column name for y-axis.
+            collabel=None :        label per point.
+            colclass1=None:        Color per point class1.
+            colclass2=None:        Size per point class2.
+            nmax=20000    :        Maximum number of points.
     """
     # import copy
     nmax = min(nmax, len(df0))
@@ -673,6 +768,20 @@ def pd_plot_scatter_get_data(df0:pd.DataFrame,colx: str=None, coly: str=None, co
 def pd_plot_scatter_matplot(df:pd.DataFrame, colx: str=None, coly: str=None, collabel: str=None,
                             colclass1: str=None, colclass2: str=None,
                             cfg: dict = {}, mode='d3', save_path: str='', verbose=True,  **kw)-> str:
+    """  Plot scatter plot.
+    Docs::
+
+            df0           :        Dataframe with data.
+            colx=None     :        Column name for x-axis.
+            coly=None     :        Column name for y-axis.
+            collabel=None :        label per point.
+            colclass1=None:        Color per point class1.
+            colclass2=None:        Size per point class2.
+            cfg={}        :        Configuration dictionary.
+            mode='d3'     :        Mode: 'd3' or 'matplotlib'.
+            save_path=''  :        Path to save plot.
+            verbose=True  :        Verbose.
+    """
     
     cc           = Box(cfg)
     cc.figsize   = cc.get('figsize', (25, 15))  # Dict type default values
@@ -747,6 +856,20 @@ def pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius=9,
                        figsize: tuple = (460, 460), xlabel: str = 'x-axis', ylabel: str = 'y-axis',
                        color: str = '#69b3a2',
                        cfg: dict = {}):
+    """  Plot density plot.
+    Docs::
+
+            df0                 :        Dataframe with data.
+            colx=None           :        Column name for x-axis.
+            coly=None           :        Column name for y-axis.
+            radius=9            :        Radius of the circle.
+            title='Plot Density':        Title of the plot.
+            figsize=(460, 460)  :        Size of the figure.
+            xlabel='x-axis'     :        Label of the x-axis.
+            ylabel='y-axis'     :        Label of the y-axis.
+            color='#69b3a2'     :        Color of the circle.
+            cfg={}              :        Configuration dictionary.
+    """
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     html_code = f'<div id="{container_id}"></div>'
 
@@ -868,16 +991,15 @@ def pd_plot_parallel_d3(df: pd.DataFrame,
                          figsize: tuple = (460, 460),
                          color: str = '#69b3a2',
                         cfg: dict = {}):
-    """
+    """ Plot parallel coordinate using d3.
     Docs::
 
-        df: pd.DataFrame,
-        col = [],
-         title: str = '',
-         figsize: tuple = (460, 460),
-         color: str = '#69b3a2',
-        cfg: dict = {}):
-
+        df                :        pandas.DataFrame.
+        col=[]            :        List of column names.
+        title=''          :        Title of the plot..
+        figsize=(460, 460):        Size of the figure.
+        color='#69b3a2'   :        Color of the plot.
+        cfg={}            :        Configuration dictionary.
     """
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     html_code = f'<div id="{container_id}"></div>'
@@ -988,11 +1110,21 @@ def pd_plot_parallel_d3(df: pd.DataFrame,
 
 def pd_plot_histogram_matplot(df:pd.DataFrame, col: str='' ,colormap:str='RdYlBu', title: str='', nbin=20.0, q5=0.005, q95=0.995, nsample=-1,
                               save_img: str="",xlabel: str=None,ylabel: str=None, verbose=True, **kw):
-    """
+    """ Plot histogram using matplotlib.
     Docs::
 
-
-
+        df                :        Dataframe with data.
+        col=''            :        Column name for histogram.
+        colormap='RdYlBu' :        Colormap for histogram.
+        title=''          :        Title of the plot.
+        nbin=20.0         :        Number of bins.
+        q5=0.005          :        Quantile 5.
+        q95=0.995         :        Quantile 95.
+        nsample=-1        :        Number of samples to draw.
+        save_img=''       :        Path to save the image.
+        xlabel=None       :        Label for x axis.
+        ylabel=None       :        Label for y axis.
+        verbose=True      :        Verbose mode.
     """
     cm = plt.cm.get_cmap(colormap)
     df.loc[:,col] = df[col].fillna(0)
@@ -1027,6 +1159,18 @@ def pd_plot_histogram_matplot(df:pd.DataFrame, col: str='' ,colormap:str='RdYlBu
 
 def pd_plot_tseries_matplot(df:pd.DataFrame, plot_type: str=None, coly1: list = [], coly2: list = [],
                             figsize: tuple =(8, 4), spacing=0.1, verbose=True, **kw):
+    """  Plot t-series chart using matplot.
+    Docs::
+
+        df               :        Dataframe with date and columns of interest.
+        plot_type        :        Type of plot.
+        coly1            :        List of column names for y1.
+        coly2=[]         :        List of column names for y2.
+        title=""         :        Title of the chart.
+        figsize="(14,7)" :        Size of the figure.
+        spacing=0.1      :        Spacing between subplots.
+        verbose=True     :        Verbose mode.
+    """
     from pandas import plotting
     from pandas.plotting import _matplotlib
     from matplotlib import pyplot as plt
@@ -1083,6 +1227,8 @@ def pd_plot_tseries_matplot(df:pd.DataFrame, plot_type: str=None, coly1: list = 
 
 
 def mpld3_server_start():
+    """  Display mpld3 on server
+    """
     # Windows specifc
     # if os.name == 'nt': os.system(f'start chrome "{dir_out}/embeds.html" ')
     # mpld3.show(fig=None, ip='127.0.0.1', port=8888, n_retries=50, local=True, open_browser=True, http_server=None, **kwargs)[source]
@@ -1205,16 +1351,17 @@ def pd_plot_tseries_highcharts(df0,
                               figsize:tuple =  None, title:str=None,
                               xlabel:str=None,  y1label:str=None, y2label:str=None,
                               cfg:dict={}, mode='d3', save_img="", verbose=True, **kw)-> str:
-    '''
-        function to return highchart json cord for time_series.
-        input parameter
-        df : panda dataframe on which you want to apply time_series
-        coly1: column name for y-axis one
-        coly2: column name for y-axis second
-        xlabel : label of x-axis
-        cols_y1label : label for yaxis 1
-        cols_y2label : label for yaxis 2
-        date_format : %m for moth , %d for day and %Y for Year.
+    '''  function to return highchart json cord for time_series.
+    Docs::       
+    
+            df0         :        Panda dataframe on which you want to apply time_series.
+            coldate     :        Column name for date.
+            date_format :        %m for moth , %d for day and %Y for Year.
+            coly1=[]    :        Column name for y-axis one.
+            coly2=[]    :        Column name for y-axis second.
+            xlabel=None :        Label of x-axis.
+            y1label=None:        Label for yaxis 1.
+            y2label=None:        Label for yaxis 2.
     '''
 
     from highcharts import Highchart
@@ -1295,20 +1442,21 @@ def pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str=None,
                               show=False, verbose=True, **kw):
 
     ''' function to return highchart json code for histogram.
-        input parameter
-        df : panda dataframe on which you want to apply histogram
-        colname : column name from dataframe in which histogram will apply
-        xaxis_label: label for x-axis
-        yaxis_label: label for y-axis
-        binsNumber: Number of bin in bistogram.
-        binWidth : width of each bin in histogram
-        title : title of histogram
-        cols_y2label : label for yaxis 2
-        date_format : %m for moth , %d for day and %Y for Year.
+    Docs::
 
-        df        = data['housing.csv']
-        html_code = pd_plot_histogram_hcharts(df,colname="median_income",xaxis_label= "x-axis",yaxis_label="y-axis",cfg={}, mode='d3', save_img=False)
-        # highcharts_show_chart(html_code)
+        df             :        panda dataframe on which you want to apply histogram.
+        colname=None   :        Column name from dataframe in which histogram will apply.
+        binsNumber=None:        Number of bin in bistogram.
+        binWidth=None  :        Width of each bin in histogram.
+        color=None     :        Color of histogram.
+        title          :        Title of histogram
+        xaxis_label    :        Label for x-axis
+        yaxis_label    :        Label for y-axis
+        cfg            :        Configuretion dictionary for highcharts.
+        save_img=""    :        Path to save image.
+        show=False     :        Show image.
+        verbose=True   :        Verbose mode.
+
     '''
     cc = Box(cfg)
     cc.title        = cc.get('title',    "My Title" ) if title is None else title
@@ -1442,8 +1590,7 @@ def images_to_html(dir_input="*.png",  title="", verbose=False):
 
 
 def colormap_get_names():
-  """
-  Function to get list of colormap names with plot.
+  """Function to get list of colormap names with plot.
   """
   cmaps = {}
   cmaps['uniform_sequential'] = [
@@ -1497,8 +1644,7 @@ def colormap_get_names():
 def pd_plot_network(df:pd.DataFrame, cola: str='col_node1', 
                     colb: str='col_node2', coledge: str='col_edge',
                     colweight: str="weight",html_code:bool = True):
-    """
-    Function to plot network https://pyviz.org/tools.html
+    """  Function to plot network https://pyviz.org/tools.html
     Docs::
 
             df                :        dataframe with nodes and edges
@@ -1529,8 +1675,7 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
 
     def draw_graph(networkx_graph, notebook:bool =False, output_filename='graph.html',
                    show_buttons:bool =True, only_physics_buttons:bool =False,html_code:bool  = True):
-        """
-        This function accepts a networkx graph object, converts it to a pyvis network object preserving
+        """  This function accepts a networkx graph object, converts it to a pyvis network object preserving
         its node and edge attributes,
         and both returns and saves a dynamic network visualization.
         Valid node attributes include:
