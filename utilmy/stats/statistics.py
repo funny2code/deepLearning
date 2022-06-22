@@ -17,7 +17,6 @@ import os, sys, pandas as pd, numpy as np
 from utilmy.utilmy import pd_generate_data
 from utilmy.prepro.util_feature import  pd_colnum_tocat, pd_colnum_tocat_stat
 
-# conduct multiple comparisons
 from tqdm import tqdm
 from typing import List, Union
 from scipy import stats
@@ -27,9 +26,7 @@ from scipy import stats
 from utilmy.utilmy import log, log2
 
 def help():
-    """        .
-    Doc::
-            
+    """    
     """
     from utilmy import help_create
     print( help_create("utilmy.stats.statistics") )
@@ -37,11 +34,8 @@ def help():
 
 #################################################################################################
 def test_all():
-    """.
-    Doc::
-            
+    """ 
     """
-    import pandas as pd
     from sklearn.tree import DecisionTreeRegressor
     from sklearn.model_selection import train_test_split
     model = DecisionTreeRegressor(random_state=1)
@@ -90,7 +84,6 @@ def test_all():
         confidence_interval_bootstrap(ypred, custom_stat=custom_stat)
 
 
-
     def test_np_utils():
         log("Testing np_utils ...")
         from utilmy.stats.statistics import np_col_extractname, np_conv_to_one_col, np_list_remove
@@ -100,7 +93,6 @@ def test_all():
         np_list_remove(arr,[1,2,3], mode="exact")
         np_conv_to_one_col(arr)
 
-  
     test()
     test_estimator()
     # test_drift_detect()
@@ -108,9 +100,7 @@ def test_all():
 
 
 def test0():
-    """ .
-    Doc::
-            
+    """ .            
     """
     df = pd_generate_data(7, 100)
     test_anova(df, 'cat1', 'cat2')
@@ -123,9 +113,7 @@ def test0():
 
 
 def test1():
-    """        .
-    Doc::
-            
+    """        .            
     """
     from sklearn.tree import DecisionTreeRegressor
     from sklearn.model_selection import train_test_split
@@ -149,7 +137,6 @@ def test1():
 
 def test3():
     """ .
-    Doc::
             
     """
     arr = np.array([[1, 2, 3], [4, 5, 6]])
@@ -161,9 +148,6 @@ def test3():
 def test_check_mean():
     """function test_check_mean.
     Doc::
-            
-            Args:
-            Returns:
                 
     """
    
@@ -249,10 +233,7 @@ def test_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', 
     """Run multiple T tests of Independance.
     Doc::
             
-               p_values = multiple_comparisons(data)
-               
-        
-        
+               p_values = multiple_comparisons(data)        
     """
     p_values = []
     colsX = df.columns  if colsX is None else colsX
@@ -309,8 +290,6 @@ def bonferoni_adjuster(p_values, threshold=0.1):
 def test_chisquare(df_obs:pd.DataFrame, df_true:pd.DataFrame, method='chisquare', **kw):
     """ Hypothesis betweeb Obs and true values.
     Doc::
-            
-        
                 https://github.com/aschleg/hypothetical/blob/master/tests/test_contingency.py
     """
     try:

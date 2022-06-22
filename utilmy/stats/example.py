@@ -102,6 +102,7 @@ def hypotest_is_all_group_means_equal(df, col=['col_group', 'val'], mean_target=
     if isinstance(df, pd.DataFrame):
         for coli in cols:
             vlist.append(df[coli].values)
+
     elif isinstance(df, list):
        vlist = df
     ddict = Box({})    
@@ -208,8 +209,9 @@ ww.test_summary
 # Data may be similar.
 
 ### test to determine normality of data
-"""# 1) Shapiro - Wilk test for normality"""
 
+
+"""# 1) Shapiro - Wilk test for normality"""
 weight = np.random.triangular(left = 40, right = 70, mode = 60, size = 1000)
 roll = [i for i in range(1000)]
 df = pd.DataFrame({
