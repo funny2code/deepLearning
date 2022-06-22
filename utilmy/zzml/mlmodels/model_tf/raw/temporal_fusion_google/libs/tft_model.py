@@ -25,7 +25,11 @@ from __future__ import division
 from __future__ import print_function
 
 import gc
-from jsoncomment import JsonComment ; json = JsonComment()
+from jsoncomment import JsonComment ;
+
+import utilmy.deeplearning.ttorch.layers
+
+json = JsonComment()
 import os
 import shutil
 
@@ -952,7 +956,7 @@ class TemporalFusionTransformer(object):
             stateful=False,
         )
       else:
-        lstm = tf.keras.layers.LSTM(
+        lstm = utilmy.deeplearning.ttorch.layers.LSTM(
             self.hidden_layer_size,
             return_sequences=True,
             return_state=return_state,

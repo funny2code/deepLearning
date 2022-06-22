@@ -12,15 +12,10 @@ import os, pickle, numpy as np
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
-from typing import Optional, Sequence
 
 import torch
-from torch import Tensor
 from torch import nn
-from torch.nn import functional as F
-from torch.utils.data import DataLoader, Dataset
 from torch.utils.data import DataLoader
-
 
 #################################################################################################
 from utilmy import log
@@ -616,137 +611,6 @@ class model_getlayer():
 
 
 
-
-
-##################################################################################################
-########### Custom Losses ######################################################################
-class FocalLoss(nn.Module):
-    """ Focal Loss, as described in https://arxiv.org/abs/1708.02002.
-    Docs::
-
-        It is essentially an enhancement to cross entropy loss and is
-        useful for classification tasks when there is a large class imbalance.
-        x is expected to contain raw, unnormalized scores for each class.
-        y is expected to contain class labels.
-        Shape:
-            - x: (batch_size, C) or (batch_size, C, d1, d2, ..., dK), K > 0.
-            - y: (batch_size,) or (batch_size, d1, d2, ..., dK), K > 0.
-    """
-
-    def __init__(self,
-                 alpha: Optional[Tensor] = None,
-                 gamma: float = 0.,
-                 reduction: str = 'mean',
-                 ignore_index: int = -100):
-        """Constructor.
-        Args:
-            alpha (Tensor, optional): Weights for each class. Defaults to None.
-            gamma (float, optional): A constant, as described in the paper.
-                Defaults to 0.
-            reduction (str, optional): 'mean', 'sum' or 'none'.
-                Defaults to 'mean'.
-            ignore_index (int, optional): class label to ignore.
-                Defaults to -100.
-        """
-        if reduction not in ('mean', 'sum', 'none'):
-            raise ValueError(
-                'Reduction must be one of: "mean", "sum", "none".')
-
-        super().__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.ignore_index = ignore_index
-        self.reduction = reduction
-
-        self.nll_loss = nn.NLLLoss(
-            weight=alpha, reduction='none', ignore_index=ignore_index)
-
-    def __repr__(self):
-        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
-        arg_vals = [self.__dict__[k] for k in arg_keys]
-        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
-        arg_str = ', '.join(arg_strs)
-        return f'{type(self).__name__}({arg_str})'
-
-    def forward(self, x: Tensor, y: Tensor) -> Tensor:
-        if x.ndim > 2:
-            # (N, C, d1, d2, ..., dK) --> (N * d1 * ... * dK, C)
-            c = x.shape[1]
-            x = x.permute(0, *range(2, x.ndim), 1).reshape(-1, c)
-            # (N, d1, d2, ..., dK) --> (N * d1 * ... * dK,)
-            y = y.view(-1)
-
-        unignored_mask = y != self.ignore_index
-        y = y[unignored_mask]
-        if len(y) == 0:
-            return 0.
-        x = x[unignored_mask]
-
-        # compute weighted cross entropy term: -alpha * log(pt)
-        # (alpha is already part of self.nll_loss)
-        log_p = F.log_softmax(x, dim=-1)
-        ce = self.nll_loss(log_p, y)
-
-        # get true class column from each row
-        all_rows = torch.arange(len(x))
-        log_pt = log_p[all_rows, y]
-
-        # compute focal term: (1 - pt)^gamma
-        pt = log_pt.exp()
-        focal_term = (1 - pt)**self.gamma
-
-        # the full loss: -alpha * ((1 - pt)^gamma) * log(pt)
-        loss = focal_term * ce
-
-        if self.reduction == 'mean':
-            loss = loss.mean()
-        elif self.reduction == 'sum':
-            loss = loss.sum()
-
-        return loss
-
-
-def focal_loss(alpha: Optional[Sequence] = None,
-               gamma: float = 0.,
-               reduction: str = 'mean',
-               ignore_index: int = -100,
-               device='cpu',
-               dtype=torch.float32) -> FocalLoss:
-    """Factory function for FocalLoss.
-    Docs::
-
-            alpha (Sequence, optional): Weights for each class. Will be converted
-                to a Tensor if not None. Defaults to None.
-            gamma (float, optional): A constant, as described in the paper.
-                Defaults to 0.
-            reduction (str, optional): 'mean', 'sum' or 'none'.
-                Defaults to 'mean'.
-            ignore_index (int, optional): class label to ignore.
-                Defaults to -100.
-            device (str, optional): Device to move alpha to. Defaults to 'cpu'.
-            dtype (torch.dtype, optional): dtype to cast alpha to.
-                Defaults to torch.float32.
-        Returns:
-            A FocalLoss object
-    """
-    if alpha is not None:
-        if not isinstance(alpha, Tensor):
-            alpha = torch.tensor(alpha)
-        alpha = alpha.to(device=device, dtype=dtype)
-
-    fl = FocalLoss(
-        alpha=alpha,
-        gamma=gamma,
-        reduction=reduction,
-        ignore_index=ignore_index)
-    return
-
-
-
-
-
-
-
 ##################################################################################################
 ########### Gradient Checks ######################################################################
 def model_is_gradient_needed(net_model):
@@ -760,7 +624,7 @@ def model_is_gradient_needed(net_model):
         return False
 
 
-def plot_grad_flow(named_parameters):
+def plot_gradient_flow(named_parameters):
     """
     Docs::
 
@@ -791,7 +655,7 @@ def plot_grad_flow(named_parameters):
     plt.grid(True)
 
 
-def plot_grad_flow_v2(named_parameters):
+def plot_gradient_flow_v2(named_parameters):
     '''  Check Grad Flow
     Docs::
 
@@ -829,19 +693,24 @@ def plot_grad_flow_v2(named_parameters):
 
 
 
-##################################################################################################
-########### Computer vision ######################################################################
-def vision_prediction_check():
-    """ Tooling for Vision checks
-    Docs::
 
-            https://github.com/jacobgil/pytorch-grad-cam
-
-            https://github.com/pytorch/captum
-
+###############################################################################################
+########### Utils #############################################################################
+def torch_norm_l2(X):
     """
-    pass
+    normalize the torch  tensor X by L2 norm.
+    """
+    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
+    X_norm = X / X_norm
+    return X_norm
 
+
+
+
+
+
+##################################################################################################
+########### Custom Losses ########################################################################
 
 
 
@@ -940,29 +809,6 @@ class MultiClassMultiLabel_Head(nn.Module):
         return loss_list
 
 
-class LSTM(nn.Module):
-  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
-    super(LSTM, self).__init__()
-    self.num_layers = num_layers
-    self.input_size = input_size
-    self.hidden_size = hidden_size
-    self.num_classes = num_classes
-    self.dropout = dropout
-
-    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers,
-                        dropout = self.dropout, batch_first=True)
-    self.fc = nn.Linear(self.hidden_size, self.num_classes)
-
-  def forward(self, x):
-    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    out, _ = self.lstm(x, (h0,c0))
-    out = out[:,-1,:]
-    out = self.fc(out)
-    return out
-
-
-
 class SequenceReshaper(nn.Module):
     def __init__(self, from_ = 'vision'):
         super(SequenceReshaper,self).__init__()
@@ -978,80 +824,17 @@ class SequenceReshaper(nn.Module):
 
 
 
+
+
+
+
 ###############################################################################################
 ########### Custom element ####################################################################
-class SmeLU(torch.nn.Module):
-    """
-    This class implements the Smooth ReLU (SmeLU) activation function proposed in:
-    https://arxiv.org/pdf/2202.06499.pdf
+from layers import (SmeLU
 
 
-    Example :
-        def main() -> None:
-            # Init figures
-            fig, ax = plt.subplots(1, 1)
-            fig_grad, ax_grad = plt.subplots(1, 1)
-            # Iterate over some beta values
-            for beta in [0.5, 1., 2., 3., 4.]:
-                # Init SemLU
-                smelu: SmeLU = SmeLU(beta=beta)
-                # Make input
-                input: torch.Tensor = torch.linspace(-6, 6, 1000, requires_grad=True)
-                # Get activations
-                output: torch.Tensor = smelu(input)
-                # Compute gradients
-                output.sum().backward()
-                # Plot activation and gradients
-                ax.plot(input.detach(), output.detach(), label=str(beta))
-                ax_grad.plot(input.detach(), input.grad.detach(), label=str(beta))
-            # Show legend, title and grid
-            ax.legend()
-            ax_grad.legend()
-            ax.set_title("SemLU")
-            ax_grad.set_title("SemLU gradient")
-            ax.grid()
-            ax_grad.grid()
-            # Show plots
-            plt.show()
+)
 
-    """
-
-    def __init__(self, beta: float = 2.) -> None:
-        """
-        Constructor method.
-        beta (float): Beta value if the SmeLU activation function. Default 2.
-        """
-        # Call super constructor
-        super(SmeLU, self).__init__()
-        # Check beta
-        assert beta >= 0., f"Beta must be equal or larger than zero. beta={beta} given."
-        # Save parameter
-        self.beta: float = beta
-
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass.
-        input (torch.Tensor): Tensor of any shape
-        :return (torch.Tensor): Output activation tensor of the same shape as the input tensor
-        """
-        output: torch.Tensor = torch.where(input >= self.beta, input,
-                                           torch.tensor([0.], device=input.device, dtype=input.dtype))
-        output: torch.Tensor = torch.where(torch.abs(input) <= self.beta,
-                                           ((input + self.beta) ** 2) / (4. * self.beta), output)
-        return output
-
-
-
-
-###############################################################################################
-########### Utils #############################################################################
-def torch_norm_l2(X):
-    """
-    normalize the torch  tensor X by L2 norm.
-    """
-    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
-    X_norm = X / X_norm
-    return X_norm
 
 
 

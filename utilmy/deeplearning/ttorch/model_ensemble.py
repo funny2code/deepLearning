@@ -182,7 +182,7 @@ def test1():
     ARG.modelA.layer_emb_id               = ""
     ARG.modelA.dataset.dirin              = "/"
     ARG.modelA.dataset.coly               = 'ytarget'
-    modelA = modelA_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -196,7 +196,7 @@ def test1():
     ARG.modelB.layer_emb_id  = ""
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = modelB_create(ARG.modelB )
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -280,7 +280,7 @@ def test2a():
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
     ARG.modelA.seed                = 42
-    modelA = modelA_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -294,7 +294,7 @@ def test2a():
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
     ARG.modelB.seed                = 42
-    modelB = modelB_create(ARG.modelB )
+    modelB = zzmodelB_create(ARG.modelB)
 
     ### merge_model  ###################################################
     ARG.merge_model                            = Box()
@@ -389,7 +389,7 @@ def test2b():
     ARG.modelA.dataset             = Box()
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
-    modelA = modelA_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
     #model_ft.fc = modelA
     ### modelB  ########################################################
@@ -405,7 +405,7 @@ def test2b():
     ARG.modelB.dataset             = Box()
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
-    modelB = modelB_create(ARG.modelB )
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -507,7 +507,7 @@ def test2c():
     ARG.modelA.dataset               = Box()
     ARG.modelA.dataset.dirin         = "/"
     ARG.modelA.dataset.coly          = 'ytarget'
-    modelA = modelA_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
 
@@ -524,7 +524,7 @@ def test2c():
     ARG.modelB.dataset       = Box()
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = modelB_create(ARG.modelB )
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     # ### modelC  ########################################################
@@ -1342,7 +1342,7 @@ def test2_lstm():
     ARG.modelD.dataset       = Box()
     ARG.modelD.dataset.dirin = "/"
     ARG.modelD.dataset.coly  = 'ytarget'
-    modelD = modelD_create(ARG.modelD)
+    modelD = zzmodelD_create(ARG.modelD)
 
     ### merge_model  ###################################################
     ### EXPLICIT DEPENDENCY  : because it's merge
@@ -2057,14 +2057,14 @@ def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num
 
 
 #################################################################################################
-class modelA_create(BaseModel):
+class zzmodelA_create(BaseModel):
     """ modelA
     """
     def __init__(self,arg):
-        super(modelA_create,self).__init__(arg)
+        super(zzmodelA_create, self).__init__(arg)
 
     def create_model(self, modelA_nn:torch.nn.Module=None):
-        super(modelA_create,self).create_model()
+        super(zzmodelA_create, self).create_model()
         layers_dim    = self.arg.architect
         nn_model_base = self.arg.nn_model
         layer_id      = self.arg.layer_emb_id
@@ -2112,20 +2112,20 @@ class modelA_create(BaseModel):
         return modelA(layers_dim, nn_model_base, layer_id)
 
     def create_loss(self, loss_fun=None) -> torch.nn.Module:
-        super(modelA_create,self).create_loss()
+        super(zzmodelA_create, self).create_loss()
         if not loss_fun : loss_fun
         return torch.nn.BCELoss()
 
 
-class modelB_create(BaseModel):
+class zzmodelB_create(BaseModel):
     """ modelB Creatio
     """
     def __init__(self,arg):
-        super(modelB_create,self).__init__(arg)
+        super(zzmodelB_create, self).__init__(arg)
         self.nn_model_base = arg.nn_model
 
     def create_model(self):
-        super(modelB_create,self).create_model()
+        super(zzmodelB_create, self).create_model()
         layers_dim    = self.arg.architect
         nn_model_base = self.arg.nn_model
         layer_id        = self.arg.layer_emb_id
@@ -2169,19 +2169,19 @@ class modelB_create(BaseModel):
 
 
     def create_loss(self) -> torch.nn.Module:
-        super(modelB_create,self).create_loss()
+        super(zzmodelB_create, self).create_loss()
         return torch.nn.BCELoss()
 
 
-class modelC_create(BaseModel):
+class zzmodelC_create(BaseModel):
     """ modelC Creatio
     """
     def __init__(self,arg):
-        super(modelC_create,self).__init__(arg)
+        super(zzmodelC_create, self).__init__(arg)
         self.nn_model_base = arg.nn_model
 
     def create_model(self):
-        super(modelC_create,self).create_model()
+        super(zzmodelC_create, self).create_model()
         layers_dim    = self.arg.architect
         nn_model_base = self.arg.nn_model
         layer_id        = self.arg.layer_emb_id
@@ -2224,19 +2224,19 @@ class modelC_create(BaseModel):
         return modelC(layers_dim, nn_model_base, layer_id )
 
     def create_loss(self) -> torch.nn.Module:
-        super(modelC_create,self).create_loss()
+        super(zzmodelC_create, self).create_loss()
         return torch.nn.BCELoss()
 
 
-class modelD_create(BaseModel):
+class zzmodelD_create(BaseModel):
     """ modelD Creatio
     """
     def __init__(self,arg):
-        super(modelD_create,self).__init__(arg)
+        super(zzmodelD_create, self).__init__(arg)
         self.nn_model_base = arg.nn_model
 
     def create_model(self):
-        super(modelD_create,self).create_model()
+        super(zzmodelD_create, self).create_model()
         layers_dim    = self.arg.architect
         nn_model_base = self.arg.nn_model
         layer_id        = self.arg.layer_emb_id
@@ -2279,8 +2279,9 @@ class modelD_create(BaseModel):
         return modelD(layers_dim, nn_model_base, layer_id )
 
     def create_loss(self) -> torch.nn.Module:
-        super(modelD_create,self).create_loss()
+        super(zzmodelD_create, self).create_loss()
         return torch.nn.BCELoss()
+
 
 ###############################################################################################################
 if __name__ == "__main__":

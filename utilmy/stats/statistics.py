@@ -5,10 +5,154 @@ Doc::
     Hypothesis testing easy.
 
     https://github.com/pranab/beymani
-
     https://github.com/topics/hypothesis-testing?l=python&o=desc&s=stars
-
     https://pypi.org/project/pysie/#description
+
+
+
+    If follows normal distrbution :  Shapiro-Wilk Test
+
+
+    Tests whether two samples have a linear relationship.  : Pearson test
+    
+    2 samples have Monotonic relationship :  Spearman’s Rank Correlation
+
+
+
+    Chi-Squared Test
+    Tests whether two categorical variables are related or independent.
+
+
+
+
+    Augmented Dickey-Fuller Unit Root Test
+    Tests whether a time series has a unit root, e.g. has a trend or more generally is autoregressive.
+
+
+
+    Student’s t-test
+    Tests whether the means of two independent samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+
+
+    Paired Student’s t-test
+    Tests whether the means of two paired samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+
+
+
+
+    Analysis of Variance Test (ANOVA)
+    Tests whether the means of two or more independent samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+    Nonparametric Statistical Hypothesis Tests
+    Mann-Whitney U Test
+    Tests whether the distributions of two independent samples are equal or not.
+
+    Assumptions
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+
+    Interpretation
+    H0: the distributions of both samples are equal.
+
+
+
+
+
+
+
+    Wilcoxon Signed-Rank Test
+    Tests whether the distributions of two paired samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the distributions of both samples are equal.
+
+
+
+
+
+    Kruskal-Wallis H Test
+    Tests whether the distributions of two or more independent samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Interpretation
+
+    H0: the distributions of all samples are equal.
+
+
+
+
+
+    Friedman Test
+    Tests whether the distributions of two or more paired samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the distributions of all samples are equal.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,7 +161,6 @@ import os, sys, pandas as pd, numpy as np
 from utilmy.utilmy import pd_generate_data
 from utilmy.prepro.util_feature import  pd_colnum_tocat, pd_colnum_tocat_stat
 
-# conduct multiple comparisons
 from tqdm import tqdm
 from typing import List, Union
 from scipy import stats
@@ -27,9 +170,7 @@ from scipy import stats
 from utilmy.utilmy import log, log2
 
 def help():
-    """        .
-    Doc::
-            
+    """    
     """
     from utilmy import help_create
     print( help_create("utilmy.stats.statistics") )
@@ -37,11 +178,8 @@ def help():
 
 #################################################################################################
 def test_all():
-    """.
-    Doc::
-            
+    """ 
     """
-    import pandas as pd
     from sklearn.tree import DecisionTreeRegressor
     from sklearn.model_selection import train_test_split
     model = DecisionTreeRegressor(random_state=1)
@@ -61,7 +199,7 @@ def test_all():
         
         df1 = pd_generate_data(7, 100)
         m.test_anova(df1,'cat1','cat2')
-        m.test_normality2(df1, '0', "Shapiro")
+        m.hypotest_normality2(df1, '0', "Shapiro")
         m.test_plot_qqplot(df1, '1')
 
         
@@ -90,7 +228,6 @@ def test_all():
         confidence_interval_bootstrap(ypred, custom_stat=custom_stat)
 
 
-
     def test_np_utils():
         log("Testing np_utils ...")
         from utilmy.stats.statistics import np_col_extractname, np_conv_to_one_col, np_list_remove
@@ -100,7 +237,6 @@ def test_all():
         np_list_remove(arr,[1,2,3], mode="exact")
         np_conv_to_one_col(arr)
 
-  
     test()
     test_estimator()
     # test_drift_detect()
@@ -108,13 +244,11 @@ def test_all():
 
 
 def test0():
-    """ .
-    Doc::
-            
+    """ .            
     """
     df = pd_generate_data(7, 100)
     test_anova(df, 'cat1', 'cat2')
-    test_normality2(df, '0', "Shapiro")
+    hypotest_normality2(df, '0', "Shapiro")
     test_plot_qqplot(df, '1')
     '''TODO: import needed
     NameError: name 'pd_colnum_tocat' is not defined
@@ -123,9 +257,7 @@ def test0():
 
 
 def test1():
-    """        .
-    Doc::
-            
+    """        .            
     """
     from sklearn.tree import DecisionTreeRegressor
     from sklearn.model_selection import train_test_split
@@ -149,7 +281,6 @@ def test1():
 
 def test3():
     """ .
-    Doc::
             
     """
     arr = np.array([[1, 2, 3], [4, 5, 6]])
@@ -161,9 +292,6 @@ def test3():
 def test_check_mean():
     """function test_check_mean.
     Doc::
-            
-            Args:
-            Returns:
                 
     """
    
@@ -177,25 +305,200 @@ def test_check_mean():
 
 
     log("### 2 columns")
-    test_same_mean(df, cols = [ 'c1', 'c2' ], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5 )
+    hypotest_same_mean(df, cols = [ 'c1', 'c2' ], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5 )
 
 
     log("### 5 columns ")
-    test_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','c5' ],  bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
+    hypotest_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','c5' ],  bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
 
 
     log("### 6 columsn not same")
     df['d6'] = np.random.random(n ) +0.3     
-    test_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','d6' ], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5  )
-
-
-
+    hypotest_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','d6' ], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5  )
 
 
 
 ###############################################################################################
 ########## Helpers on test  ###################################################################
-def test_same_mean(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) -> List[float]:
+def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4):
+    """# To test whether sample has come from a population with mean 54
+    Docs::
+        # H0: μ = 54 
+        # H1: μ != 54
+
+        ### One sample test (parameter estimation)
+    np.random.seed(10)        
+    Population = [np.random.randint(10, 100) for _ in range(1000)]
+    Sample = [np.random.randint(11, 99) for _ in range(25)]
+    Population_Mean = round(sum(Population)/len(Population))
+    Population_Mean
+
+
+    """    
+    if isinstance(df, pd.DataFrame):
+       samples = df[col].values
+    else :
+       samples = df 
+
+    log("""# 1) Student's t-test (One sample)""")
+    ttest = test.hypothesis.tTest(samples, mu = Population_Mean)
+    print( ttest.test_summary)
+
+    # As p-value is < 5% Level of significance, we reject H0.
+    # The sample has not come from a population with mean 54.
+
+
+
+def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ]):
+    """
+    data1 = [20, 55, 29, 24, 75, 56, 31, 45]
+    data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
+
+    # Test whether the samples are same
+    # H0: The two samples are same
+    # H1: The two samples are different
+    # P-value > 5%. Fail to Reject H0
+    # Data may be similar.
+
+    ### test to determine normality of data
+
+
+    """
+    log("""# 2) WaldWolfowitz""")
+
+    v1 = df[col1].values
+    v2 = df[col2].values
+
+    ww = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
+    ww.test_summary
+
+
+
+def hypotest_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
+    """# To test whether All columns have same means.
+
+    """    
+    vlist = []
+    if isinstance(df, pd.DataFrame):
+        for coli in cols:
+            vlist.append(df[coli].values)
+    elif isinstance(df, list):
+       vlist = df
+
+    ddict = Box({})    
+
+    log(""" ANOVA""")
+    dd = test.aov.AnovaOneWay(*vlist)
+    log(dd.test_summary)
+    ddict.anova = aov.test_summary
+
+
+    log(""" Friedman""")
+    dd = test.nonparametric.FriedmanTest(*vlist, group = None)
+    log(dd.test_summary)
+    ddict.friedman = dd.test_summary
+
+
+    log(""" Cochran's Q test """)
+    dd = test.contingency.CochranQ(*vlist)
+    log(dd.test_summary)
+    ddict.cochran = dd.test_summary
+
+    return ddict
+
+
+
+def hypotest_is_all_group_means_equal(df, col=['col_group', 'val'], mean_target=4):
+    """# To test whether All columns have same means.
+    Docs::
+
+        # Is there difference in ratings for vegan and non-vegan food?
+        # H0: No difference in the stars
+        # H0: There is a difference in stars
+        # create dataframe
+        # for 'Vegan', 1 stands for vegan food.
+        data = pd.DataFrame({'Vegan':[1,1,1,0,0,0,1,0,1,0,1,0],
+                                    'Stars':[5.0,2.5,1.5,3.5,4.75,3.0,4.0,3.0,3.0,2.75,1.0,1.0]})
+        data.head()
+
+        # With a p-value > 0.05, we fail to reject the null hypothesis that there is no 
+        # difference in rating between vegan and non-vegan food.
+    """    
+    vlist = []
+    if isinstance(df, pd.DataFrame):
+        for coli in cols:
+            vlist.append(df[coli].values)
+
+    elif isinstance(df, list):
+       vlist = df
+    ddict = Box({})    
+
+    log("""#2) Mann Whitney Test""")
+    mw = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
+    ddict.MannWhitney  = mw.test_summary
+    return ddict
+
+
+
+
+def hypotest_is_all_same_distribution(df, cols):
+    ### Tests to determine if data distributions are similar or not
+
+    """# 1) Kruskal Wallis Test"""
+
+    np.random.seed(10)
+    # generate three independent samples
+    data1 = 5 * np.random.randn(100) + 50
+    data2 = 5 * np.random.randn(100) + 50
+    data3 = 5 * np.random.randn(100) + 50
+
+    # To test: Whether the three distributions are similar or not 
+    # H0: All sample distribution are similar 
+    # H1: Atleast one pair of sample distributions is different
+
+    kw = test.nonparametric.KruskalWallis(data1, data2, data3)
+    kw.test_summary
+
+    # p-value > 5% level of significance. Thus, fail to reject H0
+    # No statistical evidence to prove that the sample distributions are different.
+
+
+
+def hypotest_is_mean_pergroup_equal(df, col1, col2): 
+    """
+
+    # create random sample data
+    data = [['Toyota', 'Toyota'] for i in range(55)] + \
+        [['Toyota', 'Mitsubishi'] for i in range(5)] + \
+        [['Mitsubishi', 'Toyota'] for i in range(15)] + \
+        [['Mitsubishi', 'Mitsubishi'] for i in range(25)]
+    df = pd.DataFrame(data, columns = ['Before Ad Screening', 'After Ad Screening']) 
+
+    # create contingency table
+    data_crosstab = pd.crosstab(df['Before Ad Screening'],
+                                df['After Ad Screening'],
+                                margins=True, margins_name="Total")
+    data_crosstab
+    #P0 : The true proportion of customers who prefer Toyota before the ad screening
+    #P1 : The true proportion of customers who prefer Toyota after the ad screening
+    #To test:
+    #H0 : P1 = P2
+    #H1 : P1 != P2
+
+    # As p-value < 0.05, we reject H0. 
+    # True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
+
+
+
+
+    """
+    """# 2) Mc Nemar Test"""
+    m = test.contingency.McNemarTest([[25, 5], [15, 55]], continuity=True)
+    m.test_summary
+
+
+
+def hypotest_same_mean(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) -> List[float]:
     """Test if same mean for all columns
     Doc::
 
@@ -213,7 +516,7 @@ def test_same_mean(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, thresh
         p_values = test_anova_mean(df, cols)
 
     if bonferroni_adjuster:
-        p_values = bonferoni_adjuster(p_values, threshold=threshold)
+        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     pvalue= p_values['p_value']
     if pvalue < pcritic:
@@ -225,7 +528,7 @@ def test_same_mean(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, thresh
 
 
 
-def test_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
     """Run ANOVA Test of independance.
     Doc::
             
@@ -237,22 +540,17 @@ def test_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, thr
     p_values = test_anova(df, cols)
 
     if bonferroni_adjuster:
-        p_values = bonferoni_adjuster(p_values, threshold=threshold)
+        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     return p_values
 
 
 
-
-
-def test_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
     """Run multiple T tests of Independance.
     Doc::
             
-               p_values = multiple_comparisons(data)
-               
-        
-        
+               p_values = multiple_comparisons(data)        
     """
     p_values = []
     colsX = df.columns  if colsX is None else colsX
@@ -266,14 +564,66 @@ def test_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', 
         p_values.append((c, p) )
     
     if bonferroni_adjuster:
-        p_values = bonferoni_adjuster(p_values, threshold=threshold)
+        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     return p_values
 
 
 
+def hypotest_is_normal_distribution(df:pd.DataFrame, column, test_type):
+    """.
+    Doc::
+            
+            Function to check Normal Distribution of a Feature by 3 methods
+            Input dfframe, feature name, and a test type
+            Three types of test
+            1)'Shapiro'
+            2)'Normal'
+            3)'Anderson'
+        
+            output the statistical test score and result whether accept or reject
+            Accept mean the feature is Gaussain
+            Reject mean the feature is not Gaussain
+    """
+    from scipy.stats import shapiro
+    from scipy.stats import normaltest
+    from scipy.stats import anderson
+    if  test_type == 'Shapiro':
+        stat, p = shapiro(df[column])
+        print('Statistics=%.3f, p=%.3f' % (stat, p))
+        # interpret
+        alpha = 0.05
+        if p > alpha:
+            print(column,' looks Gaussian (fail to reject H0)')
+        else:
+            print(column,' does not look Gaussian (reject H0)')
+        return stat
 
-def bonferoni_adjuster(p_values, threshold=0.1):
+    if  test_type == 'Normal':
+        stat, p = normaltest(df[column])
+        print('Statistics=%.3f, p=%.3f' % (stat, p))
+        # interpret
+        alpha = 0.05
+        if p > alpha:
+            print(column,' looks Gaussian (fail to reject H0)')
+        else:
+            print(column,' does not look Gaussian (reject H0)')
+        # normality test
+    if  test_type == 'Anderson':
+        result = anderson(df[column])
+        print('Statistic: %.3f' % result.statistic)
+        p = 0
+        for i in range(len(result.critical_values)):
+            sl, cv = result.significance_level[i], result.critical_values[i]
+            if result.statistic < result.critical_values[i]:
+                print(sl,' : ',cv,' ',column,' looks normal (fail to reject H0)')
+            else:
+                print(sl,' : ',cv,' ',column,' does not looks normal (fail to reject H0)')
+
+
+
+
+def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
     """Bonferroni correction.
     Doc::
 
@@ -301,16 +651,11 @@ def bonferoni_adjuster(p_values, threshold=0.1):
 
 
 
-
-
-
 #################################################################################################
 ############ Actual tests########################################################################
 def test_chisquare(df_obs:pd.DataFrame, df_true:pd.DataFrame, method='chisquare', **kw):
     """ Hypothesis betweeb Obs and true values.
     Doc::
-            
-        
                 https://github.com/aschleg/hypothetical/blob/master/tests/test_contingency.py
     """
     try:
@@ -357,55 +702,6 @@ def test_anova(df:pd.DataFrame, col1, col2):
     else:
          print('Accept null hypothesies and conclude that atleast one group is same and the feature is not releavant to the class.')
     return { 'stat_val': stat_val, 'crit_val': crit_val  }
-
-
-def test_normality2(df:pd.DataFrame, column, test_type):
-    """.
-    Doc::
-            
-            Function to check Normal Distribution of a Feature by 3 methods
-            Input dfframe, feature name, and a test type
-            Three types of test
-            1)'Shapiro'
-            2)'Normal'
-            3)'Anderson'
-        
-            output the statistical test score and result whether accept or reject
-            Accept mean the feature is Gaussain
-            Reject mean the feature is not Gaussain
-    """
-    from scipy.stats import shapiro
-    from scipy.stats import normaltest
-    from scipy.stats import anderson
-    if  test_type == 'Shapiro':
-        stat, p = shapiro(df[column])
-        print('Statistics=%.3f, p=%.3f' % (stat, p))
-        # interpret
-        alpha = 0.05
-        if p > alpha:
-            print(column,' looks Gaussian (fail to reject H0)')
-        else:
-            print(column,' does not look Gaussian (reject H0)')
-    if  test_type == 'Normal':
-        stat, p = normaltest(df[column])
-        print('Statistics=%.3f, p=%.3f' % (stat, p))
-        # interpret
-        alpha = 0.05
-        if p > alpha:
-            print(column,' looks Gaussian (fail to reject H0)')
-        else:
-            print(column,' does not look Gaussian (reject H0)')
-        # normality test
-    if  test_type == 'Anderson':
-        result = anderson(df[column])
-        print('Statistic: %.3f' % result.statistic)
-        p = 0
-        for i in range(len(result.critical_values)):
-            sl, cv = result.significance_level[i], result.critical_values[i]
-            if result.statistic < result.critical_values[i]:
-                print(sl,' : ',cv,' ',column,' looks normal (fail to reject H0)')
-            else:
-                print(sl,' : ',cv,' ',column,' does not looks normal (fail to reject H0)')
 
 
 
