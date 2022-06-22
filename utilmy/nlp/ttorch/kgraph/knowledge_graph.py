@@ -19,13 +19,16 @@ Reason :
 
 
 """
-
-import os, spacy, numpy as np, pandas as pd, networkx as ntx
+import os
+import spacy
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import networkx as ntx
 from tqdm import tqdm
-from typing import Tuple
+from typing import Tuple, Dict, Union
 from spacy.matcher import Matcher
-# from node2vec import Node2Vec as n2v
+from node2vec import Node2Vec as n2v
 
 import torch
 
@@ -39,55 +42,23 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
-from utilmy import util_download as ud
-from utilmy import log
 
+def get_embeddings(label_to_id:Dict[str, int], embedding):
+    aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
+    for id_, label in label_to_id.items():
+        idx_tensor = torch.tensor([id_]).to(dtype=torch.int64)
 
+        aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
+    return aux
 
+def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+    aux = []
+    for label, dict_ in embeddingDict.items():
+        vals = [label, dict_['_id'], dict_['embedding'].flatten()]
+        aux.append(vals)
+    df = pd.DataFrame(aux, columns=[entityOrRelation, 'id', 'embedding'])
+    return df
 
-#######################################################################################################
-def test_all():
-    #test1
-    pass
-
-
-
-def test1(path=""):
-    """
-
-
-
-    """
-    runall()
-
-
-
-
-#######################################################################################################
-def runall(dirin='final_dataset_clean_v2 .tsv') :
-    """
-    Doc::
-
-      cd utilmy/nlp/tttorch/kgraph/
-      python knoweledge_graph.py runall --dirin  mydirdata/
-
-
-    """
-    df = pd.read_csv(dirin, delimiter='\t')
-    grapher = knowledge_grapher(data_kgf=df,embedding_dim=10, load_spacy=True)
-
-    data_kgf = grapher.extractTriples(-1)
-    grapher.buildGraph(data_kgf)
-    grapher.plot_graph()
-    grapher.prepare_data(data_kgf)
-
-
-
-
-
-
-
-#######################################################################################################
 class knowledge_grapher():
     def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
         self.data_kgf = data_kgf
@@ -114,9 +85,10 @@ class knowledge_grapher():
         self.out_centrality_dict = ntx.out_degree_centrality(self.graph)
         # self.eigenvector_centrality_dict = ntx.katz_centrality(self.graph)
 
-    def load_data(self, path)->None:
-        data_kgf = pd.read_csv(path, delimiter='\t')
-        self.buildGraph(data_kgf)
+    @staticmethod
+    def load_data(path)->pd.DataFrame:
+        return pd.read_csv(path, delimiter='\t')
+        # self.buildGraph(data_kgf)
 
     def get_centers(self, max_centers:int=5)->None:
 
@@ -153,7 +125,6 @@ class knowledge_grapher():
             for i, (node, adj_dict) in enumerate(adjacency[center].items()):
                 adjacency_embeddings[i,:] = self.embedding_df[str(node)]
             self.mean_anchor_dict[center] = {'center': center_embedding.values, 'anchor':adjacency_embeddings.mean(axis = 0)}
-
 
 
 class NERExtractor:
@@ -264,7 +235,6 @@ class NERExtractor:
 
 
 
-
 class KGEmbedder:
     def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
 
@@ -294,6 +264,7 @@ class KGEmbedder:
 
         if os.path.exists(os.path.join(self.dataFolder, 'trained_model.pkl')):
             self.model = torch.load(os.path.join(self.dataFolder, 'trained_model.pkl'))
+            self.trained = True
         else:
             self.model = ERModel(triples_factory=self.training,
                                  interaction='distmult',
@@ -309,18 +280,22 @@ class KGEmbedder:
                 triples_factory=self.training,
                 optimizer=self.optimizer,
             )
-
+            self.trained = False
 
     def compute_embeddings(self, path_to_embeddings, batch_size=1024):
 
         self.set_up_embeddings()
-        losses = self.training_loop.train(
+        if not self.trained:
+            losses = self.training_loop.train(
                                 triples_factory=self.training,
                                 num_epochs=10,
                                 checkpoint_name='myCheckpoint.pt',
                                 checkpoint_frequency=5,
                                 batch_size=256,
                                 )
+            torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
+        else:
+            losses = None
 
         # Pick an evaluator
         evaluator = RankBasedEvaluator()
@@ -337,7 +312,6 @@ class KGEmbedder:
                 self.validation.mapped_triples,
             ],
         )
-        torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
         return losses, results
 
     def load_embeddings(self, path_to_embeddings:str):
@@ -349,12 +323,50 @@ class KGEmbedder:
             return self.compute_embeddings(path_to_embeddings, batch_size=1024)
 
     def save_embeddings(self,):
-        return self.training
 
+        entities = tuple(self.graph.nodes.values())
+        tripleFactory = self.training
 
+        entities_to_ids:Dict = tripleFactory.entity_id_to_label
+        relation_to_ids:Dict = tripleFactory.relation_id_to_label
 
+        # TransE model has only one embedding per entity/relation
+        entity_embeddings = self.model.entity_representations[0]
+        relation_embeddings = self.model.relation_representations[0]
 
-if __name__=="__main__":
+        self.relation_dict = get_embeddings(relation_to_ids, relation_embeddings)
+        self.entity_dict = get_embeddings(entities_to_ids, entity_embeddings)
+        df_entities = embeddingsToDF(self.entity_dict, 'entity')
+        df_relation = embeddingsToDF(self.relation_dict, 'relation')
+
+        df_entities.to_parquet(os.path.join(self.dataFolder, 'entityEmbeddings.parquet'))
+        df_relation.to_parquet(os.path.join(self.dataFolder, 'relationEmbeddings.parquet'))
+
+def runall(dirin='final_dataset_clean_v2 .tsv'):
+
+    """
+    Doc::
+        cd utilmy/nlp/tttorch/kgraph
+        python knowledge_graph runall --dirin mydirdata/
+    """
+    data = pd.read_csv('final_dataset_clean_v2 .tsv', delimiter='\t')
+    extractor = NERExtractor(data, 'pykeen_data', load_spacy=True)
+    data_kgf = extractor.extractTriples(-1)
+    extractor.prepare_data(data_kgf)
+
+    data_kgf_path = os.path.join('pykeen_data', 'data_kgf.tsv')
+    data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher.buildGraph()
+    grapher.plot_graph('plots')
+
+    embedder = KGEmbedder('pykeen_data', grapher.graph, embedding_dim=10)
+    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+    embedder.load_embeddings('none')
+    embedder.save_embeddings()
     import fire
     fire.Fire()
     ### python  
+
+if __name__=="__main__":
+    runall()
