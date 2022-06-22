@@ -70,8 +70,6 @@ def runall(dirin='final_dataset_clean_v2 .tsv'):
     embedder.load_embeddings('none')
     embedder.save_embeddings()
 
-    ### python
-
 
 
 
@@ -143,6 +141,7 @@ class knowledge_grapher():
             for i, (node, adj_dict) in enumerate(adjacency[center].items()):
                 adjacency_embeddings[i,:] = self.embedding_df[str(node)]
             self.mean_anchor_dict[center] = {'center': center_embedding.values, 'anchor':adjacency_embeddings.mean(axis = 0)}
+
 
 
 class NERExtractor:
@@ -370,6 +369,7 @@ def get_embeddings(label_to_id:Dict[str, int], embedding):
 
         aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
     return aux
+
 
 def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
     aux = []
