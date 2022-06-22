@@ -1,5 +1,0 @@
-"""  Statistics - Hypothesis
-Docs::
-
-
-"""
