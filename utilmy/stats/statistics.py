@@ -457,16 +457,16 @@ def test_check_mean():
 
 
     log("### 2 columns")
-    hypotest_same_mean(df, cols = [ 'c1', 'c2' ], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5 )
+    hypotest_is_mean_equal(df, cols = ['c1', 'c2'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
 
 
     log("### 5 columns ")
-    hypotest_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','c5' ],  bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
+    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'c5'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
 
 
     log("### 6 columsn not same")
     df['d6'] = np.random.random(n ) +0.3
-    hypotest_same_mean(df, cols=[ 'c1', 'c2', 'c3','c4','d6' ], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5  )
+    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'd6'], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5)
 
 
 
@@ -650,7 +650,7 @@ def hypotest_is_mean_pergroup_equal(df, col1, col2):
 
 
 
-def hypotest_same_mean(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) -> List[float]:
+def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) -> List[float]:
     """Test if same mean for all columns
     Doc::
 
