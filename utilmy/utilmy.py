@@ -442,6 +442,51 @@ def test_load_function_uri():
 
 
 
+def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d", add_days=0, add_hours=0,
+             timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
+             force_dayofmonth=-1,   ###  01 first of month
+             force_dayofweek=-1,
+             force_hourofday=-1,
+             returnval='str,int,datetime/unix'):
+    """ One liner for date Formatter
+    Doc::
+        datenow: 2012-02-12  or ""  emptry string for today's date.
+        fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
+        date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
+        date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    -->  "2020-05-19"
+        date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')    -->  20211001
+        date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
+        date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->  1634324632848
+    """
+    from pytz import timezone as tzone
+    import datetime, time
+
+    if isinstance(datenow, datetime.datetime):
+        now_utc = datenow
+
+    elif len(str(datenow)) >7 :  ## Not None
+        now_utc = datetime.datetime.strptime(str(datenow), fmt_input)
+    else:
+        now_utc = datetime.datetime.now(tzone('UTC'))  # Current time in UTC
+
+    #### Force dates
+    if force_dayofmonth >0 :
+        now_utc = now_utc.replace(day=force_dayofmonth)
+
+    if force_dayofweek >0 :
+        pass
+
+    if force_hourofday >0 :
+        now_utc = now_utc.replace(hour=force_hourofday)
+
+
+    now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
+    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours)
+
+    if   returnval == 'datetime': return now_new ### datetime
+    elif returnval == 'int':      return int(now_new.strftime(fmt))
+    elif returnval == 'unix':     return time.mktime(now_new.timetuple())
+    else:                         return now_new.strftime(fmt)
 
 
 from utilmy.util_download import google_download, download_google
