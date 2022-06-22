@@ -15,7 +15,7 @@ from utilmy import log
 
 
 
-def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
+def hypotest_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     """# To test whether All columns have same means.
 
     """    
@@ -23,7 +23,7 @@ def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     if isinstance(df, pd.DataFrame):
         for coli in cols:
             vlist.append(df[coli].values)
-    else :
+    elif isinstance(df, list):
        vlist = df
 
     ddict = Box({})    
@@ -46,6 +46,7 @@ def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     ddict.cochran = dd.test_summary
 
     return ddict
+
 
 
 
