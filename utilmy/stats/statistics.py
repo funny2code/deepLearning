@@ -5,10 +5,154 @@ Doc::
     Hypothesis testing easy.
 
     https://github.com/pranab/beymani
-
     https://github.com/topics/hypothesis-testing?l=python&o=desc&s=stars
-
     https://pypi.org/project/pysie/#description
+
+
+
+    If follows normal distrbution :  Shapiro-Wilk Test
+
+
+    Tests whether two samples have a linear relationship.  : Pearson test
+    
+    2 samples have Monotonic relationship :  Spearman’s Rank Correlation
+
+
+
+    Chi-Squared Test
+    Tests whether two categorical variables are related or independent.
+
+
+
+
+    Augmented Dickey-Fuller Unit Root Test
+    Tests whether a time series has a unit root, e.g. has a trend or more generally is autoregressive.
+
+
+
+    Student’s t-test
+    Tests whether the means of two independent samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+
+
+    Paired Student’s t-test
+    Tests whether the means of two paired samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+
+
+
+
+    Analysis of Variance Test (ANOVA)
+    Tests whether the means of two or more independent samples are significantly different.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample are normally distributed.
+    Observations in each sample have the same variance.
+    Interpretation
+
+    H0: the means of the samples are equal.
+
+
+
+
+    Nonparametric Statistical Hypothesis Tests
+    Mann-Whitney U Test
+    Tests whether the distributions of two independent samples are equal or not.
+
+    Assumptions
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+
+    Interpretation
+    H0: the distributions of both samples are equal.
+
+
+
+
+
+
+
+    Wilcoxon Signed-Rank Test
+    Tests whether the distributions of two paired samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the distributions of both samples are equal.
+
+
+
+
+
+    Kruskal-Wallis H Test
+    Tests whether the distributions of two or more independent samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Interpretation
+
+    H0: the distributions of all samples are equal.
+
+
+
+
+
+    Friedman Test
+    Tests whether the distributions of two or more paired samples are equal or not.
+
+    Assumptions
+
+    Observations in each sample are independent and identically distributed (iid).
+    Observations in each sample can be ranked.
+    Observations across each sample are paired.
+    Interpretation
+
+    H0: the distributions of all samples are equal.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
