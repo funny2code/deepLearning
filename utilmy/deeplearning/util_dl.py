@@ -125,7 +125,7 @@ gpu2 = gpu_usage
 
 
 ################################################################################################
-#####################################################################################################################
+################################################################################################
 def metrics_eval(ypred:np.ndarray=None,  ytrue:np.ndarray=None,
                  metric_list:list=["mean_squared_error", "mean_absolute_error"],
                  ypred_proba:np.ndarray=None, return_dict:bool=False, metric_pars:dict=None)->pd.DataFrame:
