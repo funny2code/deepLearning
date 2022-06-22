@@ -43,7 +43,7 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
-
+from utilmy import log
 
 
 
@@ -52,28 +52,40 @@ def runall(dirin='final_dataset_clean_v2 .tsv'):
 
     """
     Doc::
+
         cd utilmy/nlp/tttorch/kgraph
         python knowledge_graph runall --dirin mydirdata/
     """
+    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
+    dname = dataset_download(url=url)
+    dname = dname.replace("\\", "/")
+    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+    df    = pd.read_csv(path, delimiter='\t')
 
-    dname = dataset_download(url='https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip')
-    path = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
-    data = pd.read_csv(path, delimiter='\t')
-    extractor = NERExtractor(data, dname, load_spacy=True)
-    data_kgf = extractor.extractTriples(-1)
-    extractor.prepare_data(data_kgf)
+    dname = dname + "/embed/"
 
+    log('##### NER extraction from text ')
+    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
+    data_kgf = extractor.extractTriples(sents=-1)
+    extractor.export_data(data_kgf)
+
+
+    log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
     data_kgf = knowledge_grapher.load_data(data_kgf_path)
     grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
     grapher.buildGraph()
 
+
+    log('##### Build KG Embeddings')
     embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
-    embedder.load_embeddings('none')
+    embedder.compute_embeddings('none', batch_size=1024)
     embedder.save_embeddings()
 
 
+    log('##### load KG Embeddings')
+    embedder.load_embeddings('none')
 
 
 
@@ -231,7 +243,7 @@ class NERExtractor:
 
         return pd.DataFrame({'source':source, 'target':target, 'edge':relations})
 
-    def prepare_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
+    def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
 
         SAMPLES = len(data_kgf.index)
         TRAIN_SPLIT = int(0.5 * SAMPLES)
@@ -334,13 +346,14 @@ class KGEmbedder:
         )
         return losses, results
 
+
     def load_embeddings(self, path_to_embeddings:str):
 
         if os.path.exists(path_to_embeddings):
            self.embedding_df = pd.read_csv(path_to_embeddings)
            return None, None
-        else:
-            return self.compute_embeddings(path_to_embeddings, batch_size=1024)
+        #else:
+        #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
 
     def save_embeddings(self,):
 
