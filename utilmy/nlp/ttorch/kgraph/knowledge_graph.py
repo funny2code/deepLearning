@@ -43,22 +43,40 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 ### pip install python-box
 from box import Box
 
-def get_embeddings(label_to_id:Dict[str, int], embedding):
-    aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
-    for id_, label in label_to_id.items():
-        idx_tensor = torch.tensor([id_]).to(dtype=torch.int64)
 
-        aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
-    return aux
 
-def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
-    aux = []
-    for label, dict_ in embeddingDict.items():
-        vals = [label, dict_['_id'], dict_['embedding'].flatten()]
-        aux.append(vals)
-    df = pd.DataFrame(aux, columns=[entityOrRelation, 'id', 'embedding'])
-    return df
 
+######################################################################################################
+def runall(dirin='final_dataset_clean_v2 .tsv'):
+
+    """
+    Doc::
+        cd utilmy/nlp/tttorch/kgraph
+        python knowledge_graph runall --dirin mydirdata/
+    """
+    data = pd.read_csv('final_dataset_clean_v2 .tsv', delimiter='\t')
+    extractor = NERExtractor(data, 'pykeen_data', load_spacy=True)
+    data_kgf = extractor.extractTriples(-1)
+    extractor.prepare_data(data_kgf)
+
+    data_kgf_path = os.path.join('pykeen_data', 'data_kgf.tsv')
+    data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher.buildGraph()
+    grapher.plot_graph('plots')
+
+    embedder = KGEmbedder('pykeen_data', grapher.graph, embedding_dim=10)
+    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+    embedder.load_embeddings('none')
+    embedder.save_embeddings()
+
+    ### python
+
+
+
+
+
+######################################################################################################
 class knowledge_grapher():
     def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
         self.data_kgf = data_kgf
@@ -342,31 +360,29 @@ class KGEmbedder:
         df_entities.to_parquet(os.path.join(self.dataFolder, 'entityEmbeddings.parquet'))
         df_relation.to_parquet(os.path.join(self.dataFolder, 'relationEmbeddings.parquet'))
 
-def runall(dirin='final_dataset_clean_v2 .tsv'):
 
-    """
-    Doc::
-        cd utilmy/nlp/tttorch/kgraph
-        python knowledge_graph runall --dirin mydirdata/
-    """
-    data = pd.read_csv('final_dataset_clean_v2 .tsv', delimiter='\t')
-    extractor = NERExtractor(data, 'pykeen_data', load_spacy=True)
-    data_kgf = extractor.extractTriples(-1)
-    extractor.prepare_data(data_kgf)
 
-    data_kgf_path = os.path.join('pykeen_data', 'data_kgf.tsv')
-    data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
-    grapher.buildGraph()
-    grapher.plot_graph('plots')
+######################################################################################################
+def get_embeddings(label_to_id:Dict[str, int], embedding):
+    aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
+    for id_, label in label_to_id.items():
+        idx_tensor = torch.tensor([id_]).to(dtype=torch.int64)
 
-    embedder = KGEmbedder('pykeen_data', grapher.graph, embedding_dim=10)
-    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
-    embedder.load_embeddings('none')
-    embedder.save_embeddings()
-    import fire
-    fire.Fire()
-    ### python  
+        aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
+    return aux
+
+def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+    aux = []
+    for label, dict_ in embeddingDict.items():
+        vals = [label, dict_['_id'], dict_['embedding'].flatten()]
+        aux.append(vals)
+    df = pd.DataFrame(aux, columns=[entityOrRelation, 'id', 'embedding'])
+    return df
+
+
+
 
 if __name__=="__main__":
-    runall()
+    import fire
+    fire.Fire()
+    # runall()
