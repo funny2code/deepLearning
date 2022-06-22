@@ -362,6 +362,36 @@ class KGEmbedder:
 
 
 ######################################################################################################
+def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+                     dirout = "./"):
+    """ Downloading Dataset from github  and unzip it
+
+
+    """
+    import requests
+    from zipfile import ZipFile
+
+    fname = dirout + url.split("/")[-1]
+    dname = dirout + "/".join( fname.split(".")[:-1])
+
+    isdir = os.path.isdir(dname)
+    if isdir == 0:
+        r = requests.get(url)
+        open(fname , 'wb').write(r.content)
+        flag = os.path.exists(fname)
+        if(flag):
+            print("Dataset is Downloaded")
+            zip_file = ZipFile(fname)
+            zip_file.extractall()
+        else:
+            raise Exception("Dataset is not downloaded")
+    else:
+        print("dataset is already presented")
+    return dname
+
+
+
+
 def get_embeddings(label_to_id:Dict[str, int], embedding):
     aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
     for id_, label in label_to_id.items():
