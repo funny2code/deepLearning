@@ -32,6 +32,7 @@ from node2vec import Node2Vec as n2v
 
 import torch
 
+from utilmy.data import dataset_download
 from pykeen.triples import TriplesFactory
 from pykeen.pipeline import pipeline
 from pykeen.models import TransE,ERModel
@@ -54,18 +55,20 @@ def runall(dirin='final_dataset_clean_v2 .tsv'):
         cd utilmy/nlp/tttorch/kgraph
         python knowledge_graph runall --dirin mydirdata/
     """
-    data = pd.read_csv('final_dataset_clean_v2 .tsv', delimiter='\t')
-    extractor = NERExtractor(data, 'pykeen_data', load_spacy=True)
+
+    dname = dataset_download(url='https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip')
+    path = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+    data = pd.read_csv(path, delimiter='\t')
+    extractor = NERExtractor(data, dname, load_spacy=True)
     data_kgf = extractor.extractTriples(-1)
     extractor.prepare_data(data_kgf)
 
-    data_kgf_path = os.path.join('pykeen_data', 'data_kgf.tsv')
+    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
     data_kgf = knowledge_grapher.load_data(data_kgf_path)
     grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
     grapher.buildGraph()
-    grapher.plot_graph('plots')
 
-    embedder = KGEmbedder('pykeen_data', grapher.graph, embedding_dim=10)
+    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
     embedder.load_embeddings('none')
     embedder.save_embeddings()
