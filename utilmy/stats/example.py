@@ -2,7 +2,6 @@
 """Hypothesis testing using utilmy.ipynb
 Docs ::
 
-    Original file is located at
         https://colab.research.google.com/drive/1yIucO552adP4DaWhKvokIYrTuytHLUcS
 """
 import pandas as pd
