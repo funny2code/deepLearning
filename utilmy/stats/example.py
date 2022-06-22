@@ -11,27 +11,73 @@ import utilmy.stats.hypothesis as test
 import utilmy.stats.statistics as stats
 
 
+from utilmy import log
 
 
-### One sample test (parameter estimation)
 
-"""# 1) Student's t-test (One sample)"""
+def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
+    """# To test whether All columns have same means.
 
-np.random.seed(10)
-Population = [np.random.randint(10, 100) for _ in range(1000)]
-Sample = [np.random.randint(11, 99) for _ in range(25)]
-Population_Mean = round(sum(Population)/len(Population))
-Population_Mean
+    """    
+    vlist =
+    if isinstance(df, pd.DataFrame):
+        for coli in cols:
+            vlist.append(df[coli].values)
 
-# To test whether sample has come from a population with mean 54
-# H0: μ = 54 
-# H1: μ != 54
+    else :
+       vlist = df 
 
-ttest = test.hypothesis.tTest(Sample, mu = Population_Mean)
-ttest.test_summary
+    log(""" ANOVA""")
+        
+    aov = test.aov.AnovaOneWay(*vlist)
+    log(aov.test_summary)
 
-# As p-value is < 5% Level of significance, we reject H0.
-# The sample has not come from a population with mean 54.
+
+    log(""" Friedman""")
+    Friedman = test.nonparametric.FriedmanTest(*vlist, group = None)
+    log(Friedman.test_summary)
+
+
+    log(""" Cochran's Q test """)
+    cq = test.contingency.CochranQ(*vlist)
+    log(cq.test_summary)
+
+
+
+
+
+def test_is_mean_equal(df, col='mycol', mean_target=4):
+    """# To test whether sample has come from a population with mean 54
+    Docs::
+        # H0: μ = 54 
+        # H1: μ != 54
+
+        ### One sample test (parameter estimation)
+    np.random.seed(10)        
+    Population = [np.random.randint(10, 100) for _ in range(1000)]
+    Sample = [np.random.randint(11, 99) for _ in range(25)]
+    Population_Mean = round(sum(Population)/len(Population))
+    Population_Mean
+
+
+    """    
+    if isinstance(df, pd.DataFrame):
+       samples = df[col].values
+    else :
+       samples = df 
+
+    log("""# 1) Student's t-test (One sample)""")
+    ttest = test.hypothesis.tTest(samples, mu = Population_Mean)
+    print( ttest.test_summary)
+
+    # As p-value is < 5% Level of significance, we reject H0.
+    # The sample has not come from a population with mean 54.
+
+
+
+
+
+
 
 """#2) Mann Whitney Test"""
 
@@ -52,6 +98,10 @@ mw.test_summary
 # difference in rating between vegan and non-vegan food.
 
 
+
+
+
+
 ### Test for checking goodness of fit
 
 """# 1) Chi-square Test"""
@@ -69,6 +119,9 @@ ch = test.gof.ChiSquareTest(observed)
 ch.test_summary
 # P-value = 0.2942 > 5% level of significance, we fail to reject H0. 
 # We don't have enough statistical evidence that die is unfair.
+
+
+
 
 ### Test for comparing 2 or more means
 
@@ -157,6 +210,11 @@ cq.test_summary
 
 # p-value < 0.05. There is a statistical difference in the batches of patients 
 # experiencing depression and no depression between the different number of sessions.
+
+
+
+
+
 
 ### Tests to determine if data distributions are similar or not
 
