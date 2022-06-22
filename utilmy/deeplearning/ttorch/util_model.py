@@ -830,7 +830,7 @@ class SequenceReshaper(nn.Module):
 
 ###############################################################################################
 ########### Custom element ####################################################################
-from layers import (SmeLU
+from utilmy.deeplearning.ttorch.layers import (SmeLU
 
 
 )
