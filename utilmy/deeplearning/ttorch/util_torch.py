@@ -820,11 +820,7 @@ def model_summary(model, **kw):
         ModelStatistics object
                 See torchsummary/model_statistics.py for more information.
     """
-    try :
-       from torchsummary import summary
-    except:
-        os.system('pip install torch-summary')
-        from torchsummary import summary
+    from .torchinfo import summary
 
     return summary(model, **kw)
 
