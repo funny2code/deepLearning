@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import utilmy.stats.hypothesis as test
 import utilmy.stats.statistics as stats
-
+from box import Box
 
 from utilmy import log
 
@@ -19,28 +19,31 @@ def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     """# To test whether All columns have same means.
 
     """    
-    vlist =
+    vlist = []
     if isinstance(df, pd.DataFrame):
         for coli in cols:
             vlist.append(df[coli].values)
-
     else :
-       vlist = df 
+       vlist = df
+
+    ddict = Box({})    
 
     log(""" ANOVA""")
-        
-    aov = test.aov.AnovaOneWay(*vlist)
-    log(aov.test_summary)
+    dd = test.aov.AnovaOneWay(*vlist)
+    log(dd.test_summary)
+    ddict.anova = aov.test_summary
 
 
     log(""" Friedman""")
-    Friedman = test.nonparametric.FriedmanTest(*vlist, group = None)
-    log(Friedman.test_summary)
+    dd = test.nonparametric.FriedmanTest(*vlist, group = None)
+    log(dd.test_summary)
+    ddict.friedman = dd.test_summary
 
 
     log(""" Cochran's Q test """)
-    cq = test.contingency.CochranQ(*vlist)
-    log(cq.test_summary)
+    dd = test.contingency.CochranQ(*vlist)
+    log(dd.test_summary)
+    ddict.cochran = dd.test_summary
 
 
 
