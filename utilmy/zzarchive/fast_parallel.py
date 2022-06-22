@@ -349,7 +349,7 @@ np.dtype('c16')  # 128-bit complex floating-point number
 np.dtype('a25')  # 25-character string
 '''
 
-'''
+
 ###################################  Statistical #######################################################################
 @dv.parallel(block=True)
 def np_std_par(x):
@@ -478,7 +478,7 @@ def norm(vec):
 def normalize(vec):
     """ Calculate the normalized vector (norm: one). """
     return vec / norm(vec)
-'''
+
 
 
 

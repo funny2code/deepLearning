@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
-import os, pickle
+"""  Utils for torch  models
+Docs ::
+
+    All utils
+
+
+
+
+"""
+import os, pickle, numpy as np
 from collections import OrderedDict
 from functools import partial
 from pathlib import Path
 
-import numpy as np
-from torch.utils.data import DataLoader
-from typing import Optional, Sequence
-
 import torch
-from torch import Tensor
 from torch import nn
-from torch.nn import functional as F
-
+from torch.utils.data import DataLoader
 
 #################################################################################################
 from utilmy import log
@@ -27,157 +30,157 @@ def test_all():
 
 
 def test1():
-  from utilmy.deeplearning.ttorch import util_model
+    from utilmy.deeplearning.ttorch import util_model
 
-  model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-  # and record the output of the layer during the forward pass
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#tensor of shape (64, 192, 27, 27)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    # and record the output of the layer during the forward pass
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#tensor of shape (64, 192, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Record input to the layer during the forward pass
-  recorder = util_model.model_LayerRecorder(layer, record_input = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#tensor of shape (64, 64, 27, 27)
-  recorder.close()#remove the recorder
+    # Record input to the layer during the forward pass
+    recorder = util_model.model_LayerRecorder(layer, record_input = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#tensor of shape (64, 64, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
-  # and record the output of the layer in the bacward pass
-  layer = list(model.features.named_children())[2][1]
-  # Record output to the layer during the backward pass
-  recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = True)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  loss = torch.nn.CrossEntropyLoss()
-  labels = torch.randint(1000, (64,))#random labels just to compute a bacward pass
-  l = loss(output, labels)
-  l.backward()
-  print(recorder.recording[0])#tensor of shape (64, 64, 27, 27)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # MaxPool2d(kernel_size=3, stride=2, padding=0, dilation=1, ceil_mode=False)
+    # and record the output of the layer in the bacward pass
+    layer = list(model.features.named_children())[2][1]
+    # Record output to the layer during the backward pass
+    recorder = util_model.model_LayerRecorder(layer, record_output = True, backward = True)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    loss = torch.nn.CrossEntropyLoss()
+    labels = torch.randint(1000, (64,))#random labels just to compute a bacward pass
+    l = loss(output, labels)
+    l.backward()
+    print(recorder.recording[0])#tensor of shape (64, 64, 27, 27)
+    recorder.close()#remove the recorder
 
-  # Register a recorder to the 4th layer of the features part of AlexNet
-  # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
-  # and record the parameters of the layer in the forward pass
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(layer, record_params = True, backward = False)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
-  recorder.close()#remove the recorder
+    # Register a recorder to the 4th layer of the features part of AlexNet
+    # Conv2d(64, 192, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    # and record the parameters of the layer in the forward pass
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(layer, record_params = True, backward = False)
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
+    recorder.close()#remove the recorder
 
-  # A custom function can also be passed to the recorder and perform arbitrary
-  # operations. In the example below, the custom function prints the kwargs that
-  # are passed along with the custon function and also return 1 (stored in the recorder)
-  def custom_fn(*args, **kwargs):#signature of any custom fn
+    # A custom function can also be passed to the recorder and perform arbitrary
+    # operations. In the example below, the custom function prints the kwargs that
+    # are passed along with the custon function and also return 1 (stored in the recorder)
+    def custom_fn(*args, **kwargs):#signature of any custom fn
       print('custom called')
       for k,v in kwargs.items():
           print('\nkey argument:', k)
           print('\nvalue argument:', v)
       return 1
 
-  recorder = util_model.model_LayerRecorder(layer,
+    recorder = util_model.model_LayerRecorder(layer,
                                             backward = False,
                                             custom_fn = custom_fn,
                                             print_value = 5)
-  data = torch.rand(64, 3, 224, 224)
-  output = model(data)
-  print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
-  recorder.close()#remove the recorder
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    print(recorder.recording)#list of tensors of shape (192, 64, 5, 5) (weights) (192,) (biases)
+    recorder.close()#remove the recorder
 
-  # Record output to the layer during the forward pass and store it in folder
-  layer = list(model.features.named_children())[3][1]
-  recorder = util_model.model_LayerRecorder(
+    # Record output to the layer during the forward pass and store it in folder
+    layer = list(model.features.named_children())[3][1]
+    recorder = util_model.model_LayerRecorder(
       layer,
       record_params = True,
       backward = False,
       save_to = './test_recorder'#create the folder before running this example!
-  )
-  for _ in range(5):#5 passes e.g. batches, thus 5 stored "recorded" tensors
+    )
+    for _ in range(5):#5 passes e.g. batches, thus 5 stored "recorded" tensors
       data = torch.rand(64, 3, 224, 224)
       output = model(data)
-  recorder.close()#remove the recorder
+    recorder.close()#remove the recorder
 
 
 
 def test2():
-        import torch
-        from utilmy.deeplearning.ttorch import util_model
+    import torch
+    from utilmy.deeplearning.ttorch import util_model
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        # Freeze all parameters
-        util_model.model_freezeparams(model,
-                                      freeze = True)
+    # Freeze all parameters
+    util_model.model_freezeparams(model,
+                                  freeze = True)
 
-        # Unfreeze all parameters
-        util_model.model_freezeparams(model,
-                                      freeze = False)
+    # Unfreeze all parameters
+    util_model.model_freezeparams(model,
+                                  freeze = False)
 
-        # Freeze specific parameters by naming them
-        params_to_freeze = ['features.0.weight', 'classifier.1.weight']
-        util_model.model_freezeparams(model,
-                                      params_to_freeze = params_to_freeze,
-                                      freeze = True)
+    # Freeze specific parameters by naming them
+    params_to_freeze = ['features.0.weight', 'classifier.1.weight']
+    util_model.model_freezeparams(model,
+                                  params_to_freeze = params_to_freeze,
+                                  freeze = True)
 
-        # Unfreeze specific parameters by naming them
-        params_to_freeze = ['features.0.weight', 'classifier.1.weight']
-        util_model.model_freezeparams(model,
-                                      params_to_freeze = params_to_freeze,
-                                      freeze = False)
-
-
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
-
-        # Get all parameters
-        params_values, params_names, req_grad = util_model.model_getparams(model)
-
-        # Get only a subset of parameters by passing a list of named parameters
-        params_to_get = ['features.0.weight', 'classifier.1.weight']
-        params_values, params_names, req_grad = util_model.model_getparams(model,
-                                                                           params_to_get = params_to_get)
+    # Unfreeze specific parameters by naming them
+    params_to_freeze = ['features.0.weight', 'classifier.1.weight']
+    util_model.model_freezeparams(model,
+                                  params_to_freeze = params_to_freeze,
+                                  freeze = False)
 
 
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    # Get all parameters
+    params_values, params_names, req_grad = util_model.model_getparams(model)
 
-        # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
-
-        # Delete the last linear layer of an Elman RNN
-        simple_rnn = nn.Sequential(
-            nn.RNN(2,
-                100,
-                1,
-                batch_first = True),
-            nn.Linear(100, 10),
-        )
-
-        simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
+    # Get only a subset of parameters by passing a list of named parameters
+    params_to_get = ['features.0.weight', 'classifier.1.weight']
+    params_values, params_names, req_grad = util_model.model_getparams(model,
+                                                                       params_to_get = params_to_get)
 
 
 
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
 
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    # Delete the last layer of the classifier of the AlexNet model
+    model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
 
-        # Delete the last layer of the classifier of the AlexNet model
-        model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
+    # Delete the last linear layer of an Elman RNN
+    simple_rnn = nn.Sequential(
+        nn.RNN(2,
+            100,
+            1,
+            batch_first = True),
+        nn.Linear(100, 10),
+    )
 
-        # Add back to the model the deleted layer
-        module = {
-                'name': '6',
-                'position': 6,
-                'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
-                }
+    simple_rnn = util_model.model_layers_delete(simple_rnn, del_ids = [1])
 
-        model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
+
+
+
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+
+    # Delete the last layer of the classifier of the AlexNet model
+    model.classifier = util_model.model_layers_delete(model.classifier, del_ids = [6])
+
+    # Add back to the model the deleted layer
+    module = {
+            'name': '6',
+            'position': 6,
+            'module': nn.Linear(in_features = 4096, out_features = 1000, bias = True)
+            }
+
+    model.classifier = util_model.model_layers_add(model.classifier, modules = [module])
 
 
 
@@ -327,19 +330,20 @@ def model_freezeparams(model,  params_to_freeze = None,  freeze = True):
 
 def model_layers_delete(model, del_ids = []):
     '''Delete layers from model
+    Docs::
 
-    Input
-    -----
-    model: model to be modified
+        Input
+        -----
+        model: model to be modified
 
-    del_ids: list, default [], of int the modules/layers
-        that will be deleted
-        NOTE: 0, 1... denotes the 1st, 2nd etc layer
+        del_ids: list, default [], of int the modules/layers
+            that will be deleted
+            NOTE: 0, 1... denotes the 1st, 2nd etc layer
 
-    Output
-    ------
-    model: model with deleted modules/layers that is an instance of
-        torch.nn.modules.container.Sequential
+        Output
+        ------
+        model: model with deleted modules/layers that is an instance of
+            torch.nn.modules.container.Sequential
     '''
     children = [c for i,c in enumerate(model.named_children()) if i not in del_ids]
     model = torch.nn.Sequential(
@@ -351,33 +355,34 @@ def model_layers_delete(model, del_ids = []):
 
 def model_layers_add(model, modules = []):
     '''Add layers/modules to torch.nn.modules.container.Sequential
+    Docs ::
 
-    Input
-    -----
-    model: instance of class of base class torch.nn.Module
+        Input
+        -----
+        model: instance of class of base class torch.nn.Module
 
-    modules: list of dict
-        each dict has key:value pairs
+        modules: list of dict
+            each dict has key:value pairs
 
-        {
-        'name': str
-        'position': int
-        'module': torch.nn.Module
-        }
+            {
+            'name': str
+            'position': int
+            'module': torch.nn.Module
+            }
 
-        with:
-            name: str, name to be added in the nn.modules.container.Sequential
+            with:
+                name: str, name to be added in the nn.modules.container.Sequential
 
-            position: int, [0,..N], with N>0, also -1, where N the total
-            nr of modules in the torch.nn.modules.container.Sequential
-            -1 denotes the module that will be appended at the end
+                position: int, [0,..N], with N>0, also -1, where N the total
+                nr of modules in the torch.nn.modules.container.Sequential
+                -1 denotes the module that will be appended at the end
 
-            module: torch.nn.Module
+                module: torch.nn.Module
 
-    Output
-    ------
-    model: model with added modules/layers that is an instance of
-        torch.nn.modules.container.Sequential
+        Output
+        ------
+        model: model with added modules/layers that is an instance of
+            torch.nn.modules.container.Sequential
     '''
     all_positions = [m['position'] for m in modules]
     current_children = [c for c in model.named_children()]
@@ -606,137 +611,6 @@ class model_getlayer():
 
 
 
-
-
-##################################################################################################
-########### Custom Losses ######################################################################
-class FocalLoss(nn.Module):
-    """ Focal Loss, as described in https://arxiv.org/abs/1708.02002.
-    Docs::
-
-        It is essentially an enhancement to cross entropy loss and is
-        useful for classification tasks when there is a large class imbalance.
-        x is expected to contain raw, unnormalized scores for each class.
-        y is expected to contain class labels.
-        Shape:
-            - x: (batch_size, C) or (batch_size, C, d1, d2, ..., dK), K > 0.
-            - y: (batch_size,) or (batch_size, d1, d2, ..., dK), K > 0.
-    """
-
-    def __init__(self,
-                 alpha: Optional[Tensor] = None,
-                 gamma: float = 0.,
-                 reduction: str = 'mean',
-                 ignore_index: int = -100):
-        """Constructor.
-        Args:
-            alpha (Tensor, optional): Weights for each class. Defaults to None.
-            gamma (float, optional): A constant, as described in the paper.
-                Defaults to 0.
-            reduction (str, optional): 'mean', 'sum' or 'none'.
-                Defaults to 'mean'.
-            ignore_index (int, optional): class label to ignore.
-                Defaults to -100.
-        """
-        if reduction not in ('mean', 'sum', 'none'):
-            raise ValueError(
-                'Reduction must be one of: "mean", "sum", "none".')
-
-        super().__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.ignore_index = ignore_index
-        self.reduction = reduction
-
-        self.nll_loss = nn.NLLLoss(
-            weight=alpha, reduction='none', ignore_index=ignore_index)
-
-    def __repr__(self):
-        arg_keys = ['alpha', 'gamma', 'ignore_index', 'reduction']
-        arg_vals = [self.__dict__[k] for k in arg_keys]
-        arg_strs = [f'{k}={v}' for k, v in zip(arg_keys, arg_vals)]
-        arg_str = ', '.join(arg_strs)
-        return f'{type(self).__name__}({arg_str})'
-
-    def forward(self, x: Tensor, y: Tensor) -> Tensor:
-        if x.ndim > 2:
-            # (N, C, d1, d2, ..., dK) --> (N * d1 * ... * dK, C)
-            c = x.shape[1]
-            x = x.permute(0, *range(2, x.ndim), 1).reshape(-1, c)
-            # (N, d1, d2, ..., dK) --> (N * d1 * ... * dK,)
-            y = y.view(-1)
-
-        unignored_mask = y != self.ignore_index
-        y = y[unignored_mask]
-        if len(y) == 0:
-            return 0.
-        x = x[unignored_mask]
-
-        # compute weighted cross entropy term: -alpha * log(pt)
-        # (alpha is already part of self.nll_loss)
-        log_p = F.log_softmax(x, dim=-1)
-        ce = self.nll_loss(log_p, y)
-
-        # get true class column from each row
-        all_rows = torch.arange(len(x))
-        log_pt = log_p[all_rows, y]
-
-        # compute focal term: (1 - pt)^gamma
-        pt = log_pt.exp()
-        focal_term = (1 - pt)**self.gamma
-
-        # the full loss: -alpha * ((1 - pt)^gamma) * log(pt)
-        loss = focal_term * ce
-
-        if self.reduction == 'mean':
-            loss = loss.mean()
-        elif self.reduction == 'sum':
-            loss = loss.sum()
-
-        return loss
-
-
-def focal_loss(alpha: Optional[Sequence] = None,
-               gamma: float = 0.,
-               reduction: str = 'mean',
-               ignore_index: int = -100,
-               device='cpu',
-               dtype=torch.float32) -> FocalLoss:
-    """Factory function for FocalLoss.
-    Docs::
-
-            alpha (Sequence, optional): Weights for each class. Will be converted
-                to a Tensor if not None. Defaults to None.
-            gamma (float, optional): A constant, as described in the paper.
-                Defaults to 0.
-            reduction (str, optional): 'mean', 'sum' or 'none'.
-                Defaults to 'mean'.
-            ignore_index (int, optional): class label to ignore.
-                Defaults to -100.
-            device (str, optional): Device to move alpha to. Defaults to 'cpu'.
-            dtype (torch.dtype, optional): dtype to cast alpha to.
-                Defaults to torch.float32.
-        Returns:
-            A FocalLoss object
-    """
-    if alpha is not None:
-        if not isinstance(alpha, Tensor):
-            alpha = torch.tensor(alpha)
-        alpha = alpha.to(device=device, dtype=dtype)
-
-    fl = FocalLoss(
-        alpha=alpha,
-        gamma=gamma,
-        reduction=reduction,
-        ignore_index=ignore_index)
-    return
-
-
-
-
-
-
-
 ##################################################################################################
 ########### Gradient Checks ######################################################################
 def model_is_gradient_needed(net_model):
@@ -750,7 +624,7 @@ def model_is_gradient_needed(net_model):
         return False
 
 
-def plot_grad_flow(named_parameters):
+def plot_gradient_flow(named_parameters):
     """
     Docs::
 
@@ -781,7 +655,7 @@ def plot_grad_flow(named_parameters):
     plt.grid(True)
 
 
-def plot_grad_flow_v2(named_parameters):
+def plot_gradient_flow_v2(named_parameters):
     '''  Check Grad Flow
     Docs::
 
@@ -819,19 +693,24 @@ def plot_grad_flow_v2(named_parameters):
 
 
 
-##################################################################################################
-########### Computer vision ######################################################################
-def vision_prediction_check():
-    """ Tooling for Vision checks
-    Docs::
 
-            https://github.com/jacobgil/pytorch-grad-cam
-
-            https://github.com/pytorch/captum
-
+###############################################################################################
+########### Utils #############################################################################
+def torch_norm_l2(X):
     """
-    pass
+    normalize the torch  tensor X by L2 norm.
+    """
+    X_norm = torch.norm(X, p=2, dim=1, keepdim=True)
+    X_norm = X / X_norm
+    return X_norm
 
+
+
+
+
+
+##################################################################################################
+########### Custom Losses ########################################################################
 
 
 
@@ -930,29 +809,6 @@ class MultiClassMultiLabel_Head(nn.Module):
         return loss_list
 
 
-class LSTM(nn.Module):
-  def __init__(self, input_size, hidden_size, num_layers, num_classes, dropout):
-    super(LSTM, self).__init__()
-    self.num_layers = num_layers
-    self.input_size = input_size
-    self.hidden_size = hidden_size
-    self.num_classes = num_classes
-    self.dropout = dropout
-
-    self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers,
-                        dropout = self.dropout, batch_first=True)
-    self.fc = nn.Linear(self.hidden_size, self.num_classes)
-
-  def forward(self, x):
-    h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size)
-    out, _ = self.lstm(x, (h0,c0))
-    out = out[:,-1,:]
-    out = self.fc(out)
-    return out
-
-
-
 class SequenceReshaper(nn.Module):
     def __init__(self, from_ = 'vision'):
         super(SequenceReshaper,self).__init__()
@@ -967,71 +823,17 @@ class SequenceReshaper(nn.Module):
             return x
 
 
+
+
+
+
+
 ###############################################################################################
 ########### Custom element ####################################################################
-class SmeLU(torch.nn.Module):
-    """
-    This class implements the Smooth ReLU (SmeLU) activation function proposed in:
-    https://arxiv.org/pdf/2202.06499.pdf
+from utilmy.deeplearning.ttorch.layers import (SmeLU
 
 
-    Example :
-        def main() -> None:
-            # Init figures
-            fig, ax = plt.subplots(1, 1)
-            fig_grad, ax_grad = plt.subplots(1, 1)
-            # Iterate over some beta values
-            for beta in [0.5, 1., 2., 3., 4.]:
-                # Init SemLU
-                smelu: SmeLU = SmeLU(beta=beta)
-                # Make input
-                input: torch.Tensor = torch.linspace(-6, 6, 1000, requires_grad=True)
-                # Get activations
-                output: torch.Tensor = smelu(input)
-                # Compute gradients
-                output.sum().backward()
-                # Plot activation and gradients
-                ax.plot(input.detach(), output.detach(), label=str(beta))
-                ax_grad.plot(input.detach(), input.grad.detach(), label=str(beta))
-            # Show legend, title and grid
-            ax.legend()
-            ax_grad.legend()
-            ax.set_title("SemLU")
-            ax_grad.set_title("SemLU gradient")
-            ax.grid()
-            ax_grad.grid()
-            # Show plots
-            plt.show()
-
-    """
-
-    def __init__(self, beta: float = 2.) -> None:
-        """
-        Constructor method.
-        beta (float): Beta value if the SmeLU activation function. Default 2.
-        """
-        # Call super constructor
-        super(SmeLU, self).__init__()
-        # Check beta
-        assert beta >= 0., f"Beta must be equal or larger than zero. beta={beta} given."
-        # Save parameter
-        self.beta: float = beta
-
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass.
-        input (torch.Tensor): Tensor of any shape
-        :return (torch.Tensor): Output activation tensor of the same shape as the input tensor
-        """
-        output: torch.Tensor = torch.where(input >= self.beta, input,
-                                           torch.tensor([0.], device=input.device, dtype=input.dtype))
-        output: torch.Tensor = torch.where(torch.abs(input) <= self.beta,
-                                           ((input + self.beta) ** 2) / (4. * self.beta), output)
-        return output
-
-
-
-
+)
 
 
 

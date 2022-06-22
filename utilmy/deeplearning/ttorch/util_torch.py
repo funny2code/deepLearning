@@ -6,27 +6,14 @@ Doc::
     -------------------------functions----------------------
     dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
     device_setup(device = 'cpu', seed = 42, arg:dict = None)
-    gradwalk(x, _depth = 0)
-    gradwalk_run(graph)
     help()
-    load_partially_compatible(model, device = 'cpu')
     model_evaluation(model, loss_task_fun, test_loader, arg, )
     model_load(dir_checkpoint:str, torch_model = None, doeval = True, dotrain = False, device = 'cpu', input_shape = None, **kw)
-    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str, torch.Tensor])
+    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict[str, torch.Tensor])
     model_save(torch_model = None, dir_checkpoint:str = "./checkpoint/check.pt", optimizer = None, cc:dict = None, epoch = -1, loss_val = 0.0, show = 1, **kw)
     model_summary(model, **kw)
     model_train(model, loss_calc, optimizer = None, train_loader = None, valid_loader = None, arg:dict = None)
-    test1()
-    test3()
-    test4(dir_checkpoint, torch_model)
-    test_all()
-    test_dataset_classification_fake(nrows = 500)
-    test_dataset_fashion_mnist(samples = 100, random_crop = False, random_erasing = False, convert_to_RGB = False, val_set_ratio = 0.2, test_set_ratio = 0.1, num_workers = 1)
 
-    -------------------------methods----------------------
-    test_model_dummy2.__init__(self)
-    test_model_dummy.__init__(self, input_dim, output_dim, hidden_dim = 4)
-    test_model_dummy.forward(self, x)
 
 
     Utils for torch training
@@ -41,23 +28,18 @@ Doc::
 
 
 """
-import os, random, numpy as np, glob, pandas as pd, matplotlib.pyplot as plt ;from box import Box
+import os, random, numpy as np, os, pandas as pd
 from copy import deepcopy
-from typing import List,Dict,Union
+from box import Box
 
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
-from sklearn.metrics import mean_squared_error, accuracy_score, roc_curve, auc, roc_auc_score, precision_score, recall_score, precision_recall_curve, accuracy_score
 import sklearn.datasets
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
-
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 #############################################################################################
-from utilmy import log, log2, os_module_name
+from utilmy import log, os_module_name
+
 MNAME = os_module_name(__file__)
 
 def help():
@@ -112,7 +94,6 @@ def test1():
     })
 
 
-###################################################################################################
 def test2():
     """
     """
@@ -142,15 +123,14 @@ def test2():
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
 
 
-    
-    model = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
-    X, y = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
+    model       = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
+    X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
     test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
 
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
     
-    model_evaluation(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
+    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
 
     model = models.resnet50()
     kwargs = {'input_size': (3, 224, 224)}
@@ -163,7 +143,34 @@ def test2():
 
 
 
+def test_metrics1():
+    model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    data   = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    labels = torch.randint(1000, (64,))#random labels 
+    acc    = torch_metric_accuracy(output = output, labels = labels) 
 
+    x1 = torch.rand(100,)
+    x2 = torch.rand(100,)
+    r = torch_pearson_coeff(x1, x2)
+
+    x = torch.rand(100, 30)
+    r_pairs = torch_pearson_coeff_pairs(x)
+
+
+    data = torch.rand(64, 3, 224, 224)
+    output = model(data)
+    # This is just an example where class coded by 999 has more occurences
+    # No train test splits are applied to lead to the overrepresentation of class 999 
+    p = [(1-0.05)/1000]*999
+    p.append(1-sum(p))
+    labels = np.random.choice(list(range(1000)), 
+                            size = (10000,), 
+                            p = p)#imbalanced 1000-class labels
+    labels = torch.Tensor(labels).long()
+    weight, label_weight = torch_class_weights(labels)
+    loss = torch.nn.CrossEntropyLoss(weight = weight)
+    l = loss(output, labels[:64])
 
 
 
@@ -194,6 +201,12 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
     return device
 
 
+
+
+
+
+
+###############################################################################################
 def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, test_X=None, test_y=None,  
                      batch_size=64, shuffle=True, device='cpu', batch_size_val=None, batch_size_test=None):
     """dataloader_create
@@ -228,8 +241,278 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
 
 
 
+def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+                     dirout = "./"):
+    """ Downloading Dataset from github  and unzip it
+
+
+    """
+    import requests
+    from zipfile import ZipFile
+
+    fname = dirout + url.split("/")[-1]
+    dname = dirout + "/".join( fname.split(".")[:-1])
+
+    isdir = os.path.isdir(dname)
+    if isdir == 0:
+        r = requests.get(url)
+        open(fname , 'wb').write(r.content)
+        flag = os.path.exists(fname)
+        if(flag):
+            print("Dataset is Downloaded")
+            zip_file = ZipFile(fname)
+            zip_file.extractall()
+        else:
+            raise Exception("Dataset is not downloaded")
+    else:
+        print("dataset is already presented")
+    return dname
+
+
+
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    #### Split anything
+    val_ratio = val_ratio + train_ratio
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    else :  ## if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
+
+
+
+
 
 ###############################################################################################
+####### Image #################################################################################
+def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
+    """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
+
+
+    """
+    if labels_dict is not None:
+        for ci, catval in labels_dict.items():
+            dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+    labels_col = labels_dict.keys()
+
+    for ci in labels_col:
+        dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
+        dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
+        dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
+        #####  0,0,1,0 format   log(dfi_1hot)
+    return dflabels
+
+
+def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_path='./'):
+    """ Get Correct image path from image id
+
+    """
+    import glob
+    img_list = df[col_img].values
+
+    if "/" in str(img_list[0]) :
+        train_img_path = ''
+        test_img_path  = ''
+        log('id already contains the path')
+    else :
+        train_img_path = train_img_path + "/"
+        test_img_path  = test_img_path  + "/"
+
+    img_list_ok = []
+    for fi in img_list :
+        fifull = ''
+        flist = glob.glob(train_img_path + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        flist = glob.glob(test_img_path  + str(fi) + "*"  )
+        if len(flist) >0  :
+           fifull = flist[0]
+
+        img_list_ok.append(fifull)
+
+    df[col_img] = img_list_ok
+    df = df[ df[col_img] != '' ]
+    # df = df.dropna(how='any',axis=0)
+    return df
+
+
+
+class ImageDataset(Dataset):
+    """Custom DataGenerator using Pytorch Sequence for images
+        df_label format :
+        id, gender, gender_onehot_onehot, ....
+    """
+    def __init__(self, img_dir:str="images/",
+                col_img: str='id',
+
+                label_dir:str   ="labels/mylabel.csv",
+                label_dict:dict =None,
+
+                transforms=None, transforms_image_size_default=64,
+                check_ifimage_exist=False,
+                img_loader=None
+
+                 ):
+        """ Image Datast :  labels + Images path on disk
+        Docs:
+
+            img_dir (Path(str)): String path to images directory
+            label_dir (DataFrame): Dataset for Generator
+            label_dict (dict):    {label_name : list of values }
+            transforms (str): type of transformations to perform on images. Defaults to None.
+        """
+        self.image_dir  = img_dir
+        self.col_img    = col_img
+        self.transforms = transforms
+
+        if img_loader is None :  ### Use default loader
+           from PIL import Image
+           self.img_loader = Image.open
+
+        if transforms is None :
+              from torchvision import transforms
+              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
+
+
+        #### labels ############################################################################
+        from utilmy import pd_read_file
+        dflabel     = pd_read_file(label_dir)
+        dflabel     = dflabel.dropna()
+        assert col_img in dflabel.columns
+
+
+        if check_ifimage_exist :
+           #### Bugggy, not working
+           dflabel = dataset_add_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
+
+        self.dflabel    = dflabel
+        self.label_cols = list(label_dict.keys())
+        self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+        self.label_img_dir = self.label_df[self.col_img].values
+
+
+
+        ####lable Prep  #######################################################################
+        self.label_dict = {}
+        for ci in self.label_cols:
+            v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+            v = np.array([[int(t) for t in vlist] for vlist in v])
+            self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
+
+
+
+    def __len__(self) -> int:
+        return len(self.label_img_dir)
+
+
+    def __getitem__(self, idx: int):
+
+        ##### Load Image
+        # train_X = self.data[idx]
+        # from PIL import Image
+        img_dir = self.label_img_dir[idx]
+        #img     = Image.open(img_dir)
+        img     = self.img_loader(img_dir)
+        train_X = self.transforms(img)
+
+
+        train_y = {}
+        assert(len(self.label_dict) != 0)
+        for classname, n_unique_label in self.label_dict.items():
+            train_y[classname] = self.label_dict[classname][idx]
+        return (train_X, train_y)
+
+
+
+
+def ImageDataloader(df=None, batch_size=64,
+                    label_list=['gender', 'masterCategory', 'subCategory' ],
+                    col_img='id',
+                    train_img_path  = 'data_fashion_small/train',
+                    test_img_path   = 'data_fashion_small/test',
+                    train_ratio=0.5, val_ratio=0.2,
+                    transform_train=None,
+                    transform_test=None,
+                    ):
+    """
+
+    """
+    from utilmy.deeplearning.ttorch import util_torch as ut
+
+    #label_list  = label_list.split(",")   #### Actual labels
+
+    assert len(df[col_img]) > 0 , 'error'
+    assert len(df[label_list]) > 0 , 'error'
+
+
+    ########### label file in CSV  ##################################
+    label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
+    label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
+
+
+    ########### Check Image path   ###################################
+    df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+
+
+    ############ Train Test Split ####################################
+    df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=train_ratio, val_ratio=val_ratio)
+
+
+    #################TRAIN DATA##################
+    # tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+    # transform_train  = transforms.Compose(tlist)
+
+    # tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+    # transform_test   = transforms.Compose(tlist)
+
+    train_dataloader = DataLoader(ImageDataset( label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
+                       batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
+
+    val_dataloader   = DataLoader(ImageDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
+                       batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
+
+    test_dataloader  = DataLoader(ImageDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
+                       batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
+
+    return train_dataloader,val_dataloader,test_dataloader
+
+
+
+
+
+###############################################################################################
+def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", optimizer=None, cc:dict=None,
+               epoch=-1, loss_val=0.0, show=1, **kw):
+    """function model_save
+    Doc::
+
+        dir_checkpoint = "./check/mycheck.pt"
+        model_save(model, dir_checkpoint, epoch=1,)
+    """
+    from copy import deepcopy
+    dd = {}
+    dd['model_state_dict'] = deepcopy(torch_model.state_dict())
+    dd['epoch'] = cc.get('epoch',   epoch)
+    dd['loss']  = cc.get('loss_val', loss_val)
+    dd['optimizer_state_dict']  = optimizer.state_dict()  if optimizer is not None else {}
+
+    torch.save(dd, dir_checkpoint)
+    if show>0: log(dir_checkpoint)
+    return dir_checkpoint
+
+
+
 def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False, device='cpu', input_shape=None, **kw):
     """function model_load from checkpoint
     Doc::
@@ -268,28 +551,7 @@ def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False,
     return torch_model 
     
 
-def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", optimizer=None, cc:dict=None,
-               epoch=-1, loss_val=0.0, show=1, **kw):
-    """function model_save
-    Doc::
-
-        dir_checkpoint = "./check/mycheck.pt"
-        model_save(model, dir_checkpoint, epoch=1,)
-    """
-    from copy import deepcopy
-    dd = {}
-    dd['model_state_dict'] = deepcopy(torch_model.state_dict())
-    dd['epoch'] = cc.get('epoch',   epoch)
-    dd['loss']  = cc.get('loss_val', loss_val)
-    dd['optimizer_state_dict']  = optimizer.state_dict()  if optimizer is not None else {}
-
-    torch.save(dd, dir_checkpoint)
-    if show>0: log(dir_checkpoint)
-    return dir_checkpoint
-
-
-
-def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str, torch.Tensor]):
+def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict):
     """  using 1x RAM for large model
     Doc::
 
@@ -301,9 +563,8 @@ def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str
 
 
     """
-    from typing import Dict
 
-    def get_keys_to_submodule(model: nn.Module) -> Dict[str, nn.Module]:
+    def get_keys_to_submodule(model: nn.Module) -> dict:
         keys_to_submodule = {}
         # iterate all submodules
         for submodule_name, submodule in model.named_modules():
@@ -341,9 +602,18 @@ def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str
         setattr(submodule, param_name, new_val)
 
 
+def model_load_partially_compatible(model, dir_weights='', device='cpu'):
+    current_model=model.state_dict()
+    keys_vin=torch.load(dir_weights,map_location=device)
+
+    new_state_dict={k:v if v.size()==current_model[k].size()  else  current_model[k] for k,v in zip(current_model.keys(), keys_vin['model_state_dict'].values())
+                    }
+    current_model.load_state_dict(new_state_dict)
+    return current_model
 
 
-###############################################################################################
+
+
 def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loader=None, arg:dict=None ):
     """One liner for training a pytorch model.
     Doc::
@@ -442,7 +712,8 @@ def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loade
               counter_early_stopping += 1
 
 
-def model_evaluation(model, loss_task_fun, test_loader, arg, ):
+
+def model_evaluate(model, loss_task_fun, test_loader, arg, ):
     """function model_evaluation
     Doc::
 
@@ -475,7 +746,6 @@ def model_evaluation(model, loss_task_fun, test_loader, arg, ):
             dfi = metrics_eval(ypred.numpy(), yval.numpy(), metric_list=['accuracy_score']) # modified by Abrham
             dfmetric = pd.concat((dfmetric, dfi, pd.DataFrame([['loss', loss_val]], columns=['name', 'metric_val'])))
     return dfmetric
-
 
 
 
@@ -550,11 +820,7 @@ def model_summary(model, **kw):
         ModelStatistics object
                 See torchsummary/model_statistics.py for more information.
     """
-    try :
-       from torchsummary import summary
-    except:
-        os.system('pip install torch-summary')
-        from torchsummary import summary
+    from .torchinfo import summary
 
     return summary(model, **kw)
 
@@ -564,42 +830,36 @@ def model_summary(model, **kw):
 ########### Metrics  ##########################################################################
 if 'metrics':
     #### Numpy metrics
-    from utilmy.deeplearning.util_dl import metrics_eval, metrics_plot
-
-    #### Torch metrics
-    def test_metrics1():
-        model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
-        data   = torch.rand(64, 3, 224, 224)
-        output = model(data)
-        labels = torch.randint(1000, (64,))#random labels 
-        acc    = torch_metric_accuracy(output = output, labels = labels) 
+    from utilmy.deeplearning.util_dl import metrics_eval
 
 
-        x1 = torch.rand(100,)
-        x2 = torch.rand(100,)
-        r = torch_pearson_coeff(x1, x2)
+    def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
+        """Compare 2 list of vectors return cosine similarity score
 
-        x = torch.rand(100, 30)
-        r_pairs = torch_pearson_coeff_pairs(x)
+        Docs
+            cola (str): list of embedding
+            colb (str): list of embedding
+            model (model instance): Pretrained sentence transformer model
 
+        Returns:
+            pd DataFrame: 'cosine_similarity' column and return df
+        """
+        from sklearn.metrics.pairwise import cosine_similarity
 
+        results = list()
+        for emb1,emb2 in zip(emb_list1, emb_list2):
 
-    def test_metrics2():
-        model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+            #if isinstance(emb1, torch.Tensor) :
+            #    emb1 = emb1
 
-        data = torch.rand(64, 3, 224, 224)
-        output = model(data)
-        # This is just an example where class coded by 999 has more occurences
-        # No train test splits are applied to lead to the overrepresentation of class 999 
-        p = [(1-0.05)/1000]*999
-        p.append(1-sum(p))
-        labels = np.random.choice(list(range(1000)), 
-                                size = (10000,), 
-                                p = p)#imbalanced 1000-class labels
-        labels = torch.Tensor(labels).long()
-        weight, label_weight = torch_class_weights(labels)
-        loss = torch.nn.CrossEntropyLoss(weight = weight)
-        l = loss(output, labels[:64])
+            result = cosine_similarity([emb1],[emb2])
+            results.append(result[0])
+
+        df = pd.DataFrame(results, columns=['cos_sim'])
+
+        if name_list is not None :
+          df['name'] = name_list
+        return df
 
 
     def torch_pearson_coeff(x1, x2):
@@ -733,31 +993,6 @@ if 'metrics':
 
 #############################################################################################
 #############################################################################################
-class test_model_dummy(nn.Module):
-  def __init__(self, input_dim, output_dim, hidden_dim=4):
-    super(DataEncoder, self).__init__()
-    self.input_dim = input_dim
-    self.output_dim = output_dim
-    self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
-                             nn.ReLU(),
-                             nn.Linear(hidden_dim, output_dim))
-
-  def forward(self, x):
-    return self.net(x)
-
-
-class test_model_dummy2(nn.Sequential):
-    def __init__(self):
-        super().__init__()
-        self.in_proj = nn.Linear(2, 10)
-        self.stages = nn.Sequential(
-             nn.Linear(10, 10),
-             nn.Linear(10, 10)
-        )
-        self.out_proj = nn.Linear(10, 2)
-
-
-
 if 'utils':
     def to_numpy(tensor):
         return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
@@ -817,139 +1052,156 @@ if 'utils':
 
 
 
-def test_dataset_classification_fake(nrows=500):
-    """function test_dataset_classification_fake
-    Args:
-        nrows:   
-    Returns:
-        
-    """
-    from sklearn import datasets as sklearn_datasets
-    ndim    =11
-    coly    = 'y'
-    colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
-    colcat  = ['colcat_1']
-    X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
-                                                   n_informative=ndim-2)
-    df         = pd.DataFrame(X,  columns= colnum)
-    df[coly]   = y.reshape(-1, 1)
+if 'test_utils':
+    class test_model_dummy(nn.Module):
+      def __init__(self, input_dim, output_dim, hidden_dim=4):
+        super(test_model_dummy, self).__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
+                                 nn.ReLU(),
+                                 nn.Linear(hidden_dim, output_dim))
 
-    for ci in colcat :
-      df[ci] = np.random.randint(0,1, len(df))
-
-    pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
-    return df, pars
+      def forward(self, x):
+        return self.net(x)
 
 
-def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False, 
-                            convert_to_RGB=False,val_set_ratio=0.2, test_set_ratio=0.1,num_workers=1):
-    """function test_dataset_f_mnist
-    """
-
-    from torchvision.transforms import transforms
-    from torchvision import datasets
-
-    # Generate the transformations
-    train_list_transforms = [
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-    ]
-
-    test_list_transforms = [
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),
-    ]
-
-    # Add random cropping to the list of transformations
-    if random_crop:
-        train_list_transforms.insert(0, transforms.RandomCrop(28, padding=4))
-
-    # Add random erasing to the list of transformations
-    if random_erasing:
-        train_list_transforms.append(
-            transforms.RandomErasing(
-                p=0.5,
-                scale=(0.02, 0.33),
-                ratio=(0.3, 3.3),
-                value="random",
-                inplace=False,
+    class test_model_dummy2(nn.Sequential):
+        def __init__(self):
+            super().__init__()
+            self.in_proj = nn.Linear(2, 10)
+            self.stages = nn.Sequential(
+                 nn.Linear(10, 10),
+                 nn.Linear(10, 10)
             )
-        )
-    #creating RGB channels
-    if convert_to_RGB:
-        convert_to_RGB = transforms.Lambda(lambda x: x.repeat(3, 1, 1))
-        train_list_transforms.append(convert_to_RGB)
-        test_list_transforms.append(convert_to_RGB)
+            self.out_proj = nn.Linear(10, 2)
 
-    # Train Data
-    train_transform = transforms.Compose(train_list_transforms)
 
-    train_dataset = datasets.FashionMNIST(
-                    root="data", train=True, transform=train_transform, download=True)
+    def test_dataset_classification_fake(nrows=500):
+        """function test_dataset_classification_fake
+        Args:
+            nrows:
+        Returns:
 
-    # Define the size of the training set and the validation set
-    train_set_length = int(  len(train_dataset) * (100 - val_set_ratio*100) / 100)
-    val_set_length = int(len(train_dataset) - train_set_length)
-    
-    train_set, val_set = torch.utils.data.random_split(
-        train_dataset, (train_set_length, val_set_length)
-    )
-    
-    #Custom data samples for ensemble model training
-    train_set_smpls = int(samples - (val_set_ratio*100))
-    val_set_smpls   = int(samples - train_set_smpls)
-    test_set_smpls  = int(samples*test_set_ratio)
+        """
+        from sklearn import datasets as sklearn_datasets
+        ndim    =11
+        coly    = 'y'
+        colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
+        colcat  = ['colcat_1']
+        X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
+                                                       n_informative=ndim-2)
+        df         = pd.DataFrame(X,  columns= colnum)
+        df[coly]   = y.reshape(-1, 1)
 
-    #train dataset loader
-    train_loader = torch.utils.data.DataLoader(
-        train_set,
-        batch_size=train_set_smpls,
-        shuffle=True,
-        num_workers=num_workers,
-    )
+        for ci in colcat :
+          df[ci] = np.random.randint(0,1, len(df))
 
-    #validation dataset dataloader
-    val_loader = torch.utils.data.DataLoader(
-                    val_set, batch_size=val_set_smpls, shuffle=True, num_workers=1,
+        pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
+        return df, pars
+
+
+    def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False,
+                                convert_to_RGB=False,val_set_ratio=0.2, test_set_ratio=0.1,num_workers=1):
+        """function test_dataset_f_mnist
+        """
+
+        from torchvision.transforms import transforms
+        from torchvision import datasets
+
+        # Generate the transformations
+        train_list_transforms = [
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,)),
+        ]
+
+        test_list_transforms = [
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,)),
+        ]
+
+        # Add random cropping to the list of transformations
+        if random_crop:
+            train_list_transforms.insert(0, transforms.RandomCrop(28, padding=4))
+
+        # Add random erasing to the list of transformations
+        if random_erasing:
+            train_list_transforms.append(
+                transforms.RandomErasing(
+                    p=0.5,
+                    scale=(0.02, 0.33),
+                    ratio=(0.3, 3.3),
+                    value="random",
+                    inplace=False,
                 )
+            )
+        #creating RGB channels
+        if convert_to_RGB:
+            convert_to_RGB = transforms.Lambda(lambda x: x.repeat(3, 1, 1))
+            train_list_transforms.append(convert_to_RGB)
+            test_list_transforms.append(convert_to_RGB)
+
+        # Train Data
+        train_transform = transforms.Compose(train_list_transforms)
+
+        train_dataset = datasets.FashionMNIST(
+                        root="data", train=True, transform=train_transform, download=True)
+
+        # Define the size of the training set and the validation set
+        train_set_length = int(  len(train_dataset) * (100 - val_set_ratio*100) / 100)
+        val_set_length = int(len(train_dataset) - train_set_length)
+
+        train_set, val_set = torch.utils.data.random_split(
+            train_dataset, (train_set_length, val_set_length)
+        )
+
+        #Custom data samples for ensemble model training
+        train_set_smpls = int(samples - (val_set_ratio*100))
+        val_set_smpls   = int(samples - train_set_smpls)
+        test_set_smpls  = int(samples*test_set_ratio)
+
+        #train dataset loader
+        train_loader = torch.utils.data.DataLoader(
+            train_set,
+            batch_size=train_set_smpls,
+            shuffle=True,
+            num_workers=num_workers,
+        )
+
+        #validation dataset dataloader
+        val_loader = torch.utils.data.DataLoader(
+                        val_set, batch_size=val_set_smpls, shuffle=True, num_workers=1,
+                    )
 
 
-    # Test Data
-    test_transform = transforms.Compose(test_list_transforms)
+        # Test Data
+        test_transform = transforms.Compose(test_list_transforms)
 
-    test_set = datasets.FashionMNIST(
-        root="./data", train=False, transform=test_transform, download=True
-    )
+        test_set = datasets.FashionMNIST(
+            root="./data", train=False, transform=test_transform, download=True
+        )
 
-    test_loader = torch.utils.data.DataLoader(
-        test_set,
-        batch_size=test_set_smpls,
-        shuffle=False,
-        num_workers=num_workers,
-    )
+        test_loader = torch.utils.data.DataLoader(
+            test_set,
+            batch_size=test_set_smpls,
+            shuffle=False,
+            num_workers=num_workers,
+        )
 
-    #Dataloader iterators, provides number of samples
-    #configured in respective dataloaders
-    #returns tensors of size- (samples*3*28*28)
-    train_X, train_y = next(iter(train_loader))
-    valid_X, valid_y = next(iter(val_loader))
-    test_X, test_y = next(iter(test_loader))
+        #Dataloader iterators, provides number of samples
+        #configured in respective dataloaders
+        #returns tensors of size- (samples*3*28*28)
+        train_X, train_y = next(iter(train_loader))
+        valid_X, valid_y = next(iter(val_loader))
+        test_X, test_y = next(iter(test_loader))
 
-    return train_X, train_y,   valid_X, valid_y,   test_X , test_y
+        return train_X, train_y,   valid_X, valid_y,   test_X , test_y
 
 
 
 
 ###################################################################################################
-def load_partially_compatible(model,device='cpu'):
-    current_model=model.state_dict()
-    keys_vin=torch.load('',map_location=device)
-
-    new_state_dict={k:v if v.size()==current_model[k].size()  else  current_model[k] for k,v in zip(current_model.keys(), keys_vin['model_state_dict'].values()) 
-                    }    
-    current_model.load_state_dict(new_state_dict)
-    return current_model
 
 
 

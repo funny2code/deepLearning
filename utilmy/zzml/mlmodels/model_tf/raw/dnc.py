@@ -28,6 +28,8 @@ import tensorflow as tf
 import access
 import sonnet as snt
 
+import utilmy.deeplearning.ttorch.layers
+
 DNCState = collections.namedtuple("DNCState", ("access_output", "access_state", "controller_state"))
 
 
@@ -57,7 +59,7 @@ class DNC(snt.RNNCore):
         super(DNC, self).__init__(name=name)
 
         with self._enter_variable_scope():
-            self._controller = snt.LSTM(**controller_config)
+            self._controller = utilmy.deeplearning.ttorch.layers.LSTM(**controller_config)
             self._access = access.MemoryAccess(**access_config)
 
         self._access_output_size = np.prod(self._access.output_size.as_list())
