@@ -45,7 +45,7 @@ def test_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     log(dd.test_summary)
     ddict.cochran = dd.test_summary
 
-
+    return ddict
 
 
 
