@@ -14,7 +14,7 @@ from box import Box
 from utilmy import log
 
 
-
+##################################################################################
 def hypotest_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
     """# To test whether All columns have same means.
 
@@ -50,7 +50,7 @@ def hypotest_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
 
 
 
-def hypotest_is_mean_equal(df, col='mycol', mean_target=4):
+def hypotest_is_equal_fixed_mean(df, col='mycol', mean_target=4):
     """# To test whether sample has come from a population with mean 54
     Docs::
         # H0: μ = 54 
@@ -82,24 +82,36 @@ def hypotest_is_mean_equal(df, col='mycol', mean_target=4):
 
 
 
+def hypotest_is_all_group_means_equal(df, col=['col_group', 'val'], mean_target=4):
+    """# To test whether All columns have same means.
+    Docs::
 
-"""#2) Mann Whitney Test"""
+        # Is there difference in ratings for vegan and non-vegan food?
+        # H0: No difference in the stars
+        # H0: There is a difference in stars
+        # create dataframe
+        # for 'Vegan', 1 stands for vegan food.
+        data = pd.DataFrame({'Vegan':[1,1,1,0,0,0,1,0,1,0,1,0],
+                                    'Stars':[5.0,2.5,1.5,3.5,4.75,3.0,4.0,3.0,3.0,2.75,1.0,1.0]})
+        data.head()
 
-# create dataframe
-# for 'Vegan', 1 stands for vegan food.
-data = pd.DataFrame({'Vegan':[1,1,1,0,0,0,1,0,1,0,1,0],
-                            'Stars':[5.0,2.5,1.5,3.5,4.75,3.0,4.0,3.0,3.0,2.75,1.0,1.0]})
-data.head()
+        # With a p-value > 0.05, we fail to reject the null hypothesis that there is no 
+        # difference in rating between vegan and non-vegan food.
+    """    
+    vlist = []
+    if isinstance(df, pd.DataFrame):
+        for coli in cols:
+            vlist.append(df[coli].values)
+    elif isinstance(df, list):
+       vlist = df
+    ddict = Box({})    
 
-# Is there difference in ratings for vegan and non-vegan food?
-# H0: No difference in the stars
-# H0: There is a difference in stars
+    log("""#2) Mann Whitney Test""")
+    mw = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
+    ddict.MannWhitney  = mw.test_summary
+    return ddict
 
-mw = test.nonparametric.MannWhitney(group=data.Vegan, y1=data.Stars)
-mw.test_summary
 
-# With a p-value > 0.05, we fail to reject the null hypothesis that there is no 
-# difference in rating between vegan and non-vegan food.
 
 
 
@@ -127,26 +139,6 @@ ch.test_summary
 
 
 
-### Test for comparing 2 or more means
-
-"""# 1) ANOVA"""
-
-# Time (in minutes) to solve a puzzle
-# Grouped based on what beverage they drank before solving
-coffee = [8,20,26,36,39,23,25,28,27,25]
-coke = [25,26,27,29,25,23,22,27,29,21]
-tea = [14,25,23,27,28,21,26,30,31,34]
-
-# To test whether there is variation in solving time based on beverage intake
-# H0: No variation in the solving time based on the beverages
-# H1: Variation in the solving time based on the beverages
-
-aov = test.aov.AnovaOneWay(coffee, tea, coke)
-aov.test_summary
-
-# As p-value > 0.05, we fail to reject H0
-# No significant statistical evidence to prove variation in the three groups.
-
 
 """# 2) Mc Nemar Test"""
 
@@ -173,47 +165,6 @@ m = test.contingency.McNemarTest([[25, 5], [15, 55]], continuity=True)
 m.test_summary
 # As p-value < 0.05, we reject H0. 
 # True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
-
-"""# 3) Friedman Test"""
-
-group1 = [4, 6, 3, 4, 3, 2, 2, 7, 6, 5]
-group2 = [5, 6, 8, 7, 7, 8, 4, 6, 4, 5]
-group3 = [2, 4, 4, 3, 2, 2, 1, 4, 3, 2]
-
-# Test whether the samples are same
-# H0: Mean for each population is equal
-# H1: Atleast one population mean is different
-
-Friedman = test.nonparametric.FriedmanTest(group1, group2, group3, group = None)
-Friedman.test_summary
-
-# P-value < 5%. Reject H0
-# Atleast one population mean is different.
-
-"""# 4) Cochran's Q test"""
-
-# three columns for 3 sessions
-# 1 represents depression
-# 0 represents no more depression
-
-cases = np.array([[0, 0, 0],
-                  [1, 0, 0],
-                  [1, 1, 0],
-                  [1, 1, 1]])
-                      
-count = np.array([ 6,  16, 4,  2])
-data = np.repeat(cases, count, 0)
-data[:,0]
-
-#Is there a difference in depression cases over the 3 subsequent courses of therapy
-# H0: No difference in depression cases
-# H1: Difference in depression cases
-
-cq = test.contingency.CochranQ(data[:,0],data[:,1],data[:,2])
-cq.test_summary
-
-# p-value < 0.05. There is a statistical difference in the batches of patients 
-# experiencing depression and no depression between the different number of sessions.
 
 
 
