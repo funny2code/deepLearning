@@ -240,8 +240,9 @@ kw.test_summary
 # p-value > 5% level of significance. Thus, fail to reject H0
 # No statistical evidence to prove that the sample distributions are different.
 
-"""# 2) WaldWolfowitz"""
 
+
+"""# 2) WaldWolfowitz"""
 data1 = [20, 55, 29, 24, 75, 56, 31, 45]
 data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
 
