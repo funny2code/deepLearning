@@ -50,7 +50,7 @@ def hypotest_is_all_means_equal(df, col=['col1', 'col2'], mean_target=4):
 
 
 
-def test_is_mean_equal(df, col='mycol', mean_target=4):
+def hypotest_is_mean_equal(df, col='mycol', mean_target=4):
     """# To test whether sample has come from a population with mean 54
     Docs::
         # H0: μ = 54 
