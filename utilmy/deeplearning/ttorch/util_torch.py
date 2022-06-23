@@ -290,6 +290,89 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
+def SaveEmbeddings(model = None, path = './', data_loader=None):
+    isdir = os.path.isdir(path)
+    if isdir == False:
+       os.mkdir("./train")
+    assert(model is not None and data_loader is not None)
+    for img , img_names in data_loader:
+        with torch.no_grad():
+            emb = model(img)
+            for i in range(emb.size()[0]):
+                torch.save(emb[i],"./train/{}".format(img_names[i]))
+
+def LoadEmbeddings(dir = './'):
+    isdir = os.path.isdir(dir)
+    if isdir == False:
+       raise Exception("Can't read data, path is not present")
+    embv = []
+    img_names = []
+    for file in os.listdir(dir):
+        emb = torch.load(dir+'/'+file)
+        embv.append(emb)
+        img_name = file.split('_')[1]
+        img_names.append(img_name)
+
+    return embv, img_names
+
+class DataForEmbedding(Dataset):
+    """Custom DataGenerator using Pytorch Sequence for images
+    """
+    def __init__(self, df=None,
+                col_img: str='id',
+                transforms=None, transforms_image_size_default=64,
+                img_loader=None
+
+                 ):
+        self.col_img    = col_img
+        self.transforms = transforms
+
+        if img_loader is None :  ### Use default loader
+           from PIL import Image
+           self.img_loader = Image.open
+
+        if transforms is None :
+              from torchvision import transforms
+              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
+        assert(df is not None)
+        self.label_img_dir = df[self.col_img].values
+
+
+    def __len__(self) -> int:
+        return len(self.label_img_dir)
+
+
+    def __getitem__(self, idx: int):
+
+        img_dir = self.label_img_dir[idx]
+        img     = self.img_loader(img_dir)
+        img_name = img_dir.split('/')[-1].split('.')[0]
+		
+        if "\\" in img_name:
+	        img_name =  img_name.replace('\\','_')
+
+        train_X = self.transforms(img)
+        return (train_X, img_name)
+
+
+def cos_similar_embedding(embv = None, img_names=None):
+    from sklearn.metrics.pairwise import cosine_similarity
+    df = pd.DataFrame(data = img_names, columns=['id'] )
+    similar_emb = []
+    if embv is not None and img_names is not None:
+        for emb1 in embv:
+            emb1 = emb1 if emb1.dim() >1 else torch.reshape(emb1,(1,emb1.size()[0]))
+            res = []
+            for emb2 in embv:
+                if torch.all(emb1.eq(emb2)) == False:
+                    emb2 = emb2 if emb2.dim() >1 else torch.reshape(emb2,(1,emb2.size()[0]))
+                    res.append(cosine_similarity(emb1,emb2))
+                else:
+                    res.append(0)
+            max_value = max(res)
+            similar_emb.append(img_names[res.index(max_value)])
+        df['similar'] = similar_emb
+    return df
 
 
 
@@ -329,6 +412,8 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
         test_img_path  = test_img_path  + "/"
 
     img_list_ok = []
+    cnt = 0
+
     for fi in img_list :
         fifull = ''
         flist = glob.glob(train_img_path + str(fi) + "*"  )

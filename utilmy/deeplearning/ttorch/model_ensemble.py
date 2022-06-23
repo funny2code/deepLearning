@@ -1217,6 +1217,211 @@ def test5():
     print(outputs)
 
 
+def test6():
+    """ Multihead class fine tuning with Fashion Dataset
+    """
+    from utilmy.deeplearning.ttorch import  util_torch as ut
+    import glob
+    ARG = Box({
+        'MODE'   : 'mode1',
+        'DATASET': {},
+        'MODEL_INFO' : {},
+    })
+    PARAMS = {}
+
+    ##################################################################
+    if ARG.MODE == 'mode1':
+        ARG.MODEL_INFO.TYPE = 'dataonly' 
+        train_config                           = Box({})
+        train_config.LR                        = 0.001
+        train_config.SEED                      = 42
+        train_config.DEVICE                    = 'cpu'
+        train_config.BATCH_SIZE                = 8
+        train_config.EPOCHS                    = 1
+        train_config.EARLY_STOPPING_THLD       = 10
+        train_config.VALID_FREQ                = 1
+        train_config.SAVE_FILENAME             = './model.pt'
+        train_config.TRAIN_RATIO               = 0.7
+        train_config.VAL_RATIO                 = 0.2
+        train_config.TEST_RATIO                = 0.1
+
+    dirtmp      = "./"
+    col_img     = 'id'
+    label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
+
+
+
+    def custom_label(arg:dict=None):
+        ########## Downloading Dataset######
+        dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+
+        from utilmy.deeplearning.ttorch import  util_torch as ut
+        from util_torch import dataset_add_image_fullpath
+
+        dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
+
+        train_img_path = dirtmp + 'data_fashion_small/train'
+        test_img_path  = dirtmp + 'data_fashion_small/test'
+        label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
+
+
+        ########### label file in CSV  ########################
+        df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
+        label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
+   
+        ########### Image files FASHION MNIST
+        df = dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        ########### Train Test Split
+        df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
+
+        return df_train, df_val, df_test, label_dict, label_dict_count
+
+    df_train, df_val, df_test, label_dict,label_dict_count = custom_label()
+
+
+
+    def custom_dataloader():
+        ######CUSTOM DATASET#############################################
+        # isexist(df_train, df_test, df_val, label_dict, col_img)
+
+        from util_torch import ImageDataset
+        # col_img        = 'id'
+        batch_size     =  train_config.BATCH_SIZE
+        FashionDataset = ImageDataset
+
+
+        tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_train  = transforms.Compose(tlist)
+
+        tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+        transform_test   = transforms.Compose(tlist)
+
+        train_dataloader = DataLoader(FashionDataset( label_dir=df_train, label_dict=label_dict, col_img=col_img, transforms=transform_train),
+                           batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
+
+        val_dataloader   = DataLoader(FashionDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
+                           batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
+ 
+        test_dataloader  = DataLoader(FashionDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
+                           batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
+
+        return train_dataloader,val_dataloader,test_dataloader
+
+
+
+    ### modelA  ########################################################
+    from torchvision import  models
+    model_ft = models.resnet18(pretrained=True)
+    embA_dim = model_ft.fc.in_features  ###
+
+    ARG.modelA               = {}   
+    ARG.modelA.name          = 'resnet18'
+    ARG.modelA.nn_model      = model_ft
+    ARG.modelA.layer_emb_id  = 'fc'
+    ARG.modelA.architect     = [ embA_dim]  ### head s
+    ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
+    modelA = model_create(ARG.modelA)
+
+    ### modelB  ########################################################
+    from torchvision import  models
+    model_ft = models.resnet50(pretrained=True)
+    embB_dim = int(model_ft.fc.in_features)
+
+    ARG.modelB               = {}   
+    ARG.modelB.name          = 'resnet50'
+    ARG.modelB.nn_model      = model_ft
+    ARG.modelB.layer_emb_id  = 'fc'
+    ARG.modelB.architect     = [embB_dim ]   ### head size
+    ARG.modelB.architect.input_dim  = [train_config.BATCH_SIZE, 3, 28, 28]
+    modelB = model_create(ARG.modelB )
+
+
+    ### merge_model  ###################################################
+    ### EXPLICIT DEPENDENCY  
+    ARG.merge_model           = {}
+    ARG.merge_model.name      = 'modelmerge1'
+
+    ARG.merge_model.architect                  = {}
+    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+
+    ARG.merge_model.architect.merge_type       = 'cat'
+    ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
+    ARG.merge_model.architect.merge_custom     = None
+
+
+    ### Custom head
+    from utilmy.deeplearning.ttorch.util_model import MultiClassMultiLabel_Head
+    ARG.merge_model.architect.head_layers_dim  = [ 768, 256]    ### Specific task
+
+    head_custom = MultiClassMultiLabel_Head(layers_dim          = ARG.merge_model.architect.head_layers_dim,
+                                            class_label_dict    = label_dict_count,
+                                            use_first_head_only = False)
+
+    ARG.merge_model.architect.head_custom = head_custom
+    ARG.merge_model.architect.loss_custom = head_custom.get_loss
+
+
+    ARG.merge_model.dataset       = {}
+    ARG.merge_model.dataset.dirin = "/"
+    ARG.merge_model.dataset.coly = 'ytarget'
+    ARG.merge_model.train_config  = train_config
+
+
+    model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
+    model.build()
+ 
+    
+ #########################EMBEDDING ####################################
+    from utilmy.deeplearning.ttorch import  util_torch as ut
+    def custom_embedding_data():
+         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+         from utilmy.deeplearning.ttorch import  util_torch as ut
+         ut.dataset_download(dataset_url, dirout=dirtmp)     
+         train_img_path  = dirtmp + 'data_fashion_small/train'
+         label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
+         df   = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
+         df = ut.dataset_add_image_fullpath(df, col_img='id', train_img_path=train_img_path)
+
+         ##############TRANFORM IMAGE############
+         tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
+         transform  = transforms.Compose(tlist)
+
+         ###Loads image and imagename(to save the embedding with image name)#### 
+         dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform)
+         
+         return dataset
+    
+    dataset = custom_embedding_data()
+    train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
+    ut.SaveEmbeddings(model=model.net.eval().get_embedding,path="./train" ,data_loader=train_loader)
+    embv, img_names = ut.LoadEmbeddings(dir="./train")
+
+    ####Cosine similarity b/w Merged Embeddings
+    df = ut.cos_similar_embedding(embv=embv,img_names = img_names)
+    print(df)
+    ###########Functionality test#####
+    #for emb in embv:
+    #    res = head_custom(emb)
+
+    
+
+    #### Run Model   ###################################################
+    model.training(dataloader_custom = custom_dataloader ) 
+    model.save_weight('ztmp/model_x5.pt')
+    model.load_weights('ztmp/model_x5.pt')
+    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+    outputs = model.predict(inputs)
+    ######To predict lables
+    for i in range(train_config.BATCH_SIZE):
+        sum = {}
+        for key, val in outputs.items():
+            sum[key] = outputs[key].sum()
+        Keymax = max(zip(sum.values(), sum.keys()))[1]
+        print(Keymax)
+
+    print(outputs)
+
 
 ##### LSTM #################################################################################
 def test2_lstm():
@@ -2287,4 +2492,3 @@ class zzmodelD_create(BaseModel):
 if __name__ == "__main__":
     import fire
     test_all()
-
