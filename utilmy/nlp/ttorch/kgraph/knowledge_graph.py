@@ -28,11 +28,11 @@ import networkx as ntx
 from tqdm import tqdm
 from typing import Tuple, Dict, Union
 from spacy.matcher import Matcher
-from node2vec import Node2Vec as n2v
+#from node2vec import Node2Vec as n2v
 
 import torch
 
-from utilmy.data import dataset_download
+# from utilmy.data import dataset_download
 from pykeen.triples import TriplesFactory
 from pykeen.pipeline import pipeline
 from pykeen.models import TransE,ERModel
@@ -48,13 +48,58 @@ from utilmy import log
 
 
 ######################################################################################################
+def test_all():
+    pass
+
+
+def test1(dirin='final_dataset_clean_v2 .tsv'):
+
+    """
+    Doc::
+
+        cd utilmy/nlp/tttorch/kgraph
+        python knowledge_graph test1 --dirin mydirdata/
+    """
+    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
+    dname = dataset_download(url=url)
+    dname = dname.replace("\\", "/")
+    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+    df    = pd.read_csv(path, delimiter='\t')
+
+    dname = dname + "/embed/"
+
+    log('##### NER extraction from text ')
+    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
+    data_kgf = extractor.extractTriples(sents=-1)
+    extractor.export_data(data_kgf)
+
+
+    log('##### Build Knowledge Graph')
+    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+    data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher.buildGraph()
+
+
+    log('##### Build KG Embeddings')
+    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+    embedder.compute_embeddings('none', batch_size=1024)
+    embedder.save_embeddings()
+
+
+    log('##### load KG Embeddings')
+    embedder.load_embeddings('none')
+
+
+
 def runall(dirin='final_dataset_clean_v2 .tsv'):
 
     """
     Doc::
 
         cd utilmy/nlp/tttorch/kgraph
-        python knowledge_graph runall --dirin mydirdata/
+        python knowledge_graph test1 --dirin mydirdata/
     """
     url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
     dname = dataset_download(url=url)
@@ -415,6 +460,7 @@ def get_embeddings(label_to_id:Dict[str, int], embedding):
 
         aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
     return aux
+
 
 
 def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
