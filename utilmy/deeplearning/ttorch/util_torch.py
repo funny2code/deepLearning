@@ -310,7 +310,10 @@ def LoadEmbeddings(dir = './'):
     for file in os.listdir(dir):
         emb = torch.load(dir+'/'+file)
         embv.append(emb)
-        img_name = file.split('_')[1]
+        if "_" in file:
+            img_name = file.split('_')[1]
+        else:
+            img_name = file
         img_names.append(img_name)
 
     return embv, img_names
