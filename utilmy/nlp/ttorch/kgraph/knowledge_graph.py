@@ -93,13 +93,14 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
 
 
-def runall(dirin='final_dataset_clean_v2 .tsv'):
+def runall(dirin='', dirout='', config=None):
 
-    """
+    """  Run all steps to generate dirin
     Doc::
 
         cd utilmy/nlp/tttorch/kgraph
         python knowledge_graph test1 --dirin mydirdata/
+
     """
     url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
     dname = dataset_download(url=url)
@@ -290,18 +291,22 @@ class NERExtractor:
 
     def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
 
-        SAMPLES = len(data_kgf.index)
-        TRAIN_SPLIT = int(0.5 * SAMPLES)
-        TEST_SPLIT = int(0.3 * SAMPLES)
-        VALIDATION_SPLIT = int(0.2 * SAMPLES)
+        from utilmy import pd_to_file
+        train_df, val_df, test_df = dataset_traintest_split(data_kgf, train_ratio=0.6, val_ratio=0.2)
 
-        train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
-        test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
-        validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
-
-        train_df = data_kgf.iloc[train_indexes]
-        test_df = data_kgf.iloc[test_indexes]
-        val_df = data_kgf.iloc[validation_indexes]
+        # SAMPLES = len(data_kgf.index)
+        # TRAIN_SPLIT = int(0.5 * SAMPLES)
+        # TEST_SPLIT = int(0.3 * SAMPLES)
+        # VALIDATION_SPLIT = int(0.2 * SAMPLES)
+        #
+        # train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
+        # test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
+        # validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
+        #
+        # train_df = data_kgf.iloc[train_indexes]
+        # test_df = data_kgf.iloc[test_indexes]
+        # val_df = data_kgf.iloc[validation_indexes]
+      
 
         train_df.to_csv(os.path.join(self.embeddingFolder,'train_data.tsv'), sep="\t")
         test_df.to_csv(os.path.join(self.embeddingFolder,'test_data.tsv'), sep="\t")
@@ -423,6 +428,28 @@ class KGEmbedder:
 
 
 ######################################################################################################
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    #### Split anything
+    val_ratio = val_ratio + train_ratio
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    else :  ## if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
+
+
+
+
 def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
                      dirout = "./"):
     """ Downloading Dataset from github  and unzip it
