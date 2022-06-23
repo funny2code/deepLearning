@@ -1221,7 +1221,6 @@ def test6():
     """ Multihead class fine tuning with Fashion Dataset
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
-    import glob
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -1376,7 +1375,6 @@ def test6():
     from utilmy.deeplearning.ttorch import  util_torch as ut
     def custom_embedding_data():
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-         from utilmy.deeplearning.ttorch import  util_torch as ut
          ut.dataset_download(dataset_url, dirout=dirtmp)     
          train_img_path  = dirtmp + 'data_fashion_small/train'
          label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
@@ -1392,6 +1390,21 @@ def test6():
          
          return dataset
     
+
+    #### Run Model   ###################################################
+    model.training(dataloader_custom = custom_dataloader ) 
+    model.save_weight('ztmp/model_x5.pt')
+    model.load_weights('ztmp/model_x5.pt')
+    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+    outputs = model.predict(inputs)
+    print(outputs)
+    ######To predict lables
+    for i in range(train_config.BATCH_SIZE):
+        sum = {}
+        for key, val in outputs.items():
+            sum[key] = outputs[key].sum()
+        Keymax = max(zip(sum.values(), sum.keys()))[1]
+        print(Keymax)
     dataset = custom_embedding_data()
     train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
     ut.SaveEmbeddings(model=model.net.eval().get_embedding,path="./train" ,data_loader=train_loader)
@@ -1404,23 +1417,6 @@ def test6():
     #for emb in embv:
     #    res = head_custom(emb)
 
-    
-
-    #### Run Model   ###################################################
-    model.training(dataloader_custom = custom_dataloader ) 
-    model.save_weight('ztmp/model_x5.pt')
-    model.load_weights('ztmp/model_x5.pt')
-    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
-    outputs = model.predict(inputs)
-    ######To predict lables
-    for i in range(train_config.BATCH_SIZE):
-        sum = {}
-        for key, val in outputs.items():
-            sum[key] = outputs[key].sum()
-        Keymax = max(zip(sum.values(), sum.keys()))[1]
-        print(Keymax)
-
-    print(outputs)
 
 
 ##### LSTM #################################################################################
@@ -2491,4 +2487,4 @@ class zzmodelD_create(BaseModel):
 ###############################################################################################################
 if __name__ == "__main__":
     import fire
-    test_all()
+    test6()

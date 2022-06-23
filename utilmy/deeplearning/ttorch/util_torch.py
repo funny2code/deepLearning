@@ -412,7 +412,6 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
         test_img_path  = test_img_path  + "/"
 
     img_list_ok = []
-    cnt = 0
 
     for fi in img_list :
         fifull = ''
