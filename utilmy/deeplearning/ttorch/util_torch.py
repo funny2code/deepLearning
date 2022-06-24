@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#
+""" Utils for torch
 Doc::
 
     utilmy/deeplearning/ttorch/util_torch.py
