@@ -39,7 +39,7 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 #############################################################################################
 from utilmy import log, os_module_name
-
+from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 MNAME = os_module_name(__file__)
 
 def help():
@@ -290,33 +290,61 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
-def SaveEmbeddings(model = None, path = './', data_loader=None):
-    isdir = os.path.isdir(path)
-    if isdir == False:
-       os.mkdir("./train")
+def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
+    from utilmy.deeplearning import  util_embedding as ue
+    import time
+    
+    df= []
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
             emb = model(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
-                torch.save(emb[i],"./train/{}".format(img_names[i]))
+                ss = ue.np_array_to_str(emb[i].numpy())
+                df.append([ img_names[i], ss])
 
-def LoadEmbeddings(dir = './'):
-    isdir = os.path.isdir(dir)
-    if isdir == False:
-       raise Exception("Can't read data, path is not present")
-    embv = []
-    img_names = []
-    for file in os.listdir(dir):
-        emb = torch.load(dir+'/'+file)
-        embv.append(emb)
-        if "_" in file:
-            img_name = file.split('_')[1]
-        else:
-            img_name = file
-        img_names.append(img_name)
+    df = pd.DataFrame(df, columns= ['id', 'emb'])
 
-    return embv, img_names
+    if dirout is not None :
+      log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
+      dirout2 = dirout + f"/df_emb_{tag}.parquet"
+      pd_to_file(df, dirout2, show=1 )
+    return df
+
+def LoadEmbedding_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
+    """  Required columns : id, emb (string , separated)
+    
+    """
+    from utilmy.deeplearning import  util_embedding as ue
+    import glob
+
+    log('loading', dirin)
+    flist = list( glob.glob(dirin) )
+    
+    assert(flist is not None)
+    df  = pd_read_file( flist, npool= max(1, int( len(flist) / 4) ) )
+    if nmax is None:
+        nmax  = len(df)   ### 5000
+    df  = df.iloc[:nmax, :]
+    df  = df.rename(columns={ col_embed: 'emb'})
+    
+    df  = df[ df['emb'].apply( lambda x: len(x)> 10  ) ]  ### Filter small vector
+    log(df.head(5).T, df.columns, df.shape)
+    log(df, df.dtypes)    
+
+
+    ###########################################################################
+    ###### Split embed numpy array, id_map list,  #############################
+    vi      = [ float(v) for v in df['emb'][0].split(',')]
+    embs    = ue.np_str_to_array(df['emb'].values,l2_norm=False, mdim =len(vi) )
+    id_map  = { name: i for i,name in enumerate(df[colid].values) }     
+    log(",", str(embs)[:50], ",", str(id_map)[:50] )
+    
+    #####  Keep only label infos  ####
+    del df['emb']                  
+    return embs, id_map, df 
+
+
 
 class DataForEmbedding(Dataset):
     """Custom DataGenerator using Pytorch Sequence for images
@@ -360,20 +388,18 @@ class DataForEmbedding(Dataset):
 
 def cos_similar_embedding(embv = None, img_names=None):
     from sklearn.metrics.pairwise import cosine_similarity
-    df = pd.DataFrame(data = img_names, columns=['id'] )
     similar_emb = []
     if embv is not None and img_names is not None:
-        for emb1 in embv:
-            emb1 = emb1 if emb1.dim() >1 else torch.reshape(emb1,(1,emb1.size()[0]))
+        df = pd.DataFrame(data = img_names, columns=['id'] )
+        for i, emb1 in enumerate(embv):
             res = []
             for emb2 in embv:
-                if torch.all(emb1.eq(emb2)) == False:
-                    emb2 = emb2 if emb2.dim() >1 else torch.reshape(emb2,(1,emb2.size()[0]))
-                    res.append(cosine_similarity(emb1,emb2))
-                else:
-                    res.append(0)
+                res.append(cosine_similarity([emb1],[emb2]))
+                print()
+            res[i] = -1
             max_value = max(res)
-            similar_emb.append(img_names[res.index(max_value)])
+            img_name = img_names[res.index(max_value)]
+            similar_emb.append(img_name)
         df['similar'] = similar_emb
     return df
 
