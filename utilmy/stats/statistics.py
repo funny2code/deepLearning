@@ -9,33 +9,31 @@ Doc::
     https://github.com/topics/hypothesis-testing?l=python&o=desc&s=stars
     https://pypi.org/project/pysie/#description
 
-    -- Available Methods
 
     --- Analysis of Variance
-
     * One-way Analysis of Variance (ANOVA)
     * One-way Multivariate Analysis of Variance (MANOVA)
     * Bartlett's Test for Homogenity of Variances
     * Levene's Test for Homogenity of Variances
     * Van Der Waerden's (normal scores) Test
 
-    --- Contingency Tables and Related Tests
 
+    --- Contingency Tables and Related Tests
     * Chi-square test of independence
     * Fisher's Exact Test
     * McNemar's Test of paired nominal data
     * Cochran's Q test
     * D critical value (used in the Kolomogorov-Smirnov Goodness-of-Fit test).
 
-    --- Critical Value Tables and Lookup Functions
 
+    --- Critical Value Tables and Lookup Functions
     * Chi-square statistic
     * r (one-sample runs test and Wald-Wolfowitz runs test) statistic
     * Mann-Whitney U-statistic
     * Wilcoxon Rank Sum W-statistic
 
-    --- Descriptive Statistics
 
+    --- Descriptive Statistics
     * Kurtosis
     * Skewness
     * Mean Absolute Deviation
@@ -49,19 +47,18 @@ Doc::
     * Simulation of Correlation Matrices
       - Multiple simulation algorithms are available for generating correlation matrices.
 
-    --- Factor Analysis
 
+    --- Factor Analysis
     * Several algorithms for performing Factor Analysis are available, including principal components, principal
           factors, and iterated principal factors.
 
     --- Hypothesis Testing
-
     * Binomial Test
     * t-test
       - paired, one and two sample testing
 
-    --- Nonparametric Methods
 
+    --- Nonparametric Methods
     * Friedman's test for repeated measures
     * Kruskal-Wallis (nonparametric equivalent of one-way ANOVA)
     * Mann-Whitney (two sample nonparametric variant of t-test)
@@ -72,15 +69,16 @@ Doc::
     * Wald-Wolfowitz Two-Sample Runs test
     * Wilcoxon Rank Sum Test (one sample nonparametric variant of paired and one-sample t-test)
 
-    --- Normality and Goodness-of-Fit Tests
 
+    --- Normality and Goodness-of-Fit Tests
     * Chi-square one-sample goodness-of-fit
     * Jarque-Bera test
 
-    --- Post-Hoc Analysis
 
+    --- Post-Hoc Analysis
     * Tukey's Honestly Significant Difference (HSD)
     * Games-Howell (nonparametric)
+
 
     --- Helpful Functions
     * Add noise to a correlation or other matrix
@@ -91,7 +89,6 @@ Doc::
 
 
     --- Code
-
     ```python
     - -*- coding: utf-8 -*-
     Hypothesis testing using utilmy.ipynb
@@ -490,7 +487,7 @@ def test_all():
     def test():
         log("Testing normality...")
         from utilmy.stats  import statistics as m
-        error_test_normality(df["yield"])
+        hypopred_error_test_normality(df["yield"])
 
 
         df1 = pd_generate_data(7, 100)
@@ -500,12 +497,12 @@ def test_all():
 
 
         log("Testing heteroscedacity...")
-        log(m.error_test_heteroscedacity(y_test, ypred))
+        log(m.hypopred_error_test_heteroscedacity(y_test, ypred))
 
         log("Testing test_mutualinfo()...")
         df1 = pd_generate_data(7, 100)
 
-        m.error_test_residual_mutualinfo(df1["0"], df1[["1", "2", "3"]], colname="test")
+        m.hypopred_error_test_residual_mutualinfo(df1["0"], df1[["1", "2", "3"]], colname="test")
 
         log("Testing hypothesis_test()...")
         log(m.test_hypothesis(X_train, X_test,"chisquare"))
@@ -565,9 +562,9 @@ def test1():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.50, random_state=42)
     model.fit(X_train, y_train)
     ypred = model.predict(X_test)
-    error_test_normality(df["yield"])
-    log(error_test_heteroscedacity(y_test, ypred))
-    log(hypotest_independance(X_train, X_test))
+    hypopred_error_test_normality(df["yield"])
+    log(hypopred_error_test_heteroscedacity(y_test, ypred))
+    log(hypotest_is_all_independant(X_train, X_test))
     log(confidence_interval_normal_std(ypred))
     log(confidence_interval_boostrap_bayes(ypred))
     '''TODO: need to check this one
@@ -616,7 +613,7 @@ def test_check_mean():
 
 ###############################################################################################
 ########## Helpers on test  ###################################################################
-def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4):
+def hypotest_is_1_mean_equal_fixed(df, col='mycol', mean_target=4):
     """# To test whether sample has come from a population with mean 54
     Docs::
         # H0: μ = 54
@@ -735,31 +732,6 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], mean_target
     return ddict
 
 
-
-
-def hypotest_is_all_same_distribution(df, cols):
-    ### Tests to determine if data distributions are similar or not
-
-    """# 1) Kruskal Wallis Test"""
-
-    np.random.seed(10)
-    # generate three independent samples
-    data1 = 5 * np.random.randn(100) + 50
-    data2 = 5 * np.random.randn(100) + 50
-    data3 = 5 * np.random.randn(100) + 50
-
-    # To test: Whether the three distributions are similar or not
-    # H0: All sample distribution are similar
-    # H1: Atleast one pair of sample distributions is different
-
-    kw = test.nonparametric.KruskalWallis(data1, data2, data3)
-    kw.test_summary
-
-    # p-value > 5% level of significance. Thus, fail to reject H0
-    # No statistical evidence to prove that the sample distributions are different.
-
-
-
 def hypotest_is_mean_pergroup_equal(df, col1, col2):
     """
 
@@ -824,7 +796,32 @@ def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True
 
 
 
-def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+
+def hypotest_is_all_distribution_same(df, cols):
+    ### Tests to determine if data distributions are similar or not
+
+    """# 1) Kruskal Wallis Test"""
+
+    np.random.seed(10)
+    # generate three independent samples
+    data1 = 5 * np.random.randn(100) + 50
+    data2 = 5 * np.random.randn(100) + 50
+    data3 = 5 * np.random.randn(100) + 50
+
+    # To test: Whether the three distributions are similar or not
+    # H0: All sample distribution are similar
+    # H1: Atleast one pair of sample distributions is different
+
+    kw = test.nonparametric.KruskalWallis(data1, data2, data3)
+    kw.test_summary
+
+    # p-value > 5% level of significance. Thus, fail to reject H0
+    # No statistical evidence to prove that the sample distributions are different.
+
+
+
+
+def hypotest_is_all_independant(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
     """Run ANOVA Test of independance.
     Doc::
 
@@ -834,30 +831,6 @@ def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True,
     cols = df.columns  if cols is None else cols
 
     p_values = test_anova(df, cols)
-
-    if bonferroni_adjuster:
-        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
-
-    return p_values
-
-
-
-def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
-    """Run multiple T tests of Independance.
-    Doc::
-
-               p_values = multiple_comparisons(data)
-    """
-    p_values = []
-    colsX = df.columns  if colsX is None else colsX
-    for c in colsX:
-        if c.startswith(coly):
-            continue
-        group_a = df[df[c] == 0][coly]
-        group_b = df[df[c] == 1][coly]
-
-        _, p = stats.ttest_ind(group_a, group_b, equal_var=False)
-        p_values.append((c, p) )
 
     if bonferroni_adjuster:
         p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
@@ -919,6 +892,9 @@ def hypotest_is_normal_distribution(df:pd.DataFrame, column, test_type):
 
 
 
+
+
+
 def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
     """Bonferroni correction.
     Doc::
@@ -954,14 +930,8 @@ def test_chisquare(df_obs:pd.DataFrame, df_true:pd.DataFrame, method='chisquare'
     Doc::
                 https://github.com/aschleg/hypothetical/blob/master/tests/test_contingency.py
     """
-    try:
-       from utilmy.stats.hypothesis.contingency import (ChiSquareContingency, CochranQ, McNemarTest,
-            table_margins, expected_frequencies )
-    except :
-       print(' pip install hypothesis ')
-
     if method == 'chisquare' :
-        c = ChiSquareContingency(df_obs, df_true)
+        c = test.contingency.ChiSquareContingency(df_obs, df_true)
         return c
 
 
@@ -1041,7 +1011,31 @@ def test_mutualinfo(error, Xtest, colname=None, bins=5):
 
 ####################################################################################################
 ############ Residual error ########################################################################
-def error_test_heteroscedacity(ypred: np.ndarray, ytrue: np.ndarray, pred_value_only=1):
+def hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+    """Run multiple T tests of Independance.
+    Doc::
+
+               p_values = multiple_comparisons(data)
+    """
+    p_values = []
+    colsX = df.columns  if colsX is None else colsX
+    for c in colsX:
+        if c.startswith(coly):
+            continue
+        group_a = df[df[c] == 0][coly]
+        group_b = df[df[c] == 1][coly]
+
+        _, p = stats.ttest_ind(group_a, group_b, equal_var=False)
+        p_values.append((c, p) )
+
+    if bonferroni_adjuster:
+        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
+
+    return p_values
+
+
+
+def hypopred_error_test_heteroscedacity(ypred: np.ndarray, ytrue: np.ndarray, pred_value_only=1):
     """function test_heteroscedacity.
     Doc::
 
@@ -1072,7 +1066,7 @@ def error_test_heteroscedacity(ypred: np.ndarray, ytrue: np.ndarray, pred_value_
     return ddict
 
 
-def error_test_normality(ypred: np.ndarray, ytrue: np.ndarray, distribution="norm", test_size_limit=5000):
+def hypopred_error_test_normality(ypred: np.ndarray, ytrue: np.ndarray, distribution="norm", test_size_limit=5000):
     """.
     Doc::
 
@@ -1100,7 +1094,7 @@ def error_test_normality(ypred: np.ndarray, ytrue: np.ndarray, distribution="nor
     return ddict
 
 
-def error_test_residual_mutualinfo(dfX:pd.DataFrame, ypred: np.ndarray, ytrue: np.ndarray, colsX=None, bins=5):
+def hypopred_error_test_residual_mutualinfo(dfX:pd.DataFrame, ypred: np.ndarray, ytrue: np.ndarray, colsX=None, bins=5):
     """.
     Doc::
 
