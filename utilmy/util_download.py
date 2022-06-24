@@ -39,7 +39,7 @@ def test1() -> None:
 
 #############################################################################################
 def download_github(url="https://github.com/arita37/dsa2_data/blob/main/input/titanic/train/features.zip", 
-                   dirout="./ztmp/"):
+                   dirout="./ztmp/", unzip=True):
     """Fetch dataset from a given URL and save it.
     Doc::
     
@@ -53,6 +53,7 @@ def download_github(url="https://github.com/arita37/dsa2_data/blob/main/input/ti
     from tempfile import mktemp, mkdtemp
     from urllib.parse import urlparse, parse_qs
     import pathlib, requests
+    from zipfile import ZipFile
 
     supported_extensions = [ ".zip" ]
 
@@ -85,7 +86,23 @@ def download_github(url="https://github.com/arita37/dsa2_data/blob/main/input/ti
                 f.write(res.content)
         else:
             raise res.raise_for_status()
+
+    if unzip:
+        flag = os.path.exists(fileout_fullname)
+        if(flag):
+            print("Dataset is Downloaded")
+            zip_file = ZipFile(fname)
+            zip_file.extractall()
+        else:
+            print("dataset is already presented")
+
+
     return fileout_fullname
+
+
+
+
+
 
 
 

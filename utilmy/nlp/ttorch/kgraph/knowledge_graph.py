@@ -19,16 +19,20 @@ Reason :
 
 
 """
-
-import os, spacy, numpy as np, pandas as pd, networkx as ntx
+import os
+import spacy
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import networkx as ntx
 from tqdm import tqdm
-from typing import Tuple
+from typing import Tuple, Dict, Union
 from spacy.matcher import Matcher
-# from node2vec import Node2Vec as n2v
+#from node2vec import Node2Vec as n2v
 
 import torch
 
+# from utilmy.data import dataset_download
 from pykeen.triples import TriplesFactory
 from pykeen.pipeline import pipeline
 from pykeen.models import TransE,ERModel
@@ -39,57 +43,107 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
-from utilmy import util_download as ud
 from utilmy import log
 
 
 
-
-#######################################################################################################
+######################################################################################################
 def test_all():
-    #test1
     pass
 
 
+def test1(dirin='final_dataset_clean_v2 .tsv'):
 
-def test1(path=""):
-    """
-
-
-
-    """
-    runall()
-
-
-
-
-#######################################################################################################
-def runall(dirin='final_dataset_clean_v2 .tsv') :
     """
     Doc::
 
-      cd utilmy/nlp/tttorch/kgraph/
-      python knoweledge_graph.py runall --dirin  mydirdata/
+        cd utilmy/nlp/tttorch/kgraph
+        python knowledge_graph test1 --dirin mydirdata/
+    """
+    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
+    dname = dataset_download(url=url)
+    dname = dname.replace("\\", "/")
+    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+    df    = pd.read_csv(path, delimiter='\t')
 
+    dname = dname + "/embed/"
+
+    log('##### NER extraction from text ')
+    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
+    data_kgf = extractor.extractTriples(sents=-1)
+    extractor.export_data(data_kgf)
+
+
+    log('##### Build Knowledge Graph')
+    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+    data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher.buildGraph()
+
+
+    log('##### Build KG Embeddings')
+    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+    embedder.compute_embeddings('none', batch_size=1024)
+    embedder.save_embeddings()
+
+
+    log('##### load KG Embeddings')
+    embedder.load_embeddings('none')
+
+
+
+def runall(dirin='', dirout='', config=None):
+
+    """  Run all steps to generate dirin
+    Doc::
+
+        cd utilmy/nlp/tttorch/kgraph
+        python knowledge_graph test1 --dirin mydirdata/
 
     """
-    df = pd.read_csv(dirin, delimiter='\t')
-    grapher = knowledge_grapher(data_kgf=df,embedding_dim=10, load_spacy=True)
+    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
+    dname = dataset_download(url=url)
+    dname = dname.replace("\\", "/")
+    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+    df    = pd.read_csv(path, delimiter='\t')
 
-    data_kgf = grapher.extractTriples(-1)
-    grapher.buildGraph(data_kgf)
-    grapher.plot_graph()
-    grapher.prepare_data(data_kgf)
+    dname = dname + "/embed/"
+
+    log('##### NER extraction from text ')
+    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
+    data_kgf = extractor.extractTriples(sents=-1)
+    extractor.export_data(data_kgf)
+
+
+    log('##### Build Knowledge Graph')
+    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+    data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher.buildGraph()
+
+
+    log('##### Build KG Embeddings')
+    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+    embedder.compute_embeddings('none', batch_size=1024)
+    embedder.save_embeddings()
+
+
+    log('##### load KG Embeddings')
+    embedder.load_embeddings('none')
 
 
 
-
-
-
-
-#######################################################################################################
+######################################################################################################
 class knowledge_grapher():
-    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
+    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False,
+                dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+
+
+                 ) -> None:
         self.data_kgf = data_kgf
         self.embedding_dim = embedding_dim
 
@@ -114,9 +168,10 @@ class knowledge_grapher():
         self.out_centrality_dict = ntx.out_degree_centrality(self.graph)
         # self.eigenvector_centrality_dict = ntx.katz_centrality(self.graph)
 
-    def load_data(self, path)->None:
-        data_kgf = pd.read_csv(path, delimiter='\t')
-        self.buildGraph(data_kgf)
+    @staticmethod
+    def load_data(path)->pd.DataFrame:
+        return pd.read_csv(path, delimiter='\t')
+        # self.buildGraph(data_kgf)
 
     def get_centers(self, max_centers:int=5)->None:
 
@@ -158,7 +213,12 @@ class knowledge_grapher():
 
 class NERExtractor:
 
-    def __init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy=True):
+    def __init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy=True,
+                 dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+
+                 ):
 
         if load_spacy:
             self.nlp = spacy.load("ro_core_news_sm")
@@ -240,20 +300,24 @@ class NERExtractor:
 
         return pd.DataFrame({'source':source, 'target':target, 'edge':relations})
 
-    def prepare_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
+    def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
 
-        SAMPLES = len(data_kgf.index)
-        TRAIN_SPLIT = int(0.5 * SAMPLES)
-        TEST_SPLIT = int(0.3 * SAMPLES)
-        VALIDATION_SPLIT = int(0.2 * SAMPLES)
+        from utilmy import pd_to_file
+        train_df, val_df, test_df = dataset_traintest_split(data_kgf, train_ratio=0.6, val_ratio=0.2)
 
-        train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
-        test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
-        validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
+        # SAMPLES = len(data_kgf.index)
+        # TRAIN_SPLIT = int(0.5 * SAMPLES)
+        # TEST_SPLIT = int(0.3 * SAMPLES)
+        # VALIDATION_SPLIT = int(0.2 * SAMPLES)
+        #
+        # train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
+        # test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
+        # validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
+        #
+        # train_df = data_kgf.iloc[train_indexes]
+        # test_df = data_kgf.iloc[test_indexes]
+        # val_df = data_kgf.iloc[validation_indexes]
 
-        train_df = data_kgf.iloc[train_indexes]
-        test_df = data_kgf.iloc[test_indexes]
-        val_df = data_kgf.iloc[validation_indexes]
 
         train_df.to_csv(os.path.join(self.embeddingFolder,'train_data.tsv'), sep="\t")
         test_df.to_csv(os.path.join(self.embeddingFolder,'test_data.tsv'), sep="\t")
@@ -264,9 +328,12 @@ class NERExtractor:
 
 
 
-
 class KGEmbedder:
-    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
+    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int,
+                 dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+                 )->None:
 
         self.dataFolder = dataFolder
         self.graph = graph
@@ -294,6 +361,7 @@ class KGEmbedder:
 
         if os.path.exists(os.path.join(self.dataFolder, 'trained_model.pkl')):
             self.model = torch.load(os.path.join(self.dataFolder, 'trained_model.pkl'))
+            self.trained = True
         else:
             self.model = ERModel(triples_factory=self.training,
                                  interaction='distmult',
@@ -309,18 +377,22 @@ class KGEmbedder:
                 triples_factory=self.training,
                 optimizer=self.optimizer,
             )
-
+            self.trained = False
 
     def compute_embeddings(self, path_to_embeddings, batch_size=1024):
 
         self.set_up_embeddings()
-        losses = self.training_loop.train(
+        if not self.trained:
+            losses = self.training_loop.train(
                                 triples_factory=self.training,
                                 num_epochs=10,
                                 checkpoint_name='myCheckpoint.pt',
                                 checkpoint_frequency=5,
                                 batch_size=256,
                                 )
+            torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
+        else:
+            losses = None
 
         # Pick an evaluator
         evaluator = RankBasedEvaluator()
@@ -337,19 +409,109 @@ class KGEmbedder:
                 self.validation.mapped_triples,
             ],
         )
-        torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
         return losses, results
+
 
     def load_embeddings(self, path_to_embeddings:str):
 
         if os.path.exists(path_to_embeddings):
            self.embedding_df = pd.read_csv(path_to_embeddings)
            return None, None
-        else:
-            return self.compute_embeddings(path_to_embeddings, batch_size=1024)
+        #else:
+        #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
 
     def save_embeddings(self,):
-        return self.training
+
+        entities = tuple(self.graph.nodes.values())
+        tripleFactory = self.training
+
+        entities_to_ids:Dict = tripleFactory.entity_id_to_label
+        relation_to_ids:Dict = tripleFactory.relation_id_to_label
+
+        # TransE model has only one embedding per entity/relation
+        entity_embeddings = self.model.entity_representations[0]
+        relation_embeddings = self.model.relation_representations[0]
+
+        self.relation_dict = get_embeddings(relation_to_ids, relation_embeddings)
+        self.entity_dict = get_embeddings(entities_to_ids, entity_embeddings)
+        df_entities = embeddingsToDF(self.entity_dict, 'entity')
+        df_relation = embeddingsToDF(self.relation_dict, 'relation')
+
+        df_entities.to_parquet(os.path.join(self.dataFolder, 'entityEmbeddings.parquet'))
+        df_relation.to_parquet(os.path.join(self.dataFolder, 'relationEmbeddings.parquet'))
+
+
+
+######################################################################################################
+def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    #### Split anything
+    val_ratio = val_ratio + train_ratio
+    if isinstance(anyobject, pd.DataFrame):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df.iloc[0:itrain,:]
+        df_val   = df.iloc[itrain:ival,:]
+        df_test  = df.iloc[ival:,:]
+        return df_train, df_val, df_test
+
+    else :  ## if isinstance(anyobject, list):
+        df = anyobject
+        itrain,ival = int(len(df)* train_ratio), int(len(df)* val_ratio)
+        df_train = df[0:itrain]
+        df_val   = df[itrain:ival]
+        df_test  = df[ival:]
+        return df_train, df_val, df_test
+
+
+
+
+def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+                     dirout = "./"):
+    """ Downloading Dataset from github  and unzip it
+
+
+    """
+    import requests
+    from zipfile import ZipFile
+
+    fname = dirout + url.split("/")[-1]
+    dname = dirout + "/".join( fname.split(".")[:-1])
+
+    isdir = os.path.isdir(dname)
+    if isdir == 0:
+        r = requests.get(url)
+        open(fname , 'wb').write(r.content)
+        flag = os.path.exists(fname)
+        if(flag):
+            print("Dataset is Downloaded")
+            zip_file = ZipFile(fname)
+            zip_file.extractall()
+        else:
+            raise Exception("Dataset is not downloaded")
+    else:
+        print("dataset is already presented")
+    return dname
+
+
+
+
+def get_embeddings(label_to_id:Dict[str, int], embedding):
+    aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
+    for id_, label in label_to_id.items():
+        idx_tensor = torch.tensor([id_]).to(dtype=torch.int64)
+
+        aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
+    return aux
+
+
+
+def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+    aux = []
+    for label, dict_ in embeddingDict.items():
+        vals = [label, dict_['_id'], dict_['embedding'].flatten()]
+        aux.append(vals)
+    df = pd.DataFrame(aux, columns=[entityOrRelation, 'id', 'embedding'])
+    return df
 
 
 
@@ -357,4 +519,4 @@ class KGEmbedder:
 if __name__=="__main__":
     import fire
     fire.Fire()
-    ### python  
+    # runall()
