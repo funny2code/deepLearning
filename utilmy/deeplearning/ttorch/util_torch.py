@@ -336,7 +336,7 @@ def LoadEmbedding_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nma
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
     vi      = [ float(v) for v in df['emb'][0].split(',')]
-    embs    = ue.np_str_to_array(df['emb'].values,l2_norm=False, mdim =len(vi) )
+    embs    = ue.np_str_to_array(df['emb'].values, mdim =len(vi) )
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
