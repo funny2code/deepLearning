@@ -137,7 +137,13 @@ def runall(dirin='', dirout='', config=None):
 
 ######################################################################################################
 class knowledge_grapher():
-    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False) -> None:
+    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False,
+                dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+
+
+                 ) -> None:
         self.data_kgf = data_kgf
         self.embedding_dim = embedding_dim
 
@@ -207,7 +213,12 @@ class knowledge_grapher():
 
 class NERExtractor:
 
-    def __init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy=True):
+    def __init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy=True,
+                 dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+
+                 ):
 
         if load_spacy:
             self.nlp = spacy.load("ro_core_news_sm")
@@ -306,7 +317,7 @@ class NERExtractor:
         # train_df = data_kgf.iloc[train_indexes]
         # test_df = data_kgf.iloc[test_indexes]
         # val_df = data_kgf.iloc[validation_indexes]
-      
+
 
         train_df.to_csv(os.path.join(self.embeddingFolder,'train_data.tsv'), sep="\t")
         test_df.to_csv(os.path.join(self.embeddingFolder,'test_data.tsv'), sep="\t")
@@ -318,7 +329,11 @@ class NERExtractor:
 
 
 class KGEmbedder:
-    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int)->None:
+    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int,
+                 dirin:str="./mydatain/",
+                 dirout:str="./mydataout/",
+
+                 )->None:
 
         self.dataFolder = dataFolder
         self.graph = graph
