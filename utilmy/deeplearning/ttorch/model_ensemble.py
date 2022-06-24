@@ -1088,7 +1088,7 @@ def test5():
 
         train_img_path = dirtmp + 'data_fashion_small/train'
         test_img_path  = dirtmp + 'data_fashion_small/test'
-        label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
+        label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
 
 
         ########### label file in CSV  ########################
@@ -1258,7 +1258,7 @@ def test6():
 
         train_img_path = dirtmp + 'data_fashion_small/train'
         test_img_path  = dirtmp + 'data_fashion_small/test'
-        label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
+        label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
 
 
         ########### label file in CSV  ########################
@@ -1374,7 +1374,7 @@ def test6():
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)     
          train_img_path  = dirtmp + 'data_fashion_small/train'
-         label_path     = dirtmp + "data_fashion_small/csv/styles_new.csv"
+         label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
          df   = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
          df = ut.dataset_add_image_fullpath(df, col_img='id', train_img_path=train_img_path)
 
@@ -2497,4 +2497,4 @@ class zzmodelD_create(BaseModel):
 ###############################################################################################################
 if __name__ == "__main__":
     import fire
-    test6()
+    test_all()
