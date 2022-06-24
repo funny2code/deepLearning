@@ -686,6 +686,23 @@ if 'utils_vector':
         return X
 
 
+    def  np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
+        """  L2 Normalize
+        """
+        if l2_norm_numpy:
+            X /= np.hypot(X[:,0], X[:,1])
+
+        if l2_norm_sklearn:
+            from sklearn.preprocessing import normalize
+            normalize(X, norm='l2', copy=False)
+
+        if l2_norm_faiss:
+            import faiss   #### pip install faiss-cpu
+            faiss.normalize_L2(X)  ### Inplace L2 normalization
+
+        return X
+
+
     def np_matrix_to_str2(m, map_dict:dict):
         """ 2D numpy into list of string and apply map_dict.
         
