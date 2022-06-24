@@ -62,49 +62,6 @@ def test1() -> None:
 
 
 
-
-
-def test_create_fake_df(dirout="./ztmp/"):
-    """ Creates a fake embeddingdataframe
-    """
-    res  =Box({})
-    n = 30
-
-    # Create fake user ids
-    word_list = [ 'a' + str(i) for i in range(n)]
-
-    emb_list = []
-    for i in range(n):
-        emb_list.append( ','.join([str(x) for x in np.random.random( 0,1,120) ])  )
-
-
-    ####
-    df = pd.DataFrame()
-    df['id']   = word_list
-    df['emb']  = emb_list
-    res.df = df
-
-
-    #### export on disk
-    res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
-    pd_to_file(df, res.dir_parquet , show=1)
-
-    #### Write on text:
-    res.dir_text = dirout + "/word2vec_export.vec"
-    log( res.dir_text )
-    with open(res.dir_text, mode='w') as fp:
-        fp.write("word2vec export format\n")
-
-        for i,x in df.iterrows():
-          emb  = x['emb'].replace(",", "")
-          fp.write(  f"{x['id']}  {emb}\n")
-
-
-    return res
-
-
-
-
 #########################################################################################################
 ############### Visualize the embeddings ################################################################
 def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10):
@@ -112,7 +69,8 @@ def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction
    Doc::
 
         dirin= "  .parquet OR  Word2vec .vec  OR  .pkl  file"
-        embedding_create_vizhtml(dirin="in/model.vec", dirout="zhtmlfile/", dim_reduction='umap', nmax=100, ntrain=10)
+        embedding_create_vizhtml(dirin="in/model.vec", dirout="zhtmlfile/",
+                                 dim_reduction='umap', nmax=100, ntrain=10)
 
 
    """
@@ -409,8 +367,14 @@ def embedding_torchtensor_to_parquet(tensor_list,
 
 
 def embedding_rawtext_to_parquet(dirin=None, dirout=None, skip=0, nmax=10 ** 8,
-                                 is_linevalid_fun=None):   ##   python emb.py   embedding_to_parquet  &
-    #### FastText/ Word2Vec to parquet files    9808032 for purhase
+                                 is_linevalid_fun=None):
+    """FastText/ Word2Vec text file to parquet files.
+    Docs::
+
+
+
+    """
+
     log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
 
     if is_linevalid_fun is None : #### Validate line
@@ -450,8 +414,13 @@ def embedding_rawtext_to_parquet(dirin=None, dirout=None, skip=0, nmax=10 ** 8,
 
 
 
-def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  nmax= 500):
-    """  Required columns : id, emb (string , separated)
+def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  nmax= 500,
+                           return_type='numpy;pandas'
+                           ):
+    """  parquet -->  numpy array, dict map, labels
+     Docs::
+
+         id, emb  : embeeding in string "," delimited format
     
     """
     log('loading', dirin)
@@ -464,7 +433,10 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  
     
     df  = df[ df['emb'].apply( lambda x: len(x)> 10  ) ]  ### Filter small vector
     log(df.head(5).T, df.columns, df.shape)
-    log(df, df.dtypes)    
+    log(df, df.dtypes)
+
+    if return_type == 'pandas':
+        return df
 
 
     ###########################################################################
@@ -534,7 +506,6 @@ def embedding_load_pickle(dirin=None, skip=0, nmax=10 ** 8,
     for fi in flist :
         arr = pickle.load(fi)
         embs = np.concatenate((embs, arr)) if embs is not None else arr
-
 
     id_map  = {i: i for i in  range(0, len(embs))}
     dflabel = pd.DataFrame({'id': [] })
@@ -732,6 +703,45 @@ if 'utils_vector':
 
 
 if 'custom_code':
+    def test_create_fake_df(dirout="./ztmp/"):
+        """ Creates a fake embeddingdataframe
+        """
+        res  =Box({})
+        n = 30
+
+        # Create fake user ids
+        word_list = [ 'a' + str(i) for i in range(n)]
+
+        emb_list = []
+        for i in range(n):
+            emb_list.append( ','.join([str(x) for x in np.random.random( 0,1,120) ])  )
+
+
+        ####
+        df = pd.DataFrame()
+        df['id']   = word_list
+        df['emb']  = emb_list
+        res.df = df
+
+
+        #### export on disk
+        res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
+        pd_to_file(df, res.dir_parquet , show=1)
+
+        #### Write on text:
+        res.dir_text = dirout + "/word2vec_export.vec"
+        log( res.dir_text )
+        with open(res.dir_text, mode='w') as fp:
+            fp.write("word2vec export format\n")
+
+            for i,x in df.iterrows():
+              emb  = x['emb'].replace(",", "")
+              fp.write(  f"{x['id']}  {emb}\n")
+
+
+        return res
+
+
     def pd_add_onehot_encoding(dfref, img_dir, labels_col):
         """
            id, uri, cat1, cat2, .... , cat1_onehot
