@@ -653,13 +653,17 @@ if 'utils_vector':
         return ",".join(vv)
 
 
-    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
+    def np_str_to_array(vv,   mdim = None, l2_norm_faiss=False, l2_norm_sklearn=True, l2_norm_numpy=False):
         """ Convert list of string into numpy 2D Array
         Docs::
              
              np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
 
+             https://stackoverflow.com/questions/2850743/numpy-how-to-quickly-normalize-many-vectors
+
         """
+        if mdim is None :
+             mdim= len( vv[0].split(","))
 
         X = np.zeros(( len(vv) , mdim  ), dtype='float32')
         for i, r in enumerate(vv) :
@@ -669,6 +673,8 @@ if 'utils_vector':
             except Exception as e:
               log(i, e)
 
+        if l2_norm_numpy:
+            X /= np.hypot(X[:,0], X[:,1])
 
         if l2_norm_sklearn:
             from sklearn.preprocessing import normalize
