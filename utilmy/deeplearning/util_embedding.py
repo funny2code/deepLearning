@@ -26,8 +26,12 @@ from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 try :
     import hdbscan, umap
     import diskcache as dc
+    # import faiss
+    import mpld3
 
-except: pass
+except:
+    print("pip install faiss-cpu  diskcache faiss mpld3 hdbscan umap")
+    1/0
 
 
 
@@ -632,14 +636,14 @@ if 'utils_vector':
         return ",".join(vv)
 
 
-    def np_str_to_array(vv,  l2_norm=True,     mdim = 200):
+    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
         """ Convert list of string into numpy 2D Array
         Docs::
              
-             np_str_to_array(vv=[ '3,4,5', '7,8,9'],  l2_norm=True,     mdim = 3)    
+             np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
 
         """
-        import faiss
+
         X = np.zeros(( len(vv) , mdim  ), dtype='float32')
         for i, r in enumerate(vv) :
             try :
@@ -648,8 +652,13 @@ if 'utils_vector':
             except Exception as e:
               log(i, e)
 
-        if l2_norm:
-            # preprocessing.normalize(X, norm='l2', copy=False)
+
+        if l2_norm_sklearn:
+            from sklearn.preprocessing import normalize
+            normalize(X, norm='l2', copy=False)
+
+        if l2_norm_faiss:
+            import faiss   #### pip install faiss-cpu
             faiss.normalize_L2(X)  ### Inplace L2 normalization
             log("Normalized X")
         return X

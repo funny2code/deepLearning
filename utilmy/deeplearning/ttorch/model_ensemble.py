@@ -1407,16 +1407,30 @@ def test6():
         print(Keymax)
     dataset = custom_embedding_data()
     train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
-    ut.SaveEmbeddings(model=model.net.eval().get_embedding,path="./train" ,data_loader=train_loader)
-    embv, img_names = ut.LoadEmbeddings(dir="./train")
+
+    tag='multi'
+    dirout="./train"
+    ut.SaveEmbeddings(model=model.net.eval().get_embedding, dirout=dirout, data_loader=train_loader,tag=tag)
+    embv, img_names,df = ut.LoadEmbedding_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
     ####Cosine similarity b/w Merged Embeddings
-    df = ut.cos_similar_embedding(embv=embv,img_names = img_names)
-    print(df)
-    ###########Functionality test#####
-    #for emb in embv:
-    #    res = head_custom(emb)
+    df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
 
+    #########Cosine similarity b/w lables of 2 items Embeddings
+    from sklearn.metrics.pairwise import cosine_similarity
+    for i, emb1 in enumerate(embv):
+        emb1 = torch.tensor(emb1)
+        res1 = head_custom(emb1)
+        for emb2 in embv:
+            emb2 = torch.tensor(emb2)
+            if torch.all(emb1.eq(emb2)) == True:
+               continue
+            res = head_custom(emb2)
+            for key, value in res.items():
+                vec1 = res1[key].detach().numpy() 
+                vec2 = value.detach().numpy() 
+                score = cosine_similarity([vec1],[vec2])
+                print(score)
 
 
 ##### LSTM #################################################################################
