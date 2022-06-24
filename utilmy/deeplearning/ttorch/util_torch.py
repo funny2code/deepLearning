@@ -297,7 +297,7 @@ def SaveEmbeddings(model = None, path = './', data_loader=None):
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
-            emb = model(img)
+            emb = model(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
                 torch.save(emb[i],"./train/{}".format(img_names[i]))
 
