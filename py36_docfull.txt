@@ -142,6 +142,7 @@ torchvision>=0.11.0+cpu
 sentence-transformers==2.1.0
 #protobuf<=3.20.1
 transformers<5.0.0
+pykeen
 
 ### visualize emb
 mpld3
