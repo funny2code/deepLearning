@@ -269,7 +269,7 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
-def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
+def embedding_torchtensor_to_parquet(model = None, dirout = './', data_loader=None,tag=""):
     # from utilmy.deeplearning import  util_embedding as ue
     import time
     
@@ -277,7 +277,7 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
-            emb = model(img)   #### Need to get the layer !!!!!
+            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
                 ss = np_array_to_str(emb[i].numpy())
                 df.append([ img_names[i], ss])
@@ -291,11 +291,10 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
     return df
 
 
-def LoadEmbedding_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
+def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
     """  Required columns : id, emb (string , separated)
     
     """
-    from utilmy.deeplearning import  util_embedding as ue
     import glob
 
     log('loading', dirin)
