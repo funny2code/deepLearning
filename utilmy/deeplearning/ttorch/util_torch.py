@@ -298,7 +298,7 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
-            emb = model(img)
+            emb = model(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
                 ss = ue.np_array_to_str(emb[i].numpy())
                 df.append([ img_names[i], ss])
