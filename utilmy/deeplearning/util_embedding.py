@@ -23,15 +23,16 @@ from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 
 
 #### Optional imports
-try :
-    import hdbscan, umap
-    import diskcache as dc
-    # import faiss
-    import mpld3
-
-except:
-    print("pip install faiss-cpu  diskcache faiss mpld3 hdbscan umap")
-    1/0
+# try :
+#     pass
+#     #import hdbscan, umap
+#     # import diskcache as dc
+#     # import faiss
+#     # import mpld3
+#
+# except:
+#     print("pip install faiss-cpu  diskcache faiss mpld3 hdbscan umap")
+#     1/0
 
 
 
@@ -170,6 +171,7 @@ class EmbeddingViz:
 
 
         if mode == 'umap' :
+            import umap
             y_label = None
             from umap import UMAP
             clf = UMAP( set_op_mix_ratio=0.25, ## Preserve outlier
@@ -207,25 +209,35 @@ class EmbeddingViz:
 
 
     def create_clusters(self, method='kmeans', after_dim_reduction=True):
-
-        #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
-        km = KMeans(n_clusters=self.num_clusters)
-
-        if after_dim_reduction :
-           km.fit(self.coordinate_xy)
-        else :
-           km.fit( self.embs)
+        """ From Dim reduction vectors --> Create Clusters
+        Docs::
 
 
-        self.clusters      = km.labels_.tolist()
-        self.cluster_color = [f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(self.num_clusters)]
-        self.cluster_names = {i: f'Cluster {i}' for i in range(self.num_clusters)}
+
+        """
+        if method == 'kmeans':
+            #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
+            km = KMeans(n_clusters=self.num_clusters)
+
+            if after_dim_reduction :
+               km.fit(self.coordinate_xy)
+            else :
+               km.fit( self.embs)
+
+            self.clusters      = km.labels_.tolist()
+            self.cluster_color = [f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(self.num_clusters)]
+            self.cluster_names = {i: f'Cluster {i}' for i in range(self.num_clusters)}
+
+
+        if method=='hdbscan':
+            import hdbscan, umap
 
 
     def create_visualization(self, dir_out="ztmp/", mode='d3', cols_label=None, start_server=False,  **kw ):
         """
 
         """
+        import mpld3
         os.makedirs(dir_out, exist_ok=True)
         cols_label          = [] if cols_label is None else cols_label
         text_label_and_text = []
@@ -604,8 +616,13 @@ if 'utils_matplotlib':
 
 
 if 'utils_vector':
-    def db_load_dict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
-        ### load Pandas into dict
+    def db_load_dict(df, colkey='id', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
+        """Load Pandas into dict
+
+
+
+
+        """
         if isinstance(df, str):
            dirin = df
            log('loading', dirin)
