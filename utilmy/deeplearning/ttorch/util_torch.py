@@ -291,7 +291,7 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 
 def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
-    from utilmy.deeplearning import  util_embedding as ue
+    # from utilmy.deeplearning import  util_embedding as ue
     import time
     
     df= []
@@ -300,7 +300,7 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
         with torch.no_grad():
             emb = model(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
-                ss = ue.np_array_to_str(emb[i].numpy())
+                ss = np_array_to_str(emb[i].numpy())
                 df.append([ img_names[i], ss])
 
     df = pd.DataFrame(df, columns= ['id', 'emb'])
@@ -336,7 +336,7 @@ def LoadEmbedding_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nma
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
     vi      = [ float(v) for v in df['emb'][0].split(',')]
-    embs    = ue.np_str_to_array(df['emb'].values, mdim =len(vi) )
+    embs    = np_str_to_array(df['emb'].values, mdim =len(vi) )
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
@@ -1161,6 +1161,83 @@ if 'utils':
             SuperResolutionNet =  None
             eval(ss)        ## trick
             return SuperResolutionNet  ## return the class
+
+
+    def np_array_to_str(vv, ):
+        """ array/list into  "," delimited string """
+        vv= np.array(vv, dtype='float32')
+        vv= [ str(x) for x in vv]
+        return ",".join(vv)
+
+
+    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
+        """ Convert list of string into numpy 2D Array
+        Docs::
+
+             np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
+
+        """
+
+        X = np.zeros(( len(vv) , mdim  ), dtype='float32')
+        for i, r in enumerate(vv) :
+            try :
+              vi      = [ float(v) for v in r.split(',')]
+              X[i, :] = vi
+            except Exception as e:
+              log(i, e)
+
+
+        if l2_norm_sklearn:
+            from sklearn.preprocessing import normalize
+            normalize(X, norm='l2', copy=False)
+
+        if l2_norm_faiss:
+            import faiss   #### pip install faiss-cpu
+            faiss.normalize_L2(X)  ### Inplace L2 normalization
+            log("Normalized X")
+        return X
+
+
+    def np_matrix_to_str2(m, map_dict:dict):
+        """ 2D numpy into list of string and apply map_dict.
+
+        Doc::
+            map_dict = { 4:'four', 3: 'three' }
+            m= [[ 0,3,4  ], [2,4,5]]
+            np_matrix_to_str2(m, map_dict)
+
+        """
+        res = []
+        for v in m:
+            ss = ""
+            for xi in v:
+                ss += str(map_dict.get(xi, "")) + ","
+            res.append(ss[:-1])
+        return res
+
+
+    def np_matrix_to_str(m):
+        res = []
+        for v in m:
+            ss = ""
+            for xi in v:
+                ss += str(xi) + ","
+            res.append(ss[:-1])
+        return res
+
+
+    def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
+        res = []
+        for v in m:
+            ss = ""
+            for di in v:
+                ss += str(1-0.5*di) + ","
+            res.append(ss[:-1])
+        return res
+
+
+
+
 
 
 
