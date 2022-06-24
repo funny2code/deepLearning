@@ -120,7 +120,7 @@ class EmbeddingViz:
 
 
     def run_all(self, dim_reduction="mds", col_embed='embed', ndim=2, nmax= 5000, dirout="ztmp/", ntrain=10000):
-       self.dim_reduction(dim_reduction, ndim=ndim, nmax= nmax, dir_out=dirout, ntrain=ntrain)
+       self.dim_reduction(dim_reduction, ndim=ndim, nmax= nmax, dirout=dirout, ntrain=ntrain)
        self.create_clusters(after_dim_reduction=True)
        self.create_visualization(dirout, mode='d3', cols_label=None, show_server=False)
 
@@ -135,14 +135,13 @@ class EmbeddingViz:
 
 
         """
-        if ".vec"     in self.path :
-          embs, id_map, df_labels  = embedding_load_word2vec(self.path, nmax= nmax)
+        if ".vec"  in self.path :       embs, id_map, df_labels = embedding_load_word2vec(self.path, nmax= nmax)
 
-        if ".pkl" in self.path :
-          embs, id_map, df_labels  = embedding_load_pickle(self.path, nmax= nmax)
+        elif ".pkl" in self.path :      embs, id_map, df_labels = embedding_load_pickle(self.path,   nmax= nmax)
 
-        else : # if ".parquet" in self.path :
-          embs, id_map, df_labels  = embedding_load_parquet(self.path, nmax= nmax)
+        elif ".parquet" in self.path :  embs, id_map, df_labels = embedding_load_parquet(self.path,  nmax= nmax)
+
+        else : raise Exception('not implemented')
 
         assert isinstance(id_map, dict)
         assert isinstance(df_labels, pd.DataFrame)
@@ -220,7 +219,7 @@ class EmbeddingViz:
             km = KMeans(n_clusters=self.num_clusters)
 
             if after_dim_reduction :
-               km.fit(self.coordinate_xy)
+               km.fit( self.coordinate_xy)
             else :
                km.fit( self.embs)
 
@@ -233,12 +232,12 @@ class EmbeddingViz:
             import hdbscan, umap
 
 
-    def create_visualization(self, dir_out="ztmp/", mode='d3', cols_label=None, start_server=False,  **kw ):
+    def create_visualization(self, dirout="ztmp/", mode='d3', cols_label=None, start_server=False, **kw):
         """
 
         """
         import mpld3
-        os.makedirs(dir_out, exist_ok=True)
+        os.makedirs(dirout, exist_ok=True)
         cols_label          = [] if cols_label is None else cols_label
         text_label_and_text = []
         for i,x in self.df_labels.iterrows():
@@ -252,7 +251,7 @@ class EmbeddingViz:
         df = pd.DataFrame(dict(x=self.coordinate_xy[:, 0],
                                y=self.coordinate_xy[:, 1],
                                clusters= self.clusters, title=text_label_and_text))
-        df.to_parquet(f"{dir_out}/embs_xy_cluster.parquet")
+        df.to_parquet(f"{dirout}/embs_xy_cluster.parquet")
 
 
         # group by cluster
@@ -288,7 +287,7 @@ class EmbeddingViz:
             ax.text(df.loc[i]['x'], df.loc[i]['y'], df.loc[i]['title'], size=8)
 
         # uncomment the below to save the plot if need be
-        plt.savefig(f'{dir_out}/clusters_static-{datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
+        plt.savefig(f'{dirout}/clusters_static-{datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
 
         # Plot
         fig, ax = plt.subplots(figsize=(20, 15))  # set plot size
@@ -318,11 +317,11 @@ class EmbeddingViz:
 
 
         ##### Export ############################################################
-        mpld3.save_html(fig,  f"{dir_out}/embeds.html")
-        log(f"{dir_out}/embeds.html" )
+        mpld3.save_html(fig,  f"{dirout}/embeds.html")
+        log(f"{dirout}/embeds.html")
 
         ### Windows specifc
-        if os.name == 'nt': os.system(f'start chrome "{dir_out}/embeds.html" ')
+        if os.name == 'nt': os.system(f'start chrome "{dirout}/embeds.html" ')
 
 
         if start_server :
@@ -740,13 +739,14 @@ if 'custom_code':
         """
         res  =Box({})
         n = 30
+        mdim=100
 
         # Create fake user ids
         word_list = [ 'a' + str(i) for i in range(n)]
 
         emb_list = []
         for i in range(n):
-            emb_list.append( ','.join([str(x) for x in np.random.random( 0,1,120) ])  )
+            emb_list.append( ','.join([str(x) for x in np.random.random(mdim) ])  )
 
 
         ####
