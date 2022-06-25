@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
-"""# Embedding visualizer
+"""# Embedding visualizer in 2D Graph
 Doc::
+
+    from utilmy.deeplearning import util_embedding as ue
+    dirtmp ="./ztmp/"
+    dd = ue.test_create_fake_df(dirout= dirtmp, nrows=1000)
+    log(dd)
+
+    ue.embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='mds', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
+
+    ue.embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='umap', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
 
 
 """
@@ -44,7 +59,6 @@ def help():
 #############################################################################################
 def test_all() -> None:
     """ python  $utilmy/deeplearning/util_embedding.py test_all         """
-    log(MNAME)
     test1()
 
 
