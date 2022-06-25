@@ -183,7 +183,7 @@ def test1():
     ARG.modelA.layer_emb_id               = ""
     ARG.modelA.dataset.dirin              = "/"
     ARG.modelA.dataset.coly               = 'ytarget'
-    modelA = model_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -197,7 +197,7 @@ def test1():
     ARG.modelB.layer_emb_id  = ""
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = model_create(ARG.modelB)
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -281,7 +281,7 @@ def test2a():
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
     ARG.modelA.seed                = 42
-    modelA = model_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -295,7 +295,7 @@ def test2a():
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
     ARG.modelB.seed                = 42
-    modelB = model_create(ARG.modelB)
+    modelB = zzmodelB_create(ARG.modelB)
 
     ### merge_model  ###################################################
     ARG.merge_model                            = Box()
@@ -390,7 +390,7 @@ def test2b():
     ARG.modelA.dataset             = Box()
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
-    modelA = model_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
     #model_ft.fc = modelA
     ### modelB  ########################################################
@@ -406,7 +406,7 @@ def test2b():
     ARG.modelB.dataset             = Box()
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
-    modelB = model_create(ARG.modelB)
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -508,7 +508,7 @@ def test2c():
     ARG.modelA.dataset               = Box()
     ARG.modelA.dataset.dirin         = "/"
     ARG.modelA.dataset.coly          = 'ytarget'
-    modelA = model_create(ARG.modelA)
+    modelA = zzmodelA_create(ARG.modelA)
 
 
 
@@ -525,7 +525,7 @@ def test2c():
     ARG.modelB.dataset       = Box()
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = model_create(ARG.modelB)
+    modelB = zzmodelB_create(ARG.modelB)
 
 
     # ### modelC  ########################################################
@@ -1254,6 +1254,10 @@ def test6():
     def custom_label(arg:dict=None):
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
+
+        from utilmy.deeplearning.ttorch import  util_torch as ut
+        from util_torch import dataset_add_image_fullpath
+
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
 
         train_img_path = dirtmp + 'data_fashion_small/train'
@@ -1267,7 +1271,7 @@ def test6():
         label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
    
         ########### Image files FASHION MNIST
-        df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        df = dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
@@ -1406,8 +1410,8 @@ def test6():
 
     tag='multi'
     dirout="./train"
-    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
-    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    ut.SaveEmbeddings(model=model.net.eval().get_embedding, dirout=dirout, data_loader=train_loader,tag=tag)
+    embv, img_names,df = ut.LoadEmbedding_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
     ####Cosine similarity b/w Merged Embeddings
     df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
@@ -1553,7 +1557,7 @@ def test2_lstm():
     ARG.modelD.dataset       = Box()
     ARG.modelD.dataset.dirin = "/"
     ARG.modelD.dataset.coly  = 'ytarget'
-    modelD = model_create(ARG.modelD)
+    modelD = zzmodelD_create(ARG.modelD)
 
     ### merge_model  ###################################################
     ### EXPLICIT DEPENDENCY  : because it's merge
@@ -2267,23 +2271,6 @@ def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num
 
 
 
-###############################################################################################################
-if __name__ == "__main__":
-    import fire
-    test_all()
-
-
-
-
-
-
-
-
-
-
-
-
-
 #################################################################################################
 class zzmodelA_create(BaseModel):
     """ modelA
@@ -2509,3 +2496,9 @@ class zzmodelD_create(BaseModel):
     def create_loss(self) -> torch.nn.Module:
         super(zzmodelD_create, self).create_loss()
         return torch.nn.BCELoss()
+
+
+###############################################################################################################
+if __name__ == "__main__":
+    import fire
+    test_all()
