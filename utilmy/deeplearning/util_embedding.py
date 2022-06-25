@@ -4,7 +4,7 @@ Doc::
 
 
 """
-import datetime, os, glob, random, time, warnings
+import os, sys, datetime, glob, random, time, warnings
 import numpy as np, pandas as pd
 from box import Box
 
@@ -12,12 +12,8 @@ warnings.filterwarnings("ignore")
 from warnings import simplefilter  ; simplefilter(action='ignore', category=FutureWarning)
 with warnings.catch_warnings():
     import matplotlib.pyplot as plt
-    import mpld3
-
-    from sklearn.cluster import KMeans
-    from sklearn.manifold import MDS
     from sklearn.metrics.pairwise import cosine_similarity
-
+    
 
 from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 
@@ -38,8 +34,6 @@ from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 
 #############################################################################################
 from utilmy import log, os_module_name
-MNAME = os_module_name(__file__)
-
 def help():
     """function help        """
     from utilmy import help_create
@@ -55,21 +49,29 @@ def test_all() -> None:
 
 
 def test1() -> None:
-    """function test1     
+    """Test    embedding_create_vizhtml
     """
     dirtmp ="./ztmp/"
 
-    dd = test_create_fake_df(dirout= dirtmp)
+    dd = test_create_fake_df(dirout= dirtmp, nrows=1000)
     log(dd)
 
-    embedding_create_vizhtml(dirin=dirtmp + "/word2vec_export.vec",
-                             dirout=dirtmp + "/out/", dim_reduction='umap', nmax=100, ntrain=10)
+    embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='mds', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
+
+    embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='umap', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
 
 
 
 #########################################################################################################
 ############### Visualize the embeddings ################################################################
-def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10):
+def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10,
+                             num_clusters=5,):
    """Create HTML plot file of embeddings.
    Doc::
 
@@ -84,14 +86,14 @@ def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction
    #### Generate HTML  ############################################
    log(dirin)
 
-   myviz = EmbeddingViz(path = dirin)
+   myviz = EmbeddingViz(path = dirin, num_clusters=num_clusters,)
    myviz.load_data(nmax= nmax)
    myviz.run_all(dirout= dirout, dim_reduction=dim_reduction, nmax=nmax, ntrain=ntrain)
 
 
 
 class EmbeddingViz:
-    def __init__(self, path="myembed.parquet", num_clusters=5, sep=";", config:dict=None):
+    def __init__(self, path="myembed.parquet", num_clusters=2, sep=";", config:dict=None):
         """ Visualize Embedding
         Doc::
 
@@ -111,7 +113,7 @@ class EmbeddingViz:
         self.dist         = None
 
         ### Plot @D coordinate
-        self.coordinate_xy = None
+        self.coordinate_xy:np.array = None
 
         ### Store the embeddings
         self.id_map    = None
@@ -151,6 +153,8 @@ class EmbeddingViz:
         self.df_labels = df_labels
         self.embs      = embs
 
+        log( 'embs shape:', embs.shape )
+
 
     def dim_reduction(self, mode="mds", ndim=2, nmax= 5000, dirout=None, ntrain=10000, npool=2):
         """  Reduce dimension of embedding into 2D X,Y for plotting.
@@ -163,10 +167,14 @@ class EmbeddingViz:
         pos = None
         if mode == 'mds' :
             ### Co-variance matrix
-            dist = 1 - cosine_similarity(self.embs)
-            mds = MDS(n_components=ndim, dissimilarity="precomputed", random_state=1)
-            mds.fit(dist)  # shape (n_components, n_samples)
-            pos = mds.transform(dist)  # shape (n_components, n_samples)
+            from sklearn.manifold import MDS
+            # dist = 1 - cosine_similarity(self.embs)
+            # mds = MDS(n_components=ndim, dissimilarity="precomputed", random_state=1)
+            # pos = mds.fit_transform(dist)  # shape (n_components, n_samples)            
+            # dist = 1 - cosine_similarity(self.embs)
+            
+            mds = MDS(n_components=ndim, dissimilarity="euclidean", random_state=1)
+            pos = mds.fit_transform( self.embs )  # shape (n_components, n_samples)
 
 
         if mode == 'umap' :
@@ -215,7 +223,7 @@ class EmbeddingViz:
 
         """
         if method == 'kmeans':
-            #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
+            from sklearn.cluster import KMeans
             km = KMeans(n_clusters=self.num_clusters)
 
             if after_dim_reduction :
@@ -230,6 +238,7 @@ class EmbeddingViz:
 
         if method=='hdbscan':
             import hdbscan, umap
+            #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
 
 
     def create_visualization(self, dirout="ztmp/", mode='d3', cols_label=None, start_server=False, **kw):
@@ -287,7 +296,7 @@ class EmbeddingViz:
             ax.text(df.loc[i]['x'], df.loc[i]['y'], df.loc[i]['title'], size=8)
 
         # uncomment the below to save the plot if need be
-        plt.savefig(f'{dirout}/clusters_static-{datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
+        plt.savefig(f'{dirout}/clusters_static-{datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
 
         # Plot
         fig, ax = plt.subplots(figsize=(20, 15))  # set plot size
@@ -340,6 +349,8 @@ class EmbeddingViz:
         plt.tick_params(axis='x', which='both', bottom='off', top='off', labelbottom='off')
         plt.tight_layout()
         plt.savefig('dendogram_clusters.png', dpi=200)
+
+
 
 
 
@@ -430,7 +441,8 @@ def embedding_rawtext_to_parquet(dirin=None, dirout=None, skip=0, nmax=10 ** 8,
 
 
 def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  nmax= 500,
-                           return_type='numpy;pandas'
+                           return_type='numpy;pandas',
+                           emb_dim=200
                            ):
     """  parquet -->  numpy array, dict map, labels
      Docs::
@@ -456,7 +468,7 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  
 
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
-    embs    = np_str_to_array(df['emb'].values,  l2_norm=True,     mdim = 200)
+    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True,     mdim = emb_dim)
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
@@ -583,33 +595,35 @@ if 'utils_matplotlib':
         display: none; }
         """
 
-    class TopToolbar(mpld3.plugins.PluginBase):
-        """Plugin for moving toolbar to top of figure"""
+    try :
+        import mpld3    
+        class TopToolbar(mpld3.plugins.PluginBase):
+            """Plugin for moving toolbar to top of figure"""
 
-        JAVASCRIPT = """
-        mpld3.register_plugin("toptoolbar", TopToolbar);
-        TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
-        TopToolbar.prototype.constructor = TopToolbar;
-        function TopToolbar(fig, props){
-            mpld3.Plugin.call(this, fig, props);
-        };
-        TopToolbar.prototype.draw = function(){
-          // the toolbar svg doesn't exist
-          // yet, so first draw it
-          this.fig.toolbar.draw();
-          // then change the y position to be
-          // at the top of the figure
-          this.fig.toolbar.toolbar.attr("x", 150);
-          this.fig.toolbar.toolbar.attr("y", 400);
-          // then remove the draw function,
-          // so that it is not called again
-          this.fig.toolbar.draw = function() {}
-        }
-        """
+            JAVASCRIPT = """
+            mpld3.register_plugin("toptoolbar", TopToolbar);
+            TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
+            TopToolbar.prototype.constructor = TopToolbar;
+            function TopToolbar(fig, props){
+                mpld3.Plugin.call(this, fig, props);
+            };
+            TopToolbar.prototype.draw = function(){
+            // the toolbar svg doesn't exist
+            // yet, so first draw it
+            this.fig.toolbar.draw();
+            // then change the y position to be
+            // at the top of the figure
+            this.fig.toolbar.toolbar.attr("x", 150);
+            this.fig.toolbar.toolbar.attr("y", 400);
+            // then remove the draw function,
+            // so that it is not called again
+            this.fig.toolbar.draw = function() {}
+            }
+            """
 
-        def __init__(self):
-            self.dict_ = {"type": "toptoolbar"}
-
+            def __init__(self):
+                self.dict_ = {"type": "toptoolbar"}
+    except : pass
 
 
 
@@ -751,12 +765,12 @@ if 'utils_vector':
 
 
 if 'custom_code':
-    def test_create_fake_df(dirout="./ztmp/"):
+    def test_create_fake_df(dirout="./ztmp/", nrows=100):
         """ Creates a fake embeddingdataframe
         """
         res  =Box({})
-        n = 30
-        mdim=100
+        n = nrows
+        mdim= 50
 
         # Create fake user ids
         word_list = [ 'a' + str(i) for i in range(n)]
@@ -766,7 +780,6 @@ if 'custom_code':
             emb_list.append( ','.join([str(x) for x in np.random.random(mdim) ])  )
 
 
-        ####
         df = pd.DataFrame()
         df['id']   = word_list
         df['emb']  = emb_list
@@ -781,12 +794,11 @@ if 'custom_code':
         res.dir_text = dirout + "/word2vec_export.vec"
         log( res.dir_text )
         with open(res.dir_text, mode='w') as fp:
-            fp.write("word2vec export format\n")
+            fp.write("word2vec\n")
 
             for i,x in df.iterrows():
               emb  = x['emb'].replace(",", "")
               fp.write(  f"{x['id']}  {emb}\n")
-
 
         return res
 
