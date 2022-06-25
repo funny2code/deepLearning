@@ -183,7 +183,7 @@ def test1():
     ARG.modelA.layer_emb_id               = ""
     ARG.modelA.dataset.dirin              = "/"
     ARG.modelA.dataset.coly               = 'ytarget'
-    modelA = zzmodelA_create(ARG.modelA)
+    modelA = model_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -197,7 +197,7 @@ def test1():
     ARG.modelB.layer_emb_id  = ""
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = zzmodelB_create(ARG.modelB)
+    modelB = model_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -281,7 +281,7 @@ def test2a():
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
     ARG.modelA.seed                = 42
-    modelA = zzmodelA_create(ARG.modelA)
+    modelA = model_create(ARG.modelA)
 
 
     ### modelB  ########################################################
@@ -295,7 +295,7 @@ def test2a():
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
     ARG.modelB.seed                = 42
-    modelB = zzmodelB_create(ARG.modelB)
+    modelB = model_create(ARG.modelB)
 
     ### merge_model  ###################################################
     ARG.merge_model                            = Box()
@@ -390,7 +390,7 @@ def test2b():
     ARG.modelA.dataset             = Box()
     ARG.modelA.dataset.dirin       = "/"
     ARG.modelA.dataset.coly        = 'ytarget'
-    modelA = zzmodelA_create(ARG.modelA)
+    modelA = model_create(ARG.modelA)
 
     #model_ft.fc = modelA
     ### modelB  ########################################################
@@ -406,7 +406,7 @@ def test2b():
     ARG.modelB.dataset             = Box()
     ARG.modelB.dataset.dirin       = "/"
     ARG.modelB.dataset.coly        = 'ytarget'
-    modelB = zzmodelB_create(ARG.modelB)
+    modelB = model_create(ARG.modelB)
 
 
     ### merge_model  ###################################################
@@ -508,7 +508,7 @@ def test2c():
     ARG.modelA.dataset               = Box()
     ARG.modelA.dataset.dirin         = "/"
     ARG.modelA.dataset.coly          = 'ytarget'
-    modelA = zzmodelA_create(ARG.modelA)
+    modelA = model_create(ARG.modelA)
 
 
 
@@ -525,7 +525,7 @@ def test2c():
     ARG.modelB.dataset       = Box()
     ARG.modelB.dataset.dirin = "/"
     ARG.modelB.dataset.coly  = 'ytarget'
-    modelB = zzmodelB_create(ARG.modelB)
+    modelB = model_create(ARG.modelB)
 
 
     # ### modelC  ########################################################
@@ -1553,7 +1553,7 @@ def test2_lstm():
     ARG.modelD.dataset       = Box()
     ARG.modelD.dataset.dirin = "/"
     ARG.modelD.dataset.coly  = 'ytarget'
-    modelD = zzmodelD_create(ARG.modelD)
+    modelD = model_create(ARG.modelD)
 
     ### merge_model  ###################################################
     ### EXPLICIT DEPENDENCY  : because it's merge
