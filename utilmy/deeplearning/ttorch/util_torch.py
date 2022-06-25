@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#
+""" Utils for torch
 Doc::
 
     utilmy/deeplearning/ttorch/util_torch.py
@@ -98,43 +98,30 @@ def test2():
     """
     """
     from torchvision import models
-    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=7)
 
-    tr_dl, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y,
-                             batch_size=64, shuffle=True, device='cpu', batch_size_val=4, batch_size_test=4) 
+    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
+    train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
+    # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
+    # test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
+
 
 
     model = nn.Sequential(nn.Linear(50, 20),      nn.Linear(20, 1))
-    
-    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
-    train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
-    
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
     
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
+    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
 
 
     model = models.resnet50()
     torch.save({'model_state_dict': model.state_dict()}, 'resnet50_ckpt.pth')
-
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
-
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
 
 
-    model       = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
-    X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
-    test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
-
-    args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
-            'dir_modelsave': 'model.pt', 'valid_freq': 1}
-    
-    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
-
     model = models.resnet50()
     kwargs = {'input_size': (3, 224, 224)}
-    
     model_summary(model=model, **kwargs)
 
 
@@ -142,12 +129,11 @@ def test2():
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
-
-def test_metrics1():
+    ### Matrics for pytorch
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
     data   = torch.rand(64, 3, 224, 224)
     output = model(data)
-    labels = torch.randint(1000, (64,))#random labels 
+    labels = torch.randint(1000, (64,)) #random labels
     acc    = torch_metric_accuracy(output = output, labels = labels) 
 
     x1 = torch.rand(100,)
@@ -164,16 +150,11 @@ def test_metrics1():
     # No train test splits are applied to lead to the overrepresentation of class 999 
     p = [(1-0.05)/1000]*999
     p.append(1-sum(p))
-    labels = np.random.choice(list(range(1000)), 
-                            size = (10000,), 
-                            p = p)#imbalanced 1000-class labels
+    labels = np.random.choice(list(range(1000)),   size = (10000,),   p = p)#imbalanced 1000-class labels
     labels = torch.Tensor(labels).long()
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
     l = loss(output, labels[:64])
-
-
-
 
 
 
@@ -199,8 +180,6 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
             log(e)
             device = 'cpu'
     return device
-
-
 
 
 
@@ -290,7 +269,7 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
-def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
+def embedding_torchtensor_to_parquet(model = None, dirout = './', data_loader=None,tag=""):
     # from utilmy.deeplearning import  util_embedding as ue
     import time
     
@@ -298,7 +277,7 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
-            emb = model(img)   #### Need to get the layer !!!!!
+            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
                 ss = np_array_to_str(emb[i].numpy())
                 df.append([ img_names[i], ss])
@@ -311,11 +290,11 @@ def SaveEmbeddings(model = None, dirout = './', data_loader=None,tag=""):
       pd_to_file(df, dirout2, show=1 )
     return df
 
-def LoadEmbedding_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
+
+def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
     """  Required columns : id, emb (string , separated)
     
     """
-    from utilmy.deeplearning import  util_embedding as ue
     import glob
 
     log('loading', dirin)
@@ -378,9 +357,9 @@ class DataForEmbedding(Dataset):
         img_dir = self.label_img_dir[idx]
         img     = self.img_loader(img_dir)
         img_name = img_dir.split('/')[-1].split('.')[0]
-		
+
         if "\\" in img_name:
-	        img_name =  img_name.replace('\\','_')
+            img_name =  img_name.replace('\\','_')
 
         train_X = self.transforms(img)
         return (train_X, img_name)

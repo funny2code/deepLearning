@@ -1254,10 +1254,6 @@ def test6():
     def custom_label(arg:dict=None):
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-
-        from utilmy.deeplearning.ttorch import  util_torch as ut
-        from util_torch import dataset_add_image_fullpath
-
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
 
         train_img_path = dirtmp + 'data_fashion_small/train'
@@ -1271,7 +1267,7 @@ def test6():
         label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
    
         ########### Image files FASHION MNIST
-        df = dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
@@ -1410,8 +1406,8 @@ def test6():
 
     tag='multi'
     dirout="./train"
-    ut.SaveEmbeddings(model=model.net.eval().get_embedding, dirout=dirout, data_loader=train_loader,tag=tag)
-    embv, img_names,df = ut.LoadEmbedding_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
+    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
     ####Cosine similarity b/w Merged Embeddings
     df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)

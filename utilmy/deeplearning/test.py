@@ -20,5 +20,5 @@ myviz = vizEmbedding(path = "./model.vec")
 myviz.run_all(nmax=5000)
 
 myviz.dim_reduction(mode='mds')
-myviz.create_visualization(dir_out="ztmp/vis/")        
+myviz.create_visualization(dirout="ztmp/vis/")
 
