@@ -302,7 +302,7 @@ Doc::
 
 
     Tests whether two samples have a linear relationship.  : Pearson test
-    
+
     2 samples have Monotonic relationship :  Spearman’s Rank Correlation
 
 
@@ -613,66 +613,82 @@ def test_check_mean():
 
 ###############################################################################################
 ########## Helpers on test  ###################################################################
-def hypotest_is_1_mean_equal_fixed(df, col='mycol', mean_target=4):
+def hypotest_rconclusion(p_value, alpha=0.05, res=None ):
+    """ Conclusion  """
+    log("Test summary", res)
+    log(f"""\nP-value = {p_value} ,   P-critical = {alpha}""")
+    if p_value <= alpha: s, concl = "<=", "reject"
+    else: s, concl = ">", "accept"
+    log(f"""As {round(p_value, 2)} {s} {alpha}, we {concl} H0\n""")
+
+
+
+def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4, alpha=0.05):
     """# To test whether sample has come from a population with mean 54
     Docs::
-        # H0: μ = 54
-        # H1: μ != 54
 
+        # H0: μ = 54     AND  # H1: μ != 54
         ### One sample test (parameter estimation)
-    np.random.seed(10)
-    Population = [np.random.randint(10, 100) for _ in range(1000)]
-    Sample = [np.random.randint(11, 99) for _ in range(25)]
-    Population_Mean = round(sum(Population)/len(Population))
-    Population_Mean
+        np.random.seed(10)
+        Population = [np.random.randint(10, 100) for _ in range(1000)]
+        Sample = [np.random.randint(11, 99) for _ in range(25)]
+        Population_Mean = round(sum(Population)/len(Population))
+    """
+    if isinstance(df, pd.DataFrame):  samples = df[col].values
+    else :                            samples = df  ### list
 
+    log("""1) Student's t-test (One sample)""")
+    log(f"{col} has to be normally distributed and independent sample\n")
+    dd = test.hypothesis.tTest(samples, mu = mean_target)
+    hypotest_rconclusion(dd.p_value, alpha=alpha,   res=dd.test_summary )
+
+
+
+def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
+    """
+    Docs ::
+
+        data1 = [20, 55, 29, 24, 75, 56, 31, 45]
+        data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
+
+        # Test whether the samples are same
+        # H0: The two samples are same
+        # H1: The two samples are different
+        # P-value > 5%. Fail to Reject H0
+        # Data may be similar.
+
+        ### test to determine normality of data
 
     """
-    if isinstance(df, pd.DataFrame):
-       samples = df[col].values
-    else :
-       samples = df
-
-    log("""# 1) Student's t-test (One sample)""")
-    ttest = test.hypothesis.tTest(samples, mu = mean_target)
-    print( ttest.test_summary)
-
-    # As p-value is < 5% Level of significance, we reject H0.
-    # The sample has not come from a population with mean 54.
+    ddict= Box({})
+    if isinstance(df, pd.DataFrame):     v1, v2= df[cols[0]].values, df[cols[1]].values
+    else :                               v1, v2 = df[0], df[1]  ### list of lists
 
 
-
-def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ]):
-    """
-    data1 = [20, 55, 29, 24, 75, 56, 31, 45]
-    data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
-
-    # Test whether the samples are same
-    # H0: The two samples are same
-    # H1: The two samples are different
-    # P-value > 5%. Fail to Reject H0
-    # Data may be similar.
-
-    ### test to determine normality of data
+    log("""1) WaldWolfowitz""")
+    log("WaldWolfowitz test is used when response variable is dichotomous")
+    dd = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
+    hypotest_rconclusion(dd.p_value, alpha= alpha,  res=dd.test_summary  )
 
 
-    """
-    log("""# 2) WaldWolfowitz""")
+    log("""# 2) Student's t-test (Two sample)""")
+    log("For t test the columns have to be approx. normally distributed and independent with equal variances")
+    dd = test.hypothesis.tTest(v1, v2)
+    dd.student = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=alpha,  res=dd.test_summary )
 
-    v1 = df[cols[0]].values
-    v2 = df[cols[1]].values
-
-    ww = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
-    return ww.test_summary
+    return ddict
 
 
 
-def hypotest_is_all_means_equal(df, cols=['col1', 'col2'], mean_target=4):
+def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
     """# To test whether All columns have same means.
 
     """
     vlist = []
     if isinstance(df, pd.DataFrame):
+        if cols == None:
+          cols = df.columns
         for coli in cols:
             vlist.append(df[coli].values)
     elif isinstance(df, list):
@@ -680,28 +696,30 @@ def hypotest_is_all_means_equal(df, cols=['col1', 'col2'], mean_target=4):
 
     ddict = Box({})
 
-    log(""" ANOVA""")
+    log("""## 1) ANOVA""")
+    log("For ANOVA, The samples should be independent and normally distributed.")
     dd = test.aov.AnovaOneWay(*vlist)
-    log(dd.test_summary)
-    ddict.anova = test.aov.test_summary
+    ddict.anova = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log(""" Friedman""")
+    log("""## 2) Friedman test""")
+    log("Friedman test assumes same subjects show up in each group")
     dd = test.nonparametric.FriedmanTest(*vlist, group = None)
-    log(dd.test_summary)
-    ddict.friedman = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log(""" Cochran's Q test """)
+    log("""## 3) Cochran's Q test """)
+    log("Cochran's Q test is applicable when response variable can only take two values")
     dd = test.contingency.CochranQ(*vlist)
-    log(dd.test_summary)
     ddict.cochran = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
     return ddict
 
 
 
-def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], mean_target=4):
+def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05):
     """# To test whether All columns have same means.
     Docs::
 
@@ -726,43 +744,90 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], mean_target
        vlist = df
     ddict = Box({})
 
-    log("""#2) Mann Whitney Test""")
+    log("""#1) Mann Whitney Test""")
+    log("Observations should not be normally distributed and groups should be independent")
     mw = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
-    ddict.MannWhitney  = mw.test_summary
+    hypotest_rconclusion(mw.p_value, alpha=alpha, res = mw.test_summary)
     return ddict
 
 
-def hypotest_is_mean_pergroup_equal(df, col1, col2):
+
+def hypotest_is_all_same_distribution(df, cols = None):
     """
+    ### Tests to determine if data distributions are similar or not
 
-    # create random sample data
-    data = [['Toyota', 'Toyota'] for i in range(55)] + \
-        [['Toyota', 'Mitsubishi'] for i in range(5)] + \
-        [['Mitsubishi', 'Toyota'] for i in range(15)] + \
-        [['Mitsubishi', 'Mitsubishi'] for i in range(25)]
-    df = pd.DataFrame(data, columns = ['Before Ad Screening', 'After Ad Screening'])
+    np.random.seed(10)
+    # generate three independent samples
+    data1 = 5 * np.random.randn(100) + 50
+    data2 = 5 * np.random.randn(100) + 50
+    data3 = 5 * np.random.randn(100) + 50
 
-    # create contingency table
-    data_crosstab = pd.crosstab(df['Before Ad Screening'],
-                                df['After Ad Screening'],
-                                margins=True, margins_name="Total")
-    data_crosstab
-    #P0 : The true proportion of customers who prefer Toyota before the ad screening
-    #P1 : The true proportion of customers who prefer Toyota after the ad screening
-    #To test:
-    #H0 : P1 = P2
-    #H1 : P1 != P2
+    # To test: Whether the three distributions are similar or not
+    # H0: All sample distribution are similar
+    # H1: Atleast one pair of sample distributions is different
+    """
+    vlist = []
+    if isinstance(df, pd.DataFrame):
+      if cols == None:
+        cols = df.columns
+      for coli in cols:
+        vlist.append(df[coli].values)
 
-    # As p-value < 0.05, we reject H0.
-    # True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
+    elif isinstance(df, list):
+       vlist = df
+    ddict = Box({})
+
+    log("""# 1) Kruskal Wallis Test""")
+    log("If not normally distributed, use KruskalWallis")
+    kw = test.nonparametric.KruskalWallis(*vlist)
+    ddict.KruskalWallis = kw.test_summary
+    hypotest_rconclusion(kw.p_value, alpha=0.05, res=kw.test_summary )
 
 
+    log("""# 2) ANOVA""")
+    log("If normally distributed, use ANOVA")
+    dd = test.aov.AnovaOneWay(*vlist)
+    ddict.anova = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=0.05, res = dd.test_summary )
 
+    return ddict
+
+
+def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
+    """
+    Docs ::
+
+        # create random sample data
+        data = [['Toyota', 'Toyota'] for i in range(55)] + \
+            [['Toyota', 'Mitsubishi'] for i in range(5)] + \
+            [['Mitsubishi', 'Toyota'] for i in range(15)] + \
+            [['Mitsubishi', 'Mitsubishi'] for i in range(25)]
+        df = pd.DataFrame(data, columns = ['Before Ad Screening', 'After Ad Screening'])
+
+        # create contingency table
+        data_crosstab = pd.crosstab(df['Before Ad Screening'],
+                                    df['After Ad Screening'],
+                                    margins=True, margins_name="Total")
+        data_crosstab
+        #P0 : The true proportion of customers who prefer Toyota before the ad screening
+        #P1 : The true proportion of customers who prefer Toyota after the ad screening
+        #To test:
+        #H0 : P1 = P2
+        #H1 : P1 != P2
+
+        # As p-value < 0.05, we reject H0.
+        # True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
 
     """
-    """# 2) Mc Nemar Test"""
-    m = test.contingency.McNemarTest([[25, 5], [15, 55]], continuity=True)
-    m.test_summary
+    if col1 == None or col2 == None:
+      col1, col2 = df.columns
+
+    data = pd.crosstab(df[col1], df[col2])
+    v1, v2 = df[col1].unique()
+    log("## 1) Mc Nemar Test")
+    log(f"Assumption: {col1} is dichotomous variable and {col2} is independent variable with two connected groups")
+    m = test.contingency.McNemarTest([data[v1], data[v2]], continuity=True)
+    hypotest_rconclusion(m.mcnemar_p_value, alpha=alpha,res= m.test_summary )
 
 
 
@@ -776,52 +841,25 @@ def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True
     cols = df.columns  if cols is None else cols
 
     if len(cols) == 2:
-        log("## Student test of mean for 2 variables")
         p_values = hypotest_is_2_mean_equal(df, cols=cols)
 
     else :   ##> 3 values
-        log("## ANOVA test of mean for >2 variables")
-        p_values = hypotest_is_all_means_equal(df, cols)
+        report, p_values = hypotest_is_all_means_equal(df, cols)
 
     if bonferroni_adjuster:
         p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     pvalue= p_values['p_value']
     if pvalue < pcritic:
-        print("H0 hypothesis is rejected...", pvalue )
+        log("H0 hypothesis is rejected...", pvalue )
     else:
-        print("H0 hypothesis is accepted...")
+        log("H0 hypothesis is accepted...")
 
     return p_values
 
 
 
-
-def hypotest_is_all_distribution_same(df, cols):
-    ### Tests to determine if data distributions are similar or not
-
-    """# 1) Kruskal Wallis Test"""
-
-    np.random.seed(10)
-    # generate three independent samples
-    data1 = 5 * np.random.randn(100) + 50
-    data2 = 5 * np.random.randn(100) + 50
-    data3 = 5 * np.random.randn(100) + 50
-
-    # To test: Whether the three distributions are similar or not
-    # H0: All sample distribution are similar
-    # H1: Atleast one pair of sample distributions is different
-
-    kw = test.nonparametric.KruskalWallis(data1, data2, data3)
-    kw.test_summary
-
-    # p-value > 5% level of significance. Thus, fail to reject H0
-    # No statistical evidence to prove that the sample distributions are different.
-
-
-
-
-def hypotest_is_all_independant(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
     """Run ANOVA Test of independance.
     Doc::
 
@@ -839,7 +877,31 @@ def hypotest_is_all_independant(df: pd.DataFrame, cols=None, bonferroni_adjuster
 
 
 
-def hypotest_is_normal_distribution(df:pd.DataFrame, column, test_type):
+def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+    """Run multiple T tests of Independance.
+    Doc::
+
+               p_values = multiple_comparisons(data)
+    """
+    p_values = []
+    colsX = df.columns  if colsX is None else colsX
+    for c in colsX:
+        if c.startswith(coly):
+            continue
+        group_a = df[df[c] == 0][coly]
+        group_b = df[df[c] == 1][coly]
+
+        _, p = stats.ttest_ind(group_a, group_b, equal_var=False)
+        p_values.append((c, p) )
+
+    if bonferroni_adjuster:
+        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
+
+    return p_values
+
+
+
+def hypotest_is_normal_distribution(df:pd.DataFrame, column,):
     """.
     Doc::
 
@@ -857,40 +919,35 @@ def hypotest_is_normal_distribution(df:pd.DataFrame, column, test_type):
     from scipy.stats import shapiro
     from scipy.stats import normaltest
     from scipy.stats import anderson
-    if  test_type == 'Shapiro':
-        stat, p = shapiro(df[column])
-        print('Statistics=%.3f, p=%.3f' % (stat, p))
-        # interpret
-        alpha = 0.05
-        if p > alpha:
-            print(column,' looks Gaussian (fail to reject H0)')
+
+    log('Shapiro')
+    stat, p = shapiro(df[column])
+    log('Statistics=%.3f, p=%.3f' % (stat, p))
+    # interpret
+    alpha = 0.05
+    if p > alpha:    log(column,' looks Gaussian (fail to reject H0)')
+    else:            log(column,' does not look Gaussian (reject H0)')
+
+
+    log('Normal')
+    stat, p = normaltest(df[column])
+    log('Statistics=%.3f, p=%.3f' % (stat, p))
+    # interpret
+    alpha = 0.05
+    if p > alpha: log(column,' looks Gaussian (fail to reject H0)')
+    else:         log(column,' does not look Gaussian (reject H0)')
+
+
+    log('Anderson')
+    result = anderson(df[column])
+    log('Statistic: %.3f' % result.statistic)
+    p = 0
+    for i in range(len(result.critical_values)):
+        sl, cv = result.significance_level[i], result.critical_values[i]
+        if result.statistic < result.critical_values[i]:
+            log(sl,' : ',cv,' ',column,' looks normal (fail to reject H0)')
         else:
-            print(column,' does not look Gaussian (reject H0)')
-        return stat
-
-    if  test_type == 'Normal':
-        stat, p = normaltest(df[column])
-        print('Statistics=%.3f, p=%.3f' % (stat, p))
-        # interpret
-        alpha = 0.05
-        if p > alpha:
-            print(column,' looks Gaussian (fail to reject H0)')
-        else:
-            print(column,' does not look Gaussian (reject H0)')
-        # normality test
-    if  test_type == 'Anderson':
-        result = anderson(df[column])
-        print('Statistic: %.3f' % result.statistic)
-        p = 0
-        for i in range(len(result.critical_values)):
-            sl, cv = result.significance_level[i], result.critical_values[i]
-            if result.statistic < result.critical_values[i]:
-                print(sl,' : ',cv,' ',column,' looks normal (fail to reject H0)')
-            else:
-                print(sl,' : ',cv,' ',column,' does not looks normal (fail to reject H0)')
-
-
-
+            log(sl,' : ',cv,' ',column,' does not looks normal (fail to reject H0)')
 
 
 
@@ -899,8 +956,8 @@ def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
     """Bonferroni correction.
     Doc::
 
-        print('Total number of discoveries is: {:,}'  .format(sum([x[1] < threshold / n_trials for x in p_values])))
-        print('Percentage of significant results: {:5.2%}'  .format(sum([x[1] < threshold / n_trials for x in p_values]) / n_trials))
+        log('Total number of discoveries is: {:,}'  .format(sum([x[1] < threshold / n_trials for x in p_values])))
+        log('Percentage of significant results: {:5.2%}'  .format(sum([x[1] < threshold / n_trials for x in p_values]) / n_trials))
 
         # Benjamini–Hochberg procedure
         p_values.sort(key=lambda x: x[1])
@@ -910,8 +967,8 @@ def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
                 break
         significant = p_values[:i]
 
-        print('Total number of discoveries is: {:,}' .format(len(significant)))
-        print('Percentage of significant results: {:5.2%}'.format(len(significant) / n_trials))
+        log('Total number of discoveries is: {:,}' .format(len(significant)))
+        log('Percentage of significant results: {:5.2%}'.format(len(significant) / n_trials))
     """
     p_values.sort(key=lambda x: x[1])
     for i, x in enumerate(p_values):
@@ -919,6 +976,7 @@ def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
             break
     pvalues_significant = p_values[:i]
     return pvalues_significant
+
 
 
 
