@@ -147,7 +147,7 @@ pykeen
 ### visualize emb
 mpld3
 hdbscan
-umap
+umap-learn
 optuna
 
 
