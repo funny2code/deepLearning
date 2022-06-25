@@ -2267,6 +2267,23 @@ def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num
 
 
 
+###############################################################################################################
+if __name__ == "__main__":
+    import fire
+    test_all()
+
+
+
+
+
+
+
+
+
+
+
+
+
 #################################################################################################
 class zzmodelA_create(BaseModel):
     """ modelA
@@ -2492,9 +2509,3 @@ class zzmodelD_create(BaseModel):
     def create_loss(self) -> torch.nn.Module:
         super(zzmodelD_create, self).create_loss()
         return torch.nn.BCELoss()
-
-
-###############################################################################################################
-if __name__ == "__main__":
-    import fire
-    test_all()
