@@ -172,3 +172,4 @@ sendtoterminalplus.vsx
 /**/*.pth
 utilmy/deeplearning/ttorch/zzzzz.py
 /utilmy/sspark/src/zexample
+/test_recorder/
