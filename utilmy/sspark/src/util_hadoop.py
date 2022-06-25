@@ -314,23 +314,9 @@ def hdfs_download(dirin="", dirout="./", verbose=False, n_pool=1, **kw):
 
 
 
- def hive_get_tablelist(dbname):
-    """Get Hive tables from database_name
-    """
-    cmd = f"hive -e 'show tables from {dbname}'"
-    stdout,stderr = os_system(cmd)
-    if stderr: return stderr
-    lines = stdout.split("\n")
-    ltable = []
-    for li in lines :
-        if not li: continue
-        if 'tab_name' in li : continue
-        ltable.append(li.strip())
-    return ltable
-
-
 ############################################################################################################### 
-############################################################################################################### 
+###############################################################################################################
+
 def hive_get_dblist():
     """ Get  databases
     """
@@ -387,6 +373,21 @@ def hive_get_tabledetails(table):
         ltable.append(li.strip())
     return ltable
 
+
+
+def hive_get_tablelist(dbname):
+    """Get Hive tables from database_name
+    """
+    cmd = f"hive -e 'show tables from {dbname}'"
+    stdout,stderr = os_system(cmd)
+    if stderr: return stderr
+    lines = stdout.split("\n")
+    ltable = []
+    for li in lines :
+        if not li: continue
+        if 'tab_name' in li : continue
+        ltable.append(li.strip())
+    return ltable
 
 
 
