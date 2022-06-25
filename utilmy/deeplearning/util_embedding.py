@@ -2,6 +2,8 @@
 """# Embedding visualizer in 2D Graph
 Doc::
 
+    --  pip install umap-learn mpld3
+
     from utilmy.deeplearning import util_embedding as ue
     dirtmp ="./ztmp/"
     dd = ue.test_create_fake_df(dirout= dirtmp, nrows=1000)
@@ -553,6 +555,9 @@ def embedding_load_pickle(dirin=None, skip=0, nmax=10 ** 8,
     return embs, id_map, dflabel
 
 
+
+#########################################################################################################
+############## Loader of embeddings #####################################################################
 def embedding_extract_fromtransformer(model,Xinput:list):
     """ Transformder require Pooling layer to extract word level embedding.
     Doc::
@@ -596,6 +601,83 @@ def embedding_extract_fromtransformer(model,Xinput:list):
     # torch.Size([1, 5, 768])
     # len(example)
     return yout
+
+
+
+class torch_model_getlayer():
+    """ Get a specific layer for embedding output
+    Doc::
+
+        model = models.resnet50()
+        layerI= model_getlayer(model, pos_layer=-1)
+
+        ### Forward pass
+        Xin = torch.randn(4, 3, 224, 224)
+        print( model(Xin) )
+
+        print('emb')
+        Xemb = layerI.output
+        print(Xemb.shape)
+        print(Xemb)
+
+    """
+    def __init__(self, network, backward=False, pos_layer=-2):
+        self.layers = []
+        self.get_layers_in_order(network)
+        self.last_layer = self.layers[pos_layer]
+        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
+
+    def hook_fn(self, module1, input, output):
+        self.input = input
+        self.output = output
+
+    def close(self):
+        self.hook.remove()
+
+    def get_layers_in_order(self, network):
+      if len(list(network.children())) == 0:
+        self.layers.append(network)
+        return
+      for layer in network.children():
+        self.get_layers_in_order(layer)
+
+
+"""
+        class modelA(torch.nn.Module):
+            def __init__(self,layers_dim=[20,100,16], nn_model_base=None, layer_id=0):
+                super(modelA, self).__init__()
+                self.head_task = []
+                self.layer_id  = layer_id  ##flag meaning ????  layer
+
+
+                ###### Normal MLP Head   #########################################
+                self.layers_dim = layers_dim
+                self.output_dim = layers_dim[-1]
+                # self.head_task = nn.Sequential()
+
+                input_dim = layers_dim[0]
+                for layer_dim in layers_dim[:-1]:
+                    self.head_task.append(nn.Linear(input_dim, layer_dim))
+                    self.head_task.append(nn.ReLU())
+                    input_dim = layer_dim
+                self.head_task.append(nn.Linear(input_dim, layers_dim[-1]))
+                self.head_task = nn.Sequential(*self.head_task)
+
+            def forward(self, x,**kwargs):
+                return self.head_task(x)
+
+            def get_embedding(self, x,**kwargs):
+                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                self.forward(x)
+                embA = layer_l2.output.squeeze()
+                return embA
+
+
+
+"""
+
+
+
 
 
 
@@ -769,16 +851,16 @@ if 'utils_vector':
         return res   
 
 
+
+
+
+if 'custom_code':
     def os_unzip(dirin, dirout):
         # !/usr/bin/env python3
         import zipfile
         with zipfile.ZipFile(dirin, 'r') as zip_ref:
             zip_ref.extractall(dirout)
 
-
-
-
-if 'custom_code':
     def test_create_fake_df(dirout="./ztmp/", nrows=100):
         """ Creates a fake embeddingdataframe
         """
