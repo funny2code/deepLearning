@@ -659,14 +659,14 @@ if 'utils_vector':
         return df
 
 
-    def np_array_to_str(vv, ):
+    def np_array_to_str(vv:np.ndarray, ):
         """ array/list into  "," delimited string """
         vv= np.array(vv, dtype='float32')
         vv= [ str(x) for x in vv]
         return ",".join(vv)
 
 
-    def np_str_to_array(vv,   mdim = None, l2_norm_faiss=False, l2_norm_sklearn=True, l2_norm_numpy=False):
+    def np_str_to_array(vv:list,   mdim = None, l2_norm_faiss=False, l2_norm_sklearn=True, l2_norm_numpy=False):
         """ Convert list of string into numpy 2D Array
         Docs::
              
@@ -768,34 +768,30 @@ if 'custom_code':
     def test_create_fake_df(dirout="./ztmp/", nrows=100):
         """ Creates a fake embeddingdataframe
         """
-        res  =Box({})
-        n = nrows
-        mdim= 50
+        res  = Box({})
+        n    = nrows
+        mdim = 50
 
-        # Create fake user ids
+        #### Create fake user ids
         word_list = [ 'a' + str(i) for i in range(n)]
-
-        emb_list = []
+        emb_list  = []
         for i in range(n):
             emb_list.append( ','.join([str(x) for x in np.random.random(mdim) ])  )
 
-
         df = pd.DataFrame()
-        df['id']   = word_list
-        df['emb']  = emb_list
-        res.df = df
-
+        df['id']  = word_list
+        df['emb'] = emb_list
+        res.df    = df
 
         #### export on disk
-        res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
+        res.dir_parquet = dirout + "/emb_parquet/db_emb.parquet"
         pd_to_file(df, res.dir_parquet , show=1)
 
         #### Write on text:
-        res.dir_text = dirout + "/word2vec_export.vec"
+        res.dir_text   = dirout + "/word2vec_export.vec"
         log( res.dir_text )
         with open(res.dir_text, mode='w') as fp:
             fp.write("word2vec\n")
-
             for i,x in df.iterrows():
               emb  = x['emb'].replace(",", "")
               fp.write(  f"{x['id']}  {emb}\n")
