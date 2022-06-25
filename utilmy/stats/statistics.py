@@ -641,6 +641,7 @@ def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4, alpha=0.05):
     log(f"{col} has to be normally distributed and independent sample\n")
     dd = test.hypothesis.tTest(samples, mu = mean_target)
     hypotest_rconclusion(dd.p_value, alpha=alpha,   res=dd.test_summary )
+    return dd
 
 
 
@@ -665,20 +666,19 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
     else :                               v1, v2 = df[0], df[1]  ##- list of lists
 
 
-    log("""1) WaldWolfowitz""")
+    log("""WaldWolfowitz""")
     log("WaldWolfowitz test is used when response variable is dichotomous")
     dd = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
     hypotest_rconclusion(dd.p_value, alpha= alpha,  res=dd.test_summary  )
 
 
-    log("""- 2) Student's t-test (Two sample)""")
+    log("""Student's t-test (Two sample)""")
     log("For t test the columns have to be approx. normally distributed and independent with equal variances")
     dd = test.hypothesis.tTest(v1, v2)
     dd.student = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha,  res=dd.test_summary )
 
     return ddict
-
 
 
 def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
@@ -744,54 +744,11 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05)
        vlist = df
     ddict = Box({})
 
-    log("""#1) Mann Whitney Test""")
+    log("Mann Whitney Test")
     log("Observations should not be normally distributed and groups should be independent")
-    mw = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
-    hypotest_rconclusion(mw.p_value, alpha=alpha, res = mw.test_summary)
+    dd = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
+    hypotest_rconclusion(dd.p_value, alpha=alpha, res = dd.test_summary)
     return ddict
-
-
-
-def hypotest_is_all_same_distribution(df, cols = None):
-    """
-    ##- Tests to determine if data distributions are similar or not
-
-    np.random.seed(10)
-    - generate three independent samples
-    data1 = 5 * np.random.randn(100) + 50
-    data2 = 5 * np.random.randn(100) + 50
-    data3 = 5 * np.random.randn(100) + 50
-
-    - To test: Whether the three distributions are similar or not
-    - H0: All sample distribution are similar
-    - H1: Atleast one pair of sample distributions is different
-    """
-    vlist = []
-    if isinstance(df, pd.DataFrame):
-      if cols == None:
-        cols = df.columns
-      for coli in cols:
-        vlist.append(df[coli].values)
-
-    elif isinstance(df, list):
-       vlist = df
-    ddict = Box({})
-
-    log("""- 1) Kruskal Wallis Test""")
-    log("If not normally distributed, use KruskalWallis")
-    kw = test.nonparametric.KruskalWallis(*vlist)
-    ddict.KruskalWallis = kw.test_summary
-    hypotest_rconclusion(kw.p_value, alpha=0.05, res=kw.test_summary )
-
-
-    log("""- 2) ANOVA""")
-    log("If normally distributed, use ANOVA")
-    dd = test.aov.AnovaOneWay(*vlist)
-    ddict.anova = dd.test_summary
-    hypotest_rconclusion(dd.p_value, alpha=0.05, res = dd.test_summary )
-
-    return ddict
-
 
 
 def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
@@ -832,7 +789,7 @@ def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
 
 
 
-def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) -> List[float]:
+def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) :
     """Test if same mean for all columns
     Doc::
 
@@ -860,7 +817,49 @@ def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True
 
 
 
-def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+#############################################################################
+def hypotest_is_all_same_distribution(df, cols = None):
+    """Tests to determine if data distributions are similar or not
+     Docs::
+
+        np.random.seed(10)
+        - generate three independent samples
+        data1 = 5 * np.random.randn(100) + 50
+        data2 = 5 * np.random.randn(100) + 50
+        data3 = 5 * np.random.randn(100) + 50
+
+        - To test: Whether the three distributions are similar or not
+        - H0: All sample distribution are similar
+        - H1: Atleast one pair of sample distributions is different
+    """
+    vlist = []
+    if isinstance(df, pd.DataFrame):
+      if cols == None:
+        cols = df.columns
+      for coli in cols:
+        vlist.append(df[coli].values)
+
+    elif isinstance(df, list):
+       vlist = df
+    ddict = Box({})
+
+    log("""- 1) Kruskal Wallis Test""")
+    log("If not normally distributed, use KruskalWallis")
+    kw = test.nonparametric.KruskalWallis(*vlist)
+    ddict.KruskalWallis = kw.test_summary
+    hypotest_rconclusion(kw.p_value, alpha=0.05, res=kw.test_summary )
+
+
+    log("""- 2) ANOVA""")
+    log("If normally distributed, use ANOVA")
+    dd = test.aov.AnovaOneWay(*vlist)
+    ddict.anova = dd.test_summary
+    hypotest_rconclusion(dd.p_value, alpha=0.05, res = dd.test_summary )
+
+    return ddict
+
+
+def hypotest_independance(df: pd.DataFrame, cols=None, threshold=0.1) -> List[float]:
     """Run ANOVA Test of independance.
     Doc::
 
@@ -870,9 +869,6 @@ def hypotest_independance(df: pd.DataFrame, cols=None, bonferroni_adjuster=True,
     cols = df.columns  if cols is None else cols
 
     p_values = test_anova(df, cols)
-
-    if bonferroni_adjuster:
-        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     return p_values
 
