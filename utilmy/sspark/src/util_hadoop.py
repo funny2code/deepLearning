@@ -143,9 +143,13 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
-def hdfs_ls(path, filename_only=False):
+def hdfs_ls(path, flag="-h ", filename_only=False):
+    """
+          flag=-R
+
+    """
     from subprocess import Popen, PIPE
-    process = Popen(f"hdfs dfs -ls -h '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
+    process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
     std_out, std_err = process.communicate()
 
     if filename_only:
@@ -307,6 +311,93 @@ def hdfs_download(dirin="", dirout="./", verbose=False, n_pool=1, **kw):
   return res_list
 
  
+
+
+
+ def hive_get_tablelist(dbname):
+    """Get Hive tables from database_name
+    """
+    cmd = f"hive -e 'show tables from {dbname}'"
+    stdout,stderr = os_system(cmd)
+    if stderr: return stderr
+    lines = stdout.split("\n")
+    ltable = []
+    for li in lines :
+        if not li: continue
+        if 'tab_name' in li : continue
+        ltable.append(li.strip())
+    return ltable
+
+
+############################################################################################################### 
+############################################################################################################### 
+def hive_get_dblist():
+    """ Get  databases
+    """
+    cmd = f"hive -e  'show databases '"
+    stdout,stderr = os_system(cmd)
+    if stderr: return stderr
+    lines = stdout.split("\n")
+    ldb = []
+    for li in lines :
+        if not li: continue
+        if 'database_name' in li : continue
+        ldb.append(li.strip())
+    return ldb
+
+
+
+def hive_get_tablechema(tablename):
+    """Get  databases
+    """
+    cmd = f"hive -e 'describe {tablename}'"
+    stdout,stderr = os_system(cmd)
+    if stderr: return stderr
+    lines = stdout.split("\n")
+    table_info = {}
+    for li in lines :
+        if not li: continue
+        if 'col_name' in li : continue
+        tmp = []
+        for item in li.split(" "): # assume li = "id   int   comment '' "
+            if item:
+                tmp.append(item)
+        col_name = item[0]
+        data_type = item[1]
+        comment = item[2] if len(item)>=3 else ""
+        table_info[col_name] = {"data_type": data_type, "comment": comment}
+    return table_info
+
+
+
+def hive_get_tabledetails(table):
+    """
+    Doc::
+    describe formatted table
+    """
+    cmd = f"hive -e 'describe formatted {table}'"
+    stdout,stderr = os_system(cmd)
+    if stderr: return stderr
+    lines = stdout.split("\n")
+    table_info = {}
+    ltable = []
+    for li in lines :
+        if not li: continue
+        if 'col_name' in li : continue
+        ltable.append(li.strip())
+    return ltable
+
+
+
+
+def hive_db_dumpall():
+    cmd = 'dump all db, table schema on disk'
+
+
+
+
+
+
 
 
 ############################################################################################################### 
