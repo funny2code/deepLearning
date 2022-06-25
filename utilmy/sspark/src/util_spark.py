@@ -617,7 +617,7 @@ def spark_df_isempty(df:sp_dataframe)->bool:
 
 
 
-def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
+def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "./", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
     """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
