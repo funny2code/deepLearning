@@ -114,3 +114,11 @@ jobs:
       run: |
           python utilmy/deeplearning/ttorch/util_model.py     test_all
 
+
+    #################################################################
+    - name: utilmy/deeplearning/util_embedding.py
+      # continue-on-error: true
+      run: |
+          python utilmy/deeplearning/util_embedding.py test_all
+
+
