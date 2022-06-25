@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#
+""" Utils for torch
 Doc::
 
     utilmy/deeplearning/ttorch/util_torch.py
@@ -39,7 +39,7 @@ from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 #############################################################################################
 from utilmy import log, os_module_name
-
+from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 MNAME = os_module_name(__file__)
 
 def help():
@@ -98,43 +98,30 @@ def test2():
     """
     """
     from torchvision import models
-    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=7)
 
-    tr_dl, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y,
-                             batch_size=64, shuffle=True, device='cpu', batch_size_val=4, batch_size_test=4) 
+    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
+    train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
+    # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
+    # test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
+
 
 
     model = nn.Sequential(nn.Linear(50, 20),      nn.Linear(20, 1))
-    
-    X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
-    train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
-    
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
     
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
+    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
 
 
     model = models.resnet50()
     torch.save({'model_state_dict': model.state_dict()}, 'resnet50_ckpt.pth')
-
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
-
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
 
 
-    model       = nn.Sequential(nn.Linear(40, 20),      nn.Linear(20, 2))
-    X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
-    test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
-
-    args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
-            'dir_modelsave': 'model.pt', 'valid_freq': 1}
-    
-    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=test_loader, arg=args)
-
     model = models.resnet50()
     kwargs = {'input_size': (3, 224, 224)}
-    
     model_summary(model=model, **kwargs)
 
 
@@ -142,12 +129,11 @@ def test2():
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
-
-def test_metrics1():
+    ### Matrics for pytorch
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
     data   = torch.rand(64, 3, 224, 224)
     output = model(data)
-    labels = torch.randint(1000, (64,))#random labels 
+    labels = torch.randint(1000, (64,)) #random labels
     acc    = torch_metric_accuracy(output = output, labels = labels) 
 
     x1 = torch.rand(100,)
@@ -164,16 +150,11 @@ def test_metrics1():
     # No train test splits are applied to lead to the overrepresentation of class 999 
     p = [(1-0.05)/1000]*999
     p.append(1-sum(p))
-    labels = np.random.choice(list(range(1000)), 
-                            size = (10000,), 
-                            p = p)#imbalanced 1000-class labels
+    labels = np.random.choice(list(range(1000)),   size = (10000,),   p = p)#imbalanced 1000-class labels
     labels = torch.Tensor(labels).long()
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
     l = loss(output, labels[:64])
-
-
-
 
 
 
@@ -199,8 +180,6 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
             log(e)
             device = 'cpu'
     return device
-
-
 
 
 
@@ -290,33 +269,61 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
-def SaveEmbeddings(model = None, path = './', data_loader=None):
-    isdir = os.path.isdir(path)
-    if isdir == False:
-       os.mkdir("./train")
+def embedding_torchtensor_to_parquet(model = None, dirout = './', data_loader=None,tag=""):
+    # from utilmy.deeplearning import  util_embedding as ue
+    import time
+    
+    df= []
     assert(model is not None and data_loader is not None)
     for img , img_names in data_loader:
         with torch.no_grad():
-            emb = model(img)   #### Need to get the layer !!!!!
+            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
-                torch.save(emb[i],"./train/{}".format(img_names[i]))
+                ss = np_array_to_str(emb[i].numpy())
+                df.append([ img_names[i], ss])
 
-def LoadEmbeddings(dir = './'):
-    isdir = os.path.isdir(dir)
-    if isdir == False:
-       raise Exception("Can't read data, path is not present")
-    embv = []
-    img_names = []
-    for file in os.listdir(dir):
-        emb = torch.load(dir+'/'+file)
-        embv.append(emb)
-        if "_" in file:
-            img_name = file.split('_')[1]
-        else:
-            img_name = file
-        img_names.append(img_name)
+    df = pd.DataFrame(df, columns= ['id', 'emb'])
 
-    return embv, img_names
+    if dirout is not None :
+      log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
+      dirout2 = dirout + f"/df_emb_{tag}.parquet"
+      pd_to_file(df, dirout2, show=1 )
+    return df
+
+
+def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
+    """  Required columns : id, emb (string , separated)
+    
+    """
+    import glob
+
+    log('loading', dirin)
+    flist = list( glob.glob(dirin) )
+    
+    assert(flist is not None)
+    df  = pd_read_file( flist, npool= max(1, int( len(flist) / 4) ) )
+    if nmax is None:
+        nmax  = len(df)   ### 5000
+    df  = df.iloc[:nmax, :]
+    df  = df.rename(columns={ col_embed: 'emb'})
+    
+    df  = df[ df['emb'].apply( lambda x: len(x)> 10  ) ]  ### Filter small vector
+    log(df.head(5).T, df.columns, df.shape)
+    log(df, df.dtypes)    
+
+
+    ###########################################################################
+    ###### Split embed numpy array, id_map list,  #############################
+    vi      = [ float(v) for v in df['emb'][0].split(',')]
+    embs    = np_str_to_array(df['emb'].values, mdim =len(vi) )
+    id_map  = { name: i for i,name in enumerate(df[colid].values) }     
+    log(",", str(embs)[:50], ",", str(id_map)[:50] )
+    
+    #####  Keep only label infos  ####
+    del df['emb']                  
+    return embs, id_map, df 
+
+
 
 class DataForEmbedding(Dataset):
     """Custom DataGenerator using Pytorch Sequence for images
@@ -350,9 +357,9 @@ class DataForEmbedding(Dataset):
         img_dir = self.label_img_dir[idx]
         img     = self.img_loader(img_dir)
         img_name = img_dir.split('/')[-1].split('.')[0]
-		
+
         if "\\" in img_name:
-	        img_name =  img_name.replace('\\','_')
+            img_name =  img_name.replace('\\','_')
 
         train_X = self.transforms(img)
         return (train_X, img_name)
@@ -360,20 +367,18 @@ class DataForEmbedding(Dataset):
 
 def cos_similar_embedding(embv = None, img_names=None):
     from sklearn.metrics.pairwise import cosine_similarity
-    df = pd.DataFrame(data = img_names, columns=['id'] )
     similar_emb = []
     if embv is not None and img_names is not None:
-        for emb1 in embv:
-            emb1 = emb1 if emb1.dim() >1 else torch.reshape(emb1,(1,emb1.size()[0]))
+        df = pd.DataFrame(data = img_names, columns=['id'] )
+        for i, emb1 in enumerate(embv):
             res = []
             for emb2 in embv:
-                if torch.all(emb1.eq(emb2)) == False:
-                    emb2 = emb2 if emb2.dim() >1 else torch.reshape(emb2,(1,emb2.size()[0]))
-                    res.append(cosine_similarity(emb1,emb2))
-                else:
-                    res.append(0)
+                res.append(cosine_similarity([emb1],[emb2]))
+                print()
+            res[i] = -1
             max_value = max(res)
-            similar_emb.append(img_names[res.index(max_value)])
+            img_name = img_names[res.index(max_value)]
+            similar_emb.append(img_name)
         df['similar'] = similar_emb
     return df
 
@@ -1135,6 +1140,83 @@ if 'utils':
             SuperResolutionNet =  None
             eval(ss)        ## trick
             return SuperResolutionNet  ## return the class
+
+
+    def np_array_to_str(vv, ):
+        """ array/list into  "," delimited string """
+        vv= np.array(vv, dtype='float32')
+        vv= [ str(x) for x in vv]
+        return ",".join(vv)
+
+
+    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
+        """ Convert list of string into numpy 2D Array
+        Docs::
+
+             np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
+
+        """
+
+        X = np.zeros(( len(vv) , mdim  ), dtype='float32')
+        for i, r in enumerate(vv) :
+            try :
+              vi      = [ float(v) for v in r.split(',')]
+              X[i, :] = vi
+            except Exception as e:
+              log(i, e)
+
+
+        if l2_norm_sklearn:
+            from sklearn.preprocessing import normalize
+            normalize(X, norm='l2', copy=False)
+
+        if l2_norm_faiss:
+            import faiss   #### pip install faiss-cpu
+            faiss.normalize_L2(X)  ### Inplace L2 normalization
+            log("Normalized X")
+        return X
+
+
+    def np_matrix_to_str2(m, map_dict:dict):
+        """ 2D numpy into list of string and apply map_dict.
+
+        Doc::
+            map_dict = { 4:'four', 3: 'three' }
+            m= [[ 0,3,4  ], [2,4,5]]
+            np_matrix_to_str2(m, map_dict)
+
+        """
+        res = []
+        for v in m:
+            ss = ""
+            for xi in v:
+                ss += str(map_dict.get(xi, "")) + ","
+            res.append(ss[:-1])
+        return res
+
+
+    def np_matrix_to_str(m):
+        res = []
+        for v in m:
+            ss = ""
+            for xi in v:
+                ss += str(xi) + ","
+            res.append(ss[:-1])
+        return res
+
+
+    def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
+        res = []
+        for v in m:
+            ss = ""
+            for di in v:
+                ss += str(1-0.5*di) + ","
+            res.append(ss[:-1])
+        return res
+
+
+
+
 
 
 
