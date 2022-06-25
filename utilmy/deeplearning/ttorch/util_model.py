@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""  Utils for torch  models
-Docs ::
+""" Utils for torch models
+Docs::
 
     All utils
 

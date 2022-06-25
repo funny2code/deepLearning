@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
 """ utils for model merge
 Doc::
-
         import utilmy.deeplearning.ttorch.model_ensemble as me
         me.test1()
         me.help()
-
         https://discuss.pytorch.org/t/combining-trained-models-in-pytorch/28383/45
-
         https://discuss.pytorch.org/t/merging-3-models/66230/3
-
         Issue wthen reloading jupyte
                 import library.Child
                 reload(library)
                 import library.Child
-
 Code::
-
         if ARG.MODE == 'mode1':
             ARG.MODEL_INFO.TYPE = 'dataonly'
             train_config                     = Box({})
@@ -28,13 +22,10 @@ Code::
             train_config.VALID_FREQ          = 1
             train_config.SAVE_FILENAME       = './model.pt'
             train_config.TRAIN_RATIO         = 0.7
-
-
         #### SEPARATE the models completetly, and create duplicate
         ### modelA  ########################################################
         model_ft = models.resnet18(pretrained=True)
         embA_dim = int(model_ft.fc.in_features)  ###
-
         ARG.modelA               = Box()   #MODEL_TASK
         ARG.modelA.name          = 'resnet18'
         ARG.modelA.nn_model      = model_ft
@@ -44,12 +35,9 @@ Code::
         ARG.modelA.dataset.dirin = "/"
         ARG.modelA.dataset.coly  = 'ytarget'
         modelA = modelA_create(ARG.modelA)
-
-
         ### modelB  ########################################################
         model_ft = models.resnet50(pretrained=True)
         embB_dim = int(model_ft.fc.in_features)
-
         ARG.modelB               = Box()
         ARG.modelB.name          = 'resnet50'
         ARG.modelB.nn_model      = model_ft
@@ -59,22 +47,16 @@ Code::
         ARG.modelB.dataset.dirin = "/"
         ARG.modelB.dataset.coly  = 'ytarget'
         modelB = modelB_create(ARG.modelB )
-
-
         ### merge_model  ###################################################
         ARG.merge_model           = Box()
         ARG.merge_model.name      = 'modelmerge1'
         ARG.merge_model.architect = { 'layers_dim': [ 200, 32, 1 ] }
-
         ARG.merge_model.architect.merge_type= 'cat'
-
         ARG.merge_model.dataset       = Box()
         ARG.merge_model.dataset.dirin = "/"
         ARG.merge_model.dataset.coly = 'ytarget'
         ARG.merge_model.train_config  = train_config
         model = MergeModel_create(ARG, modelB=modelB, modelA=modelA)
-
-
         #### Run Model   ###################################################
         # load_DataFrame = modelB_create.load_DataFrame
         # prepro_dataset = modelB_create.prepro_dataset
@@ -82,12 +64,8 @@ Code::
         model.training(load_DataFrame, prepro_dataset)
         inputs = torch.randn((1,5)).to(model.device)
         outputs = model.predict(inputs)
-
-
 TODO :
     make get_embedding works
-
-
 """
 import os, random,glob, numpy as np, pandas as pd ;from box import Box
 from copy import deepcopy
@@ -733,10 +711,10 @@ def test2d():
 
 
 ##MultiClassMultiLable
-def test3():    
+def test3():
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset
-   
+
    ARG = Box({
        'MODE'   : 'mode1',
        'DATASET': {},
@@ -747,7 +725,7 @@ def test3():
 
    ##################################################################
    if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly' 
+       ARG.MODEL_INFO.TYPE = 'dataonly'
        train_config                           = Box({})
        train_config.LR                        = 0.001
        train_config.SEED                      = 42
@@ -774,8 +752,8 @@ def test3():
 
        dataset1 = datasets.FashionMNIST(root="data",train=True,
                                         transform=transforms.Compose(train_list_transforms),download=True,)
-       
-       #sampling the requred no. of samples from dataset 
+
+       #sampling the requred no. of samples from dataset
        dataset1 = torch.utils.data.Subset(dataset1, np.arange(samples))
        X,Y    = [],  []
        for data, targets in dataset1:
@@ -797,20 +775,20 @@ def test3():
        return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
 
-   
+
    ### modelA  ########################################################
    from torchvision import  models
    model_ft = models.resnet18(pretrained=True)
    embA_dim = model_ft.fc.in_features  ###
 
-   ARG.modelA               = {}   
+   ARG.modelA               = {}
    ARG.modelA.name          = 'resnet18'
    ARG.modelA.nn_model      = model_ft
    ARG.modelA.layer_emb_id  = 'fc'
    ARG.modelA.architect     = [ embA_dim]  ### head s
    ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
    modelA = model_create(ARG.modelA)
-   
+
 
 
    ### modelB  ########################################################
@@ -818,7 +796,7 @@ def test3():
    model_ft = models.resnet50(pretrained=True)
    embB_dim = int(model_ft.fc.in_features)
 
-   ARG.modelB               = {}   
+   ARG.modelB               = {}
    ARG.modelB.name          = 'resnet50'
    ARG.modelB.nn_model      = model_ft
    ARG.modelB.layer_emb_id  = 'fc'
@@ -830,12 +808,12 @@ def test3():
 
 
    ### merge_model  ###################################################
-   ### EXPLICIT DEPENDENCY  
+   ### EXPLICIT DEPENDENCY
    ARG.merge_model           = {}
    ARG.merge_model.name      = 'modelmerge1'
 
    ARG.merge_model.architect                  = {}
-   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim
 
    ARG.merge_model.architect.merge_type       = 'cat'
    ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
@@ -852,8 +830,8 @@ def test3():
                                         use_first_head_only= True)
    ARG.merge_model.architect.head_custom      = head_custom
    ARG.merge_model.architect.loss_custom = torch.nn.BCELoss() ###another loss func torch.nn.L1Loss()
- 
- 
+
+
    ARG.merge_model.dataset       = {}
    ARG.merge_model.dataset.dirin = "/"
    ARG.merge_model.dataset.coly = 'ytarget'
@@ -866,7 +844,7 @@ def test3():
 
 
    #### Run Model   ###################################################
-   model.training(load_DataFrame, prepro_dataset) 
+   model.training(load_DataFrame, prepro_dataset)
 
    model.save_weight('ztmp/model_x5.pt')
    model.load_weights('ztmp/model_x5.pt')
@@ -875,10 +853,10 @@ def test3():
    print(outputs)
 
 
-def test4():    
+def test4():
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset, Dataset
-   
+
    ARG = Box({
        'MODE'   : 'mode1',
        'DATASET': {},
@@ -889,7 +867,7 @@ def test4():
 
    ##################################################################
    if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly' 
+       ARG.MODEL_INFO.TYPE = 'dataonly'
        train_config                           = Box({})
        train_config.LR                        = 0.001
        train_config.SEED                      = 42
@@ -933,7 +911,7 @@ def test4():
       return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
 
-  
+
    train_X ,train_y,valid_X ,valid_y,test_X,test_y = prepro_dataset()
    class_label_dict =  {'gender': 2,'season':4, 'colour': 7}  ##5 n_unique_label
 
@@ -941,7 +919,7 @@ def test4():
    ############## Custom Data Loader #############################
    def custom_dataloader():
        class CustomImageDataset(Dataset):
-           def __init__(self,data=None,lables=None,class_lable_dict=None): 
+           def __init__(self,data=None,lables=None,class_lable_dict=None):
                self.data    = data
                self.lables  = lables
                self.classes = class_lable_dict
@@ -974,14 +952,14 @@ def test4():
    model_ft = models.resnet18(pretrained=True)
    embA_dim = model_ft.fc.in_features  ###
 
-   ARG.modelA               = {}   
+   ARG.modelA               = {}
    ARG.modelA.name          = 'resnet18'
    ARG.modelA.nn_model      = model_ft
    ARG.modelA.layer_emb_id  = 'fc'
    ARG.modelA.architect     = [ embA_dim]  ### head s
    ARG.modelA.architect.input_dim        = [train_config.BATCH_SIZE, 3 ,28, 28]
    modelA = model_create(ARG.modelA)
-   
+
 
 
    ### modelB  ########################################################
@@ -989,7 +967,7 @@ def test4():
    model_ft = models.resnet50(pretrained=True)
    embB_dim = int(model_ft.fc.in_features)
 
-   ARG.modelB               = {}   
+   ARG.modelB               = {}
    ARG.modelB.name          = 'resnet50'
    ARG.modelB.nn_model      = model_ft
    ARG.modelB.layer_emb_id  = 'fc'
@@ -999,12 +977,12 @@ def test4():
 
 
    ### merge_model  ###################################################
-   ### EXPLICIT DEPENDENCY  
+   ### EXPLICIT DEPENDENCY
    ARG.merge_model           = {}
    ARG.merge_model.name      = 'modelmerge1'
 
    ARG.merge_model.architect                  = {}
-   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+   ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim
 
    ARG.merge_model.architect.merge_type       = 'cat'
    ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
@@ -1020,8 +998,8 @@ def test4():
                                         use_first_head_only= False)
    ARG.merge_model.architect.head_custom      = head_custom
    ARG.merge_model.architect.loss_custom = head_custom.get_loss
- 
- 
+
+
    ARG.merge_model.dataset       = {}
    ARG.merge_model.dataset.dirin = "/"
    ARG.merge_model.dataset.coly = 'ytarget'
@@ -1033,7 +1011,7 @@ def test4():
 
 
    #### Run Model   ###################################################
-   model.training(dataloader_custom = custom_dataloader ) 
+   model.training(dataloader_custom = custom_dataloader )
    model.save_weight('ztmp/model_x5.pt')
    model.load_weights('ztmp/model_x5.pt')
    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
@@ -1045,8 +1023,6 @@ def test4():
 
 def test5():
     """ Multihead class fine tuning with Fashion Dataset
-
-
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
     import glob
@@ -1059,7 +1035,7 @@ def test5():
 
     ##################################################################
     if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly' 
+        ARG.MODEL_INFO.TYPE = 'dataonly'
         train_config                           = Box({})
         train_config.LR                        = 0.001
         train_config.SEED                      = 42
@@ -1094,8 +1070,8 @@ def test5():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
-   
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
+
         ########### Image files FASHION MNIST
         df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
 
@@ -1131,7 +1107,7 @@ def test5():
 
         val_dataloader   = DataLoader(FashionDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
- 
+
         test_dataloader  = DataLoader(FashionDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                            batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
@@ -1144,7 +1120,7 @@ def test5():
     model_ft = models.resnet18(pretrained=True)
     embA_dim = model_ft.fc.in_features  ###
 
-    ARG.modelA               = {}   
+    ARG.modelA               = {}
     ARG.modelA.name          = 'resnet18'
     ARG.modelA.nn_model      = model_ft
     ARG.modelA.layer_emb_id  = 'fc'
@@ -1157,7 +1133,7 @@ def test5():
     model_ft = models.resnet50(pretrained=True)
     embB_dim = int(model_ft.fc.in_features)
 
-    ARG.modelB               = {}   
+    ARG.modelB               = {}
     ARG.modelB.name          = 'resnet50'
     ARG.modelB.nn_model      = model_ft
     ARG.modelB.layer_emb_id  = 'fc'
@@ -1167,12 +1143,12 @@ def test5():
 
 
     ### merge_model  ###################################################
-    ### EXPLICIT DEPENDENCY  
+    ### EXPLICIT DEPENDENCY
     ARG.merge_model           = {}
     ARG.merge_model.name      = 'modelmerge1'
 
     ARG.merge_model.architect                  = {}
-    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim
 
     ARG.merge_model.architect.merge_type       = 'cat'
     ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
@@ -1202,7 +1178,7 @@ def test5():
 
 
     #### Run Model   ###################################################
-    model.training(dataloader_custom = custom_dataloader ) 
+    model.training(dataloader_custom = custom_dataloader )
     model.save_weight('ztmp/model_x5.pt')
     model.load_weights('ztmp/model_x5.pt')
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
@@ -1231,7 +1207,7 @@ def test6():
 
     ##################################################################
     if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly' 
+        ARG.MODEL_INFO.TYPE = 'dataonly'
         train_config                           = Box({})
         train_config.LR                        = 0.001
         train_config.SEED                      = 42
@@ -1254,10 +1230,6 @@ def test6():
     def custom_label(arg:dict=None):
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-
-        from utilmy.deeplearning.ttorch import  util_torch as ut
-        from util_torch import dataset_add_image_fullpath
-
         dataset_path = ut.dataset_download(dataset_url, dirout=dirtmp)
 
         train_img_path = dirtmp + 'data_fashion_small/train'
@@ -1268,10 +1240,10 @@ def test6():
         ########### label file in CSV  ########################
         df         = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
         label_dict       = {ci: df[ci].unique()  for ci in label_list}   ### list of cat values
-        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique     
-   
+        label_dict_count = {ci: df[ci].nunique() for ci in label_list}   ### count unique
+
         ########### Image files FASHION MNIST
-        df = dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+        df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
@@ -1302,7 +1274,7 @@ def test6():
 
         val_dataloader   = DataLoader(FashionDataset( label_dir=df_val,   label_dict=label_dict, col_img=col_img, transforms=transform_train),
                            batch_size=batch_size, shuffle= True ,num_workers=0, drop_last=True)
- 
+
         test_dataloader  = DataLoader(FashionDataset( label_dir=df_test,   label_dict=label_dict, col_img=col_img, transforms=transform_test),
                            batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
@@ -1315,7 +1287,7 @@ def test6():
     model_ft = models.resnet18(pretrained=True)
     embA_dim = model_ft.fc.in_features  ###
 
-    ARG.modelA               = {}   
+    ARG.modelA               = {}
     ARG.modelA.name          = 'resnet18'
     ARG.modelA.nn_model      = model_ft
     ARG.modelA.layer_emb_id  = 'fc'
@@ -1328,7 +1300,7 @@ def test6():
     model_ft = models.resnet50(pretrained=True)
     embB_dim = int(model_ft.fc.in_features)
 
-    ARG.modelB               = {}   
+    ARG.modelB               = {}
     ARG.modelB.name          = 'resnet50'
     ARG.modelB.nn_model      = model_ft
     ARG.modelB.layer_emb_id  = 'fc'
@@ -1338,12 +1310,12 @@ def test6():
 
 
     ### merge_model  ###################################################
-    ### EXPLICIT DEPENDENCY  
+    ### EXPLICIT DEPENDENCY
     ARG.merge_model           = {}
     ARG.merge_model.name      = 'modelmerge1'
 
     ARG.merge_model.architect                  = {}
-    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim 
+    ARG.merge_model.architect.input_dim        =  embA_dim + embB_dim
 
     ARG.merge_model.architect.merge_type       = 'cat'
     ARG.merge_model.architect.merge_layers_dim = [1024, 768]  ### Common embedding is 768
@@ -1370,13 +1342,13 @@ def test6():
 
     model = MergeModel_create(ARG, model_create_list= [modelA, modelB ] )
     model.build()
- 
-    
+
+
  #########################EMBEDDING ####################################
     from utilmy.deeplearning.ttorch import  util_torch as ut
     def custom_embedding_data():
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
-         ut.dataset_download(dataset_url, dirout=dirtmp)     
+         ut.dataset_download(dataset_url, dirout=dirtmp)
          train_img_path  = dirtmp + 'data_fashion_small/train'
          label_path     = dirtmp + "data_fashion_small/csv/styles.csv"
          df   = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
@@ -1386,13 +1358,13 @@ def test6():
          tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
          transform  = transforms.Compose(tlist)
 
-         ###Loads image and imagename(to save the embedding with image name)#### 
+         ###Loads image and imagename(to save the embedding with image name)####
          dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform)
-         
+
          return dataset
 
     #### Run Model   ###################################################
-    model.training(dataloader_custom = custom_dataloader ) 
+    model.training(dataloader_custom = custom_dataloader )
     model.save_weight('ztmp/model_x5.pt')
     model.load_weights('ztmp/model_x5.pt')
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
@@ -1410,8 +1382,8 @@ def test6():
 
     tag='multi'
     dirout="./train"
-    ut.SaveEmbeddings(model=model.net.eval().get_embedding, dirout=dirout, data_loader=train_loader,tag=tag)
-    embv, img_names,df = ut.LoadEmbedding_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
+    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
     ####Cosine similarity b/w Merged Embeddings
     df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
@@ -1427,8 +1399,8 @@ def test6():
                continue
             res = head_custom(emb2)
             for key, value in res.items():
-                vec1 = res1[key].detach().numpy() 
-                vec2 = value.detach().numpy() 
+                vec1 = res1[key].detach().numpy()
+                vec2 = value.detach().numpy()
                 score = cosine_similarity([vec1],[vec2])
                 print(score)
 
@@ -1525,8 +1497,8 @@ def test2_lstm():
             self.hidden_size = hidden_size
             self.num_classes = num_classes
             self.dropout = dropout
-            
-            self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers, 
+
+            self.lstm = nn.LSTM(self.input_size, self.hidden_size, self.num_layers,
                                 dropout = self.dropout, batch_first=True)
             self.fc = nn.Linear(self.hidden_size, self.num_classes)
 
@@ -1537,16 +1509,16 @@ def test2_lstm():
             out = out[:,-1,:]
             out = self.fc(out)
             return out
-            
+
     lstm = LSTM(input_size=28, hidden_size=128, num_layers=2, num_classes=2, dropout=0.0)
     #from util_models.LSTM import lstm
     model_ft                 = lstm
     embD_dim                 = int(model_ft.fc.in_features)
-    
+
     ##Reshape input to be compatible with Sequence Model
-    seq_reshaper = SequenceReshaper(from_='vision') 
+    seq_reshaper = SequenceReshaper(from_='vision')
     model_ft = torch.nn.Sequential(seq_reshaper,	model_ft )
-    
+
 
     ARG.modelD               = Box()
     ARG.modelD.name          = 'LSTM'
@@ -1602,11 +1574,10 @@ def test2_lstm():
 class SequenceReshaper(nn.Module):
     def __init__(self, from_ = 'vision'):
         """ Reshape output to fit the merge flatenning
-
         """
         super(SequenceReshaper,self).__init__()
         self.from_ = from_
-    
+
     def forward(self, x):
         if self.from_ == 'vision':
             x = x[:,0,:,:]
@@ -1660,7 +1631,6 @@ class model_template_MLP(torch.nn.Module):
 ##############################################################################################
 class BaseModel(object):
     """This is BaseClass for model create
-
     Method:
         create_model : Initialize Model (torch.nn.Module)
         evaluate:
@@ -1801,7 +1771,7 @@ class BaseModel(object):
             kk = 0
             for param1, param2 in zip(self.models_list[i].net.parameters(),net_model.parameters()):
                 if kk > 5 : break
-                kk = kk + 1 
+                kk = kk + 1
                 # torch.testing.assert_close(param1.data, param2.data)
                 if(param2.requires_grad==True):
                    raise Exception("Gradients are updated in models_nets {}".format(i) )
@@ -1823,7 +1793,7 @@ class BaseModel(object):
         val_input, _ = next(val)
         assert val_input.size()[1:] == train_inp.size()[1:],"invalid validating data"
 
-        
+
 
     def predict(self,x,**kwargs):
         # raise NotImplementedError
@@ -2018,7 +1988,7 @@ class MergeModel_create(BaseModel):
         if self.loss_merge_custom is None :
            loss =  torch.nn.BCEWithLogitsLoss()
         else :
-            loss = self.loss_merge_custom   
+            loss = self.loss_merge_custom
         return loss
 
 
@@ -2044,9 +2014,7 @@ class MergeModel_create(BaseModel):
     def training(self,load_DataFrame=None,prepro_dataset=None, dataloader_custom=None):
         """ Train Loop
         Docs:
-
              # training with load_DataFrame and prepro_data function or default funtion in self.method
-
         """
 
         batch_size = self.arg.merge_model.train_config.BATCH_SIZE
@@ -2197,7 +2165,6 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
         test_y:
         arg:
     Returns:
-
     """
     train_loader, valid_loader, test_loader = None, None, None
 
@@ -2233,8 +2200,6 @@ def torch_norm_l2(X):
 def test_dataset_fashionmnist_get_torchdataloader(nrows=1000, batch_size=64, num_workers=8, transform_custom=None):
     """
        return dataloader_train,  dataloader_test
-
-
     """
     from torchvision import transforms, datasets, models
     from torch.utils import data
@@ -2501,4 +2466,6 @@ class zzmodelD_create(BaseModel):
 ###############################################################################################################
 if __name__ == "__main__":
     import fire
-    test_all()
+    fire.Fire()
+    # test_all()
+

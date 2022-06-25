@@ -1,10 +1,27 @@
 # -*- coding: utf-8 -*-
-"""# Embedding visualizer
+"""# Embedding visualizer in 2D Graph
 Doc::
+
+    --  pip install umap-learn mpld3
+
+    from utilmy.deeplearning import util_embedding as ue
+    dirtmp ="./ztmp/"
+    dd = ue.test_create_fake_df(dirout= dirtmp, nrows=1000)
+    log(dd)
+
+    ue.embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='mds', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
+
+    ue.embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='umap', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
 
 
 """
-import datetime, os, glob, random, time, warnings
+import os, sys, datetime, glob, random, time, warnings
 import numpy as np, pandas as pd
 from box import Box
 
@@ -12,33 +29,28 @@ warnings.filterwarnings("ignore")
 from warnings import simplefilter  ; simplefilter(action='ignore', category=FutureWarning)
 with warnings.catch_warnings():
     import matplotlib.pyplot as plt
-    import mpld3
-
-    from sklearn.cluster import KMeans
-    from sklearn.manifold import MDS
     from sklearn.metrics.pairwise import cosine_similarity
-
+    
 
 from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 
 
 #### Optional imports
-try :
-    import hdbscan, umap
-    import diskcache as dc
-    # import faiss
-    import mpld3
-
-except:
-    print("pip install faiss-cpu  diskcache faiss mpld3 hdbscan umap")
-    1/0
+# try :
+#     pass
+#     #import hdbscan, umap
+#     # import diskcache as dc
+#     # import faiss
+#     # import mpld3
+#
+# except:
+#     print("pip install faiss-cpu  diskcache faiss mpld3 hdbscan umap")
+#     1/0
 
 
 
 #############################################################################################
 from utilmy import log, os_module_name
-MNAME = os_module_name(__file__)
-
 def help():
     """function help        """
     from utilmy import help_create
@@ -49,26 +61,33 @@ def help():
 #############################################################################################
 def test_all() -> None:
     """ python  $utilmy/deeplearning/util_embedding.py test_all         """
-    log(MNAME)
     test1()
 
 
 def test1() -> None:
-    """function test1     
+    """Test    embedding_create_vizhtml
     """
     dirtmp ="./ztmp/"
 
-    dd = test_create_fake_df(dirout= dirtmp)
+    dd = test_create_fake_df(dirout= dirtmp, nrows=1000)
     log(dd)
 
-    embedding_create_vizhtml(dirin=dirtmp + "/word2vec_export.vec",
-                             dirout=dirtmp + "/out/", dim_reduction='umap', nmax=100, ntrain=10)
+    embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='mds', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
+
+    embedding_create_vizhtml(dirin=dirtmp + "/emb_parquet/*.parquet",
+                                dirout=dirtmp + "/out/", dim_reduction='umap', nmax=200, ntrain=200,
+                                num_clusters=2,
+                                )
 
 
 
 #########################################################################################################
 ############### Visualize the embeddings ################################################################
-def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10):
+def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction='umap', nmax=100, ntrain=10,
+                             num_clusters=5,):
    """Create HTML plot file of embeddings.
    Doc::
 
@@ -83,14 +102,14 @@ def embedding_create_vizhtml(dirin="in/model.vec", dirout="ztmp/", dim_reduction
    #### Generate HTML  ############################################
    log(dirin)
 
-   myviz = EmbeddingViz(path = dirin)
+   myviz = EmbeddingViz(path = dirin, num_clusters=num_clusters,)
    myviz.load_data(nmax= nmax)
    myviz.run_all(dirout= dirout, dim_reduction=dim_reduction, nmax=nmax, ntrain=ntrain)
 
 
 
 class EmbeddingViz:
-    def __init__(self, path="myembed.parquet", num_clusters=5, sep=";", config:dict=None):
+    def __init__(self, path="myembed.parquet", num_clusters=2, sep=";", config:dict=None):
         """ Visualize Embedding
         Doc::
 
@@ -110,7 +129,7 @@ class EmbeddingViz:
         self.dist         = None
 
         ### Plot @D coordinate
-        self.coordinate_xy = None
+        self.coordinate_xy:np.array = None
 
         ### Store the embeddings
         self.id_map    = None
@@ -119,7 +138,7 @@ class EmbeddingViz:
 
 
     def run_all(self, dim_reduction="mds", col_embed='embed', ndim=2, nmax= 5000, dirout="ztmp/", ntrain=10000):
-       self.dim_reduction(dim_reduction, ndim=ndim, nmax= nmax, dir_out=dirout, ntrain=ntrain)
+       self.dim_reduction(dim_reduction, ndim=ndim, nmax= nmax, dirout=dirout, ntrain=ntrain)
        self.create_clusters(after_dim_reduction=True)
        self.create_visualization(dirout, mode='d3', cols_label=None, show_server=False)
 
@@ -134,14 +153,13 @@ class EmbeddingViz:
 
 
         """
-        if ".vec"     in self.path :
-          embs, id_map, df_labels  = embedding_load_word2vec(self.path, nmax= nmax)
+        if ".vec"  in self.path :       embs, id_map, df_labels = embedding_load_word2vec(self.path, nmax= nmax)
 
-        if ".pkl" in self.path :
-          embs, id_map, df_labels  = embedding_load_pickle(self.path, nmax= nmax)
+        elif ".pkl" in self.path :      embs, id_map, df_labels = embedding_load_pickle(self.path,   nmax= nmax)
 
-        else : # if ".parquet" in self.path :
-          embs, id_map, df_labels  = embedding_load_parquet(self.path, nmax= nmax)
+        elif ".parquet" in self.path :  embs, id_map, df_labels = embedding_load_parquet(self.path,  nmax= nmax)
+
+        else : raise Exception('not implemented')
 
         assert isinstance(id_map, dict)
         assert isinstance(df_labels, pd.DataFrame)
@@ -150,6 +168,8 @@ class EmbeddingViz:
         self.id_map    = id_map
         self.df_labels = df_labels
         self.embs      = embs
+
+        log( 'embs shape:', embs.shape )
 
 
     def dim_reduction(self, mode="mds", ndim=2, nmax= 5000, dirout=None, ntrain=10000, npool=2):
@@ -163,13 +183,18 @@ class EmbeddingViz:
         pos = None
         if mode == 'mds' :
             ### Co-variance matrix
-            dist = 1 - cosine_similarity(self.embs)
-            mds = MDS(n_components=ndim, dissimilarity="precomputed", random_state=1)
-            mds.fit(dist)  # shape (n_components, n_samples)
-            pos = mds.transform(dist)  # shape (n_components, n_samples)
+            from sklearn.manifold import MDS
+            # dist = 1 - cosine_similarity(self.embs)
+            # mds = MDS(n_components=ndim, dissimilarity="precomputed", random_state=1)
+            # pos = mds.fit_transform(dist)  # shape (n_components, n_samples)            
+            # dist = 1 - cosine_similarity(self.embs)
+            
+            mds = MDS(n_components=ndim, dissimilarity="euclidean", random_state=1)
+            pos = mds.fit_transform( self.embs )  # shape (n_components, n_samples)
 
 
         if mode == 'umap' :
+            import umap
             y_label = None
             from umap import UMAP
             clf = UMAP( set_op_mix_ratio=0.25, ## Preserve outlier
@@ -207,26 +232,37 @@ class EmbeddingViz:
 
 
     def create_clusters(self, method='kmeans', after_dim_reduction=True):
-
-        #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
-        km = KMeans(n_clusters=self.num_clusters)
-
-        if after_dim_reduction :
-           km.fit(self.coordinate_xy)
-        else :
-           km.fit( self.embs)
+        """ From Dim reduction vectors --> Create Clusters
+        Docs::
 
 
-        self.clusters      = km.labels_.tolist()
-        self.cluster_color = [f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(self.num_clusters)]
-        self.cluster_names = {i: f'Cluster {i}' for i in range(self.num_clusters)}
+
+        """
+        if method == 'kmeans':
+            from sklearn.cluster import KMeans
+            km = KMeans(n_clusters=self.num_clusters)
+
+            if after_dim_reduction :
+               km.fit( self.coordinate_xy)
+            else :
+               km.fit( self.embs)
+
+            self.clusters      = km.labels_.tolist()
+            self.cluster_color = [f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(self.num_clusters)]
+            self.cluster_names = {i: f'Cluster {i}' for i in range(self.num_clusters)}
 
 
-    def create_visualization(self, dir_out="ztmp/", mode='d3', cols_label=None, start_server=False,  **kw ):
+        if method=='hdbscan':
+            import hdbscan, umap
+            #km = hdbscan.HDBSCAN(min_samples=3, min_cluster_size=10)  #.fit_predict(self.pos)
+
+
+    def create_visualization(self, dirout="ztmp/", mode='d3', cols_label=None, start_server=False, **kw):
         """
 
         """
-        os.makedirs(dir_out, exist_ok=True)
+        import mpld3
+        os.makedirs(dirout, exist_ok=True)
         cols_label          = [] if cols_label is None else cols_label
         text_label_and_text = []
         for i,x in self.df_labels.iterrows():
@@ -240,7 +276,7 @@ class EmbeddingViz:
         df = pd.DataFrame(dict(x=self.coordinate_xy[:, 0],
                                y=self.coordinate_xy[:, 1],
                                clusters= self.clusters, title=text_label_and_text))
-        df.to_parquet(f"{dir_out}/embs_xy_cluster.parquet")
+        df.to_parquet(f"{dirout}/embs_xy_cluster.parquet")
 
 
         # group by cluster
@@ -276,7 +312,7 @@ class EmbeddingViz:
             ax.text(df.loc[i]['x'], df.loc[i]['y'], df.loc[i]['title'], size=8)
 
         # uncomment the below to save the plot if need be
-        plt.savefig(f'{dir_out}/clusters_static-{datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
+        plt.savefig(f'{dirout}/clusters_static-{datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")}.png', dpi=200)
 
         # Plot
         fig, ax = plt.subplots(figsize=(20, 15))  # set plot size
@@ -306,11 +342,11 @@ class EmbeddingViz:
 
 
         ##### Export ############################################################
-        mpld3.save_html(fig,  f"{dir_out}/embeds.html")
-        log(f"{dir_out}/embeds.html" )
+        mpld3.save_html(fig,  f"{dirout}/embeds.html")
+        log(f"{dirout}/embeds.html")
 
         ### Windows specifc
-        if os.name == 'nt': os.system(f'start chrome "{dir_out}/embeds.html" ')
+        if os.name == 'nt': os.system(f'start chrome "{dirout}/embeds.html" ')
 
 
         if start_server :
@@ -329,6 +365,8 @@ class EmbeddingViz:
         plt.tick_params(axis='x', which='both', bottom='off', top='off', labelbottom='off')
         plt.tight_layout()
         plt.savefig('dendogram_clusters.png', dpi=200)
+
+
 
 
 
@@ -419,7 +457,8 @@ def embedding_rawtext_to_parquet(dirin=None, dirout=None, skip=0, nmax=10 ** 8,
 
 
 def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  nmax= 500,
-                           return_type='numpy;pandas'
+                           return_type='numpy;pandas',
+                           emb_dim=200
                            ):
     """  parquet -->  numpy array, dict map, labels
      Docs::
@@ -445,7 +484,7 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  
 
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
-    embs    = np_str_to_array(df['emb'].values,  l2_norm=True,     mdim = 200)
+    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True,     mdim = emb_dim)
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
@@ -516,6 +555,9 @@ def embedding_load_pickle(dirin=None, skip=0, nmax=10 ** 8,
     return embs, id_map, dflabel
 
 
+
+#########################################################################################################
+############## Loader of embeddings #####################################################################
 def embedding_extract_fromtransformer(model,Xinput:list):
     """ Transformder require Pooling layer to extract word level embedding.
     Doc::
@@ -562,6 +604,83 @@ def embedding_extract_fromtransformer(model,Xinput:list):
 
 
 
+class torch_model_getlayer():
+    """ Get a specific layer for embedding output
+    Doc::
+
+        model = models.resnet50()
+        layerI= model_getlayer(model, pos_layer=-1)
+
+        ### Forward pass
+        Xin = torch.randn(4, 3, 224, 224)
+        print( model(Xin) )
+
+        print('emb')
+        Xemb = layerI.output
+        print(Xemb.shape)
+        print(Xemb)
+
+    """
+    def __init__(self, network, backward=False, pos_layer=-2):
+        self.layers = []
+        self.get_layers_in_order(network)
+        self.last_layer = self.layers[pos_layer]
+        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
+
+    def hook_fn(self, module1, input, output):
+        self.input = input
+        self.output = output
+
+    def close(self):
+        self.hook.remove()
+
+    def get_layers_in_order(self, network):
+      if len(list(network.children())) == 0:
+        self.layers.append(network)
+        return
+      for layer in network.children():
+        self.get_layers_in_order(layer)
+
+
+"""
+        class modelA(torch.nn.Module):
+            def __init__(self,layers_dim=[20,100,16], nn_model_base=None, layer_id=0):
+                super(modelA, self).__init__()
+                self.head_task = []
+                self.layer_id  = layer_id  ##flag meaning ????  layer
+
+
+                ###### Normal MLP Head   #########################################
+                self.layers_dim = layers_dim
+                self.output_dim = layers_dim[-1]
+                # self.head_task = nn.Sequential()
+
+                input_dim = layers_dim[0]
+                for layer_dim in layers_dim[:-1]:
+                    self.head_task.append(nn.Linear(input_dim, layer_dim))
+                    self.head_task.append(nn.ReLU())
+                    input_dim = layer_dim
+                self.head_task.append(nn.Linear(input_dim, layers_dim[-1]))
+                self.head_task = nn.Sequential(*self.head_task)
+
+            def forward(self, x,**kwargs):
+                return self.head_task(x)
+
+            def get_embedding(self, x,**kwargs):
+                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                self.forward(x)
+                embA = layer_l2.output.squeeze()
+                return embA
+
+
+
+"""
+
+
+
+
+
+
 ###############################################################################################################
 if 'utils_matplotlib':
     CSS = """
@@ -572,40 +691,47 @@ if 'utils_matplotlib':
         display: none; }
         """
 
-    class TopToolbar(mpld3.plugins.PluginBase):
-        """Plugin for moving toolbar to top of figure"""
+    try :
+        import mpld3    
+        class TopToolbar(mpld3.plugins.PluginBase):
+            """Plugin for moving toolbar to top of figure"""
 
-        JAVASCRIPT = """
-        mpld3.register_plugin("toptoolbar", TopToolbar);
-        TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
-        TopToolbar.prototype.constructor = TopToolbar;
-        function TopToolbar(fig, props){
-            mpld3.Plugin.call(this, fig, props);
-        };
-        TopToolbar.prototype.draw = function(){
-          // the toolbar svg doesn't exist
-          // yet, so first draw it
-          this.fig.toolbar.draw();
-          // then change the y position to be
-          // at the top of the figure
-          this.fig.toolbar.toolbar.attr("x", 150);
-          this.fig.toolbar.toolbar.attr("y", 400);
-          // then remove the draw function,
-          // so that it is not called again
-          this.fig.toolbar.draw = function() {}
-        }
-        """
+            JAVASCRIPT = """
+            mpld3.register_plugin("toptoolbar", TopToolbar);
+            TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
+            TopToolbar.prototype.constructor = TopToolbar;
+            function TopToolbar(fig, props){
+                mpld3.Plugin.call(this, fig, props);
+            };
+            TopToolbar.prototype.draw = function(){
+            // the toolbar svg doesn't exist
+            // yet, so first draw it
+            this.fig.toolbar.draw();
+            // then change the y position to be
+            // at the top of the figure
+            this.fig.toolbar.toolbar.attr("x", 150);
+            this.fig.toolbar.toolbar.attr("y", 400);
+            // then remove the draw function,
+            // so that it is not called again
+            this.fig.toolbar.draw = function() {}
+            }
+            """
 
-        def __init__(self):
-            self.dict_ = {"type": "toptoolbar"}
-
+            def __init__(self):
+                self.dict_ = {"type": "toptoolbar"}
+    except : pass
 
 
 
 
 if 'utils_vector':
-    def db_load_dict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
-        ### load Pandas into dict
+    def db_load_dict(df, colkey='id', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
+        """Load Pandas into dict
+
+
+
+
+        """
         if isinstance(df, str):
            dirin = df
            log('loading', dirin)
@@ -629,20 +755,24 @@ if 'utils_vector':
         return df
 
 
-    def np_array_to_str(vv, ):
+    def np_array_to_str(vv:np.ndarray, ):
         """ array/list into  "," delimited string """
         vv= np.array(vv, dtype='float32')
         vv= [ str(x) for x in vv]
         return ",".join(vv)
 
 
-    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
+    def np_str_to_array(vv:list,   mdim = None, l2_norm_faiss=False, l2_norm_sklearn=True, l2_norm_numpy=False):
         """ Convert list of string into numpy 2D Array
         Docs::
              
              np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
 
+             https://stackoverflow.com/questions/2850743/numpy-how-to-quickly-normalize-many-vectors
+
         """
+        if mdim is None :
+             mdim= len( vv[0].split(","))
 
         X = np.zeros(( len(vv) , mdim  ), dtype='float32')
         for i, r in enumerate(vv) :
@@ -652,6 +782,8 @@ if 'utils_vector':
             except Exception as e:
               log(i, e)
 
+        if l2_norm_numpy:
+            X /= np.hypot(X[:,0], X[:,1])
 
         if l2_norm_sklearn:
             from sklearn.preprocessing import normalize
@@ -661,6 +793,23 @@ if 'utils_vector':
             import faiss   #### pip install faiss-cpu
             faiss.normalize_L2(X)  ### Inplace L2 normalization
             log("Normalized X")
+        return X
+
+
+    def  np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
+        """  L2 Normalize
+        """
+        if l2_norm_numpy:
+            X /= np.hypot(X[:,0], X[:,1])
+
+        if l2_norm_sklearn:
+            from sklearn.preprocessing import normalize
+            normalize(X, norm='l2', copy=False)
+
+        if l2_norm_faiss:
+            import faiss   #### pip install faiss-cpu
+            faiss.normalize_L2(X)  ### Inplace L2 normalization
+
         return X
 
 
@@ -702,51 +851,46 @@ if 'utils_vector':
         return res   
 
 
+
+
+
+if 'custom_code':
     def os_unzip(dirin, dirout):
         # !/usr/bin/env python3
         import zipfile
         with zipfile.ZipFile(dirin, 'r') as zip_ref:
             zip_ref.extractall(dirout)
 
-
-
-
-if 'custom_code':
-    def test_create_fake_df(dirout="./ztmp/"):
+    def test_create_fake_df(dirout="./ztmp/", nrows=100):
         """ Creates a fake embeddingdataframe
         """
-        res  =Box({})
-        n = 30
+        res  = Box({})
+        n    = nrows
+        mdim = 50
 
-        # Create fake user ids
+        #### Create fake user ids
         word_list = [ 'a' + str(i) for i in range(n)]
-
-        emb_list = []
+        emb_list  = []
         for i in range(n):
-            emb_list.append( ','.join([str(x) for x in np.random.random( 0,1,120) ])  )
+            emb_list.append( ','.join([str(x) for x in np.random.random(mdim) ])  )
 
-
-        ####
         df = pd.DataFrame()
-        df['id']   = word_list
-        df['emb']  = emb_list
-        res.df = df
-
+        df['id']  = word_list
+        df['emb'] = emb_list
+        res.df    = df
 
         #### export on disk
-        res.dir_parquet =  dirout +"/emb_parquet/db_emb.parquet"
+        res.dir_parquet = dirout + "/emb_parquet/db_emb.parquet"
         pd_to_file(df, res.dir_parquet , show=1)
 
         #### Write on text:
-        res.dir_text = dirout + "/word2vec_export.vec"
+        res.dir_text   = dirout + "/word2vec_export.vec"
         log( res.dir_text )
         with open(res.dir_text, mode='w') as fp:
-            fp.write("word2vec export format\n")
-
+            fp.write("word2vec\n")
             for i,x in df.iterrows():
               emb  = x['emb'].replace(",", "")
               fp.write(  f"{x['id']}  {emb}\n")
-
 
         return res
 
