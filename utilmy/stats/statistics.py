@@ -1,13 +1,9 @@
 # coding=utf-8
-"""hypothetical - Hypothesis and Statistical Testing in Python
+"""Fast Hypothesis and Statistical Testing in Python
 
 Doc::
 
     Hypothesis testing easy.
-
-    https://github.com/pranab/beymani
-    https://github.com/topics/hypothesis-testing?l=python&o=desc&s=stars
-    https://pypi.org/project/pysie/#description
 
 
     --- Analysis of Variance
@@ -89,8 +85,11 @@ Doc::
 
 
     --- Code
-    ```python
-    - -*- coding: utf-8 -*-
+    https://github.com/pranab/beymani
+    https://github.com/topics/hypothesis-testing?l=python&o=desc&s=stars
+    https://pypi.org/project/pysie/#description
+
+
     Hypothesis testing using utilmy.ipynb
     Docs ::
         Original file is located at
@@ -100,10 +99,6 @@ Doc::
     import numpy as np
     import utilmy.stats.hypothesis as test
     import utilmy.stats.statistics as stats
-
-
-
-
 
 
     - 1) Mc Nemar Test
@@ -429,17 +424,6 @@ Doc::
     Interpretation
 
     H0: the distributions of all samples are equal.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
