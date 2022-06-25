@@ -147,19 +147,20 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_di
 ######## Top-K retrieval Faiss #########################################################################
 def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
                        nrows=-1):
-    """ 1 billion size vector Index creation
+    """ Create Large scale Index
     Docs::
 
           python util_embedding.py   faiss_create_index    --df_or_path myemb/
+
+
     """
     import faiss
 
     
     dirout    =  "/".join( os.path.dirname(df_or_path).split("/")[:-1]) + "/faiss/" if dirout is None else dirout
-
-    os.makedirs(dirout, exist_ok=True) ; 
-    log( 'dirout', dirout)    
-    log('dirin',   df_or_path)  ; time.sleep(10)
+    os.makedirs(dirout, exist_ok=True)
+    log('dirout', dirout)
+    log('dirin',  df_or_path)
     
     if isinstance(df_or_path, str) :      
        flist = sorted(glob.glob(df_or_path  ))[:nfile] 
@@ -198,8 +199,8 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     log('Nsample training', nt)
 
     ####################################################    
-    D = emb_dim   ### actual  embedding size
-    N = len(X)   #1000000
+    D = emb_dim  ###   actual  embedding size
+    N = len(X)   ##### 1000000
 
     # Param of PQ for 1 billion
     M      = 40 # 16  ###  200 / 5 = 40  The number of sub-vector. Typically this is 8, 16, 32, etc.
@@ -236,62 +237,48 @@ def faiss_load_index(faiss_index_path=""):
 
 
 def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
-                    faiss_index:str="", topk=200, npool=1, nrows=10**7, nfile=1000,
-                    return_simscore=False
+                    faiss_index:str="", topk=200, dirout=None, npool=1, nrows=10**7, nfile=1000,
+                    return_simscore=False, return_dist=False,
 
                     ) :
-   """#
+   """  Calculate top-k for each 'emb' vector of dataframe in parallel batch.
    Doc::
 
-       df : path or DF
-
-
-       return on disk
-         id  :     word id
-         id_list : topk from word id
-         dist_list, sim_list:
+       df : path or DF   df[['id', 'embd' ]]
+       dirout : results path,   id, topk   :     word id, topk of id
 
 
 
        https://github.com/facebookresearch/faiss/issues/632
        dis = 2 - 2 * sim
-  
    """
-   # nfile  = 1000      ; nrows= 10**7
-   # topk   = 500 
- 
-   if faiss_index is None : 
-      faiss_index = ""
 
-   log('Faiss Index: ', faiss_index)
+   faiss_index = ""  if faiss_index is None  else faiss_index
    if isinstance(faiss_index, str) :
         faiss_path  = faiss_index
         faiss_index = faiss_load_index(db_path=faiss_index) 
    faiss_index.nprobe = 12  # Runtime param. The number of cells that are visited for search.
-        
+   log('Faiss Index: ', faiss_index)
+
+
    ########################################################################
    if isinstance(df, list):    ### Multi processing part
         if len(df) < 1 : return 1
         flist = df[0]
         root     = os.path.abspath( os.path.dirname( flist[0] + "/../../") )  ### bug in multipro
         dirin    = root + "/df/"
-        dir_out  = root + "/topk/"
+        dir_out  = dirout
 
-   elif df is None : ## Default
-        root    = "emb/emb/i_1000000000/"
-        dirin   = root + "/df/*.parquet"        
-        dir_out = root + "/topk/"
-        flist = sorted(glob.glob(dirin))
-                
-   else : ### df == string path
-        root    = os.path.abspath( os.path.dirname(df)  + "/../") 
-        log(root)
-        dirin   = root + "/df/*.parquet"
-        dir_out = root + "/topk/"  
+   elif isinstance(df, str) : ### df == string path
+        root    = df
+        dirin   = root
+        dir_out = dirout
         flist   = sorted(glob.glob(dirin))
-        
+   else :
+       raise Exception('Unknonw path')
+
    log('dir_in',  dirin)
-   log('dir_out', dir_out) ; time.sleep(2)     
+   log('dir_out', dir_out)
    flist = flist[:nfile]
    if len(flist) < 1: return 1 
    log('Nfile', len(flist), flist )
@@ -337,13 +324,13 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
                 
            dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
            dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
-           # dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
+           if return_dist:     dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
            if return_simscore: dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
         
            dfall = pd.concat((dfall, dfi))
 
        dirout2 = dir_out + "/" + fi.split("/")[-1]      
-       # log(dfall['id_list'])
+
        pd_to_file(dfall, dirout2, show=1)  
        kk    = kk + 1
        if kk == 1 : dfall.iloc[:100,:].to_csv( dirout2.replace(".parquet", ".csv")  , sep="\t" )
