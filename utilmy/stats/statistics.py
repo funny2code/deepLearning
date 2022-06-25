@@ -455,18 +455,16 @@ def help():
 
 #################################################################################################
 def test_all():
-    """
-    """
-    from sklearn.tree import DecisionTreeRegressor
-    from sklearn.model_selection import train_test_split
-    model = DecisionTreeRegressor(random_state=1)
+    test1()
 
-    df = pd.read_csv("./testdata/tmp/test/crop.data.csv")
-    y = df.fertilizer
-    X = df[["yield","density","block"]]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.50, random_state=42)
-    model.fit(X_train, y_train)
-    ypred = model.predict(X_test)
+
+
+def test4():
+    from utilmy import adatasets  as da
+    df = da.test_dataset_classifier_fake(nrows=100)
+
+    Xtrain, Xtest =da.train_test_split(df,0.5)
+
 
     def test():
         log("Testing normality...")
@@ -476,12 +474,12 @@ def test_all():
 
         df1 = pd_generate_data(7, 100)
         m.test_anova(df1,'cat1','cat2')
-        m.hypotest_normality2(df1, '0', "Shapiro")
+        m.hypotest_is_normal_distribution(df1, cols=df.columns[0])
         m.test_plot_qqplot(df1, '1')
 
 
         log("Testing heteroscedacity...")
-        log(m.hypopred_error_test_heteroscedacity(y_test, ypred))
+        log(m.hypopred_error_test_heteroscedacity(Xtest[:,0], Xtrain[:,1]))
 
         log("Testing test_mutualinfo()...")
         df1 = pd_generate_data(7, 100)
@@ -489,7 +487,7 @@ def test_all():
         m.hypopred_error_test_residual_mutualinfo(df1["0"], df1[["1", "2", "3"]], colname="test")
 
         log("Testing hypothesis_test()...")
-        log(m.test_hypothesis(X_train, X_test,"chisquare"))
+        log(m.test_hypothesis(Xtrain, Xtest,"chisquare"))
 
     def custom_stat(values, axis=1):
         #stat_val = np.mean(np.asmatrix(values),axis=axis)
@@ -613,7 +611,6 @@ def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4, alpha=0.05):
 
         - H0: μ = 54     AND  - H1: μ != 54
         ##- One sample test (parameter estimation)
-        np.random.seed(10)
         Population = [np.random.randint(10, 100) for _ in range(1000)]
         Sample = [np.random.randint(11, 99) for _ in range(25)]
         Population_Mean = round(sum(Population)/len(Population))
@@ -633,16 +630,12 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
     """
     Docs ::
 
-        data1 = [20, 55, 29, 24, 75, 56, 31, 45]
-        data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
-
         - Test whether the samples are same
         - H0: The two samples are same
         - H1: The two samples are different
         - P-value > 5%. Fail to Reject H0
         - Data may be similar.
 
-        ##- test to determine normality of data
 
     """
     ddict= Box({})
@@ -650,16 +643,17 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
     else :                               v1, v2 = df[0], df[1]  ##- list of lists
 
 
-    log("""WaldWolfowitz""")
+    log("WaldWolfowitz ")
     log("WaldWolfowitz test is used when response variable is dichotomous")
     dd = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
+    ddict.waldo = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha= alpha,  res=dd.test_summary  )
 
 
-    log("""Student's t-test (Two sample)""")
+    log("Student's t-test (Two sample)")
     log("For t test the columns have to be approx. normally distributed and independent with equal variances")
     dd = test.hypothesis.tTest(v1, v2)
-    dd.student = dd.test_summary
+    ddict.student = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha,  res=dd.test_summary )
 
     return ddict
@@ -680,20 +674,20 @@ def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
 
     ddict = Box({})
 
-    log("""#- 1) ANOVA""")
+    log(" ANOVA")
     log("For ANOVA, The samples should be independent and normally distributed.")
     dd = test.aov.AnovaOneWay(*vlist)
     ddict.anova = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log("""#- 2) Friedman test""")
+    log(" Friedman test")
     log("Friedman test assumes same subjects show up in each group")
     dd = test.nonparametric.FriedmanTest(*vlist, group = None)
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log("""#- 3) Cochran's Q test """)
+    log(" Cochran's Q test ")
     log("Cochran's Q test is applicable when response variable can only take two values")
     dd = test.contingency.CochranQ(*vlist)
     ddict.cochran = dd.test_summary
@@ -731,6 +725,7 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05)
     log("Mann Whitney Test")
     log("Observations should not be normally distributed and groups should be independent")
     dd = test.nonparametric.MannWhitney(group=vlist[0], y1=vlist[1] )
+    ddict.mann = dd
     hypotest_rconclusion(dd.p_value, alpha=alpha, res = dd.test_summary)
     return ddict
 
@@ -756,9 +751,6 @@ def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
         #To test:
         #H0 : P1 = P2
         #H1 : P1 != P2
-
-        - As p-value < 0.05, we reject H0.
-        - True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
 
     """
     if col1 == None or col2 == None:
@@ -858,7 +850,7 @@ def hypotest_independance(df: pd.DataFrame, cols=None, threshold=0.1) -> List[fl
 
 
 
-def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', ) :
     """Run multiple T tests of Independance.
     Doc::
 
@@ -874,9 +866,6 @@ def hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='
 
         _, p = stats.ttest_ind(group_a, group_b, equal_var=False)
         p_values.append((c, p) )
-
-    if bonferroni_adjuster:
-        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     return p_values
 
@@ -897,9 +886,7 @@ def hypotest_is_normal_distribution(df:pd.DataFrame, column,):
             Accept mean the feature is Gaussain
             Reject mean the feature is not Gaussain
     """
-    from scipy.stats import shapiro
-    from scipy.stats import normaltest
-    from scipy.stats import anderson
+    from scipy.stats import shapiro, normaltest, anderson
 
     log('Shapiro')
     stat, p = shapiro(df[column])
