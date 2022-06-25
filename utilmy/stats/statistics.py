@@ -509,7 +509,7 @@ def test_all():
 
     def custom_stat(values, axis=1):
         #stat_val = np.mean(np.asmatrix(values),axis=axis)
-        # # stat_val = np.std(np.asmatrix(values),axis=axis)p.mean
+        # stat_val = np.std(np.asmatrix(values),axis=axis)p.mean
         stat_val = np.sqrt(np.mean(np.asmatrix(values*values),axis=axis))
         return stat_val
 
@@ -532,7 +532,7 @@ def test_all():
 
     test()
     test_estimator()
-    # test_drift_detect()
+    #test_drift_detect()
     test_np_utils()
 
 
@@ -564,7 +564,7 @@ def test1():
     ypred = model.predict(X_test)
     hypopred_error_test_normality(df["yield"])
     log(hypopred_error_test_heteroscedacity(y_test, ypred))
-    log(hypotest_is_all_independant(X_train, X_test))
+    #log(hypotest_is_all_independant(X_train, X_test))
     log(confidence_interval_normal_std(ypred))
     log(confidence_interval_boostrap_bayes(ypred))
     '''TODO: need to check this one
@@ -597,22 +597,22 @@ def test_check_mean():
     df['c5'] = np.random.random(n )
 
 
-    log("### 2 columns")
+    log("##- 2 columns")
     hypotest_is_mean_equal(df, cols = ['c1', 'c2'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
 
 
-    log("### 5 columns ")
+    log("##- 5 columns ")
     hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'c5'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
 
 
-    log("### 6 columsn not same")
+    log("##- 6 columsn not same")
     df['d6'] = np.random.random(n ) +0.3
     hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'd6'], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5)
 
 
 
 ###############################################################################################
-########## Helpers on test  ###################################################################
+#########- Helpers on test  ###################################################################
 def hypotest_rconclusion(p_value, alpha=0.05, res=None ):
     """ Conclusion  """
     log("Test summary", res)
@@ -624,18 +624,18 @@ def hypotest_rconclusion(p_value, alpha=0.05, res=None ):
 
 
 def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4, alpha=0.05):
-    """# To test whether sample has come from a population with mean 54
+    """- To test whether sample has come from a population with mean 54
     Docs::
 
-        # H0: μ = 54     AND  # H1: μ != 54
-        ### One sample test (parameter estimation)
+        - H0: μ = 54     AND  - H1: μ != 54
+        ##- One sample test (parameter estimation)
         np.random.seed(10)
         Population = [np.random.randint(10, 100) for _ in range(1000)]
         Sample = [np.random.randint(11, 99) for _ in range(25)]
         Population_Mean = round(sum(Population)/len(Population))
     """
     if isinstance(df, pd.DataFrame):  samples = df[col].values
-    else :                            samples = df  ### list
+    else :                            samples = df  ##- list
 
     log("""1) Student's t-test (One sample)""")
     log(f"{col} has to be normally distributed and independent sample\n")
@@ -651,18 +651,18 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
         data1 = [20, 55, 29, 24, 75, 56, 31, 45]
         data2 = [23, 8, 24, 15, 8, 6, 15, 15, 21, 23, 16, 15, 24, 15, 21, 15, 18, 14, 22, 15, 14]
 
-        # Test whether the samples are same
-        # H0: The two samples are same
-        # H1: The two samples are different
-        # P-value > 5%. Fail to Reject H0
-        # Data may be similar.
+        - Test whether the samples are same
+        - H0: The two samples are same
+        - H1: The two samples are different
+        - P-value > 5%. Fail to Reject H0
+        - Data may be similar.
 
-        ### test to determine normality of data
+        ##- test to determine normality of data
 
     """
     ddict= Box({})
     if isinstance(df, pd.DataFrame):     v1, v2= df[cols[0]].values, df[cols[1]].values
-    else :                               v1, v2 = df[0], df[1]  ### list of lists
+    else :                               v1, v2 = df[0], df[1]  ##- list of lists
 
 
     log("""1) WaldWolfowitz""")
@@ -671,7 +671,7 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
     hypotest_rconclusion(dd.p_value, alpha= alpha,  res=dd.test_summary  )
 
 
-    log("""# 2) Student's t-test (Two sample)""")
+    log("""- 2) Student's t-test (Two sample)""")
     log("For t test the columns have to be approx. normally distributed and independent with equal variances")
     dd = test.hypothesis.tTest(v1, v2)
     dd.student = dd.test_summary
@@ -682,7 +682,7 @@ def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
 
 
 def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
-    """# To test whether All columns have same means.
+    """- To test whether All columns have same means.
 
     """
     vlist = []
@@ -696,20 +696,20 @@ def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
 
     ddict = Box({})
 
-    log("""## 1) ANOVA""")
+    log("""#- 1) ANOVA""")
     log("For ANOVA, The samples should be independent and normally distributed.")
     dd = test.aov.AnovaOneWay(*vlist)
     ddict.anova = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log("""## 2) Friedman test""")
+    log("""#- 2) Friedman test""")
     log("Friedman test assumes same subjects show up in each group")
     dd = test.nonparametric.FriedmanTest(*vlist, group = None)
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log("""## 3) Cochran's Q test """)
+    log("""#- 3) Cochran's Q test """)
     log("Cochran's Q test is applicable when response variable can only take two values")
     dd = test.contingency.CochranQ(*vlist)
     ddict.cochran = dd.test_summary
@@ -720,20 +720,20 @@ def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
 
 
 def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05):
-    """# To test whether All columns have same means.
+    """- To test whether All columns have same means.
     Docs::
 
-        # Is there difference in ratings for vegan and non-vegan food?
-        # H0: No difference in the stars
-        # H0: There is a difference in stars
-        # create dataframe
-        # for 'Vegan', 1 stands for vegan food.
+        - Is there difference in ratings for vegan and non-vegan food?
+        - H0: No difference in the stars
+        - H0: There is a difference in stars
+        - create dataframe
+        - for 'Vegan', 1 stands for vegan food.
         data = pd.DataFrame({'Vegan':[1,1,1,0,0,0,1,0,1,0,1,0],
                                     'Stars':[5.0,2.5,1.5,3.5,4.75,3.0,4.0,3.0,3.0,2.75,1.0,1.0]})
         data.head()
 
-        # With a p-value > 0.05, we fail to reject the null hypothesis that there is no
-        # difference in rating between vegan and non-vegan food.
+        - With a p-value > 0.05, we fail to reject the null hypothesis that there is no
+        - difference in rating between vegan and non-vegan food.
     """
     vlist = []
     if isinstance(df, pd.DataFrame):
@@ -754,17 +754,17 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05)
 
 def hypotest_is_all_same_distribution(df, cols = None):
     """
-    ### Tests to determine if data distributions are similar or not
+    ##- Tests to determine if data distributions are similar or not
 
     np.random.seed(10)
-    # generate three independent samples
+    - generate three independent samples
     data1 = 5 * np.random.randn(100) + 50
     data2 = 5 * np.random.randn(100) + 50
     data3 = 5 * np.random.randn(100) + 50
 
-    # To test: Whether the three distributions are similar or not
-    # H0: All sample distribution are similar
-    # H1: Atleast one pair of sample distributions is different
+    - To test: Whether the three distributions are similar or not
+    - H0: All sample distribution are similar
+    - H1: Atleast one pair of sample distributions is different
     """
     vlist = []
     if isinstance(df, pd.DataFrame):
@@ -777,14 +777,14 @@ def hypotest_is_all_same_distribution(df, cols = None):
        vlist = df
     ddict = Box({})
 
-    log("""# 1) Kruskal Wallis Test""")
+    log("""- 1) Kruskal Wallis Test""")
     log("If not normally distributed, use KruskalWallis")
     kw = test.nonparametric.KruskalWallis(*vlist)
     ddict.KruskalWallis = kw.test_summary
     hypotest_rconclusion(kw.p_value, alpha=0.05, res=kw.test_summary )
 
 
-    log("""# 2) ANOVA""")
+    log("""- 2) ANOVA""")
     log("If normally distributed, use ANOVA")
     dd = test.aov.AnovaOneWay(*vlist)
     ddict.anova = dd.test_summary
@@ -793,18 +793,19 @@ def hypotest_is_all_same_distribution(df, cols = None):
     return ddict
 
 
+
 def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
     """
     Docs ::
 
-        # create random sample data
+        - create random sample data
         data = [['Toyota', 'Toyota'] for i in range(55)] + \
             [['Toyota', 'Mitsubishi'] for i in range(5)] + \
             [['Mitsubishi', 'Toyota'] for i in range(15)] + \
             [['Mitsubishi', 'Mitsubishi'] for i in range(25)]
         df = pd.DataFrame(data, columns = ['Before Ad Screening', 'After Ad Screening'])
 
-        # create contingency table
+        - create contingency table
         data_crosstab = pd.crosstab(df['Before Ad Screening'],
                                     df['After Ad Screening'],
                                     margins=True, margins_name="Total")
@@ -815,8 +816,8 @@ def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
         #H0 : P1 = P2
         #H1 : P1 != P2
 
-        # As p-value < 0.05, we reject H0.
-        # True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
+        - As p-value < 0.05, we reject H0.
+        - True proportion of customers who prefer Toyota before and after the ad screening is not the same, at 5% significant level.
 
     """
     if col1 == None or col2 == None:
@@ -824,7 +825,7 @@ def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
 
     data = pd.crosstab(df[col1], df[col2])
     v1, v2 = df[col1].unique()
-    log("## 1) Mc Nemar Test")
+    log("#- 1) Mc Nemar Test")
     log(f"Assumption: {col1} is dichotomous variable and {col2} is independent variable with two connected groups")
     m = test.contingency.McNemarTest([data[v1], data[v2]], continuity=True)
     hypotest_rconclusion(m.mcnemar_p_value, alpha=alpha,res= m.test_summary )
@@ -959,7 +960,7 @@ def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
         log('Total number of discoveries is: {:,}'  .format(sum([x[1] < threshold / n_trials for x in p_values])))
         log('Percentage of significant results: {:5.2%}'  .format(sum([x[1] < threshold / n_trials for x in p_values]) / n_trials))
 
-        # Benjamini–Hochberg procedure
+        - Benjamini–Hochberg procedure
         p_values.sort(key=lambda x: x[1])
 
         for i, x in enumerate(p_values):
@@ -982,7 +983,7 @@ def hypotest_bonferoni_adjuster(p_values, threshold=0.1):
 
 
 #################################################################################################
-############ Actual tests########################################################################
+###########- Actual tests########################################################################
 def test_chisquare(df_obs:pd.DataFrame, df_true:pd.DataFrame, method='chisquare', **kw):
     """ Hypothesis betweeb Obs and true values.
     Doc::
@@ -1058,7 +1059,7 @@ def test_mutualinfo(error, Xtest, colname=None, bins=5):
     from sklearn.feature_selection import mutual_info_classif
     error = pd.DataFrame({"error": error})
     error_dis, _ = pd_colnum_tocat(error, bins=bins, method="quantile")
-    # print(error_dis)
+    - print(error_dis)
 
     res = mutual_info_classif(Xtest.values, error_dis.values.ravel())
 
@@ -1068,7 +1069,7 @@ def test_mutualinfo(error, Xtest, colname=None, bins=5):
 
 
 ####################################################################################################
-############ Residual error ########################################################################
+###########- Residual error ########################################################################
 def hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
     """Run multiple T tests of Independance.
     Doc::
@@ -1177,7 +1178,7 @@ def hypopred_error_test_residual_mutualinfo(dfX:pd.DataFrame, ypred: np.ndarray,
 
 
 ####################################################################################################
-######### Confidence interval ######################################################################
+########- Confidence interval ######################################################################
 def confidence_interval_normal_std(err:np.ndarray, alpha=0.05, ):
     """function estimator_std_normal.
     Doc::
@@ -1221,8 +1222,8 @@ def confidence_interval_bootstrap(err:np.ndarray, custom_stat=None, alpha=0.05, 
     Doc::
 
               def custom_stat(values, axis=1):
-              # stat_val = np.mean(np.asmatrix(values),axis=axis)
-              # stat_val = np.std(np.asmatrix(values),axis=axis)p.mean
+              - stat_val = np.mean(np.asmatrix(values),axis=axis)
+              - stat_val = np.std(np.asmatrix(values),axis=axis)p.mean
               stat_val = np.sqrt(np.mean(np.asmatrix(values*values),axis=axis))
               return stat_val
     """
@@ -1237,7 +1238,7 @@ def confidence_interval_bootstrap(err:np.ndarray, custom_stat=None, alpha=0.05, 
 
 
 ####################################################################################################
-####### Utils ######################################################################################
+######- Utils ######################################################################################
 def np_col_extractname(col_onehot):
     """.
     Doc::
