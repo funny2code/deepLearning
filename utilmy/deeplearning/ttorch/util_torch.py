@@ -255,7 +255,23 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 ###############################################################################################
 ####### Embedding #############################################################################
-def model_extract_embedding_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb')
+    embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
+    pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+
+
+
+def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
     """
     Docs:
 
