@@ -52,15 +52,18 @@ def help():
 #############################################################################################
 def test_all():
     """function test_all"""
-    test_classifier_simple()
-    test_classifier_cardio_dataset()
-    test_resnet()
-    test_alexnet()
+    test1()
+    test2()
 
 
-def test_classifier_simple():
-    """function test_classifier_simple"""
-    print('-' * 50 + '\n--- test_classifier_simple started...\n' + '-' * 50)
+
+
+def test1():
+    """test  model_train, model_evaluate,  model_load, model_summary, model_load_state_dict
+
+    """
+
+    log('-' * 50 + '\n--- test_classifier_simple started...\n' + '-' * 50)
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
     # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
@@ -69,47 +72,13 @@ def test_classifier_simple():
     model = nn.Sequential(nn.Linear(50, 20), nn.Linear(20, 1))
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
-    
+
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
     model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
 
 
-def test_classifier_cardio_dataset():
-    """function test_classifier_cardio_dataset"""
-    print('-' * 50 + '\n--- test_classifier_cardio_dataset started...\n' + '-' * 50)
-    arg = Box({
-      "dataurl":  "https://github.com/caravanuden/cardio/raw/master/cardio_train.csv",
-      "datapath": './cardio_train.csv',
 
-      ##### Rules
-      "rules" : {},
-
-      #####
-      "train_ratio": 0.7,
-      "validation_ratio": 0.1,
-      "test_ratio": 0.2,
-
-      "model_type": 'dataonly',
-      "input_dim_encoder": 16,
-      "output_dim_encoder": 16,
-      "hidden_dim_encoder": 100,
-      "hidden_dim_db": 16,
-      "n_layers": 1,
-
-      ##### Training
-      "seed": 42,
-      "device": 'cpu',  ### 'cuda:0',
-      "batch_size": 32,
-      "epochs": 1,
-      "early_stopping_thld": 10,
-      "valid_freq": 1,
-      'saved_filename' :'./model.pt',
-    })
-
-
-def test_resnet():
-    """function test_resnet"""
-    print('-' * 50 + '\n--- test_resnet started...\n' + '-' * 50)
+    log('-' * 50 + '\n--- test_resnet started...\n' + '-' * 50)
     from torchvision import models
 
     model = models.resnet50()
@@ -125,10 +94,8 @@ def test_resnet():
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
-def test_alexnet():
-    """function test_alexnet"""
-    print('-' * 50 + '\n--- test_alexnet started...\n' + '-' * 50)
-    ### Metrics for pytorch
+def test2():
+    log("### Metrics torch_metric_accuracy  ")
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
     output = model(data)
@@ -156,6 +123,7 @@ def test_alexnet():
     l = loss(output, labels[:64])
 
 
+
 ###############################################################################################
 def device_setup( device='cpu', seed=42, arg:dict=None):
     """Setup 'cpu' or 'gpu' for device and seed for torch
@@ -177,6 +145,11 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
             log(e)
             device = 'cpu'
     return device
+
+
+
+
+
 
 
 ###############################################################################################
@@ -261,6 +234,11 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
+
+
+
+###############################################################################################
+####### Embedding #############################################################################
 def embedding_torchtensor_to_parquet(model=None, dirout='./', data_loader=None, tag=""):
     # from utilmy.deeplearning import  util_embedding as ue
     import time
@@ -372,6 +350,10 @@ def cos_similar_embedding(embv = None, img_names=None):
             similar_emb.append(img_name)
         df['similar'] = similar_emb
     return df
+
+
+
+
 
 
 ###############################################################################################
@@ -565,6 +547,9 @@ def ImageDataloader(df=None, batch_size=64,
                        batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
     return train_dataloader,val_dataloader,test_dataloader
+
+
+
 
 
 ###############################################################################################
@@ -893,6 +878,9 @@ def model_summary(model, **kw):
     return summary(model, **kw)
 
 
+
+
+
 ###############################################################################################
 ########### Metrics  ##########################################################################
 from utilmy.deeplearning.util_dl import metrics_eval
@@ -1051,6 +1039,10 @@ def torch_effective_dim(X, center = True):
         return ed
 
 
+
+
+
+
 #############################################################################################
 ########### Utils  ##########################################################################
 from utilmy.utilmy import load_function_uri
@@ -1182,6 +1174,8 @@ def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
                 ss += str(1-0.5*di) + ","
             res.append(ss[:-1])
         return res
+
+
 
 
 #############################################################################################
