@@ -282,6 +282,23 @@ def model_extract_embedding_to_parquet(model=None, dirout='./', data_loader=None
     return df
 
 
+def model_extract_embedding(model,  data_loader ):
+    """  Extract Embedding for given input
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+    """
+    df= []
+    for X , id_sample in data_loader:
+        with torch.no_grad():
+            emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            for i in range(emb.size()[0]):
+                ss = emb[i].numpy()  ####  as numpy
+                df.append([ id_sample[i], ss])
+    return df
+
+
 def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
     """  Required columns : id, emb (string , separated)
     
