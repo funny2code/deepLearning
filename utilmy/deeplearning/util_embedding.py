@@ -796,7 +796,7 @@ if 'utils_vector':
         return X
 
 
-    def  np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
+    def np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
         """  L2 Normalize
         """
         if l2_norm_numpy:
@@ -813,17 +813,19 @@ if 'utils_vector':
         return X
 
 
-    def np_matrix_to_str2(m, map_dict:dict):
-        """ 2D numpy into list of string and apply map_dict.
+    def np_matrix_to_str2(array_2d, map_dict:dict=None):
+        """ 2D numpy or List of List into list of string and apply map_dict.
         
         Doc::
             map_dict = { 4:'four', 3: 'three' }
             m= [[ 0,3,4  ], [2,4,5]]
             np_matrix_to_str2(m, map_dict)
+            --> [ ",threee,four" ,   ",four," ]
 
         """
+        map_dict = {} if map_dict is None else map_dict
         res = []
-        for v in m:
+        for v in array_2d:
             ss = ""
             for xi in v:
                 ss += str(map_dict.get(xi, "")) + ","
@@ -832,6 +834,13 @@ if 'utils_vector':
 
 
     def np_matrix_to_str(m):
+        """ 2D numpy into list of string and apply map_dict.
+
+        Doc::
+            m= [[ 0,3,4  ], [2,4,5]]
+            --> [ "0,3,4" ,   "2,4,5" ]
+
+        """
         res = []
         for v in m:
             ss = ""
@@ -841,7 +850,14 @@ if 'utils_vector':
         return res            
                 
     
-    def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
+    def np_matrix_to_str_sim(m):
+        """
+        Docs::
+
+             Return Simcore = 1 - 0.5 * dist**2
+
+
+        """
         res = []
         for v in m:
             ss = ""
@@ -849,8 +865,6 @@ if 'utils_vector':
                 ss += str(1-0.5*di) + ","
             res.append(ss[:-1])
         return res   
-
-
 
 
 
