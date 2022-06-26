@@ -623,37 +623,32 @@ def hypotest_is_1_mean_equal_fixes(df, col='mycol', mean_target=4, alpha=0.05):
 
 
 
-def hypotest_is_2_mean_equal(df, cols=['mycol', 'col2' ], alpha=0.05) :
-    """
+def hypotest_is_2_mean_equal(df_or_2dlist, cols=None, alpha=0.05) :
+    """ 2 samples tests, H0: The two samples are same
     Docs ::
 
-        - Test whether the samples are same
-        - H0: The two samples are same
-        - H1: The two samples are different
-        - P-value > 5%. Fail to Reject H0
-        - Data may be similar.
+        hypotest_is_2_mean_equal(df_or_2dlist, cols=['col1', 'col2'], alpha=0.05)
 
 
     """
     ddict= Box({})
-    if isinstance(df, pd.DataFrame):     v1, v2= df[cols[0]].values, df[cols[1]].values
-    else :                               v1, v2 = df[0], df[1]  ##- list of lists
+    if isinstance(df_or_2dlist, pd.DataFrame): v1, v2 = df_or_2dlist[cols[0]].values, df_or_2dlist[cols[1]].values
+    else :                                     v1, v2 = df_or_2dlist[0], df_or_2dlist[1]  ##- list of lists
 
 
-    log("WaldWolfowitz ")
     log("WaldWolfowitz test is used when response variable is dichotomous")
     dd = test.nonparametric.WaldWolfowitz(x = v1, y = v2)
     ddict.waldo = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha= alpha,  res=dd.test_summary  )
 
 
-    log("Student's t-test (Two sample)")
-    log("For t test the columns have to be approx. normally distributed and independent with equal variances")
+    log("For Studen-t 2 samples test the columns have to be approx. normally distributed and independent with equal variances")
     dd = test.hypothesis.tTest(v1, v2)
     ddict.student = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha,  res=dd.test_summary )
 
     return ddict
+
 
 
 def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
@@ -671,20 +666,18 @@ def hypotest_is_all_means_equal(df, cols = None, alpha=0.05):
 
     ddict = Box({})
 
-    log(" ANOVA")
     log("For ANOVA, The samples should be independent and normally distributed.")
     dd = test.aov.AnovaOneWay(*vlist)
     ddict.anova = dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log(" Friedman test")
     log("Friedman test assumes same subjects show up in each group")
     dd = test.nonparametric.FriedmanTest(*vlist, group = None)
+    ddict.friedman  =dd.test_summary
     hypotest_rconclusion(dd.p_value, alpha=alpha, res= dd.test_summary )
 
 
-    log(" Cochran's Q test ")
     log("Cochran's Q test is applicable when response variable can only take two values")
     dd = test.contingency.CochranQ(*vlist)
     ddict.cochran = dd.test_summary
@@ -727,6 +720,7 @@ def hypotest_is_all_group_means_equal(df, cols=['col_group', 'val'], alpha=0.05)
     return ddict
 
 
+
 def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
     """
     Docs ::
@@ -762,7 +756,7 @@ def hypotest_is_mean_pergroup_equal(df, col1=None, col2=None, alpha = 0.05):
 
 
 
-def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True, threshold=0.1, pcritic=0.5) :
+def hypotest_is_mean_equal(df: pd.DataFrame, cols=None,  alpha=0.05) :
     """Test if same mean for all columns
     Doc::
 
@@ -772,25 +766,14 @@ def hypotest_is_mean_equal(df: pd.DataFrame, cols=None, bonferroni_adjuster=True
     cols = df.columns  if cols is None else cols
 
     if len(cols) == 2:
-        p_values = hypotest_is_2_mean_equal(df, cols=cols)
+        ddict = hypotest_is_2_mean_equal(df, cols=cols, alpha= alpha)
 
     else :   ##> 3 values
-        report, p_values = hypotest_is_all_means_equal(df, cols)
-
-    if bonferroni_adjuster:
-        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
-
-    pvalue= p_values['p_value']
-    if pvalue < pcritic:
-        log("H0 hypothesis is rejected...", pvalue )
-    else:
-        log("H0 hypothesis is accepted...")
-
-    return p_values
+        ddict = hypotest_is_all_means_equal(df, cols, alpha=alpha)
 
 
 
-#############################################################################
+###############################################################################################
 def hypotest_is_all_same_distribution(df, cols = None):
     """Tests to determine if data distributions are similar or not
      Docs::
@@ -1034,7 +1017,7 @@ def test_mutualinfo(error, Xtest, colname=None, bins=5):
 
 ####################################################################################################
 ###########- Residual error ########################################################################
-def hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y', bonferroni_adjuster=True, threshold=0.1) -> List[float]:
+def hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='y',  threshold=0.1) -> List[float]:
     """Run multiple T tests of Independance.
     Doc::
 
@@ -1050,9 +1033,6 @@ def hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX=None, coly='
 
         _, p = stats.ttest_ind(group_a, group_b, equal_var=False)
         p_values.append((c, p) )
-
-    if bonferroni_adjuster:
-        p_values = hypotest_bonferoni_adjuster(p_values, threshold=threshold)
 
     return p_values
 
