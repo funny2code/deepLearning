@@ -316,8 +316,8 @@ class DataForEmbedding(Dataset):
     def __init__(self, df=None,
                 col_img: str='id',
                 transforms=None, transforms_image_size_default=64,
-                img_loader=None
-
+                img_loader=None,
+                col_class='gender', class_lable='Men'
                  ):
         self.col_img    = col_img
         self.transforms = transforms
@@ -325,7 +325,10 @@ class DataForEmbedding(Dataset):
         if img_loader is None :  ### Use default loader
            from PIL import Image
            self.img_loader = Image.open
-
+        assert(df is not None)
+        
+        df = df.loc[df[col_class] == class_lable]
+        df = df[[col_img,col_class]]
         if transforms is None :
               from torchvision import transforms
               self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
@@ -359,7 +362,6 @@ def cos_similar_embedding(embv = None, img_names=None):
             res = []
             for emb2 in embv:
                 res.append(cosine_similarity([emb1],[emb2]))
-                print()
             res[i] = -1
             max_value = max(res)
             img_name = img_names[res.index(max_value)]

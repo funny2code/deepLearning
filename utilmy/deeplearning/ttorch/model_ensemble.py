@@ -1207,7 +1207,7 @@ def test6():
 
     ##################################################################
     if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
+        ARG.MODEL_INFO.TYPE = 'dataonly' 
         train_config                           = Box({})
         train_config.LR                        = 0.001
         train_config.SEED                      = 42
@@ -1346,6 +1346,8 @@ def test6():
 
  #########################EMBEDDING ####################################
     from utilmy.deeplearning.ttorch import  util_torch as ut
+    col_class= 'gender'
+    class_lable='Men'
     def custom_embedding_data():
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)
@@ -1358,52 +1360,53 @@ def test6():
          tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
          transform  = transforms.Compose(tlist)
 
-         ###Loads image and imagename(to save the embedding with image name)####
-         dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform)
+         ###Loads image and imagename(to save the embedding with image name)#### 
+         dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform,
+                   col_class=col_class, class_lable=class_lable)
 
          return dataset
 
-    #### Run Model   ###################################################
-    model.training(dataloader_custom = custom_dataloader )
-    model.save_weight('ztmp/model_x5.pt')
-    model.load_weights('ztmp/model_x5.pt')
-    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
-    outputs = model.predict(inputs)
-    print(outputs)
-    ######To predict lables
-    for i in range(train_config.BATCH_SIZE):
-        sum = {}
-        for key, val in outputs.items():
-            sum[key] = outputs[key].sum()
-        Keymax = max(zip(sum.values(), sum.keys()))[1]
-        print(Keymax)
     dataset = custom_embedding_data()
     train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
 
     tag='multi'
     dirout="./train"
     ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
+    embv1, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+
+    #############Before Training #################
+    print("Before Training")
+    #########Cosine similarity b/w lables of 2 items Embeddings
+    from sklearn.metrics.pairwise import cosine_similarity
+    for i, emb1 in enumerate(embv1):
+        for j, emb2 in enumerate(embv1):
+            if i==j:
+                continue
+            print(cosine_similarity([emb1],[emb2]))
+    
+    #### Run Model   ###################################################
+    model.training(dataloader_custom = custom_dataloader ) 
+    model.save_weight('ztmp/model_x5.pt')
+    model.load_weights('ztmp/model_x5.pt')
+    inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
+    outputs = model.predict(inputs)
+    #print(outputs)
+
+    tag='multi-finetuned'
+    dirout="./train"
+    #############After Training #################
+    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
     embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+
+    print("After Training Model Activations")
+    for i, emb1 in enumerate(embv):
+        for j, emb2 in enumerate(embv):
+            if i==j:
+                continue
+            print(cosine_similarity([emb1],[emb2]))
 
     ####Cosine similarity b/w Merged Embeddings
     df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
-
-    #########Cosine similarity b/w lables of 2 items Embeddings
-    from sklearn.metrics.pairwise import cosine_similarity
-    for i, emb1 in enumerate(embv):
-        emb1 = torch.tensor(emb1)
-        res1 = head_custom(emb1)
-        for emb2 in embv:
-            emb2 = torch.tensor(emb2)
-            if torch.all(emb1.eq(emb2)) == True:
-               continue
-            res = head_custom(emb2)
-            for key, value in res.items():
-                vec1 = res1[key].detach().numpy()
-                vec2 = value.detach().numpy()
-                score = cosine_similarity([vec1],[vec2])
-                print(score)
-
 
 ##### LSTM #################################################################################
 def test2_lstm():
@@ -1964,7 +1967,10 @@ class MergeModel_create(BaseModel):
         #### BE cacreful to include all the params if COmbine loss.
         #### Here, only head_task
         self.optimizer = torch.optim.Adam(self.net.parameters())
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0b5949b001c5a72345b5b117c96af8b331b1ee70
 
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5,
                          verbose=True, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
@@ -2468,5 +2474,5 @@ class zzmodelD_create(BaseModel):
 if __name__ == "__main__":
     import fire
     fire.Fire()
-    # test_all()
+    test6()
 
