@@ -102,11 +102,11 @@ def test1():
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
     model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
 
-    model = models.resnet50()
+    # model = models.resnet50()
     kwargs = {'input_size': (1, 3, 224, 224)}
     model_summary(model=model, **kwargs)
 
-    model = models.resnet50()
+    # model = models.resnet50()
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
