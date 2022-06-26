@@ -1966,11 +1966,10 @@ class MergeModel_create(BaseModel):
 
         #### BE cacreful to include all the params if COmbine loss.
         #### Here, only head_task
+        # self.optimizer = torch.optim.Adam({ **self.net.merge_task.parameters() ,
+        #                                    **self.net.head_task.parameters() ,  })
+        #### contains all the params,  and pre-trained models are FREEZED
         self.optimizer = torch.optim.Adam(self.net.parameters())
-<<<<<<< HEAD
-
-=======
->>>>>>> 0b5949b001c5a72345b5b117c96af8b331b1ee70
 
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5,
                          verbose=True, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
