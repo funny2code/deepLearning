@@ -478,13 +478,15 @@ def test4():
         log("Testing heteroscedacity...")
         log(m.hypopred_error_test_heteroscedacity(Xtest[:,0], Xtrain[:,1]))
 
+
         log("Testing test_mutualinfo()...")
         df1 = pd_generate_data(7, 100)
-        m.hypopred_error_test_residual_mutualinfo(df1["0"], df1[["1", "2", "3"]], colname="test")
+        m.hypopred_error_test_residual_mutualinfo(df1["0"], df1[["1", "2", "3"]],)
 
         log("Testing hypothesis_test()...")
-
-        log(m.hypopred_independance(Xtrain, Xtest))
+        X1 = np.random.random(100)
+        X2 = np.random.random(100)
+        log(m.hypotest_independance(X1, X2))
 
     def custom_stat(values, axis=1):
         #stat_val = np.mean(np.asmatrix(values),axis=axis)
@@ -494,7 +496,7 @@ def test4():
 
     def test_estimator():
         log("Testing estimators()...")
-        from utilmy.stats.statistics import confidence_interval_normal_std,confidence_interval_boostrap_bayes,confidence_interval_bootstrap
+        ypred = np.random.random(100)
         log(confidence_interval_normal_std(ypred))
         log(confidence_interval_boostrap_bayes(ypred))
         confidence_interval_bootstrap(ypred, custom_stat=custom_stat)
@@ -529,26 +531,26 @@ def test0():
 
 
 def test1():
-    """        .
+    """
     """
     from sklearn.tree import DecisionTreeRegressor
     from sklearn.model_selection import train_test_split
+    from utilmy import adatasets as ad
 
-    df = pd.read_csv("../testdata/tmp/test/crop.data.csv")
+    df = ad.test_dataset_classifier_fake(500)
     model = DecisionTreeRegressor(random_state=1)
-    y = df.fertilizer
-    X = df[["yield","density","block"]]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.50, random_state=42)
+    y = df['y'] ; del df['y']
+    X = df.values
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.50)
     model.fit(X_train, y_train)
     ypred = model.predict(X_test)
-    hypopred_error_test_normality(df["yield"])
+
+    hypopred_error_test_normality(df["y"])
     log(hypopred_error_test_heteroscedacity(y_test, ypred))
     #log(hypotest_is_all_independant(X_train, X_test))
     log(confidence_interval_normal_std(ypred))
     log(confidence_interval_boostrap_bayes(ypred))
-    '''TODO: need to check this one
-    estimator_bootstrap(ypred, custom_stat=custom_stat(ypred))
-    '''
+
 
 
 def test3():
@@ -566,7 +568,6 @@ def test_check_mean():
     Doc::
 
     """
-
     n = 100
     df = pd.DataFrme({'id' :  np.arange(0, n)})
     df['c1'] = np.random.random(n )
@@ -577,16 +578,16 @@ def test_check_mean():
 
 
     log("##- 2 columns")
-    hypotest_is_mean_equal(df, cols = ['c1', 'c2'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
+    hypotest_is_mean_equal(df, cols = ['c1', 'c2'],  alpha=0.05)
 
 
     log("##- 5 columns ")
-    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'c5'], bonferroni_adjuster=False, threshold=0.1, pcritic=0.5)
+    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'c5'],  alpha=0.05)
 
 
     log("##- 6 columsn not same")
     df['d6'] = np.random.random(n ) +0.3
-    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'd6'], bonferroni_adjuster=True, threshold=0.1, pcritic=0.5)
+    hypotest_is_mean_equal(df, cols=['c1', 'c2', 'c3', 'c4', 'd6'],  alpha=0.05)
 
 
 
