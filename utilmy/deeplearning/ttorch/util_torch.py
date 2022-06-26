@@ -270,12 +270,13 @@ def model_extract_embedding_to_parquet(model=None, dirout='./', data_loader=None
         with torch.no_grad():
             emb = model.get_embedding(X)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
-                ss = np_array_to_str(emb[i].numpy())  ####  array as string
+                ss = emb[i].numpy()  ####  array as string
                 df.append([ id_sample[i], ss])
 
-    df = pd.DataFrame(df, columns= ['id', 'emb'])
 
     if dirout is not None :
+      df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df = pd.DataFrame(df, columns= ['id', 'emb'])
       os_makedirs(dirout)
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
       pd_to_file(df, dirout2, show=1 )
