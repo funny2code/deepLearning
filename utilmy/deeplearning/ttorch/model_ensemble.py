@@ -1372,12 +1372,12 @@ def test6():
     tag='multi'
     dirout="./train"
     ut.model_extract_embedding_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
-    embv1, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    embv1, img_names,df = ut.embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
 
     #############Before Training #################
     print("Before Training")
     #########Cosine similarity b/w lables of 2 items Embeddings
-    dfsim = ut.embedding_cosinus_scores_pairwise(embv1, img_names, is_symmetric=False)
+    dfsim = ut.embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
     log(dfsim)
 
     # from sklearn.metrics.pairwise import cosine_similarity
@@ -1399,10 +1399,10 @@ def test6():
     dirout="./train"
     #############After Training #################
     ut.model_extract_embedding_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
-    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    embv, img_names,df = ut.embedding_load_parquet(dirin= f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
 
     print("After Training Cosinus Similarity")
-    dfsim = ut.embedding_cosinus_scores_pairwise(embv, img_names, is_symmetric=False)
+    dfsim = ut.embedding_cosinus_scores_pairwise(embv, name_list=None, is_symmetric=False)
     log(dfsim)
 
     # for i, emb1 in enumerate(embv):
