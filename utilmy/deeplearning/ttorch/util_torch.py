@@ -8,7 +8,7 @@ Doc::
     cos_similar_embedding(embv  =  None, img_names = None)
     dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
     dataset_add_image_fullpath(df, col_img = 'id', train_img_path = "./", test_img_path = './')
-    dataset_download(url    = "https =  "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
+    dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
     dataset_traintest_split(anyobject, train_ratio = 0.6, val_ratio = 0.2)
     device_setup(device = 'cpu', seed = 42, arg:dict = None)
     embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax  = None)
