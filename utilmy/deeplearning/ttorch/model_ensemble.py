@@ -1398,7 +1398,7 @@ def test6():
     ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
     embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
-    print("After Training Model Activations")
+    print("After Training Cosinus Similarity")
     for i, emb1 in enumerate(embv):
         for j, emb2 in enumerate(embv):
             if i==j:
