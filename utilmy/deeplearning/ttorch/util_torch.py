@@ -4,16 +4,32 @@ Doc::
 
     utilmy/deeplearning/ttorch/util_torch.py
     -------------------------functions----------------------
+    ImageDataloader(df = None, batch_size = 64, label_list = ['gender', 'masterCategory', 'subCategory' ], col_img = 'id', train_img_path   =  'data_fashion_small/train', test_img_path    =  'data_fashion_small/test', train_ratio = 0.5, val_ratio = 0.2, transform_train = None, transform_test = None, )
+    cos_similar_embedding(embv  =  None, img_names = None)
     dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
+    dataset_add_image_fullpath(df, col_img = 'id', train_img_path = "./", test_img_path = './')
+    dataset_download(url    = "https =  "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
+    dataset_traintest_split(anyobject, train_ratio = 0.6, val_ratio = 0.2)
     device_setup(device = 'cpu', seed = 42, arg:dict = None)
-    help()
-    model_evaluation(model, loss_task_fun, test_loader, arg, )
+    embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax  = None)
+    embedding_torchtensor_to_parquet(model  =  None, dirout  =  './', data_loader = None, tag = "")
+    model_evaluate(model, loss_task_fun, test_loader, arg, )
     model_load(dir_checkpoint:str, torch_model = None, doeval = True, dotrain = False, device = 'cpu', input_shape = None, **kw)
-    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict[str, torch.Tensor])
+    model_load_partially_compatible(model, dir_weights = '', device = 'cpu')
+    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict)
     model_save(torch_model = None, dir_checkpoint:str = "./checkpoint/check.pt", optimizer = None, cc:dict = None, epoch = -1, loss_val = 0.0, show = 1, **kw)
     model_summary(model, **kw)
     model_train(model, loss_calc, optimizer = None, train_loader = None, valid_loader = None, arg:dict = None)
+    pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict  =  None)
 
+
+    -------------------------methods----------------------
+    DataForEmbedding.__getitem__(self, idx: int)
+    DataForEmbedding.__init__(self, df = None, col_img: str = 'id', transforms = None, transforms_image_size_default = 64, img_loader = None)
+    DataForEmbedding.__len__(self)
+    ImageDataset.__getitem__(self, idx: int)
+    ImageDataset.__init__(self, img_dir:str = "images/", col_img: str = 'id', label_dir:str    = "labels/mylabel.csv", label_dict:dict  = None, transforms = None, transforms_image_size_default = 64, check_ifimage_exist = False, img_loader = None)
+    ImageDataset.__len__(self)
 
 
     Utils for torch training
@@ -95,7 +111,7 @@ def test1():
 
 
 def test2():
-    log("### Metrics torch_metric_accuracy  ")
+    log("### test torch_metric_accuracy, torch_pearson_coeff  ")
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
     output = model(data)
