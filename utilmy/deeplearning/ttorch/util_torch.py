@@ -255,6 +255,14 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 ###############################################################################################
 ####### Embedding #############################################################################
+def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
+    """  output model otuput, embedding.
+
+    """
+    pass
+
+
+
 def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
     """
     Docs:
@@ -280,11 +288,13 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
 
     """
+    model_embed_extract_fun = model.get_embedding
+
     df= []
-    assert(model is not None and data_loader is not None)
     for X , id_sample in data_loader:
         with torch.no_grad():
-            emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            emb = model_embed_extract_fun(X)
             for i in range(emb.size()[0]):
                 ss = emb[i].numpy()  ####  array as string
                 df.append([ id_sample[i], ss])
@@ -293,9 +303,9 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
     if dirout is not None :
       df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
       df = pd.DataFrame(df, columns= ['id', 'emb'])
-      os_makedirs(dirout)
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
       pd_to_file(df, dirout2, show=1 )
+
     return df
 
 
