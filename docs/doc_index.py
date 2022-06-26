@@ -590,25 +590,6 @@ utilmy/deeplearning/test.py
 utilmy/deeplearning/ttorch/__init__.py
 
 
-utilmy/deeplearning/ttorch/graphnlp.py
--------------------------functions----------------------
-dataset_download(dirout = '/content/sample_data/sent_tans/')
-dataset_fake(dirdata)
-graphnlp_train(modelname_or_path = 'distilbert-base-nli-mean-tokens', taskname = "classifier", lossname = "cosinus", datasetname  =  'sts', train_path = "train/*.csv", val_path   = "val/*.csv", eval_path  = "eval/*.csv", metricname = 'cosinus', dirout  = "mymodel_save/", cc:dict =  None)
-load_dataloader(name = 'sts', path_or_df  =  "", cc:dict =  None, npool = 4)
-load_evaluator(name = 'sts', path_or_df = "", dname = 'sts', cc:dict = None)
-load_loss(model  = '', lossname  = 'cosinus', cc:dict =  None)
-log(*s)
-metrics_cosine_sim(sentence1  =  "sentence 1", sentence2  =  "sentence 2", model_id  =  "model name or path or object")
-model_evaluate(model  = "modelname OR path OR model object", dirdata = './*.csv', dirout = './', cc:dict =  None, batch_size = 16, name = 'sts-test')
-model_load(path_or_name_or_object)
-model_save(model, path, reload = True)
-model_setup_compute(model, use_gpu = 0, ngpu = 1, ncpu = 1, cc:dict = None)
-pd_read(path_or_df = './myfile.csv', npool = 1, **kw)
-test()
-
-
-
 utilmy/deeplearning/ttorch/images/__init__.py
 
 
@@ -634,6 +615,314 @@ X3DHead.forward(self, x)
 X3DHead.init_weights(self)
 
 
+utilmy/deeplearning/ttorch/layers/__init__.py
+-------------------------methods----------------------
+LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
+LSTM.forward(self, x)
+MultiClassMultiLabel_Head.__init__(self, layers_dim = [256, 64], class_label_dict = None, dropout = 0, activation_custom = None, use_first_head_only =  None)
+MultiClassMultiLabel_Head.forward(self, x)
+MultiClassMultiLabel_Head.get_loss(self, ypred, ytrue, loss_calc_custom = None, weights = None, sum_loss = True)
+SmeLU.__init__(self, beta: float  =  2.)
+SmeLU.forward(self, input: torch.Tensor)
+
+
+utilmy/deeplearning/ttorch/losses/__init__.py
+-------------------------functions----------------------
+focal_loss(alpha: Optional[Sequence]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100, device = 'cpu', dtype = torch.float32)
+
+-------------------------methods----------------------
+FocalLoss.__init__(self, alpha: Optional[Tensor]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100)
+FocalLoss.__repr__(self)
+FocalLoss.forward(self, x: Tensor, y: Tensor)
+
+
+utilmy/deeplearning/ttorch/losses/affinity_loss.py
+-------------------------methods----------------------
+AffinityFieldLoss.__init__(self, kl_margin, lambda_edge = 1., lambda_not_edge = 1., ignore_lb = 255)
+AffinityFieldLoss.forward(self, logits, labels)
+AffinityLoss.__init__(self, kernel_size = 3, ignore_index = -100)
+AffinityLoss.forward(self, logits, labels)
+
+
+utilmy/deeplearning/ttorch/losses/amsoftmax.py
+-------------------------methods----------------------
+AMSoftmax.__init__(self, in_feats, n_classes = 10, m = 0.3, s = 15)
+AMSoftmax.forward(self, x, lb)
+
+
+utilmy/deeplearning/ttorch/losses/conv_ops.py
+-------------------------methods----------------------
+CoordConv2d.__init__(self, in_chan, out_chan, kernel_size = 3, stride = 1, padding = 1, dilation = 1, groups = 1, bias = True)
+CoordConv2d.forward(self, x)
+DY_Conv2d.__init__(self, in_chan, out_chan, kernel_size = 3, stride = 1, padding = 1, dilation = 1, groups = 1, bias = False, inplace = True), K = 4, temperature = 30, temp_anneal_steps = 3000)
+DY_Conv2d.forward(self, x)
+DY_Conv2d.get_atten(self, x)
+
+
+utilmy/deeplearning/ttorch/losses/dice_loss.py
+-------------------------methods----------------------
+BatchSoftDiceLoss.__init__(self, p = 1, smooth = 1, weight = None, ignore_lb = 255)
+BatchSoftDiceLoss.forward(self, logits, label)
+GeneralizedSoftDiceLoss.__init__(self, p = 1, smooth = 1, reduction = 'mean', weight = None, ignore_lb = 255)
+GeneralizedSoftDiceLoss.forward(self, logits, label)
+
+
+utilmy/deeplearning/ttorch/losses/dual_focal_loss.py
+-------------------------methods----------------------
+Dual_Focal_loss.__init__(self, ignore_lb = 255, eps = 1e-5, reduction = 'mean')
+Dual_Focal_loss.forward(self, logits, label)
+
+
+utilmy/deeplearning/ttorch/losses/ema.py
+-------------------------methods----------------------
+EMA.__init__(self, model, alpha, buffer_ema = True)
+EMA.apply_shadow(self)
+EMA.get_model_state(self)
+EMA.restore(self)
+EMA.update_params(self)
+
+
+utilmy/deeplearning/ttorch/losses/focal_loss.py
+-------------------------methods----------------------
+FocalLossV1.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean', )
+FocalLossV1.forward(self, logits, label)
+FocalLossV2.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean')
+FocalLossV2.forward(self, logits, label)
+FocalLossV3.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean')
+FocalLossV3.forward(self, logits, label)
+FocalSigmoidLossFuncV2.backward(ctx, grad_output)
+FocalSigmoidLossFuncV2.forward(ctx, logits, label, alpha, gamma)
+FocalSigmoidLossFuncV3.backward(ctx, grad_output)
+FocalSigmoidLossFuncV3.forward(ctx, logits, labels, alpha, gamma)
+
+
+utilmy/deeplearning/ttorch/losses/focal_loss_old.py
+-------------------------methods----------------------
+FocalLossV1.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean', )
+FocalLossV1.forward(self, logits, label)
+FocalLossV2.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean')
+FocalLossV2.forward(self, logits, label)
+FocalLossV3.__init__(self, alpha = 0.25, gamma = 2, reduction = 'mean')
+FocalLossV3.forward(self, logits, label)
+FocalSigmoidLossFuncV2.backward(ctx, grad_output)
+FocalSigmoidLossFuncV2.forward(ctx, logits, label, alpha, gamma)
+FocalSigmoidLossFuncV3.backward(ctx, grad_output)
+FocalSigmoidLossFuncV3.forward(ctx, logits, labels, alpha, gamma)
+
+
+utilmy/deeplearning/ttorch/losses/frelu.py
+-------------------------methods----------------------
+FReLU.__init__(self, in_chan)
+FReLU.forward(self, x)
+
+
+utilmy/deeplearning/ttorch/losses/generalized_iou_loss.py
+-------------------------functions----------------------
+generalized_iou_loss(gt_bboxes, pr_bboxes, reduction = 'mean')
+
+
+
+utilmy/deeplearning/ttorch/losses/group_loss.py
+-------------------------methods----------------------
+GroupLoss.__init__(self, in_feats = 2048, n_ids = 100, n_iters = 2, n_lbs_per_cls = 2, has_fc = True)
+GroupLoss.forward(self, emb, lbs, logits = None)
+
+
+utilmy/deeplearning/ttorch/losses/hswish.py
+-------------------------methods----------------------
+HSwishFunctionV2.backward(ctx, grad_output)
+HSwishFunctionV2.forward(ctx, feat)
+HSwishFunctionV3.backward(ctx, grad_output)
+HSwishFunctionV3.forward(ctx, feat)
+HSwishV1.__init__(self)
+HSwishV1.forward(self, feat)
+HSwishV2.__init__(self)
+HSwishV2.forward(self, feat)
+HSwishV3.__init__(self)
+HSwishV3.forward(self, feat)
+
+
+utilmy/deeplearning/ttorch/losses/info_nce_dist.py
+-------------------------methods----------------------
+InfoNceDist.__init__(self, temper = 0.1, margin = 0.)
+InfoNceDist.forward(self, embs1, embs2)
+InfoNceFunction.backward(ctx, grad_logits, grad_label)
+InfoNceFunction.forward(ctx, embs1, embs2, temper_factor, margin)
+
+
+utilmy/deeplearning/ttorch/losses/label_smooth.py
+-------------------------methods----------------------
+LSRCrossEntropyFunctionV2.backward(ctx, grad_output)
+LSRCrossEntropyFunctionV2.forward(ctx, logits, label, lb_smooth, lb_ignore)
+LSRCrossEntropyFunctionV3.backward(ctx, grad_output)
+LSRCrossEntropyFunctionV3.forward(ctx, logits, labels, lb_smooth, lb_ignore)
+LabelSmoothSoftmaxCEV1.__init__(self, lb_smooth = 0.1, reduction = 'mean', ignore_index = -100)
+LabelSmoothSoftmaxCEV1.forward(self, logits, label)
+LabelSmoothSoftmaxCEV2.__init__(self, lb_smooth = 0.1, reduction = 'mean', ignore_index = -100)
+LabelSmoothSoftmaxCEV2.forward(self, logits, labels)
+LabelSmoothSoftmaxCEV3.__init__(self, lb_smooth = 0.1, reduction = 'mean', ignore_index = -100)
+LabelSmoothSoftmaxCEV3.forward(self, logits, labels)
+
+
+utilmy/deeplearning/ttorch/losses/large_margin_softmax.py
+-------------------------methods----------------------
+LargeMarginSoftmaxFuncV2.backward(ctx, grad_output)
+LargeMarginSoftmaxFuncV2.forward(ctx, logits, labels, lam = 0.3)
+LargeMarginSoftmaxFuncV3.backward(ctx, grad_output)
+LargeMarginSoftmaxFuncV3.forward(ctx, logits, labels, lam = 0.3, ignore_index = 255)
+LargeMarginSoftmaxV1.__init__(self, lam = 0.3, reduction = 'mean', ignore_index = 255)
+LargeMarginSoftmaxV1.forward(self, logits, label)
+LargeMarginSoftmaxV2.__init__(self, lam = 0.3, reduction = 'mean', ignore_index = 255)
+LargeMarginSoftmaxV2.forward(self, logits, labels)
+LargeMarginSoftmaxV3.__init__(self, lam = 0.3, reduction = 'mean', ignore_index = 255)
+LargeMarginSoftmaxV3.forward(self, logits, labels)
+
+
+utilmy/deeplearning/ttorch/losses/layer_norm.py
+-------------------------methods----------------------
+LayerNormV1.__init__(self, n_chan, affine = True, eps = 1e-6)
+LayerNormV1.forward(self, x)
+LayerNormV2.__init__(self, n_chan, affine = True, eps = 1e-6)
+LayerNormV2.forward(self, x)
+LayerNormV2Func.backward(ctx, grad_output)
+LayerNormV2Func.forward(ctx, x, eps)
+LayerNormV3.__init__(self, n_chan, affine = True, eps = 1e-6)
+LayerNormV3.forward(self, x)
+LayerNormV3Func.backward(ctx, grad_output)
+LayerNormV3Func.forward(ctx, x, eps)
+
+
+utilmy/deeplearning/ttorch/losses/lovasz_softmax.py
+-------------------------methods----------------------
+LovaszSoftmaxFunctionV3.backward(ctx, grad_output)
+LovaszSoftmaxFunctionV3.forward(ctx, logits, labels, ignore_index)
+LovaszSoftmaxV1.__init__(self, reduction = 'mean', ignore_index = -100)
+LovaszSoftmaxV1.forward(self, logits, label)
+LovaszSoftmaxV3.__init__(self, reduction = 'mean', ignore_index = -100)
+LovaszSoftmaxV3.forward(self, logits, label)
+
+
+utilmy/deeplearning/ttorch/losses/mish.py
+-------------------------methods----------------------
+MishFunctionV2.backward(ctx, grad_output)
+MishFunctionV2.forward(ctx, feat)
+MishFunctionV3.backward(ctx, grad_output)
+MishFunctionV3.forward(ctx, feat)
+MishV1.__init__(self)
+MishV1.forward(self, feat)
+MishV2.__init__(self)
+MishV2.forward(self, feat)
+MishV3.__init__(self)
+MishV3.forward(self, feat)
+
+
+utilmy/deeplearning/ttorch/losses/ohem_loss.py
+-------------------------methods----------------------
+OhemCELoss.__init__(self, score_thresh, n_min = None, ignore_index = 255)
+OhemCELoss.forward(self, logits, labels)
+OhemLargeMarginLoss.__init__(self, score_thresh, n_min = None, ignore_index = 255)
+OhemLargeMarginLoss.forward(self, logits, labels)
+
+
+utilmy/deeplearning/ttorch/losses/one_hot.py
+-------------------------functions----------------------
+convert_to_one_hot(x, minleng, ignore_idx = -1)
+convert_to_one_hot_cu(x, minleng, smooth = 0., ignore_idx = -1)
+
+-------------------------methods----------------------
+OnehotEncoder.__init__(self, n_classes, lb_smooth = 0., ignore_idx = -1, )
+OnehotEncoder.forward(self, label)
+
+
+utilmy/deeplearning/ttorch/losses/partial_fc_amsoftmax.py
+-------------------------methods----------------------
+GatherFunction.backward(ctx, grad_all_embs, grad_all_lbs)
+GatherFunction.forward(ctx, embs, lbs)
+PartialFCAMSoftmax.__init__(self, emb_dim, n_ids = 10, m = 0.3, s = 15, ratio = 1., reduction = 'mean')
+PartialFCAMSoftmax.forward(self, x, lb)
+PartialFCFunction.backward(ctx, grad_output)
+PartialFCFunction.forward(ctx, all_embs, W, ind1, ind2, n_pos, s, m)
+SampleFunction.backward(ctx, grad_W, grad_ind1, grad_ind2, grad_n_pos)
+SampleFunction.forward(ctx, W, lb, ratio)
+
+
+utilmy/deeplearning/ttorch/losses/pc_softmax.py
+-------------------------functions----------------------
+pc_softmax_func(logits, lb_proportion)
+
+-------------------------methods----------------------
+PCSoftmax.__init__(self, lb_proportion)
+PCSoftmax.forward(self, logits)
+PCSoftmaxCrossEntropyFunction.backward(ctx, grad_output)
+PCSoftmaxCrossEntropyFunction.forward(ctx, logits, label, lb_proportion, reduction, ignore_index)
+PCSoftmaxCrossEntropyV1.__init__(self, lb_proportion, ignore_index = 255, reduction = 'mean')
+PCSoftmaxCrossEntropyV1.forward(self, logits, label)
+PCSoftmaxCrossEntropyV2.__init__(self, lb_proportion, reduction = 'mean', ignore_index = -100)
+PCSoftmaxCrossEntropyV2.forward(self, logits, label)
+
+
+utilmy/deeplearning/ttorch/losses/soft_dice_loss.py
+-------------------------methods----------------------
+SoftDiceLossV1.__init__(self, p = 1, smooth = 1)
+SoftDiceLossV1.forward(self, logits, labels)
+SoftDiceLossV2.__init__(self, p = 1, smooth = 1)
+SoftDiceLossV2.forward(self, logits, labels)
+SoftDiceLossV2Func.backward(ctx, grad_output)
+SoftDiceLossV2Func.forward(ctx, logits, labels, p, smooth)
+SoftDiceLossV3.__init__(self, p = 1, smooth = 1.)
+SoftDiceLossV3.forward(self, logits, labels)
+SoftDiceLossV3Func.backward(ctx, grad_output)
+SoftDiceLossV3Func.forward(ctx, logits, labels, p, smooth)
+
+
+utilmy/deeplearning/ttorch/losses/swish.py
+-------------------------methods----------------------
+SwishFunction.backward(ctx, grad_output)
+SwishFunction.forward(ctx, feat)
+SwishFunctionV3.backward(ctx, grad_output)
+SwishFunctionV3.forward(ctx, feat)
+SwishV1.__init__(self)
+SwishV1.forward(self, feat)
+SwishV2.__init__(self)
+SwishV2.forward(self, feat)
+SwishV3.__init__(self)
+SwishV3.forward(self, feat)
+
+
+utilmy/deeplearning/ttorch/losses/taylor_softmax.py
+-------------------------functions----------------------
+taylor_softmax_v1(x, dim = 1, n = 4, use_log = False)
+taylor_softmax_v3(inten, dim = 1, n = 4, use_log = False)
+
+-------------------------methods----------------------
+LogTaylorSoftmaxV1.__init__(self, dim = 1, n = 2)
+LogTaylorSoftmaxV1.forward(self, x)
+LogTaylorSoftmaxV3.__init__(self, dim = 1, n = 2)
+LogTaylorSoftmaxV3.forward(self, x)
+TaylorCrossEntropyLossV1.__init__(self, n = 2, ignore_index = -1, reduction = 'mean')
+TaylorCrossEntropyLossV1.forward(self, logits, labels)
+TaylorCrossEntropyLossV3.__init__(self, n = 2, ignore_index = -1, reduction = 'mean')
+TaylorCrossEntropyLossV3.forward(self, logits, labels)
+TaylorSoftmaxFunc.backward(ctx, grad_output)
+TaylorSoftmaxFunc.forward(ctx, feat, dim = 1, n = 2, use_log = False)
+TaylorSoftmaxV1.__init__(self, dim = 1, n = 2)
+TaylorSoftmaxV1.forward(self, x)
+TaylorSoftmaxV3.__init__(self, dim = 1, n = 2)
+TaylorSoftmaxV3.forward(self, x)
+
+
+utilmy/deeplearning/ttorch/losses/test.py
+-------------------------methods----------------------
+Model.__init__(self, n_classes)
+Model.forward(self, x)
+
+
+utilmy/deeplearning/ttorch/losses/triplet_loss.py
+-------------------------methods----------------------
+TripletLoss.__init__(self, margin = None)
+TripletLoss.forward(self, anchor, pos, neg)
+
+
 utilmy/deeplearning/ttorch/model_ensemble.py
 -------------------------functions----------------------
 dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
@@ -648,6 +937,7 @@ test2d()
 test3()
 test4()
 test5()
+test6()
 test_all()
 test_dataset_fashionmnist_get_torchdataloader(nrows = 1000, batch_size = 64, num_workers = 8, transform_custom = None)
 torch_norm_l2(X)
@@ -679,18 +969,6 @@ MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
 MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
 SequenceReshaper.__init__(self, from_  =  'vision')
 SequenceReshaper.forward(self, x)
-modelA_create.__init__(self, arg)
-modelA_create.create_loss(self, loss_fun = None)
-modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
-modelB_create.__init__(self, arg)
-modelB_create.create_loss(self)
-modelB_create.create_model(self)
-modelC_create.__init__(self, arg)
-modelC_create.create_loss(self)
-modelC_create.create_model(self)
-modelD_create.__init__(self, arg)
-modelD_create.create_loss(self)
-modelD_create.create_model(self)
 model_create.__init__(self, arg)
 model_create.create_loss(self, loss_fun = None)
 model_create.create_model(self, modelA_nn:torch.nn.Module = None)
@@ -700,74 +978,40 @@ model_getlayer.get_layers_in_order(self, network)
 model_getlayer.hook_fn(self, module, input, output)
 model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
 model_template_MLP.forward(self, x, **kwargs)
-
-
-utilmy/deeplearning/ttorch/model_ensemble2.py
--------------------------functions----------------------
-dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
-device_setup(arg, device = 'cpu', seed = 67)
-help()
-test1()
-test2_lstm()
-test2a()
-test2b()
-test2c()
-test2d()
-test3()
-test_all()
-torch_norm_l2(X)
-
--------------------------methods----------------------
-BaseModel.__init__(self, arg)
-BaseModel.build(self, )
-BaseModel.create_loss(self, )
-BaseModel.create_model(self, )
-BaseModel.device(self, )
-BaseModel.device(self, )
-BaseModel.device_setup(self, arg)
-BaseModel.eval(self)
-BaseModel.evaluate(self)
-BaseModel.grad_check(self, )
-BaseModel.load_DataFrame(self, path = None)
-BaseModel.load_weights(self, path)
-BaseModel.predict(self, x, **kwargs)
-BaseModel.prepro_dataset(self, csv)
-BaseModel.save_weight(self, path, meta_data = None)
-BaseModel.train(self)
-BaseModel.training(self, )
-BaseModel.validate_dim(self, train_loader, val_loader)
-MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
-MergeModel_create.build(self)
-MergeModel_create.create_loss(self, )
-MergeModel_create.create_model(self, )
-MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
-MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
-SequenceReshaper.__init__(self, from_  =  'vision')
-SequenceReshaper.forward(self, x)
-modelA_create.__init__(self, arg)
-modelA_create.create_loss(self, loss_fun = None)
-modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
-modelB_create.__init__(self, arg)
-modelB_create.create_loss(self)
-modelB_create.create_model(self)
-modelC_create.__init__(self, arg)
-modelC_create.create_loss(self)
-modelC_create.create_model(self)
-modelD_create.__init__(self, arg)
-modelD_create.create_loss(self)
-modelD_create.create_model(self)
-model_create.__init__(self, arg)
-model_create.create_loss(self, loss_fun = None)
-model_create.create_model(self, modelA_nn:torch.nn.Module = None)
-model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
-model_getlayer.close(self)
-model_getlayer.get_layers_in_order(self, network)
-model_getlayer.hook_fn(self, module, input, output)
-model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
-model_template_MLP.forward(self, x, **kwargs)
+zzmodelA_create.__init__(self, arg)
+zzmodelA_create.create_loss(self, loss_fun = None)
+zzmodelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+zzmodelB_create.__init__(self, arg)
+zzmodelB_create.create_loss(self)
+zzmodelB_create.create_model(self)
+zzmodelC_create.__init__(self, arg)
+zzmodelC_create.create_loss(self)
+zzmodelC_create.create_model(self)
+zzmodelD_create.__init__(self, arg)
+zzmodelD_create.create_loss(self)
+zzmodelD_create.create_model(self)
 
 
 utilmy/deeplearning/ttorch/models/__init__.py
+
+
+utilmy/deeplearning/ttorch/models/graphnlp.py
+-------------------------functions----------------------
+dataset_download(dirout = '/content/sample_data/sent_tans/')
+dataset_fake(dirdata)
+graphnlp_train(modelname_or_path = 'distilbert-base-nli-mean-tokens', taskname = "classifier", lossname = "cosinus", datasetname  =  'sts', train_path = "train/*.csv", val_path   = "val/*.csv", eval_path  = "eval/*.csv", metricname = 'cosinus', dirout  = "mymodel_save/", cc:dict =  None)
+load_dataloader(name = 'sts', path_or_df  =  "", cc:dict =  None, npool = 4)
+load_evaluator(name = 'sts', path_or_df = "", dname = 'sts', cc:dict = None)
+load_loss(model  = '', lossname  = 'cosinus', cc:dict =  None)
+log(*s)
+metrics_cosine_sim(sentence1  =  "sentence 1", sentence2  =  "sentence 2", model_id  =  "model name or path or object")
+model_evaluate(model  = "modelname OR path OR model object", dirdata = './*.csv', dirout = './', cc:dict =  None, batch_size = 16, name = 'sts-test')
+model_load(path_or_name_or_object)
+model_save(model, path, reload = True)
+model_setup_compute(model, use_gpu = 0, ngpu = 1, ncpu = 1, cc:dict = None)
+pd_read(path_or_df = './myfile.csv', npool = 1, **kw)
+test()
+
 
 
 utilmy/deeplearning/ttorch/models/rule_encoder4.py
@@ -838,37 +1082,102 @@ check_lstm()
 
 
 
+utilmy/deeplearning/ttorch/torchinfo/__init__.py
+
+
+utilmy/deeplearning/ttorch/torchinfo/enums.py
+
+
+utilmy/deeplearning/ttorch/torchinfo/formatting.py
+-------------------------methods----------------------
+FormattingOptions.__init__(self, max_depth: int, verbose: int, col_names: tuple[ColumnSettings, ...], col_width: int, row_settings: set[RowSettings], )
+FormattingOptions.format_row(self, layer_name: str, row_values: dict[ColumnSettings, str])
+FormattingOptions.get_start_str(self, depth: int)
+FormattingOptions.get_total_width(self)
+FormattingOptions.header_row(self)
+FormattingOptions.layer_info_to_row(self, layer_info: LayerInfo, reached_max_depth: bool)
+FormattingOptions.layers_to_str(self, summary_list: list[LayerInfo])
+FormattingOptions.set_layer_name_width(self, summary_list: list[LayerInfo], align_val: int  =  5)
+FormattingOptions.str_(val: Any)
+
+
+utilmy/deeplearning/ttorch/torchinfo/layer_info.py
+-------------------------functions----------------------
+get_children_layers(summary_list: list[LayerInfo], index: int)
+prod(num_list: Iterable[int] | torch.Size)
+rgetattr(module: nn.Module, attr: str)
+
+-------------------------methods----------------------
+LayerInfo.__init__(self, var_name: str, module: nn.Module, depth: int, parent_info: LayerInfo | None  =  None, )
+LayerInfo.__repr__(self)
+LayerInfo.calculate_macs(self)
+LayerInfo.calculate_num_params(self)
+LayerInfo.calculate_size(inputs: DETECTED_INPUT_OUTPUT_TYPES, batch_dim: int | None)
+LayerInfo.check_recursive(self, layer_ids: set[int])
+LayerInfo.get_kernel_size(module: nn.Module)
+LayerInfo.get_layer_name(self, show_var_name: bool, show_depth: bool)
+LayerInfo.get_param_count(module: nn.Module, name: str, param: torch.Tensor)
+LayerInfo.leftover_params(self)
+LayerInfo.leftover_trainable_params(self)
+LayerInfo.macs_to_str(self, reached_max_depth: bool)
+LayerInfo.num_params_to_str(self, reached_max_depth: bool)
+LayerInfo.trainable(self)
+
+
+utilmy/deeplearning/ttorch/torchinfo/model_statistics.py
+-------------------------methods----------------------
+ModelStatistics.__init__(self, summary_list: list[LayerInfo], input_size: Any, total_input_size: int, formatting: FormattingOptions, )
+ModelStatistics.__repr__(self)
+ModelStatistics.float_to_megabytes(num: int)
+ModelStatistics.to_megabytes(num: int)
+ModelStatistics.to_readable(num: int)
+
+
+utilmy/deeplearning/ttorch/torchinfo/torchinfo.py
+-------------------------functions----------------------
+add_missing_layers(summary_list: list[LayerInfo], all_layers: list[LayerInfo])
+apply_hooks(model_name: str, module: nn.Module, input_data: CORRECTED_INPUT_DATA_TYPE, batch_dim: int | None, list[LayerInfo], dict[int, LayerInfo], dict[int, tuple[RemovableHandle, RemovableHandle]], ])
+clear_cached_forward_pass()
+construct_hook(global_layer_info: dict[int, LayerInfo], batch_dim: int | None)
+construct_pre_hook(global_layer_info: dict[int, LayerInfo], summary_list: list[LayerInfo], layer_ids: set[int], var_name: str, curr_depth: int, parent_info: LayerInfo | None, )
+flatten(nested_array: INPUT_SIZE_TYPE)
+forward_pass(model: nn.Module, x: CORRECTED_INPUT_DATA_TYPE, batch_dim: int | None, cache_forward_pass: bool, device: torch.device | str, mode: Mode, **kwargs: Any, )
+get_correct_input_sizes(input_size: INPUT_SIZE_TYPE)
+get_input_data_sizes(data: Any)
+get_input_tensor(input_size: CORRECTED_INPUT_SIZE_TYPE, batch_dim: int | None, dtypes: list[torch.dtype], device: torch.device | str, )
+get_total_memory_used(data: CORRECTED_INPUT_DATA_TYPE)
+process_input(input_data: INPUT_DATA_TYPE | None, input_size: INPUT_SIZE_TYPE | None, batch_dim: int | None, device: torch.device | str, dtypes: list[torch.dtype] | None  =  None, )
+set_children_layers(summary_list: list[LayerInfo])
+set_device(data: Any, device: torch.device | str)
+summary(model: nn.Module, input_size: INPUT_SIZE_TYPE | None  =  None, input_data: INPUT_DATA_TYPE | None  =  None, batch_dim: int | None  =  None, cache_forward_pass: bool | None  =  None, col_names: Iterable[str] | None  =  None, col_width: int  =  25, depth: int  =  3, device: torch.device | str | None  =  None, dtypes: list[torch.dtype] | None  =  None, mode: str | None  =  None, row_settings: Iterable[str] | None  =  None, verbose: int | None  =  None, **kwargs: Any, )
+traverse_input_data(data: Any, action_fn: Callable[..., Any], aggregate_fn: Callable[..., Any])
+validate_user_params(input_data: INPUT_DATA_TYPE | None, input_size: INPUT_SIZE_TYPE | None, col_names: tuple[ColumnSettings, ...], col_width: int, device: torch.device | str | None, dtypes: list[torch.dtype] | None, verbose: int, )
+
+
+
 utilmy/deeplearning/ttorch/util_model.py
 -------------------------functions----------------------
-focal_loss(alpha: Optional[Sequence]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100, device = 'cpu', dtype = torch.float32)
 model_freezeparams(model, params_to_freeze  =  None, freeze  =  True)
 model_getparams(model, params_to_get  =  None, detach  =  True)
 model_is_gradient_needed(net_model)
 model_layers_add(model, modules  =  [])
 model_layers_delete(model, del_ids  =  [])
 model_layers_getall(model)
-plot_grad_flow(named_parameters)
-plot_grad_flow_v2(named_parameters)
+plot_gradient_flow(named_parameters)
+plot_gradient_flow_v2(named_parameters)
 test1()
 test2()
 test3()
 test4()
 test_all()
-vision_prediction_check()
+torch_norm_l2(X)
 
 -------------------------methods----------------------
-FocalLoss.__init__(self, alpha: Optional[Tensor]  =  None, gamma: float  =  0., reduction: str  =  'mean', ignore_index: int  =  -100)
-FocalLoss.__repr__(self)
-FocalLoss.forward(self, x: Tensor, y: Tensor)
-LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
-LSTM.forward(self, x)
 MultiClassMultiLabel_Head.__init__(self, layers_dim = [256, 64], class_label_dict = None, dropout = 0, activation_custom = None, use_first_head_only =  None)
 MultiClassMultiLabel_Head.forward(self, x)
 MultiClassMultiLabel_Head.get_loss(self, ypred, ytrue, loss_calc_custom = None, weights = None, sum_loss = True)
 SequenceReshaper.__init__(self, from_  =  'vision')
 SequenceReshaper.forward(self, x)
-SmeLU.__init__(self, beta: float  =  2.)
-SmeLU.forward(self, input: torch.Tensor)
 model_LayerRecorder.__init__(self, module, record_input  =  False, record_output  =  False, record_params  =  False, params_to_get  =  None, backward  =  False, custom_fn  =  None, save_to  =  None, **kwargs)
 model_LayerRecorder._custom_wrapper(self, module, input, output)
 model_LayerRecorder._fn_in_out_params(self, module, input, output, record_what  =  None)
@@ -881,216 +1190,35 @@ model_getlayer.hook_fn(self, module1, input, output)
 
 utilmy/deeplearning/ttorch/util_torch.py
 -------------------------functions----------------------
+ImageDataloader(df = None, batch_size = 64, label_list = ['gender', 'masterCategory', 'subCategory' ], col_img = 'id', train_img_path   =  'data_fashion_small/train', test_img_path    =  'data_fashion_small/test', train_ratio = 0.5, val_ratio = 0.2, transform_train = None, transform_test = None, )
+cos_similar_embedding(embv  =  None, img_names = None)
 dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
+dataset_add_image_fullpath(df, col_img = 'id', train_img_path = "./", test_img_path = './')
+dataset_download(url    = "https =  "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
+dataset_traintest_split(anyobject, train_ratio = 0.6, val_ratio = 0.2)
 device_setup(device = 'cpu', seed = 42, arg:dict = None)
+embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax  = None)
+embedding_torchtensor_to_parquet(model  =  None, dirout  =  './', data_loader = None, tag = "")
 help()
-load_partially_compatible(model, device = 'cpu')
-model_evaluation(model, loss_task_fun, test_loader, arg, )
+model_evaluate(model, loss_task_fun, test_loader, arg, )
 model_load(dir_checkpoint:str, torch_model = None, doeval = True, dotrain = False, device = 'cpu', input_shape = None, **kw)
-model_load_state_dict_with_low_memory(model: nn.Module, state_dict: Dict[str, torch.Tensor])
+model_load_partially_compatible(model, dir_weights = '', device = 'cpu')
+model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict)
 model_save(torch_model = None, dir_checkpoint:str = "./checkpoint/check.pt", optimizer = None, cc:dict = None, epoch = -1, loss_val = 0.0, show = 1, **kw)
 model_summary(model, **kw)
 model_train(model, loss_calc, optimizer = None, train_loader = None, valid_loader = None, arg:dict = None)
+pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict  =  None)
 test1()
 test2()
 test_all()
-test_dataset_classification_fake(nrows = 500)
-test_dataset_fashion_mnist(samples = 100, random_crop = False, random_erasing = False, convert_to_RGB = False, val_set_ratio = 0.2, test_set_ratio = 0.1, num_workers = 1)
 
 -------------------------methods----------------------
-test_model_dummy2.__init__(self)
-test_model_dummy.__init__(self, input_dim, output_dim, hidden_dim = 4)
-test_model_dummy.forward(self, x)
-
-
-utilmy/deeplearning/ttorch/zmodel_ensemble2.py
--------------------------functions----------------------
-dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
-device_setup(arg, device = 'cpu', seed = 67)
-help()
-test1()
-test2a()
-test2b()
-test2c()
-test2d()
-test_all()
-torch_norm_l2(X)
-
--------------------------methods----------------------
-BaseModel.__init__(self, arg)
-BaseModel.build(self, )
-BaseModel.create_loss(self, )
-BaseModel.create_model(self, )
-BaseModel.device(self, )
-BaseModel.device(self, )
-BaseModel.device_setup(self, arg)
-BaseModel.eval(self)
-BaseModel.evaluate(self)
-BaseModel.load_DataFrame(self, path = None)
-BaseModel.load_weights(self, path)
-BaseModel.predict(self, x, **kwargs)
-BaseModel.prepro_dataset(self, csv)
-BaseModel.save_weight(self, path, meta_data = None)
-BaseModel.train(self)
-BaseModel.training(self, )
-MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
-MergeModel_create.build(self)
-MergeModel_create.create_loss(self, )
-MergeModel_create.create_model(self, )
-MergeModel_create.freeze_all(self, )
-MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
-MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None)
-MergeModel_create.unfreeze_all(self, )
-modelA_create.__init__(self, arg)
-modelA_create.create_loss(self, loss_fun = None)
-modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
-modelB_create.__init__(self, arg)
-modelB_create.create_loss(self)
-modelB_create.create_model(self)
-modelC_create.__init__(self, arg)
-modelC_create.create_loss(self)
-modelC_create.create_model(self)
-model_create.__init__(self, arg)
-model_create.create_loss(self, loss_fun = None)
-model_create.create_model(self, modelA_nn:torch.nn.Module = None)
-model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
-model_getlayer.close(self)
-model_getlayer.get_layers_in_order(self, network)
-model_getlayer.hook_fn(self, module, input, output)
-model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
-model_template_MLP.forward(self, x, **kwargs)
-
-
-utilmy/deeplearning/ttorch/zmodel_ensemble4.py
--------------------------functions----------------------
-dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
-device_setup(arg, device = 'cpu', seed = 67)
-help()
-test1()
-test2a()
-test2b()
-test2c()
-test2d()
-test2e()
-test_all()
-torch_norm_l2(X)
-
--------------------------methods----------------------
-BaseModel.__init__(self, arg)
-BaseModel.build(self, )
-BaseModel.create_loss(self, )
-BaseModel.create_model(self, )
-BaseModel.device(self, )
-BaseModel.device(self, )
-BaseModel.device_setup(self, arg)
-BaseModel.eval(self)
-BaseModel.evaluate(self)
-BaseModel.grad_check(self, )
-BaseModel.load_DataFrame(self, path = None)
-BaseModel.load_weights(self, path)
-BaseModel.predict(self, x, **kwargs)
-BaseModel.prepro_dataset(self, csv)
-BaseModel.save_weight(self, path, meta_data = None)
-BaseModel.train(self)
-BaseModel.training(self, )
-BaseModel.validate_dim(self, train_loader, val_loader)
-LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
-LSTM.forward(self, x)
-MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
-MergeModel_create.build(self)
-MergeModel_create.create_loss(self, )
-MergeModel_create.create_model(self, )
-MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
-MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
-SequenceReshaper.__init__(self, from_  =  'vision')
-SequenceReshaper.forward(self, x)
-modelA_create.__init__(self, arg)
-modelA_create.create_loss(self, loss_fun = None)
-modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
-modelB_create.__init__(self, arg)
-modelB_create.create_loss(self)
-modelB_create.create_model(self)
-modelC_create.__init__(self, arg)
-modelC_create.create_loss(self)
-modelC_create.create_model(self)
-modelD_create.__init__(self, arg)
-modelD_create.create_loss(self)
-modelD_create.create_model(self)
-model_create.__init__(self, arg)
-model_create.create_loss(self, loss_fun = None)
-model_create.create_model(self, modelA_nn:torch.nn.Module = None)
-model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
-model_getlayer.close(self)
-model_getlayer.get_layers_in_order(self, network)
-model_getlayer.hook_fn(self, module, input, output)
-model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
-model_template_MLP.forward(self, x, **kwargs)
-
-
-utilmy/deeplearning/ttorch/zmodel_ensemble_old.py
--------------------------functions----------------------
-dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
-device_setup(arg, device = 'cpu', seed = 67)
-help()
-test1()
-test2a()
-test2b()
-test2c()
-test2d()
-test2e()
-test_all()
-torch_norm_l2(X)
-
--------------------------methods----------------------
-BaseModel.__init__(self, arg)
-BaseModel.build(self, )
-BaseModel.create_loss(self, )
-BaseModel.create_model(self, )
-BaseModel.device(self, )
-BaseModel.device(self, )
-BaseModel.device_setup(self, arg)
-BaseModel.eval(self)
-BaseModel.evaluate(self)
-BaseModel.grad_check(self, )
-BaseModel.load_DataFrame(self, path = None)
-BaseModel.load_weights(self, path)
-BaseModel.predict(self, x, **kwargs)
-BaseModel.prepro_dataset(self, csv)
-BaseModel.save_weight(self, path, meta_data = None)
-BaseModel.train(self)
-BaseModel.training(self, )
-BaseModel.validate_dim(self, train_loader, val_loader)
-LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
-LSTM.forward(self, x)
-MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
-MergeModel_create.build(self)
-MergeModel_create.create_loss(self, )
-MergeModel_create.create_model(self, )
-MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
-MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
-SequenceReshaper.__init__(self, from_  =  'vision')
-SequenceReshaper.forward(self, x)
-modelA_create.__init__(self, arg)
-modelA_create.create_loss(self, loss_fun = None)
-modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
-modelB_create.__init__(self, arg)
-modelB_create.create_loss(self)
-modelB_create.create_model(self)
-modelC_create.__init__(self, arg)
-modelC_create.create_loss(self)
-modelC_create.create_model(self)
-modelD_create.__init__(self, arg)
-modelD_create.create_loss(self)
-modelD_create.create_model(self)
-model_create.__init__(self, arg)
-model_create.create_loss(self, loss_fun = None)
-model_create.create_model(self, modelA_nn:torch.nn.Module = None)
-model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
-model_getlayer.close(self)
-model_getlayer.get_layers_in_order(self, network)
-model_getlayer.hook_fn(self, module, input, output)
-model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
-model_template_MLP.forward(self, x, **kwargs)
+DataForEmbedding.__getitem__(self, idx: int)
+DataForEmbedding.__init__(self, df = None, col_img: str = 'id', transforms = None, transforms_image_size_default = 64, img_loader = None)
+DataForEmbedding.__len__(self)
+ImageDataset.__getitem__(self, idx: int)
+ImageDataset.__init__(self, img_dir:str = "images/", col_img: str = 'id', label_dir:str    = "labels/mylabel.csv", label_dict:dict  = None, transforms = None, transforms_image_size_default = 64, check_ifimage_exist = False, img_loader = None)
+ImageDataset.__len__(self)
 
 
 utilmy/deeplearning/ttorch/zsave/__init__.py
@@ -1190,6 +1318,196 @@ RuleEncoder_Create.prepro_dataset(self, df)
 utilmy/deeplearning/ttorch/zsave/test_usage.py
 
 
+utilmy/deeplearning/ttorch/zsave/zmodel_ensemble2.py
+-------------------------functions----------------------
+dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
+device_setup(arg, device = 'cpu', seed = 67)
+help()
+test1()
+test2a()
+test2b()
+test2c()
+test2d()
+test_all()
+torch_norm_l2(X)
+
+-------------------------methods----------------------
+BaseModel.__init__(self, arg)
+BaseModel.build(self, )
+BaseModel.create_loss(self, )
+BaseModel.create_model(self, )
+BaseModel.device(self, )
+BaseModel.device(self, )
+BaseModel.device_setup(self, arg)
+BaseModel.eval(self)
+BaseModel.evaluate(self)
+BaseModel.load_DataFrame(self, path = None)
+BaseModel.load_weights(self, path)
+BaseModel.predict(self, x, **kwargs)
+BaseModel.prepro_dataset(self, csv)
+BaseModel.save_weight(self, path, meta_data = None)
+BaseModel.train(self)
+BaseModel.training(self, )
+MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
+MergeModel_create.build(self)
+MergeModel_create.create_loss(self, )
+MergeModel_create.create_model(self, )
+MergeModel_create.freeze_all(self, )
+MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
+MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None)
+MergeModel_create.unfreeze_all(self, )
+modelA_create.__init__(self, arg)
+modelA_create.create_loss(self, loss_fun = None)
+modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+modelB_create.__init__(self, arg)
+modelB_create.create_loss(self)
+modelB_create.create_model(self)
+modelC_create.__init__(self, arg)
+modelC_create.create_loss(self)
+modelC_create.create_model(self)
+model_create.__init__(self, arg)
+model_create.create_loss(self, loss_fun = None)
+model_create.create_model(self, modelA_nn:torch.nn.Module = None)
+model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+model_getlayer.close(self)
+model_getlayer.get_layers_in_order(self, network)
+model_getlayer.hook_fn(self, module, input, output)
+model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
+model_template_MLP.forward(self, x, **kwargs)
+
+
+utilmy/deeplearning/ttorch/zsave/zmodel_ensemble4.py
+-------------------------functions----------------------
+dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
+device_setup(arg, device = 'cpu', seed = 67)
+help()
+test1()
+test2a()
+test2b()
+test2c()
+test2d()
+test2e()
+test_all()
+torch_norm_l2(X)
+
+-------------------------methods----------------------
+BaseModel.__init__(self, arg)
+BaseModel.build(self, )
+BaseModel.create_loss(self, )
+BaseModel.create_model(self, )
+BaseModel.device(self, )
+BaseModel.device(self, )
+BaseModel.device_setup(self, arg)
+BaseModel.eval(self)
+BaseModel.evaluate(self)
+BaseModel.grad_check(self, )
+BaseModel.load_DataFrame(self, path = None)
+BaseModel.load_weights(self, path)
+BaseModel.predict(self, x, **kwargs)
+BaseModel.prepro_dataset(self, csv)
+BaseModel.save_weight(self, path, meta_data = None)
+BaseModel.train(self)
+BaseModel.training(self, )
+BaseModel.validate_dim(self, train_loader, val_loader)
+LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
+LSTM.forward(self, x)
+MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
+MergeModel_create.build(self)
+MergeModel_create.create_loss(self, )
+MergeModel_create.create_model(self, )
+MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
+MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
+SequenceReshaper.__init__(self, from_  =  'vision')
+SequenceReshaper.forward(self, x)
+modelA_create.__init__(self, arg)
+modelA_create.create_loss(self, loss_fun = None)
+modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+modelB_create.__init__(self, arg)
+modelB_create.create_loss(self)
+modelB_create.create_model(self)
+modelC_create.__init__(self, arg)
+modelC_create.create_loss(self)
+modelC_create.create_model(self)
+modelD_create.__init__(self, arg)
+modelD_create.create_loss(self)
+modelD_create.create_model(self)
+model_create.__init__(self, arg)
+model_create.create_loss(self, loss_fun = None)
+model_create.create_model(self, modelA_nn:torch.nn.Module = None)
+model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+model_getlayer.close(self)
+model_getlayer.get_layers_in_order(self, network)
+model_getlayer.hook_fn(self, module, input, output)
+model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
+model_template_MLP.forward(self, x, **kwargs)
+
+
+utilmy/deeplearning/ttorch/zsave/zmodel_ensemble_old.py
+-------------------------functions----------------------
+dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
+device_setup(arg, device = 'cpu', seed = 67)
+help()
+test1()
+test2a()
+test2b()
+test2c()
+test2d()
+test2e()
+test_all()
+torch_norm_l2(X)
+
+-------------------------methods----------------------
+BaseModel.__init__(self, arg)
+BaseModel.build(self, )
+BaseModel.create_loss(self, )
+BaseModel.create_model(self, )
+BaseModel.device(self, )
+BaseModel.device(self, )
+BaseModel.device_setup(self, arg)
+BaseModel.eval(self)
+BaseModel.evaluate(self)
+BaseModel.grad_check(self, )
+BaseModel.load_DataFrame(self, path = None)
+BaseModel.load_weights(self, path)
+BaseModel.predict(self, x, **kwargs)
+BaseModel.prepro_dataset(self, csv)
+BaseModel.save_weight(self, path, meta_data = None)
+BaseModel.train(self)
+BaseModel.training(self, )
+BaseModel.validate_dim(self, train_loader, val_loader)
+LSTM.__init__(self, input_size, hidden_size, num_layers, num_classes, dropout)
+LSTM.forward(self, x)
+MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
+MergeModel_create.build(self)
+MergeModel_create.create_loss(self, )
+MergeModel_create.create_model(self, )
+MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
+MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
+SequenceReshaper.__init__(self, from_  =  'vision')
+SequenceReshaper.forward(self, x)
+modelA_create.__init__(self, arg)
+modelA_create.create_loss(self, loss_fun = None)
+modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+modelB_create.__init__(self, arg)
+modelB_create.create_loss(self)
+modelB_create.create_model(self)
+modelC_create.__init__(self, arg)
+modelC_create.create_loss(self)
+modelC_create.create_model(self)
+modelD_create.__init__(self, arg)
+modelD_create.create_loss(self)
+modelD_create.create_model(self)
+model_create.__init__(self, arg)
+model_create.create_loss(self, loss_fun = None)
+model_create.create_model(self, modelA_nn:torch.nn.Module = None)
+model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+model_getlayer.close(self)
+model_getlayer.get_layers_in_order(self, network)
+model_getlayer.hook_fn(self, module, input, output)
+model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
+model_template_MLP.forward(self, x, **kwargs)
+
+
 utilmy/deeplearning/ttorch/zsave/zrule_encoder2.py
 -------------------------functions----------------------
 dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, arg = None)
@@ -1242,31 +1560,122 @@ RuleEncoder.__init__(self, input_dim, output_dim, hidden_dim = 4)
 RuleEncoder.forward(self, x)
 
 
+utilmy/deeplearning/ttorch/zsave/zz_model_ensemble2.py
+-------------------------functions----------------------
+dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, device = 'cpu', batch_size = 16, )
+device_setup(arg, device = 'cpu', seed = 67)
+help()
+test1()
+test2_lstm()
+test2a()
+test2b()
+test2c()
+test2d()
+test3()
+test_all()
+torch_norm_l2(X)
+
+-------------------------methods----------------------
+BaseModel.__init__(self, arg)
+BaseModel.build(self, )
+BaseModel.create_loss(self, )
+BaseModel.create_model(self, )
+BaseModel.device(self, )
+BaseModel.device(self, )
+BaseModel.device_setup(self, arg)
+BaseModel.eval(self)
+BaseModel.evaluate(self)
+BaseModel.grad_check(self, )
+BaseModel.load_DataFrame(self, path = None)
+BaseModel.load_weights(self, path)
+BaseModel.predict(self, x, **kwargs)
+BaseModel.prepro_dataset(self, csv)
+BaseModel.save_weight(self, path, meta_data = None)
+BaseModel.train(self)
+BaseModel.training(self, )
+BaseModel.validate_dim(self, train_loader, val_loader)
+MergeModel_create.__init__(self, arg:dict = None, model_create_list  =  None)
+MergeModel_create.build(self)
+MergeModel_create.create_loss(self, )
+MergeModel_create.create_model(self, )
+MergeModel_create.prepro_dataset(self, df:pd.DataFrame = None)
+MergeModel_create.training(self, load_DataFrame = None, prepro_dataset = None, dataloader_custom = None)
+SequenceReshaper.__init__(self, from_  =  'vision')
+SequenceReshaper.forward(self, x)
+modelA_create.__init__(self, arg)
+modelA_create.create_loss(self, loss_fun = None)
+modelA_create.create_model(self, modelA_nn:torch.nn.Module = None)
+modelB_create.__init__(self, arg)
+modelB_create.create_loss(self)
+modelB_create.create_model(self)
+modelC_create.__init__(self, arg)
+modelC_create.create_loss(self)
+modelC_create.create_model(self)
+modelD_create.__init__(self, arg)
+modelD_create.create_loss(self)
+modelD_create.create_model(self)
+model_create.__init__(self, arg)
+model_create.create_loss(self, loss_fun = None)
+model_create.create_model(self, modelA_nn:torch.nn.Module = None)
+model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+model_getlayer.close(self)
+model_getlayer.get_layers_in_order(self, network)
+model_getlayer.hook_fn(self, module, input, output)
+model_template_MLP.__init__(self, layers_dim = [20, 100, 16])
+model_template_MLP.forward(self, x, **kwargs)
+
+
+utilmy/deeplearning/tutorial/__init__.py
+
+
 utilmy/deeplearning/tutorial/transf.py
+
+
+utilmy/deeplearning/tutorial/zz_util_topk.py
+-------------------------functions----------------------
+convert_txt_to_vector_parquet(dirin = None, dirout = None, skip = 0, nmax = 10**8)
+data_add_onehot(dfref, img_dir, labels_col)
+folder_size()
+gzip()
+np_matrix_to_str(m)
+np_matrix_to_str2(m, map_dict)
+np_matrix_to_str_sim(m)
+np_str_to_array(vv, l2_norm = True, mdim  =  200)
+predict(name = None)
+test()
+topk(topk = 100, dname = None, pattern = "df_*", filter1 = None)
+topk_export()
+topk_nearest_vector(x0, vector_list, topk = 3)
+topk_predict()
+unzip(dirin, dirout)
+
 
 
 utilmy/deeplearning/util_embedding.py
 -------------------------functions----------------------
-embedding_create_vizhtml(dirin = "in/model.vec", dirout = "ztmp/", dim_reduction = 'umap', nmax = 100, ntrain = 10)
+embedding_create_vizhtml(dirin = "in/model.vec", dirout = "ztmp/", dim_reduction = 'umap', nmax = 100, ntrain = 10, num_clusters = 5, )
 embedding_extract_fromtransformer(model, Xinput:list)
-embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax =  500)
+embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax =  500, return_type = 'numpy;pandas', emb_dim = 200)
 embedding_load_pickle(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Noneimport pickleembs = Nonedirin)for fi in flist  = Noneimport pickleembs = Nonedirin)for fi in flist :)
 embedding_load_word2vec(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun = None)
-embedding_rawtext_to_parquet(dirin = None, dirout = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None  = Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None : #### Validate linew):)
+embedding_rawtext_to_parquet(dirin = None, dirout = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun = None)
 embedding_torchtensor_to_parquet(tensor_list, id_list:list, label_list, dirout = None, tag = "", nmax = 10 ** 8)
 help()
 test1()
 test_all()
-test_create_fake_df(dirout = "./ztmp/")
 
 -------------------------methods----------------------
-EmbeddingViz.__init__(self, path = "myembed.parquet", num_clusters = 5, sep = ";", config:dict = None)
+EmbeddingViz.__init__(self, path = "myembed.parquet", num_clusters = 2, sep = ";", config:dict = None)
 EmbeddingViz.create_clusters(self, method = 'kmeans', after_dim_reduction = True)
-EmbeddingViz.create_visualization(self, dirout="ztmp/", mode ='d3', cols_label = None, start_server = False, **kw)
+EmbeddingViz.create_visualization(self, dirout = "ztmp/", mode = 'd3', cols_label = None, start_server = False, **kw)
 EmbeddingViz.dim_reduction(self, mode = "mds", ndim = 2, nmax =  5000, dirout = None, ntrain = 10000, npool = 2)
 EmbeddingViz.draw_cluster_hiearchy(self)
 EmbeddingViz.load_data(self, col_embed = 'embed', nmax =  5000, npool = 2)
 EmbeddingViz.run_all(self, dim_reduction = "mds", col_embed = 'embed', ndim = 2, nmax =  5000, dirout = "ztmp/", ntrain = 10000)
+torch_model_getlayer.__init__(self, network, backward = False, pos_layer = -2)
+torch_model_getlayer.close(self)
+torch_model_getlayer.get_layers_in_order(self, network)
+torch_model_getlayer.hook_fn(self, module1, input, output)
 
 
 utilmy/deeplearning/util_hash.py
@@ -1313,20 +1722,13 @@ test_onnx_convert()
 
 utilmy/deeplearning/util_topk.py
 -------------------------functions----------------------
-embedding_extract_fromtransformer(model, Xinput:list)
-embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax =  500)
-embedding_load_pickle(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Noneimport pickleembs = Nonedirin)for fi in flist  = Noneimport pickleembs = Nonedirin)for fi in flist :)
-embedding_load_word2vec(dirin = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun = None)
-embedding_rawtext_to_parquet(dirin = None, dirout = None, skip = 0, nmax = 10 ** 8, is_linevalid_fun=Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None  = Nonedirout) ; os_makedirs(dirout)  ; time.sleep(4)if is_linevalid_fun is None : #### Validate linew):)
-embedding_torchtensor_to_parquet(tensor_list, id_list:list, label_list, dirout = None, tag = "", nmax = 10 ** 8)
+embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list, is_symmetric = False)
 faiss_create_index(df_or_path = None, col = 'emb', dirout = None, db_type  =  "IVF4096,Flat", nfile = 1000, emb_dim = 200, nrows = -1)
 faiss_load_index(faiss_index_path = "")
-faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index:str = "", topk = 200, npool = 1, nrows = 10**7, nfile = 1000, return_simscore = False)
+faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index:str = "", topk = 200, dirout = None, npool = 1, nrows = 10**7, nfile = 1000, return_simscore = False, return_dist = False, )
 help()
-sim_scores_pairwise(embs:np.ndarray, word_list:list, is_symmetric = False)
 test1()
 test_all()
-test_create_fake_df(dirout = "./ztmp/")
 topk_calc(diremb = "", dirout = "", topk = 100, idlist = None, nexample = 10, emb_dim = 200, tag = None, debug = True)
 topk_nearest_vector(x0:np.ndarray, vector_list:list, topk = 3, engine = 'faiss', engine_pars:dict = None)
 
@@ -1341,26 +1743,6 @@ test_convert_to_yolov5()
 test_yolov5_from_xml()
 yolo_extract_info_from_xml(xml_file:str)
 yolov5_from_xml(xml_file_path:str  =  "None", xml_folder:str =  "None", output:str = "None")
-
-
-
-utilmy/deeplearning/zz_util_topk.py
--------------------------functions----------------------
-convert_txt_to_vector_parquet(dirin = None, dirout = None, skip = 0, nmax = 10**8)
-data_add_onehot(dfref, img_dir, labels_col)
-folder_size()
-gzip()
-np_matrix_to_str(m)
-np_matrix_to_str2(m, map_dict)
-np_matrix_to_str_sim(m)
-np_str_to_array(vv, l2_norm = True, mdim  =  200)
-predict(name = None)
-test()
-topk(topk = 100, dname = None, pattern = "df_*", filter1 = None)
-topk_export()
-topk_nearest_vector(x0, vector_list, topk = 3)
-topk_predict()
-unzip(dirin, dirout)
 
 
 
@@ -1804,16 +2186,55 @@ SentenceEncoder.__init__(self, num_labels = None)
 SentenceEncoder.call(self, inputs, **kwargs)
 
 
+utilmy/nlp/ner_extractor.py
+
+
 utilmy/nlp/ttorch/__init__.py
 
 
+utilmy/nlp/ttorch/kgraph/__init__.py
+
+
 utilmy/nlp/ttorch/kgraph/kgDriverCode.py
+-------------------------functions----------------------
+runall(dirin = 'final_dataset_clean_v2 .tsv')
+
 
 
 utilmy/nlp/ttorch/kgraph/knowledge_graph.py
 -------------------------functions----------------------
-test1(path = "")
+dataset_download(url    = "https =  "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
+dataset_traintest_split(anyobject, train_ratio = 0.6, val_ratio = 0.2)
+embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)
+get_embeddings(label_to_id:Dict[str, int], embedding)
+runall(dirin = '', dirout = '', config = None)
+test1(dirin = 'final_dataset_clean_v2 .tsv')
+test_all()
 
+-------------------------methods----------------------
+KGEmbedder.__init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
+KGEmbedder.compute_embeddings(self, path_to_embeddings, batch_size = 1024)
+KGEmbedder.load_embeddings(self, path_to_embeddings:str)
+KGEmbedder.save_embeddings(self, )
+KGEmbedder.set_up_embeddings(self, )
+NERExtractor.__init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy = True, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
+NERExtractor.export_data(self, data_kgf:pd.DataFrame)
+NERExtractor.extractTriples(self, max_text:int)
+NERExtractor.extract_entities(self, sents)
+NERExtractor.obtain_relation(self, sent)
+knowledge_grapher.__init__(self, data_kgf, embedding_dim:int = 14, load_spacy:bool = False, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
+knowledge_grapher.buildGraph(self, relation  =  None)
+knowledge_grapher.compute_centrality(self, )
+knowledge_grapher.get_centers(self, max_centers:int = 5)
+knowledge_grapher.load_data(path)
+knowledge_grapher.map_centers_anchors(self, embedding_df:pd.DataFrame, _type:str)
+knowledge_grapher.plot_graph(self, plotFolder)
+
+
+utilmy/nlp/ttorch/kgraph/misc/kgDriverCode.py
+
+
+utilmy/nlp/ttorch/kgraph/misc/knowledge_graph.py
 -------------------------methods----------------------
 KGEmbedder.__init__(self, graph:ntx.MultiDiGraph, embedding_dim:int)
 KGEmbedder.compute_embeddings(self, path_to_embeddings, WINDOW, MIN_COUNT, BATCH_WORDS)
@@ -1832,10 +2253,10 @@ knowledge_grapher.map_centers_anchors(self, _type:str)
 knowledge_grapher.plot_graph(self)
 
 
-utilmy/nlp/ttorch/kgraph/mytest.py
+utilmy/nlp/ttorch/kgraph/misc/mytest.py
 
 
-utilmy/nlp/ttorch/kgraph/pykeenTest.py
+utilmy/nlp/ttorch/kgraph/misc/pykeenTest.py
 
 
 utilmy/nlp/ttorch/model_patent.py
@@ -3519,12 +3940,17 @@ hdfs_dir_list(path, recursive = False)
 hdfs_dir_rm(path)
 hdfs_download(dirin = "", dirout = "./", verbose = False, n_pool = 1, **kw)
 hdfs_file_exists(filename)
-hdfs_ls(path, filename_only = False)
+hdfs_ls(path, flag = "-h ", filename_only = False)
 hdfs_mkdir(hdfs_dir)
 hive_csv_tohive(folder, tablename = "ztmp", tableref = "nono2.table2")
+hive_db_dumpall()
 hive_df_tohive(df, tableref = "nono2.table2")
 hive_exec(query = "", nohup:int = 1, dry = False, end0 = None, with_exception = False)
+hive_get_dblist()
 hive_get_partitions(url = "", user = "myuser_hadoop", table = 'mydb.mytable', dirout = "myexport/")
+hive_get_tablechema(tablename)
+hive_get_tabledetails(table)
+hive_get_tablelist(dbname)
 hive_run(query, logdir = "ztmp/loghive/", tag = 'v01', dry = 1, ### only fake runnohup = 0, ### backgroundexplain=0query)if explain>0 = 0query)if explain>0:)
 hive_schema(df)
 hive_sql_todf(sql, header_hive_sql:str = '', verbose = 1, save_dir = None, **kwargs)
@@ -3615,6 +4041,9 @@ spark_metrics_classifier_summary(df_labels_preds)
 spark_metrics_roc_summary(labels_and_predictions_df)
 spark_read(sparksession = None, dirin="hdfs = "hdfs://", format = None, **kw)
 spark_run_sqlfile(sparksession = None, spark_config:dict = None, sql_path:str = "", map_sql_variables:dict = None)
+sql_generatedate()
+sql_generatedate_mysql()
+sql_generateint()
 test1()
 test2()
 test_all()
@@ -3714,6 +4143,9 @@ test_spark_check(spark_session: SparkSession, config: dict)
 
 
 utilmy/stats/__init__.py
+
+
+utilmy/stats/example.py
 
 
 utilmy/stats/hypothesis/__init__.py
@@ -3911,14 +4343,26 @@ TestGamesHowell.test_games_howell(self)
 
 utilmy/stats/statistics.py
 -------------------------functions----------------------
-bonferoni_adjuster(p_values, threshold = 0.1)
 confidence_interval_boostrap_bayes(err:np.ndarray, alpha = 0.05, )
 confidence_interval_bootstrap(err:np.ndarray, custom_stat = None, alpha = 0.05, n_iter = 10000)
 confidence_interval_normal_std(err:np.ndarray, alpha = 0.05, )
-error_test_heteroscedacity(ypred: np.ndarray, ytrue: np.ndarray, pred_value_only = 1)
-error_test_normality(ypred: np.ndarray, ytrue: np.ndarray, distribution = "norm", test_size_limit = 5000)
-error_test_residual_mutualinfo(dfX:pd.DataFrame, ypred: np.ndarray, ytrue: np.ndarray, colsX = None, bins = 5)
 help()
+hypopred_error_test_heteroscedacity(ypred: np.ndarray, ytrue: np.ndarray, pred_value_only = 1)
+hypopred_error_test_normality(ypred: np.ndarray, ytrue: np.ndarray, distribution = "norm", test_size_limit = 5000)
+hypopred_error_test_residual_mutualinfo(dfX:pd.DataFrame, ypred: np.ndarray, ytrue: np.ndarray, colsX = None, bins = 5)
+hypopred_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX = None, coly = 'y', bonferroni_adjuster = True, threshold = 0.1)
+hypotest_bonferoni_adjuster(p_values, threshold = 0.1)
+hypotest_independance(df: pd.DataFrame, cols = None, bonferroni_adjuster = True, threshold = 0.1)
+hypotest_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX = None, coly = 'y', bonferroni_adjuster = True, threshold = 0.1)
+hypotest_is_1_mean_equal_fixes(df, col = 'mycol', mean_target = 4, alpha = 0.05)
+hypotest_is_2_mean_equal(df, cols = ['mycol', 'col2' ], alpha = 0.05)
+hypotest_is_all_group_means_equal(df, cols = ['col_group', 'val'], alpha = 0.05)
+hypotest_is_all_means_equal(df, cols  =  None, alpha = 0.05)
+hypotest_is_all_same_distribution(df, cols  =  None)
+hypotest_is_mean_equal(df: pd.DataFrame, cols = None, bonferroni_adjuster = True, threshold = 0.1, pcritic = 0.5)
+hypotest_is_mean_pergroup_equal(df, col1 = None, col2 = None, alpha  =  0.05)
+hypotest_is_normal_distribution(df:pd.DataFrame, column, )
+hypotest_rconclusion(p_value, alpha = 0.05, res = None)
 np_col_extractname(col_onehot)
 np_conv_to_one_col(np_array, sep_char = "_")
 np_list_remove(cols, colsremove, mode = "exact")
@@ -3929,12 +4373,8 @@ test_all()
 test_anova(df:pd.DataFrame, col1, col2)
 test_check_mean()
 test_chisquare(df_obs:pd.DataFrame, df_true:pd.DataFrame, method = 'chisquare', **kw)
-test_independance(df: pd.DataFrame, cols = None, bonferroni_adjuster = True, threshold = 0.1)
-test_independance_Xinput_vs_ytarget(df: pd.DataFrame, colsX = None, coly = 'y', bonferroni_adjuster = True, threshold = 0.1)
 test_mutualinfo(error, Xtest, colname = None, bins = 5)
-test_normality2(df:pd.DataFrame, column, test_type)
 test_plot_qqplot(df:pd.DataFrame, col_name)
-test_same_mean(df: pd.DataFrame, cols = None, bonferroni_adjuster = True, threshold = 0.1, pcritic = 0.5)
 
 
 
@@ -3942,6 +4382,16 @@ utilmy/tabular/__init__.py
 
 
 utilmy/tabular/bayesian/__init__.py
+
+
+utilmy/tabular/bayesian/abtest_inference.py
+-------------------------functions----------------------
+main(args)
+make_dataset(rng_key)
+model(design_matrix: jnp.ndarray, outcome: jnp.ndarray  =  None)
+print_results(coef: jnp.ndarray, interval_size: float  =  0.95)
+run_inference(design_matrix: jnp.ndarray, outcome: jnp.ndarray, rng_key: jnp.ndarray, num_warmup: int, num_samples: int, num_chains: int, interval_size: float  =  0.95, )
+
 
 
 utilmy/tabular/bayesian/model_bayesian_numpyro.py
@@ -4189,6 +4639,12 @@ UnpicklableCallback.__reduce__(self)
 utilmy/tabular/util_lineartree.py
 -------------------------functions----------------------
 sklearn_tree_to_code(tree, feature_names)
+
+
+
+utilmy/tabular/util_regression.py
+-------------------------functions----------------------
+test1()
 
 
 
@@ -5042,7 +5498,7 @@ utilmy/util_download.py
 -------------------------functions----------------------
 donwload_and_extract(url, dirout = './ztmp/', unzip = True)
 download_custom_pageimage(query, fileout = "query1", genre_en = '', id0 = "", cat = "", npage = 1)
-download_github(url="https = "https://github.com/arita37/dsa2_data/blob/main/input/titanic/train/features.zip", dirout = "./ztmp/")
+download_github(url="https = "https://github.com/arita37/dsa2_data/blob/main/input/titanic/train/features.zip", dirout = "./ztmp/", unzip = True)
 download_google(url_or_id="https = "https://drive.google.com/file/d/1iFrhCPWRITarabHfBZvR-V9B2yTlbVhH/view?usp=sharing", fileout = "./ztmp/", unzip = True)
 download_kaggle(names = "", dirout = "", n_dataset = 5)
 download_with_progress(url, fileout)
@@ -5052,6 +5508,21 @@ test1()
 test_all()
 to_file(s, filep)
 upload_google(src_folder_name, dst_folder_name, auth_key)
+
+
+
+utilmy/util_numba.py
+-------------------------functions----------------------
+_compute_overlaps(u, v)
+cosine(u, v)
+distance_jaccard(u, v)
+distance_jaccard2(u, v)
+distance_jaccard_X(X)
+np_log_exp_sum2()
+np_mean(x)
+np_std_par(x)
+test1()
+test_all()
 
 
 
@@ -5069,6 +5540,7 @@ unzip(dirin, dirout)
 
 utilmy/utilmy.py
 -------------------------functions----------------------
+date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
 direpo()
 find_fuzzy(word:str, wlist:list, threshold = 0.0)
 get_loggers(mode = 'print', n_loggers = 2, verbose_level = None)
@@ -5154,7 +5626,7 @@ tokenize_text(text)
 -------------------------methods----------------------
 vizEmbedding.__init__(self, path = "myembed.parquet", num_clusters = 5, sep = ";", config:dict = None)
 vizEmbedding.create_clusters(self, after_dim_reduction = True)
-vizEmbedding.create_visualization(self, dirout="ztmp/", mode ='d3', cols_label = None, show_server = False, **kw)
+vizEmbedding.create_visualization(self, dir_out = "ztmp/", mode = 'd3', cols_label = None, show_server = False, **kw)
 vizEmbedding.dim_reduction(self, mode = "mds", col_embed = 'embed', ndim = 2, nmax =  5000, dir_out = None)
 vizEmbedding.draw_hiearchy(self)
 vizEmbedding.run_all(self, mode = "mds", col_embed = 'embed', ndim = 2, nmax =  5000, dir_out = "ztmp/")
@@ -5193,6 +5665,7 @@ images_to_html(dir_input = "*.png", title = "", verbose = False)
 log(*s)
 mlpd3_add_tooltip(fig, points, labels)
 pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {})
+pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str = None, binsNumber = None, binWidth = None, color:str = '#7CB5EC', title:str = "", xaxis_label:str =  "x-axis", yaxis_label:str = "y-axis", cfg:dict = {}, mode = 'd3', save_img = "", show = False, verbose = True, **kw)
 pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
 pd_plot_scatter_get_data(df0:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, nmax: int = 20000, **kw)
 pd_plot_scatter_matplot(df:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, cfg: dict  =  {}, mode = 'd3', save_path: str = '', verbose = True, **kw)
@@ -5294,9 +5767,6 @@ URLData.completed_url(self)
 URLData.fixed_post_id(self)
 URLData.new_url(self)
 URLData.sanitized_title(self)
-
-
-utilmy/webscraper/ner_extractor.py
 
 
 utilmy/webscraper/pdf_scraper.py
@@ -7719,6 +8189,18 @@ year(s)
 
 utilmy/zzarchive/fast_parallel.py
 -------------------------functions----------------------
+_compute_overlaps(u, v)
+cosine(u, v)
+cross(vec1, vec2)
+distance_jaccard(u, v)
+distance_jaccard2(u, v)
+distance_jaccard_X(X)
+norm(vec)
+normalize(vec)
+np_log_exp_sum2()
+np_mean(x)
+np_std_par(x)
+rmse(y, yhat)
 task_find_best(tasks, n_top = 5)
 task_parallel_job_01(name, param, datadict)
 task_progress(tasks)
