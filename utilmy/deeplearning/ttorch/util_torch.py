@@ -136,7 +136,7 @@ def test2():
     labels = torch.Tensor(labels).long()
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
-    l = loss(output, labels[:64])
+    # l = loss(output, labels[:64])
 
 
 
@@ -255,26 +255,49 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 ###############################################################################################
 ####### Embedding #############################################################################
-def embedding_torchtensor_to_parquet(model=None, dirout='./', data_loader=None, tag=""):
-    # from utilmy.deeplearning import  util_embedding as ue
-    import time
-    
+def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb')
+    embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
+    pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+
+
+
+def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
     df= []
     assert(model is not None and data_loader is not None)
-    for img , img_names in data_loader:
+    for X , id_sample in data_loader:
         with torch.no_grad():
-            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
+            emb = model.get_embedding(X)   #### Need to get the layer !!!!!
             for i in range(emb.size()[0]):
-                ss = np_array_to_str(emb[i].numpy())
-                df.append([ img_names[i], ss])
+                ss = emb[i].numpy()  ####  array as string
+                df.append([ id_sample[i], ss])
 
-    df = pd.DataFrame(df, columns= ['id', 'emb'])
 
     if dirout is not None :
-      log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
+      df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df = pd.DataFrame(df, columns= ['id', 'emb'])
+      os_makedirs(dirout)
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
       pd_to_file(df, dirout2, show=1 )
     return df
+
 
 
 def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
@@ -353,23 +376,62 @@ class DataForEmbedding(Dataset):
         return (train_X, img_name)
 
 
-def cos_similar_embedding(embv = None, img_names=None):
+def np_cosinus_most_similar(embv = None, emb_name_list=None):
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
-    if embv is not None and img_names is not None:
-        df = pd.DataFrame(data = img_names, columns=['id'] )
-        for i, emb1 in enumerate(embv):
-            res = []
-            for emb2 in embv:
-                res.append(cosine_similarity([emb1],[emb2]))
-            res[i] = -1
-            max_value = max(res)
-            img_name = img_names[res.index(max_value)]
-            similar_emb.append(img_name)
-        df['similar'] = similar_emb
+    n = len(embv)
+    emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
+
+    for i, emb1 in enumerate(embv):
+        res = []
+        for emb2 in embv:
+            res.append(cosine_similarity([emb1],[emb2]))
+        res[i] = -1
+        max_value = max(res)
+        img_name = emb_name_list[res.index(max_value)]
+        similar_emb.append(img_name)
+
+    df = pd.DataFrame(data = emb_name_list, columns=['id'])
+    df['similar'] = similar_emb
     return df
 
 
+
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+    """ Pairwise Cosinus Sim scores
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist, is_symmetric=False)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    name_list = np.arange(0, n) if name_list is None else name_list
+    dfsim = []
+    for i in  range(0, len(name_list) - 1) :
+        vi = embs[i,:]
+        normi = np.sqrt(np.dot(vi,vi))
+        for j in range(i+1, len(name_list)) :
+            # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
+            vj = embs[j,:]
+            normj = np.sqrt(np.dot(vj, vj))
+            simij = np.dot( vi ,  vj  ) / (normi * normj)
+            dfsim.append([name_list[i], name_list[j], simij])
+            # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
+
+    dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
+
+    if is_symmetric:
+        ### Add symmetric part
+        dfsim3 = copy.deepcopy(dfsim)
+        dfsim3.columns = ['id2', 'id1', 'sim_score' ]
+        dfsim          = pd.concat(( dfsim, dfsim3 ))
+    return dfsim
 
 
 

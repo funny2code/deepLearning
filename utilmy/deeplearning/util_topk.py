@@ -318,7 +318,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
            if i*chunk >= len(df) : break         
            i2 = i+1 if i < nchunk else 3*(i+1)
         
-           x0 = np_str_to_array( df[colemb].iloc[ i*chunk:(i2*chunk)].values   , l2_norm=True ) 
+           x0 = np_str_to_array( df[colemb].iloc[ i*chunk:(i2*chunk)].values    )
            log('X topk') 
            topk_dist, topk_idx = faiss_index.search(x0, topk)            
            log('X', topk_idx.shape) 
@@ -343,7 +343,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
 
 #########################################################################################################
 ############## Loader of embeddings #####################################################################
-def embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list, is_symmetric=False):
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list=None, is_symmetric=False):
     """ Pairwise Cosinus Sim scores
     Example:
         Doc::
@@ -354,7 +354,10 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list, is_symmet
            df[[ 'id1', 'id2', 'sim_score'  ]]
 
     """
-    from sklearn.metrics.pairwise import cosine_similarity
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    word_list = np.arange(0, n) if word_list is None else word_list
     dfsim = []
     for i in  range(0, len(word_list) - 1) :
         vi = embs[i,:]

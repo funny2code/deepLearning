@@ -604,6 +604,48 @@ def embedding_extract_fromtransformer(model,Xinput:list):
 
 
 
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+    """ Pairwise Cosinus Sim scores
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist, is_symmetric=False)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    name_list = np.arange(0, n) if name_list is None else name_list
+    dfsim = []
+    for i in  range(0, len(name_list) - 1) :
+        vi = embs[i,:]
+        normi = np.sqrt(np.dot(vi,vi))
+        for j in range(i+1, len(name_list)) :
+            # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
+            vj = embs[j,:]
+            normj = np.sqrt(np.dot(vj, vj))
+            simij = np.dot( vi ,  vj  ) / (normi * normj)
+            dfsim.append([name_list[i], name_list[j], simij])
+            # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
+
+    dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
+
+    if is_symmetric:
+        ### Add symmetric part
+        dfsim3 = copy.deepcopy(dfsim)
+        dfsim3.columns = ['id2', 'id1', 'sim_score' ]
+        dfsim          = pd.concat(( dfsim, dfsim3 ))
+    return dfsim
+
+
+
+
+
+
+
 class torch_model_getlayer():
     """ Get a specific layer for embedding output
     Doc::

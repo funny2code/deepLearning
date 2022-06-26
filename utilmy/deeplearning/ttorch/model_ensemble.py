@@ -1371,18 +1371,23 @@ def test6():
 
     tag='multi'
     dirout="./train"
-    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
-    embv1, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
-    #############Before Training #################
     print("Before Training")
-    #########Cosine similarity b/w lables of 2 items Embeddings
-    from sklearn.metrics.pairwise import cosine_similarity
-    for i, emb1 in enumerate(embv1):
-        for j, emb2 in enumerate(embv1):
-            if i==j:
-                continue
-            print(cosine_similarity([emb1],[emb2]))
+    ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
+
+    # ut.model_embedding_extract_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
+    # embv1, img_names,df = ut.embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    # #############Before Training #################
+    # #########Cosine similarity b/w lables of 2 items Embeddings
+    # dfsim = ut.embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
+    # log(dfsim)
+
+    # from sklearn.metrics.pairwise import cosine_similarity
+    # for i, emb1 in enumerate(embv1):
+    #     for j, emb2 in enumerate(embv1):
+    #         if i==j:
+    #             continue
+    #         print(cosine_similarity([emb1],[emb2]))
     
     #### Run Model   ###################################################
     model.training(dataloader_custom = custom_dataloader ) 
@@ -1394,19 +1399,23 @@ def test6():
 
     tag='multi-finetuned'
     dirout="./train"
-    #############After Training #################
-    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
-    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
+    print("After Training")
+    ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
 
-    print("After Training Cosinus Similarity")
-    for i, emb1 in enumerate(embv):
-        for j, emb2 in enumerate(embv):
-            if i==j:
-                continue
-            print(cosine_similarity([emb1],[emb2]))
+    # ut.model_extract_embedding_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
+    # embv, img_names,df = ut.embedding_load_parquet(dirin= f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    #
+    # dfsim = ut.embedding_cosinus_scores_pairwise(embv, name_list=None, is_symmetric=False)
+    # log(dfsim)
+
+    # for i, emb1 in enumerate(embv):
+    #     for j, emb2 in enumerate(embv):
+    #         if i==j:
+    #             continue
+    #         print(cosine_similarity([emb1],[emb2]))
 
     ####Cosine similarity b/w Merged Embeddings
-    df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
+    # df = ut.np_cosinus_most_similar(embv=embv, emb_name_list= df['id'].values)
 
 ##### LSTM #################################################################################
 def test2_lstm():
