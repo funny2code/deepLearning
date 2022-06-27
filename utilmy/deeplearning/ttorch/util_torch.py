@@ -272,6 +272,14 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 ###############################################################################################
 ####### Embedding #############################################################################
+def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
+    """  output model otuput, embedding.
+
+    """
+    pass
+
+
+
 def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
     """
     Docs:
@@ -297,22 +305,24 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
 
     """
+    model_embed_extract_fun = model.get_embedding
+
     df= []
-    assert(model is not None and data_loader is not None)
     for X , id_sample in data_loader:
         with torch.no_grad():
-            emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            emb = model_embed_extract_fun(X)
             for i in range(emb.size()[0]):
                 ss = emb[i].numpy()  ####  array as string
                 df.append([ id_sample[i], ss])
 
 
     if dirout is not None :
-      df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
-      df = pd.DataFrame(df, columns= ['id', 'emb'])
-      os_makedirs(dirout)
+      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df, dirout2, show=1 )
+      pd_to_file(df2, dirout2, show=1 )
+
     return df
 
 
@@ -350,70 +360,6 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
     return embs, id_map, df 
 
 
-class DataForEmbedding(Dataset):
-    """Custom DataGenerator using Pytorch Sequence for images
-    """
-    def __init__(self, df=None,
-                col_img: str='id',
-                transforms=None, transforms_image_size_default=64,
-                img_loader=None,
-                col_class='gender', class_lable='Men'
-                 ):
-        self.col_img    = col_img
-        self.transforms = transforms
-
-        if img_loader is None :  ### Use default loader
-           from PIL import Image
-           self.img_loader = Image.open
-        assert(df is not None)
-        
-        df = df.loc[df[col_class] == class_lable]
-        df = df[[col_img,col_class]]
-        if transforms is None :
-              from torchvision import transforms
-              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
-        assert(df is not None)
-        self.label_img_dir = df[self.col_img].values
-
-
-    def __len__(self) -> int:
-        return len(self.label_img_dir)
-
-
-    def __getitem__(self, idx: int):
-
-        img_dir = self.label_img_dir[idx]
-        img     = self.img_loader(img_dir)
-        img_name = img_dir.split('/')[-1].split('.')[0]
-
-        if "\\" in img_name:
-            img_name =  img_name.replace('\\','_')
-
-        train_X = self.transforms(img)
-        return (train_X, img_name)
-
-
-def np_cosinus_most_similar(embv = None, emb_name_list=None):
-    from sklearn.metrics.pairwise import cosine_similarity
-    similar_emb = []
-    n = len(embv)
-    emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
-
-    for i, emb1 in enumerate(embv):
-        res = []
-        for emb2 in embv:
-            res.append(cosine_similarity([emb1],[emb2]))
-        res[i] = -1
-        max_value = max(res)
-        img_name = emb_name_list[res.index(max_value)]
-        similar_emb.append(img_name)
-
-    df = pd.DataFrame(data = emb_name_list, columns=['id'])
-    df['similar'] = similar_emb
-    return df
-
-
-
 def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
     """ Pairwise Cosinus Sim scores
     Example:
@@ -449,6 +395,27 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
         dfsim3.columns = ['id2', 'id1', 'sim_score' ]
         dfsim          = pd.concat(( dfsim, dfsim3 ))
     return dfsim
+
+
+def np_cosinus_most_similar(embv = None, emb_name_list=None):
+    from sklearn.metrics.pairwise import cosine_similarity
+    similar_emb = []
+    n = len(embv)
+    emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
+
+    for i, emb1 in enumerate(embv):
+        res = []
+        for emb2 in embv:
+            res.append(cosine_similarity([emb1],[emb2]))
+        res[i] = -1
+        max_value = max(res)
+        img_name = emb_name_list[res.index(max_value)]
+        similar_emb.append(img_name)
+
+    df = pd.DataFrame(data = emb_name_list, columns=['id'])
+    df['similar'] = similar_emb
+    return df
+
 
 
 
@@ -521,7 +488,9 @@ class ImageDataset(Dataset):
 
                 transforms=None, transforms_image_size_default=64,
                 check_ifimage_exist=False,
-                img_loader=None
+                img_loader=None,
+
+                return_img_id=False   #### reutnr the image path in the datalaoder
 
                  ):
         """ Image Datast :  labels + Images path on disk
@@ -531,10 +500,14 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
+
+            return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
+
+        self.return_img_id = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
@@ -591,7 +564,12 @@ class ImageDataset(Dataset):
         assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
+
+        if self.return_img_id :
+            return  (train_X, train_y, img_dir)
+
         return (train_X, train_y)
+
 
 
 def ImageDataloader(df=None, batch_size=64,
@@ -645,6 +623,48 @@ def ImageDataloader(df=None, batch_size=64,
 
     return train_dataloader,val_dataloader,test_dataloader
 
+
+class ImageEmbedDataset(Dataset):
+    """Custom DataGenerator using Pytorch Sequence for images
+    """
+    def __init__(self, df=None,
+                col_img: str='id',
+                transforms=None, transforms_image_size_default=64,
+                img_loader=None,
+                col_class='gender', class_lable='Men'
+                 ):
+        self.col_img    = col_img
+        self.transforms = transforms
+
+        if img_loader is None :  ### Use default loader
+           from PIL import Image
+           self.img_loader = Image.open
+        assert(df is not None)
+
+        df = df.loc[df[col_class] == class_lable]
+        df = df[[col_img,col_class]]
+        if transforms is None :
+              from torchvision import transforms
+              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
+        assert(df is not None)
+        self.label_img_dir = df[self.col_img].values
+
+
+    def __len__(self) -> int:
+        return len(self.label_img_dir)
+
+
+    def __getitem__(self, idx: int):
+
+        img_dir = self.label_img_dir[idx]
+        img     = self.img_loader(img_dir)
+        img_name = img_dir.split('/')[-1].split('.')[0]
+
+        if "\\" in img_name:
+            img_name =  img_name.replace('\\','_')
+
+        train_X = self.transforms(img)
+        return (train_X, img_name)
 
 
 
