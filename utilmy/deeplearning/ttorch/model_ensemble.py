@@ -1361,8 +1361,8 @@ def test6():
          transform  = transforms.Compose(tlist)
 
          ###Loads image and imagename(to save the embedding with image name)#### 
-         dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform,
-                   col_class=col_class, class_lable=class_lable)
+         dataset = ut.ImageEmbedDataset(df, col_img='id', transforms=transform,
+                                        col_class=col_class, class_lable=class_lable)
 
          return dataset
 
