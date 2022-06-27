@@ -473,7 +473,7 @@ class ImageDataset(Dataset):
                 check_ifimage_exist=False,
                 img_loader=None,
 
-                return_img_id=False
+                return_img_id=False   #### reutnr the image path in the datalaoder
 
                  ):
         """ Image Datast :  labels + Images path on disk
@@ -483,6 +483,8 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
+
+            return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
