@@ -471,7 +471,9 @@ class ImageDataset(Dataset):
 
                 transforms=None, transforms_image_size_default=64,
                 check_ifimage_exist=False,
-                img_loader=None
+                img_loader=None,
+
+                return_img_id=False
 
                  ):
         """ Image Datast :  labels + Images path on disk
@@ -485,6 +487,8 @@ class ImageDataset(Dataset):
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
+
+        self.return_img_id = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
@@ -541,7 +545,12 @@ class ImageDataset(Dataset):
         assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
+
+        if self.return_img_id :
+            return  (train_X, train_y, img_dir)
+
         return (train_X, train_y)
+
 
 
 def ImageDataloader(df=None, batch_size=64,

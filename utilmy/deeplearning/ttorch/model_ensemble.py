@@ -1391,6 +1391,7 @@ def test6():
     ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
 
 
+
 ##### LSTM #################################################################################
 def test2_lstm():
     log('\n\n\n\nLSTM Version')
