@@ -1366,56 +1366,30 @@ def test6():
 
          return dataset
 
-    dataset = custom_embedding_data()
+    dataset      = custom_embedding_data()
     train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
 
-    tag='multi'
-    dirout="./train"
 
     print("Before Training")
+    tag   ='multi'
+    dirout="./train"
     ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
 
-    # ut.model_embedding_extract_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
-    # embv1, img_names,df = ut.embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
-    # #############Before Training #################
-    # #########Cosine similarity b/w lables of 2 items Embeddings
-    # dfsim = ut.embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
-    # log(dfsim)
-
-    # from sklearn.metrics.pairwise import cosine_similarity
-    # for i, emb1 in enumerate(embv1):
-    #     for j, emb2 in enumerate(embv1):
-    #         if i==j:
-    #             continue
-    #         print(cosine_similarity([emb1],[emb2]))
     
     #### Run Model   ###################################################
     model.training(dataloader_custom = custom_dataloader ) 
-    model.save_weight('ztmp/model_x5.pt')
+    model.save_weight( 'ztmp/model_x5.pt')
     model.load_weights('ztmp/model_x5.pt')
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
     outputs = model.predict(inputs)
     #print(outputs)
 
-    tag='multi-finetuned'
-    dirout="./train"
+
     print("After Training")
+    tag   ='multi-finetuned'
+    dirout="./train"
     ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
 
-    # ut.model_extract_embedding_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
-    # embv, img_names,df = ut.embedding_load_parquet(dirin= f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
-    #
-    # dfsim = ut.embedding_cosinus_scores_pairwise(embv, name_list=None, is_symmetric=False)
-    # log(dfsim)
-
-    # for i, emb1 in enumerate(embv):
-    #     for j, emb2 in enumerate(embv):
-    #         if i==j:
-    #             continue
-    #         print(cosine_similarity([emb1],[emb2]))
-
-    ####Cosine similarity b/w Merged Embeddings
-    # df = ut.np_cosinus_most_similar(embv=embv, emb_name_list= df['id'].values)
 
 ##### LSTM #################################################################################
 def test2_lstm():
