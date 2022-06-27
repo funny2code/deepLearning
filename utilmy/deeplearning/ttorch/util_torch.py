@@ -301,10 +301,10 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
 
     if dirout is not None :
-      df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
-      df = pd.DataFrame(df, columns= ['id', 'emb'])
+      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df, dirout2, show=1 )
+      pd_to_file(df2, dirout2, show=1 )
 
     return df
 
