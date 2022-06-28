@@ -211,7 +211,10 @@ class knowledge_grapher():
             log(e.msg)
             log('Data format may be incorrect')
 
+        cols =['source', 'target', 'edge']
+        assert len(df[cols])>0 , "error missing columns"
         # self.buildGraph(data_kgf)
+
 
     def get_centers(self, max_centers:int=5)->None:
 
