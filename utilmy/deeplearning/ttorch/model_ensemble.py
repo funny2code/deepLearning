@@ -1394,6 +1394,7 @@ def test6():
                                      force_getlayer= True, pos_layer=-2)
     print(dfsim)
 
+
 ##### LSTM #################################################################################
 def test2_lstm():
     log('\n\n\n\nLSTM Version')

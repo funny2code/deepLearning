@@ -19,6 +19,7 @@ Reason :
 
 
 """
+import sys
 import os
 import spacy
 import numpy as np
@@ -26,7 +27,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as ntx
 from tqdm import tqdm
-from typing import Tuple, Dict, Union
+from typing import Tuple, Any, Dict, Union, List
 from spacy.matcher import Matcher
 #from node2vec import Node2Vec as n2v
 
@@ -76,9 +77,12 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
-    data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    # data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher = knowledge_grapher(embedding_dim=10, load_spacy=True)
+    grapher.load_data( data_kgf_path)
     grapher.buildGraph()
+
 
 
     log('##### Build KG Embeddings')
@@ -137,17 +141,30 @@ def runall(dirin='', dirout='', config=None):
 
 ######################################################################################################
 class knowledge_grapher():
-    def __init__(self, data_kgf, embedding_dim:int=14, load_spacy:bool=False,
+    def __init__(self, data_kgf:pd.DataFrame, embedding_dim:int=14,
                 dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
-
-
-
                  ) -> None:
-        self.data_kgf = data_kgf
+        """knowledge_grapher:
+        Docs:
+
+                data_kgf     :      pd.DataFrame, dataframe with triples entity, relation, entity
+                embedding_dim:      int, number of dimensions in the embedding space
+                dirin        :      PathLike, where to read input data
+                dirout       :      PathLike, where to store results
+        """
+        self.data_kgf = None # data_kgf
         self.embedding_dim = embedding_dim
+        self.dirin = dirin
+        self.dirout = dirout
 
     def buildGraph(self, relation = None)->None:
+        """build knowledge graph
+        Docs:
+
+                relation:   str, build graph isolating a particular relation for visualization purposes.
+
+        """
         if relation:
             self.graph = ntx.from_pandas_edgelist(self.data_kgf[self.data_kgf['edge']==relation], "source", "target",
                          edge_attr=True, create_using=ntx.MultiDiGraph())
@@ -155,26 +172,52 @@ class knowledge_grapher():
             self.graph = ntx.from_pandas_edgelist(self.data_kgf, "source", "target",
                          edge_attr=True, create_using=ntx.MultiDiGraph())
 
-    def plot_graph(self, plotFolder)->None:
+    def plot_graph(self)->None:
+        """plot the knowledge graph using a networkx method, other ways are posible
+
+        """
         plt.figure(figsize=(14, 14))
         posn = ntx.spring_layout(self.graph)
         ntx.draw(self.graph, with_labels=True, node_color='green', edge_cmap=plt.cm.Blues, pos = posn)
-        plt.savefig(os.path.join(plotFolder,'graphPlot.jpg'))
+        plt.savefig(os.path.join(self.dirout,'graphPlot.jpg'))
         plt.close()
 
     def compute_centrality(self,)->None:
+        """compute the centrality metric for each node using diferent methods,
+        refer to the networkx documentation for more info
+
+        """
         self.centrality_dict = ntx.degree_centrality(self.graph)
         self.in_centrality_dict = ntx.in_degree_centrality(self.graph)
         self.out_centrality_dict = ntx.out_degree_centrality(self.graph)
         # self.eigenvector_centrality_dict = ntx.katz_centrality(self.graph)
 
-    @staticmethod
-    def load_data(path)->pd.DataFrame:
-        return pd.read_csv(path, delimiter='\t')
+    #@staticmethod
+    def load_data(self, path)->pd.DataFrame:
+        """load the data_kgf dataframe
+        Docs:
+
+                path:   PathLike, where the data is stored in tsv format
+
+        """
+        try:
+            df = pd.read_csv(path, delimiter='\t')
+            self.data_kgf  = df
+
+        except Exception as e:
+            log(e.msg)
+            log('Data format may be incorrect')
+
         # self.buildGraph(data_kgf)
 
     def get_centers(self, max_centers:int=5)->None:
 
+        """ get the nodes with the higher centrality metric for each methods
+        Docs:
+
+                max_centers:    int, how many centers to include in the top
+
+        """
         sorted_dict = sorted(self.centrality_dict.items(), key=lambda x: x[1])[::-1]
         in_sorted_dict = sorted(self.in_centrality_dict.items(), key=lambda x: x[1])[::-1]
         out_sorted_dict = sorted(self.out_centrality_dict.items(), key=lambda x: x[1])[::-1]
@@ -193,8 +236,13 @@ class knowledge_grapher():
                             'in_degree':{'centers':in_degree_centers, 'adjacency': in_degree_adjacency},
                             'out_degree':{'centers':out_degree_centers, 'adjacency':out_degree_adjacency},}
 
-    def map_centers_anchors(self,embedding_df:pd.DataFrame, _type:str):
+    def map_centers_anchors(self,embedding_df:pd.DataFrame, _type:str)->None:
+       """ map centers to anchors (embeddings)
+       Docs::
 
+            embedding_df:   pd.DataFrame, map from nodes to embeddings
+            type_       :   str, which method to use of the calculated centers
+       """
        self.embedding_df = embedding_df
        _aux = self.center_dict[_type]
        centers = _aux['centers']
@@ -213,19 +261,39 @@ class knowledge_grapher():
 
 class NERExtractor:
 
-    def __init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy=True,
-                 dirin:str="./mydatain/",
+    def __init__(self, dirin_or_df:pd.DataFrame,
+                 # dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
-
-
                  ):
+        """NERExtractor: named entity extractor
+        Docs:
 
-        if load_spacy:
-            self.nlp = spacy.load("ro_core_news_sm")
-        self.data = data
-        self.embeddingFolder = embeddingFolder
+                data    : pd.DataFrame, with the corpus of text from which to extract entities
+                dirin   : where to load the input data
+                dirout  : where to save the output
 
-    def extract_entities(self, sents)->pd.DataFrame:
+        """
+
+        self.nlp = spacy.load("ro_core_news_sm")
+        # self.dirin = dirin
+        self.dirout = dirout
+
+        if isinstance(dirin_or_df, pd.DataFrame):
+            self.data = dirin_or_df
+        else :
+            from utilmy import pd_read_file
+            self.data = pd_read_file(dirin_or_df)
+
+
+        cols = ['paragraph']
+        assert len(self.data[cols])> 0, 'not ok'
+
+
+    def extract_entities(self, sents:List[str])->pd.DataFrame:
+        """extracting entities for a series of sentences of cleaned text
+        Docs:
+                sents: List[str], cleaned Text from which to extract the entities
+        """
         # chunk one
         enti_one = ""
         enti_two = ""
@@ -266,6 +334,11 @@ class NERExtractor:
         return [enti_one.strip(), enti_two.strip()]
 
     def obtain_relation(self,sent):
+        """extracting relations for a series of sentences of cleaned text
+        Docs:
+
+                sents: List[str], cleaned Text from which to extract the relations
+        """
         doc = self.nlp(sent)
         matcher = Matcher(self.nlp.vocab)
         pattern = [{'DEP':'ROOT'},
@@ -285,6 +358,14 @@ class NERExtractor:
 
     def extractTriples(self, max_text:int) -> pd.DataFrame:
 
+        """extracting triples of the form [source relation target]
+        Docs:
+
+                max_text: int, how many of the corpus rows to consume
+                returs:
+                    pd.DataFrame where each row is a triple of the same form
+        """
+
         pairs_of_entities = [self.extract_entities(i) for i in tqdm(self.data['paragraph'][:max_text])]
         relations = [self.obtain_relation(j) for j in tqdm(self.data['paragraph'][:max_text])]
         indexes = [x for x, z in enumerate(relations) if z is not None]
@@ -300,51 +381,59 @@ class NERExtractor:
 
         return pd.DataFrame({'source':source, 'target':target, 'edge':relations})
 
+
     def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
+
+        """extracting relations for a series of sentences of cleaned text
+        Docs:
+
+                data_kgf: pd.DataFrame of the form [source relation target]
+                returns
+                    Tuple[pd.DataFrame] with traning, validation and testing datasets
+
+        """
 
         from utilmy import pd_to_file
         train_df, val_df, test_df = dataset_traintest_split(data_kgf, train_ratio=0.6, val_ratio=0.2)
 
-        # SAMPLES = len(data_kgf.index)
-        # TRAIN_SPLIT = int(0.5 * SAMPLES)
-        # TEST_SPLIT = int(0.3 * SAMPLES)
-        # VALIDATION_SPLIT = int(0.2 * SAMPLES)
-        #
-        # train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
-        # test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
-        # validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
-        #
-        # train_df = data_kgf.iloc[train_indexes]
-        # test_df = data_kgf.iloc[test_indexes]
-        # val_df = data_kgf.iloc[validation_indexes]
 
-
-        train_df.to_csv(os.path.join(self.embeddingFolder,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.embeddingFolder,'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.embeddingFolder,'validation_data.tsv'), sep="\t")
-        data_kgf.to_csv(os.path.join(self.embeddingFolder,'data_kgf.tsv'), sep="\t")
+        train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
+        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
+        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
 
         return train_df, test_df, val_df
 
 
 
 class KGEmbedder:
-    def __init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int,
+    def __init__(self, graph:ntx.MultiDiGraph, embedding_dim:int,
                  dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
 
                  )->None:
 
-        self.dataFolder = dataFolder
+        """KGEmbedder: produces the KG embeddings using pyKeen:
+
+        Docs:
+
+                https://pykeen.readthedocs.io/en/stable/
+                graph           : ntx.MultiDiGraph the knowledge itself
+                embedding_dim   : int, number of dimensions of the embedding space
+                dirin           : where to load the input data
+                dirout          : where to save the output
+
+        """
         self.graph = graph
         self.embedding_dim = embedding_dim
 
-        train_path =os.path.join(dataFolder,'train_data.tsv')
-        test_path =os.path.join(dataFolder,'test_data.tsv')
-        val_path =os.path.join(dataFolder,'validation_data.tsv')
-        data_path = os.path.join(dataFolder,'data_kgf.tsv')
+        train_path =os.path.join(dirout,'train_data.tsv')
+        test_path =os.path.join(dirout,'test_data.tsv')
+        val_path =os.path.join(dirout,'validation_data.tsv')
+        data_path = os.path.join(dirin,'data_kgf.tsv')
 
-
+        self.dirin = dirin
+        self.dirout = dirout
         self.training = TriplesFactory.from_path(train_path)
 
         self.testing = TriplesFactory.from_path(test_path,
@@ -357,10 +446,12 @@ class KGEmbedder:
 
 
     def set_up_embeddings(self,):
+        """set up the training pipeline for pykeen or load the trained model
+        """
         # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
 
-        if os.path.exists(os.path.join(self.dataFolder, 'trained_model.pkl')):
-            self.model = torch.load(os.path.join(self.dataFolder, 'trained_model.pkl'))
+        if os.path.exists(os.path.join(self.dirout, 'trained_model.pkl')):
+            self.model = torch.load(os.path.join(self.dirout, 'trained_model.pkl'))
             self.trained = True
         else:
             self.model = ERModel(triples_factory=self.training,
@@ -379,8 +470,14 @@ class KGEmbedder:
             )
             self.trained = False
 
-    def compute_embeddings(self, path_to_embeddings, batch_size=1024):
+    def compute_embeddings(self, path_to_embeddings, batch_size=1024)->Tuple:
 
+        """set up the training pipeline for pykeen or load the trained model
+        Docs:
+
+                path_to_embeddings: PathLike
+                batch_size        : int, batch_size for the pykeen nn
+        """
         self.set_up_embeddings()
         if not self.trained:
             losses = self.training_loop.train(
@@ -390,7 +487,7 @@ class KGEmbedder:
                                 checkpoint_frequency=5,
                                 batch_size=256,
                                 )
-            torch.save(self.model, os.path.join(self.dataFolder, 'trained_model.pkl'))
+            torch.save(self.model, os.path.join(self.dirout, 'trained_model.pkl'))
         else:
             losses = None
 
@@ -413,15 +510,18 @@ class KGEmbedder:
 
 
     def load_embeddings(self, path_to_embeddings:str):
-
-        if os.path.exists(path_to_embeddings):
-           self.embedding_df = pd.read_csv(path_to_embeddings)
+        """load the embedding parquet files
+        """
+        if os.path.exists(os.path.join(self.dirout, 'entityEmbeddings.parquet')):
+           self.embedding_df = pd.read_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
+           self.relation_df = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
            return None, None
         #else:
         #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
 
     def save_embeddings(self,):
-
+        """save the embedding parquet files
+        """
         entities = tuple(self.graph.nodes.values())
         tripleFactory = self.training
 
@@ -437,14 +537,17 @@ class KGEmbedder:
         df_entities = embeddingsToDF(self.entity_dict, 'entity')
         df_relation = embeddingsToDF(self.relation_dict, 'relation')
 
-        df_entities.to_parquet(os.path.join(self.dataFolder, 'entityEmbeddings.parquet'))
-        df_relation.to_parquet(os.path.join(self.dataFolder, 'relationEmbeddings.parquet'))
+        df_entities.to_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
+        df_relation.to_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
 
 
 
 ######################################################################################################
-def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+def dataset_traintest_split(anyobject:Any, train_ratio:float=0.6, val_ratio:float=0.2):
     #### Split anything
+    """train test split Any
+
+    """
     val_ratio = val_ratio + train_ratio
     if isinstance(anyobject, pd.DataFrame):
         df = anyobject
@@ -495,9 +598,17 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
-def get_embeddings(label_to_id:Dict[str, int], embedding):
-    aux = {label:{'_id': id_} for id_, label in label_to_id.items()}
-    for id_, label in label_to_id.items():
+def get_embeddings(id_to_label:Dict[int, str], embedding):
+    """parse the triple [label id embedding] from the pykeen API
+    Docs:
+
+            id_to_label: Dict[int, str] mapping from ids to labels
+            embedding  : torch.tensor produced embeddings
+            returns
+                dict with the requested triple
+    """
+    aux = {label:{'_id': id_} for id_, label in id_to_label.items()}
+    for id_, label in id_to_label.items():
         idx_tensor = torch.tensor([id_]).to(dtype=torch.int64)
 
         aux[label]['embedding'] = embedding.forward(indices = idx_tensor).detach().numpy()
@@ -506,6 +617,14 @@ def get_embeddings(label_to_id:Dict[str, int], embedding):
 
 
 def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+    """turn the results from pykeen in a more manageable format
+    Docs:
+
+            embeddingDict   :   Dict[str, Dict[str, Union[int, torch.tensor]]],
+                                mapping from labels to ids and embeddings
+            entityOrRelation:   Wether to use the relation or the entity column name
+
+    """
     aux = []
     for label, dict_ in embeddingDict.items():
         vals = [label, dict_['_id'], dict_['embedding'].flatten()]

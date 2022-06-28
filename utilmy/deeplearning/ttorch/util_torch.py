@@ -70,20 +70,17 @@ def test_all():
     """function test_all"""
     test1()
     test2()
-
-
+    test3()
+    test4()
 
 
 def test1():
-    """test  model_train, model_evaluate,  model_load, model_summary, model_load_state_dict
+    log('### test dataloader_create, model_train, model_evaluate, model_load_partially_compatible')
+    from os.path import exists as os_exists
+    from os import makedirs as os_makedirs
 
-    """
-
-    log('-' * 50 + '\n--- test_classifier_simple started...\n' + '-' * 50)
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
-    # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
-    # test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
 
     model = nn.Sequential(nn.Linear(50, 20), nn.Linear(20, 1))
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
@@ -91,26 +88,47 @@ def test1():
 
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
     model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
+    
 
-
-
-    log('-' * 50 + '\n--- test_resnet started...\n' + '-' * 50)
-    from torchvision import models
-
-    model = models.resnet50()
-    torch.save({'model_state_dict': model.state_dict()}, 'resnet50_ckpt.pth')
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
-
-    # model = models.resnet50()
-    kwargs = {'input_size': (1, 3, 224, 224)}
-    model_summary(model=model, **kwargs)
-
-    # model = models.resnet50()
-    model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
+    tests_temp_dir = './tests_temp_dir/'
+    if not os_exists(tests_temp_dir):
+        os_makedirs(tests_temp_dir)
+    torch.save(model, tests_temp_dir+'saved_model')
+    # _ = model_load_partially_compatible(model=model, dir_weights=tests_temp_dir+'saved_model')
 
 
 def test2():
+    log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
+    from os.path import exists as os_exists
+    from os import makedirs as os_makedirs
+    from torchvision import models
+
+    _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
+    
+    model = models.resnet50()
+    tests_temp_dir = './tests_temp_dir/'
+    if not os_exists(tests_temp_dir):
+        os_makedirs(tests_temp_dir)
+    dir_checkpoint = model_save(model, dir_checkpoint=tests_temp_dir + 'check.pt', cc=model.state_dict())
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=True)
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=False, dotrain=True)
+
+    kwargs = {'input_size': (1, 3, 224, 224)}
+    model_summary(model=model, **kwargs)
+
+    model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
+
+
+def test3():
+    log('### test device_setup, dataset_traintest_split')
+    device_setup(device='cpu', seed=123)
+    assert torch.initial_seed() == 123, 'Seed assigning failed.'
+
+    train_subset, val_subset, test_subset = dataset_traintest_split(range(10), train_ratio=.7, val_ratio=.2)
+    assert len(train_subset) == 7 and len(val_subset) == 2 and len(test_subset) == 1, 'Dataset split failed.'
+
+
+def test4():
     log("### test torch_metric_accuracy, torch_pearson_coeff  ")
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
@@ -137,7 +155,6 @@ def test2():
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
     # l = loss(output, labels[:64])
-
 
 
 ###############################################################################################
@@ -316,8 +333,8 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
 
     if dirout is not None :
-      df = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
-      df = pd.DataFrame(df, columns= ['id', 'emb'])
+      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
       pd_to_file(df, dirout2, show=1 )
     else:
@@ -519,11 +536,15 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
+
+            return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
         self.return_img_id  = return_img_id 
+
+        self.return_img_id = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
@@ -590,6 +611,7 @@ class ImageDataset(Dataset):
                 img_name =  img_name.replace('\\','_')
             train_y = img_name
         return (train_X, train_y)
+
 
 
 def ImageDataloader(df=None, batch_size=64,
