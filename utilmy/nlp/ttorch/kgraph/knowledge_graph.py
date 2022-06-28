@@ -70,23 +70,26 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
     dname = dname + "/embed/"
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
-    data_kgf = extractor.extractTriples(sents=-1)
-    extractor.export_data(data_kgf)
+    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor.extractTriples(max_text=-1)
+    extractor.export_data()
+    # data_kgf  = extractor.extractTriples(max_text=-1)
+    # extractor.export_data(data_kgf)
 
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
-    # data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
-    grapher = knowledge_grapher(embedding_dim=10, load_spacy=True)
+    grapher = knowledge_grapher(embedding_dim=10)
     grapher.load_data( data_kgf_path)
     grapher.buildGraph()
+    # data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
 
 
 
     log('##### Build KG Embeddings')
-    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    dirout_emb = dname
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
     embedder.compute_embeddings('none', batch_size=1024)
     embedder.save_embeddings()
@@ -264,6 +267,7 @@ class NERExtractor:
     def __init__(self, dirin_or_df:pd.DataFrame,
                  # dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
+                 model_name="ro_core_news_sm"
                  ):
         """NERExtractor: named entity extractor
         Docs:
@@ -274,7 +278,7 @@ class NERExtractor:
 
         """
 
-        self.nlp = spacy.load("ro_core_news_sm")
+        self.nlp = spacy.load(model_name)
         # self.dirin = dirin
         self.dirout = dirout
 
@@ -356,7 +360,7 @@ class NERExtractor:
             print('No match found for this entry!')
             return None
 
-    def extractTriples(self, max_text:int) -> pd.DataFrame:
+    def extractTriples(self, max_text:int, return_val=False) -> pd.DataFrame:
 
         """extracting triples of the form [source relation target]
         Docs:
@@ -365,7 +369,7 @@ class NERExtractor:
                 returs:
                     pd.DataFrame where each row is a triple of the same form
         """
-
+        max_text = len(self.data) if max_text<0 else max_text
         pairs_of_entities = [self.extract_entities(i) for i in tqdm(self.data['paragraph'][:max_text])]
         relations = [self.obtain_relation(j) for j in tqdm(self.data['paragraph'][:max_text])]
         indexes = [x for x, z in enumerate(relations) if z is not None]
@@ -379,10 +383,11 @@ class NERExtractor:
         target = [k[1] for k in pairs_of_entities]
         target = [target[i] for i in indexes]
 
-        return pd.DataFrame({'source':source, 'target':target, 'edge':relations})
+        self.data_kgf = pd.DataFrame({'source':source, 'target':target, 'edge':relations})
+        if return_val: return self.data_kgf
 
 
-    def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
+    def export_data(self, dirout=None):
 
         """extracting relations for a series of sentences of cleaned text
         Docs:
@@ -394,15 +399,20 @@ class NERExtractor:
         """
 
         from utilmy import pd_to_file
-        train_df, val_df, test_df = dataset_traintest_split(data_kgf, train_ratio=0.6, val_ratio=0.2)
+        train_df, val_df, test_df = dataset_traintest_split(self.data_kgf, train_ratio=0.6, val_ratio=0.2)
 
 
-        train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
-        data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        dirout = dirout if dirout is not None else self.dirout
+        pd_to_file(train_df,   dirout + '/train_data.tsv', sep="\t")
+        pd_to_file(test_df,    dirout + '/test_data.tsv',  sep="\t")
+        pd_to_file(val_df,     dirout + '/val_data.tsv',   sep="\t")
+        pd_to_file(self.data_kgf,   dirout + '/data_kgf.tsv',   sep="\t")
 
-        return train_df, test_df, val_df
+        # train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
+        # test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
+        # val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        # data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        # return train_df, test_df, val_df
 
 
 
@@ -427,22 +437,22 @@ class KGEmbedder:
         self.graph = graph
         self.embedding_dim = embedding_dim
 
-        train_path =os.path.join(dirout,'train_data.tsv')
-        test_path =os.path.join(dirout,'test_data.tsv')
-        val_path =os.path.join(dirout,'validation_data.tsv')
-        data_path = os.path.join(dirin,'data_kgf.tsv')
+        train_path = os.path.join(dirin,'train_data.tsv')
+        test_path  = os.path.join(dirin,'test_data.tsv')
+        val_path   = os.path.join(dirin,'validation_data.tsv')
+        data_path  = os.path.join(dirin,'data_kgf.tsv')
 
-        self.dirin = dirin
+        self.dirin  = dirin
         self.dirout = dirout
         self.training = TriplesFactory.from_path(train_path)
 
         self.testing = TriplesFactory.from_path(test_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
+                                            entity_to_id  = self.training.entity_to_id,
+                                            relation_to_id= self.training.relation_to_id)
 
         self.validation = TriplesFactory.from_path(val_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
+                                            entity_to_id  = self.training.entity_to_id,
+                                            relation_to_id= self.training.relation_to_id)
 
 
     def set_up_embeddings(self,):
