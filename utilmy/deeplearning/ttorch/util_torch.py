@@ -70,20 +70,17 @@ def test_all():
     """function test_all"""
     test1()
     test2()
-
-
+    test3()
+    test4()
 
 
 def test1():
-    """test  model_train, model_evaluate,  model_load, model_summary, model_load_state_dict
+    log('### test dataloader_create, model_train, model_evaluate, model_load_partially_compatible')
+    from os.path import exists as os_exists
+    from os import makedirs as os_makedirs
 
-    """
-
-    log('-' * 50 + '\n--- test_classifier_simple started...\n' + '-' * 50)
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
-    # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
-    # test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
 
     model = nn.Sequential(nn.Linear(50, 20), nn.Linear(20, 1))
     args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
@@ -91,26 +88,47 @@ def test1():
 
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
     model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
+    
 
-
-
-    log('-' * 50 + '\n--- test_resnet started...\n' + '-' * 50)
-    from torchvision import models
-
-    model = models.resnet50()
-    torch.save({'model_state_dict': model.state_dict()}, 'resnet50_ckpt.pth')
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
-
-    # model = models.resnet50()
-    kwargs = {'input_size': (1, 3, 224, 224)}
-    model_summary(model=model, **kwargs)
-
-    # model = models.resnet50()
-    model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
+    tests_temp_dir = './tests_temp_dir/'
+    if not os_exists(tests_temp_dir):
+        os_makedirs(tests_temp_dir)
+    torch.save(model, tests_temp_dir+'saved_model')
+    # _ = model_load_partially_compatible(model=model, dir_weights=tests_temp_dir+'saved_model')
 
 
 def test2():
+    log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
+    from os.path import exists as os_exists
+    from os import makedirs as os_makedirs
+    from torchvision import models
+
+    _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
+    
+    model = models.resnet50()
+    tests_temp_dir = './tests_temp_dir/'
+    if not os_exists(tests_temp_dir):
+        os_makedirs(tests_temp_dir)
+    dir_checkpoint = model_save(model, dir_checkpoint=tests_temp_dir + 'check.pt', cc=model.state_dict())
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=True)
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=False, dotrain=True)
+
+    kwargs = {'input_size': (1, 3, 224, 224)}
+    model_summary(model=model, **kwargs)
+
+    model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
+
+
+def test3():
+    log('### test device_setup, dataset_traintest_split')
+    device_setup(device='cpu', seed=123)
+    assert torch.initial_seed() == 123, 'Seed assigning failed.'
+
+    train_subset, val_subset, test_subset = dataset_traintest_split(range(10), train_ratio=.7, val_ratio=.2)
+    assert len(train_subset) == 7 and len(val_subset) == 2 and len(test_subset) == 1, 'Dataset split failed.'
+
+
+def test4():
     log("### test torch_metric_accuracy, torch_pearson_coeff  ")
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
@@ -136,8 +154,7 @@ def test2():
     labels = torch.Tensor(labels).long()
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
-    l = loss(output, labels[:64])
-
+    # l = loss(output, labels[:64])
 
 
 ###############################################################################################
@@ -255,26 +272,59 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
 
 ###############################################################################################
 ####### Embedding #############################################################################
-def embedding_torchtensor_to_parquet(model=None, dirout='./', data_loader=None, tag=""):
-    # from utilmy.deeplearning import  util_embedding as ue
-    import time
-    
-    df= []
-    assert(model is not None and data_loader is not None)
-    for img , img_names in data_loader:
-        with torch.no_grad():
-            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
-            for i in range(emb.size()[0]):
-                ss = np_array_to_str(emb[i].numpy())
-                df.append([ img_names[i], ss])
+def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
+    """  output model otuput, embedding.
 
-    df = pd.DataFrame(df, columns= ['id', 'emb'])
+    """
+    pass
+
+
+
+def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb')
+    embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
+    pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+
+
+
+def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    model_embed_extract_fun = model.get_embedding
+
+    df= []
+    for X , id_sample in data_loader:
+        with torch.no_grad():
+            #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            emb = model_embed_extract_fun(X)
+            for i in range(emb.size()[0]):
+                ss = emb[i].numpy()  ####  array as string
+                df.append([ id_sample[i], ss])
+
 
     if dirout is not None :
-      log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
+      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
+      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df, dirout2, show=1 )
+      pd_to_file(df2, dirout2, show=1 )
+
     return df
+
 
 
 def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
@@ -310,65 +360,61 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
     return embs, id_map, df 
 
 
-class DataForEmbedding(Dataset):
-    """Custom DataGenerator using Pytorch Sequence for images
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+    """ Pairwise Cosinus Sim scores
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist, is_symmetric=False)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
     """
-    def __init__(self, df=None,
-                col_img: str='id',
-                transforms=None, transforms_image_size_default=64,
-                img_loader=None,
-                col_class='gender', class_lable='Men'
-                 ):
-        self.col_img    = col_img
-        self.transforms = transforms
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    name_list = np.arange(0, n) if name_list is None else name_list
+    dfsim = []
+    for i in  range(0, len(name_list) - 1) :
+        vi = embs[i,:]
+        normi = np.sqrt(np.dot(vi,vi))
+        for j in range(i+1, len(name_list)) :
+            # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
+            vj = embs[j,:]
+            normj = np.sqrt(np.dot(vj, vj))
+            simij = np.dot( vi ,  vj  ) / (normi * normj)
+            dfsim.append([name_list[i], name_list[j], simij])
+            # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
 
-        if img_loader is None :  ### Use default loader
-           from PIL import Image
-           self.img_loader = Image.open
-        assert(df is not None)
-        
-        df = df.loc[df[col_class] == class_lable]
-        df = df[[col_img,col_class]]
-        if transforms is None :
-              from torchvision import transforms
-              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
-        assert(df is not None)
-        self.label_img_dir = df[self.col_img].values
+    dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
 
-
-    def __len__(self) -> int:
-        return len(self.label_img_dir)
-
-
-    def __getitem__(self, idx: int):
-
-        img_dir = self.label_img_dir[idx]
-        img     = self.img_loader(img_dir)
-        img_name = img_dir.split('/')[-1].split('.')[0]
-
-        if "\\" in img_name:
-            img_name =  img_name.replace('\\','_')
-
-        train_X = self.transforms(img)
-        return (train_X, img_name)
+    if is_symmetric:
+        ### Add symmetric part
+        dfsim3 = copy.deepcopy(dfsim)
+        dfsim3.columns = ['id2', 'id1', 'sim_score' ]
+        dfsim          = pd.concat(( dfsim, dfsim3 ))
+    return dfsim
 
 
-def cos_similar_embedding(embv = None, img_names=None):
+def np_cosinus_most_similar(embv = None, emb_name_list=None):
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
-    if embv is not None and img_names is not None:
-        df = pd.DataFrame(data = img_names, columns=['id'] )
-        for i, emb1 in enumerate(embv):
-            res = []
-            for emb2 in embv:
-                res.append(cosine_similarity([emb1],[emb2]))
-            res[i] = -1
-            max_value = max(res)
-            img_name = img_names[res.index(max_value)]
-            similar_emb.append(img_name)
-        df['similar'] = similar_emb
-    return df
+    n = len(embv)
+    emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
 
+    for i, emb1 in enumerate(embv):
+        res = []
+        for emb2 in embv:
+            res.append(cosine_similarity([emb1],[emb2]))
+        res[i] = -1
+        max_value = max(res)
+        img_name = emb_name_list[res.index(max_value)]
+        similar_emb.append(img_name)
+
+    df = pd.DataFrame(data = emb_name_list, columns=['id'])
+    df['similar'] = similar_emb
+    return df
 
 
 
@@ -442,7 +488,9 @@ class ImageDataset(Dataset):
 
                 transforms=None, transforms_image_size_default=64,
                 check_ifimage_exist=False,
-                img_loader=None
+                img_loader=None,
+
+                return_img_id=False   #### reutnr the image path in the datalaoder
 
                  ):
         """ Image Datast :  labels + Images path on disk
@@ -452,10 +500,14 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
+
+            return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
+
+        self.return_img_id = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
@@ -512,7 +564,12 @@ class ImageDataset(Dataset):
         assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
+
+        if self.return_img_id :
+            return  (train_X, train_y, img_dir)
+
         return (train_X, train_y)
+
 
 
 def ImageDataloader(df=None, batch_size=64,
@@ -566,6 +623,48 @@ def ImageDataloader(df=None, batch_size=64,
 
     return train_dataloader,val_dataloader,test_dataloader
 
+
+class ImageEmbedDataset(Dataset):
+    """Custom DataGenerator using Pytorch Sequence for images
+    """
+    def __init__(self, df=None,
+                col_img: str='id',
+                transforms=None, transforms_image_size_default=64,
+                img_loader=None,
+                col_class='gender', class_lable='Men'
+                 ):
+        self.col_img    = col_img
+        self.transforms = transforms
+
+        if img_loader is None :  ### Use default loader
+           from PIL import Image
+           self.img_loader = Image.open
+        assert(df is not None)
+
+        df = df.loc[df[col_class] == class_lable]
+        df = df[[col_img,col_class]]
+        if transforms is None :
+              from torchvision import transforms
+              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
+        assert(df is not None)
+        self.label_img_dir = df[self.col_img].values
+
+
+    def __len__(self) -> int:
+        return len(self.label_img_dir)
+
+
+    def __getitem__(self, idx: int):
+
+        img_dir = self.label_img_dir[idx]
+        img     = self.img_loader(img_dir)
+        img_name = img_dir.split('/')[-1].split('.')[0]
+
+        if "\\" in img_name:
+            img_name =  img_name.replace('\\','_')
+
+        train_X = self.transforms(img)
+        return (train_X, img_name)
 
 
 
