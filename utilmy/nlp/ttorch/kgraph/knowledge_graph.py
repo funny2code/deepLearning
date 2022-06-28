@@ -144,6 +144,7 @@ class knowledge_grapher():
                  ) -> None:
         """knowledge_grapher:
         Docs:
+
                 data_kgf     :      pd.DataFrame, dataframe with triples entity, relation, entity
                 embedding_dim:      int, number of dimensions in the embedding space
                 dirin        :      PathLike, where to read input data
@@ -157,6 +158,7 @@ class knowledge_grapher():
     def buildGraph(self, relation = None)->None:
         """build knowledge graph
         Docs:
+
                 relation:   str, build graph isolating a particular relation for visualization purposes.
 
         """
@@ -191,6 +193,7 @@ class knowledge_grapher():
     def load_data(path)->pd.DataFrame:
         """load the data_kgf dataframe
         Docs:
+
                 path:   PathLike, where the data is stored in tsv format
 
         """
@@ -206,6 +209,7 @@ class knowledge_grapher():
 
         """ get the nodes with the higher centrality metric for each methods
         Docs:
+
                 max_centers:    int, how many centers to include in the top
 
         """
@@ -229,6 +233,7 @@ class knowledge_grapher():
 
     def map_centers_anchors(self,embedding_df:pd.DataFrame, _type:str)->None:
        """ map centers to anchors (embeddings)
+       Docs::
 
             embedding_df:   pd.DataFrame, map from nodes to embeddings
             type_       :   str, which method to use of the calculated centers
@@ -257,6 +262,7 @@ class NERExtractor:
                  ):
         """NERExtractor: named entity extractor
         Docs:
+
                 data    : pd.DataFrame, with the corpus of text from which to extract entities
                 dirin   : where to load the input data
                 dirout  : where to save the output
@@ -315,6 +321,7 @@ class NERExtractor:
     def obtain_relation(self,sent):
         """extracting relations for a series of sentences of cleaned text
         Docs:
+
                 sents: List[str], cleaned Text from which to extract the relations
         """
         doc = self.nlp(sent)
@@ -338,6 +345,7 @@ class NERExtractor:
 
         """extracting triples of the form [source relation target]
         Docs:
+
                 max_text: int, how many of the corpus rows to consume
                 returs:
                     pd.DataFrame where each row is a triple of the same form
@@ -362,6 +370,7 @@ class NERExtractor:
 
         """extracting relations for a series of sentences of cleaned text
         Docs:
+
                 data_kgf: pd.DataFrame of the form [source relation target]
                 returns
                     Tuple[pd.DataFrame] with traning, validation and testing datasets
@@ -402,8 +411,10 @@ class KGEmbedder:
                  )->None:
 
         """KGEmbedder: produces the KG embeddings using pyKeen:
-            https://pykeen.readthedocs.io/en/stable/
+
         Docs:
+
+                https://pykeen.readthedocs.io/en/stable/
                 graph           : ntx.MultiDiGraph the knowledge itself
                 embedding_dim   : int, number of dimensions of the embedding space
                 dirin           : where to load the input data
@@ -460,6 +471,7 @@ class KGEmbedder:
 
         """set up the training pipeline for pykeen or load the trained model
         Docs:
+
                 path_to_embeddings: PathLike
                 batch_size        : int, batch_size for the pykeen nn
         """
@@ -495,7 +507,6 @@ class KGEmbedder:
 
 
     def load_embeddings(self, path_to_embeddings:str):
-
         """load the embedding parquet files
         """
         if os.path.exists(os.path.join(self.dirout, 'entityEmbeddings.parquet')):
@@ -587,6 +598,7 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 def get_embeddings(id_to_label:Dict[int, str], embedding):
     """parse the triple [label id embedding] from the pykeen API
     Docs:
+    
             id_to_label: Dict[int, str] mapping from ids to labels
             embedding  : torch.tensor produced embeddings
             returns
@@ -604,6 +616,7 @@ def get_embeddings(id_to_label:Dict[int, str], embedding):
 def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
     """turn the results from pykeen in a more manageable format
     Docs:
+
             embeddingDict   :   Dict[str, Dict[str, Union[int, torch.tensor]]],
                                 mapping from labels to ids and embeddings
             entityOrRelation:   Wether to use the relation or the entity column name
