@@ -267,8 +267,9 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 
 
-def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                 force_getlayer= True, pos_layer=-2):
+def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
+                                 force_getlayer= True,
+                                  pos_layer=-2):
     """
     Docs:
 
@@ -277,18 +278,21 @@ def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag
 
 
     """
-    assert(model is not None)
-    df = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb',force_getlayer= force_getlayer, pos_layer=pos_layer)
-    
-    if dirout is not None:
-        embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb') 
-    else:
-        embv1 = [ x[1] for x in df]
+    if dirin is not None:
+        embv1, img_names,df = embedding_load_parquet(dirin=f"{dirin}/df_emb_{tag}.parquet",
+                                                     colid= colid, col_embed= colemb)
+    else :
+        emb_list = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid=colid, colemb=colemb,
+                                            force_getlayer= force_getlayer, pos_layer=pos_layer)
+        embv1    = [ x[1] for x in emb_list]
+
+
     dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
     
     if dirout is not None:
         pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
     return dfsim
+
 
 def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
                                         force_getlayer= True, pos_layer=-2):
@@ -305,7 +309,7 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
     else:
        model_embed_extract_fun = model.get_embedding
 
-    df= []
+    llist= []
     for X , lable, id_sample in data_loader:
         with torch.no_grad():
             #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
@@ -315,16 +319,17 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
             else:
                 emb = model_embed_extract_fun(X)
             for i in range(emb.size()[0]):
-                ss = emb[i].numpy()  ####  array as string
-                df.append([ id_sample[i], ss])
+                ss = emb[i].numpy()
+                llist.append([ id_sample[i], ss])
 
 
     if dirout is not None :
-      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
-      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
-      dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df, dirout2, show=1 )
-    return df
+        df2 = [ (k, np_array_to_str(v) )  for (k,v) in llist ]    ####  array as string
+        df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
+        dirout2 = dirout + f"/df_emb_{tag}.parquet"
+        pd_to_file(df2, dirout2, show=1 )
+
+    return llist
 
 
 def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
@@ -358,6 +363,7 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
     #####  Keep only label infos  ####
     del df['emb']                  
     return embs, id_map, df 
+
 
 
 def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
@@ -395,6 +401,7 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
         dfsim3.columns = ['id2', 'id1', 'sim_score' ]
         dfsim          = pd.concat(( dfsim, dfsim3 ))
     return dfsim
+
 
 
 def np_cosinus_most_similar(embv = None, emb_name_list=None):
