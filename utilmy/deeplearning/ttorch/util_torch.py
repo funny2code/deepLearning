@@ -291,18 +291,18 @@ def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag
 
     """
     assert(model is not None)
-    embv1 = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb',force_getlayer= force_getlayer, pos_layer=pos_layer)
+    df = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb',force_getlayer= force_getlayer, pos_layer=pos_layer)
     
     if dirout is not None:
         embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb') 
-    
+    else:
+        embv1 = [ x[1] for x in df]
     dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
     
     if dirout is not None:
         pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
-    
     return dfsim
-    
+
 def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
                                         force_getlayer= True, pos_layer=-2):
     """
@@ -319,7 +319,7 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
        model_embed_extract_fun = model.get_embedding
 
     df= []
-    for X , id_sample in data_loader:
+    for X , lable, id_sample in data_loader:
         with torch.no_grad():
             #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
             if force_getlayer == True:
@@ -337,11 +337,6 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
       df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
       dirout2 = dirout + f"/df_emb_{tag}.parquet"
       pd_to_file(df, dirout2, show=1 )
-    else:
-       embv = [] 
-       for i in range(len(df)):
-           embv.append(df[i][1]) 
-       df = embv
     return df
 
 
@@ -569,13 +564,12 @@ class ImageDataset(Dataset):
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
 
-
+        self.label_dict = {}
         if self.return_img_id  == False:
             ####lable Prep  #######################################################################
             self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
             self.label_img_dir = self.label_df[self.col_img].values
     
-            self.label_dict = {}
             for ci in self.label_cols:
                 v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
                 v = np.array([[int(t) for t in vlist] for vlist in v])
@@ -586,6 +580,8 @@ class ImageDataset(Dataset):
             self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
             self.dflabel = self.dflabel[[col_img,label_col]]
             self.label_img_dir = self.dflabel[self.col_img].values
+            ##Buggy 
+            self.label_dict[label_col] = torch.ones(len(self.label_img_dir),dtype=torch.float)
 
     def __len__(self) -> int:
         return len(self.label_img_dir)
@@ -600,16 +596,17 @@ class ImageDataset(Dataset):
         img     = self.img_loader(img_dir)
         train_X = self.transforms(img)
 
-        if self.return_img_id  == False:
-            train_y = {}
-            assert(len(self.label_dict) != 0)
-            for classname, n_unique_label in self.label_dict.items():
-                train_y[classname] = self.label_dict[classname][idx]
-        else: ##Data for Embeddings' extraction 
+
+        train_y = {}
+        assert(len(self.label_dict) != 0)
+        for classname, n_unique_label in self.label_dict.items():
+            train_y[classname] = self.label_dict[classname][idx]
+
+        if self.return_img_id == True: ##Data for Embeddings' extraction
             img_name = img_dir.split('/')[-1].split('.')[0]
             if "\\" in img_name:
                 img_name =  img_name.replace('\\','_')
-            train_y = img_name
+            return (train_X, train_y, img_name)  
         return (train_X, train_y)
 
 
