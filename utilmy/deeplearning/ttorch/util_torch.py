@@ -75,9 +75,7 @@ def test_all():
 
 
 def test1():
-    log('### test dataloader_create, model_train, model_evaluate, model_load_partially_compatible')
-    from os.path import exists as os_exists
-    from os import makedirs as os_makedirs
+    log('### test dataloader_create, model_train, model_evaluate')
 
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
@@ -88,28 +86,17 @@ def test1():
 
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
     model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
-    
-
-    tests_temp_dir = './tests_temp_dir/'
-    if not os_exists(tests_temp_dir):
-        os_makedirs(tests_temp_dir)
-    torch.save(model, tests_temp_dir+'saved_model')
-    # _ = model_load_partially_compatible(model=model, dir_weights=tests_temp_dir+'saved_model')
 
 
 def test2():
     log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
-    from os.path import exists as os_exists
-    from os import makedirs as os_makedirs
     from torchvision import models
 
     _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
     
     model = models.resnet50()
-    tests_temp_dir = './tests_temp_dir/'
-    if not os_exists(tests_temp_dir):
-        os_makedirs(tests_temp_dir)
-    dir_checkpoint = model_save(model, dir_checkpoint=tests_temp_dir + 'check.pt', cc=model.state_dict())
+    os.makedirs('./tests_temp_dir/', exist_ok=True)
+    dir_checkpoint = model_save(model, dir_checkpoint='./tests_temp_dir/check.pt', cc=model.state_dict())
     model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=True)
     model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=False, dotrain=True)
 
