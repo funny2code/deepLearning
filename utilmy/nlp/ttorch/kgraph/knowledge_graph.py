@@ -70,20 +70,26 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
     dname = dname + "/embed/"
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
-    data_kgf = extractor.extractTriples(sents=-1)
-    extractor.export_data(data_kgf)
+    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor.extractTriples(max_text=-1)
+    extractor.export_data()
+    # data_kgf  = extractor.extractTriples(max_text=-1)
+    # extractor.export_data(data_kgf)
 
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
-    data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher = knowledge_grapher(embedding_dim=10)
+    grapher.load_data( data_kgf_path)
     grapher.buildGraph()
+    # data_kgf = knowledge_grapher.load_data(data_kgf_path)
+    #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+
 
 
     log('##### Build KG Embeddings')
-    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    dirout_emb = dname
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
     embedder.compute_embeddings('none', batch_size=1024)
     embedder.save_embeddings()
@@ -150,7 +156,7 @@ class knowledge_grapher():
                 dirin        :      PathLike, where to read input data
                 dirout       :      PathLike, where to store results
         """
-        self.data_kgf = data_kgf
+        self.data_kgf = None # data_kgf
         self.embedding_dim = embedding_dim
         self.dirin = dirin
         self.dirout = dirout
@@ -189,8 +195,8 @@ class knowledge_grapher():
         self.out_centrality_dict = ntx.out_degree_centrality(self.graph)
         # self.eigenvector_centrality_dict = ntx.katz_centrality(self.graph)
 
-    @staticmethod
-    def load_data(path)->pd.DataFrame:
+    #@staticmethod
+    def load_data(self, path)->pd.DataFrame:
         """load the data_kgf dataframe
         Docs:
 
@@ -198,12 +204,17 @@ class knowledge_grapher():
 
         """
         try:
-            return pd.read_csv(path, delimiter='\t')
+            df = pd.read_csv(path, delimiter='\t')
+            self.data_kgf  = df
+
         except Exception as e:
             log(e.msg)
             log('Data format may be incorrect')
 
+        cols =['source', 'target', 'edge']
+        assert len(df[cols])>0 , "error missing columns"
         # self.buildGraph(data_kgf)
+
 
     def get_centers(self, max_centers:int=5)->None:
 
@@ -256,9 +267,10 @@ class knowledge_grapher():
 
 class NERExtractor:
 
-    def __init__(self, data:pd.DataFrame,
-                 dirin:str="./mydatain/",
+    def __init__(self, dirin_or_df:pd.DataFrame,
+                 # dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
+                 model_name="ro_core_news_sm"
                  ):
         """NERExtractor: named entity extractor
         Docs:
@@ -269,10 +281,20 @@ class NERExtractor:
 
         """
 
-        self.nlp = spacy.load("ro_core_news_sm")
-        self.dirin = dirin
+        self.nlp = spacy.load(model_name)
+        # self.dirin = dirin
         self.dirout = dirout
-        self.data = data
+
+        if isinstance(dirin_or_df, pd.DataFrame):
+            self.data = dirin_or_df
+        else :
+            from utilmy import pd_read_file
+            self.data = pd_read_file(dirin_or_df)
+
+
+        cols = ['paragraph']
+        assert len(self.data[cols])> 0, 'not ok'
+
 
     def extract_entities(self, sents:List[str])->pd.DataFrame:
         """extracting entities for a series of sentences of cleaned text
@@ -341,7 +363,7 @@ class NERExtractor:
             print('No match found for this entry!')
             return None
 
-    def extractTriples(self, max_text:int) -> pd.DataFrame:
+    def extractTriples(self, max_text:int, return_val=False) -> pd.DataFrame:
 
         """extracting triples of the form [source relation target]
         Docs:
@@ -350,7 +372,7 @@ class NERExtractor:
                 returs:
                     pd.DataFrame where each row is a triple of the same form
         """
-
+        max_text = len(self.data) if max_text<0 else max_text
         pairs_of_entities = [self.extract_entities(i) for i in tqdm(self.data['paragraph'][:max_text])]
         relations = [self.obtain_relation(j) for j in tqdm(self.data['paragraph'][:max_text])]
         indexes = [x for x, z in enumerate(relations) if z is not None]
@@ -364,9 +386,11 @@ class NERExtractor:
         target = [k[1] for k in pairs_of_entities]
         target = [target[i] for i in indexes]
 
-        return pd.DataFrame({'source':source, 'target':target, 'edge':relations})
+        self.data_kgf = pd.DataFrame({'source':source, 'target':target, 'edge':relations})
+        if return_val: return self.data_kgf
 
-    def export_data(self, data_kgf:pd.DataFrame)->Tuple[pd.DataFrame]:
+
+    def export_data(self, dirout=None):
 
         """extracting relations for a series of sentences of cleaned text
         Docs:
@@ -378,28 +402,20 @@ class NERExtractor:
         """
 
         from utilmy import pd_to_file
-        train_df, val_df, test_df = dataset_traintest_split(data_kgf, train_ratio=0.6, val_ratio=0.2)
-
-        # SAMPLES = len(data_kgf.index)
-        # TRAIN_SPLIT = int(0.5 * SAMPLES)
-        # TEST_SPLIT = int(0.3 * SAMPLES)
-        # VALIDATION_SPLIT = int(0.2 * SAMPLES)
-        #
-        # train_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TRAIN_SPLIT)
-        # test_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=TEST_SPLIT)
-        # validation_indexes = np.random.randint(low = 0, high = len(data_kgf.index), size=VALIDATION_SPLIT)
-        #
-        # train_df = data_kgf.iloc[train_indexes]
-        # test_df = data_kgf.iloc[test_indexes]
-        # val_df = data_kgf.iloc[validation_indexes]
+        train_df, val_df, test_df = dataset_traintest_split(self.data_kgf, train_ratio=0.6, val_ratio=0.2)
 
 
-        train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
-        data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        dirout = dirout if dirout is not None else self.dirout
+        pd_to_file(train_df,   dirout + '/train_data.tsv', sep="\t")
+        pd_to_file(test_df,    dirout + '/test_data.tsv',  sep="\t")
+        pd_to_file(val_df,     dirout + '/val_data.tsv',   sep="\t")
+        pd_to_file(self.data_kgf,   dirout + '/data_kgf.tsv',   sep="\t")
 
-        return train_df, test_df, val_df
+        # train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
+        # test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
+        # val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        # data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        # return train_df, test_df, val_df
 
 
 
@@ -424,22 +440,22 @@ class KGEmbedder:
         self.graph = graph
         self.embedding_dim = embedding_dim
 
-        train_path =os.path.join(dirout,'train_data.tsv')
-        test_path =os.path.join(dirout,'test_data.tsv')
-        val_path =os.path.join(dirout,'validation_data.tsv')
-        data_path = os.path.join(dirin,'data_kgf.tsv')
+        train_path = os.path.join(dirin,'train_data.tsv')
+        test_path  = os.path.join(dirin,'test_data.tsv')
+        val_path   = os.path.join(dirin,'validation_data.tsv')
+        data_path  = os.path.join(dirin,'data_kgf.tsv')
 
-        self.dirin = dirin
+        self.dirin  = dirin
         self.dirout = dirout
         self.training = TriplesFactory.from_path(train_path)
 
         self.testing = TriplesFactory.from_path(test_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
+                                            entity_to_id  = self.training.entity_to_id,
+                                            relation_to_id= self.training.relation_to_id)
 
         self.validation = TriplesFactory.from_path(val_path,
-                                            entity_to_id=self.training.entity_to_id,
-                                            relation_to_id=self.training.relation_to_id)
+                                            entity_to_id  = self.training.entity_to_id,
+                                            relation_to_id= self.training.relation_to_id)
 
 
     def set_up_embeddings(self,):
@@ -598,7 +614,7 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 def get_embeddings(id_to_label:Dict[int, str], embedding):
     """parse the triple [label id embedding] from the pykeen API
     Docs:
-    
+
             id_to_label: Dict[int, str] mapping from ids to labels
             embedding  : torch.tensor produced embeddings
             returns

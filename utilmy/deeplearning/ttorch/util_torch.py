@@ -75,9 +75,7 @@ def test_all():
 
 
 def test1():
-    log('### test dataloader_create, model_train, model_evaluate, model_load_partially_compatible')
-    from os.path import exists as os_exists
-    from os import makedirs as os_makedirs
+    log('### test dataloader_create, model_train, model_evaluate')
 
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
@@ -88,28 +86,17 @@ def test1():
 
     model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
     model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
-    
-
-    tests_temp_dir = './tests_temp_dir/'
-    if not os_exists(tests_temp_dir):
-        os_makedirs(tests_temp_dir)
-    torch.save(model, tests_temp_dir+'saved_model')
-    # _ = model_load_partially_compatible(model=model, dir_weights=tests_temp_dir+'saved_model')
 
 
 def test2():
     log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
-    from os.path import exists as os_exists
-    from os import makedirs as os_makedirs
     from torchvision import models
 
     _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
     
     model = models.resnet50()
-    tests_temp_dir = './tests_temp_dir/'
-    if not os_exists(tests_temp_dir):
-        os_makedirs(tests_temp_dir)
-    dir_checkpoint = model_save(model, dir_checkpoint=tests_temp_dir + 'check.pt', cc=model.state_dict())
+    os.makedirs('./tests_temp_dir/', exist_ok=True)
+    dir_checkpoint = model_save(model, dir_checkpoint='./tests_temp_dir/check.pt', cc=model.state_dict())
     model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=True)
     model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=False, dotrain=True)
 
@@ -280,7 +267,9 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 
 
-def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
+                                 force_getlayer= True,
+                                  pos_layer=-2):
     """
     Docs:
 
@@ -289,14 +278,24 @@ def model_embedding_extract_check(model=None, dirout=None, data_loader=None, tag
 
 
     """
-    model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid='id', colemb='emb')
-    embv1, img_names,df = embedding_load_parquet(dirin=f"{dirout}/df_emb_{tag}.parquet",  colid= 'id', col_embed= 'emb')
+    if dirin is not None:
+        embv1, img_names,df = embedding_load_parquet(dirin=f"{dirin}/df_emb_{tag}.parquet",
+                                                     colid= colid, col_embed= colemb)
+    else :
+        emb_list = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid=colid, colemb=colemb,
+                                            force_getlayer= force_getlayer, pos_layer=pos_layer)
+        embv1    = [ x[1] for x in emb_list]
+
+
     dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
-    pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+    
+    if dirout is not None:
+        pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+    return dfsim
 
 
-
-def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb'):
+def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
+                                        force_getlayer= True, pos_layer=-2):
     """
     Docs:
 
@@ -305,26 +304,32 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
 
     """
-    model_embed_extract_fun = model.get_embedding
+    if force_getlayer == True:
+       model_embed_extract_fun = model_getlayer(model, pos_layer=pos_layer)
+    else:
+       model_embed_extract_fun = model.get_embedding
 
-    df= []
-    for X , id_sample in data_loader:
+    llist= []
+    for X , lable, id_sample in data_loader:
         with torch.no_grad():
             #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
-            emb = model_embed_extract_fun(X)
+            if force_getlayer == True:
+               emb = model(X)
+               emb = model_embed_extract_fun.output.squeeze()
+            else:
+                emb = model_embed_extract_fun(X)
             for i in range(emb.size()[0]):
-                ss = emb[i].numpy()  ####  array as string
-                df.append([ id_sample[i], ss])
+                ss = emb[i].numpy()
+                llist.append([ id_sample[i], ss])
 
 
     if dirout is not None :
-      df2 = [ (k, np_array_to_str(v) )  for (k,v) in df ]   #### As string
-      df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
-      dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df2, dirout2, show=1 )
+        df2 = [ (k, np_array_to_str(v) )  for (k,v) in llist ]    ####  array as string
+        df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
+        dirout2 = dirout + f"/df_emb_{tag}.parquet"
+        pd_to_file(df2, dirout2, show=1 )
 
-    return df
-
+    return llist
 
 
 def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
@@ -360,6 +365,7 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
     return embs, id_map, df 
 
 
+
 def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
     """ Pairwise Cosinus Sim scores
     Example:
@@ -377,11 +383,11 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
     name_list = np.arange(0, n) if name_list is None else name_list
     dfsim = []
     for i in  range(0, len(name_list) - 1) :
-        vi = embs[i,:]
+        vi = embs[i]
         normi = np.sqrt(np.dot(vi,vi))
         for j in range(i+1, len(name_list)) :
             # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
-            vj = embs[j,:]
+            vj = embs[j]
             normj = np.sqrt(np.dot(vj, vj))
             simij = np.dot( vi ,  vj  ) / (normi * normj)
             dfsim.append([name_list[i], name_list[j], simij])
@@ -395,6 +401,7 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
         dfsim3.columns = ['id2', 'id1', 'sim_score' ]
         dfsim          = pd.concat(( dfsim, dfsim3 ))
     return dfsim
+
 
 
 def np_cosinus_most_similar(embv = None, emb_name_list=None):
@@ -474,6 +481,28 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     # df = df.dropna(how='any',axis=0)
     return df
 
+class model_getlayer():
+    def __init__(self, network, backward=False, pos_layer=-2):
+        self.layers = []
+        self.get_layers_in_order(network)
+        self.last_layer = self.layers[pos_layer]
+        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
+
+    def hook_fn(self, module, input, output):
+        self.input = input
+        self.output = output
+
+    def close(self):
+        self.hook.remove()
+
+    def get_layers_in_order(self, network):
+      if len(list(network.children())) == 0:
+        self.layers.append(network)
+        return
+      for layer in network.children():
+        self.get_layers_in_order(layer)
+
+
 
 class ImageDataset(Dataset):
     """Custom DataGenerator using Pytorch Sequence for images
@@ -482,16 +511,12 @@ class ImageDataset(Dataset):
     """
     def __init__(self, img_dir:str="images/",
                 col_img: str='id',
-
                 label_dir:str   ="labels/mylabel.csv",
                 label_dict:dict =None,
-
                 transforms=None, transforms_image_size_default=64,
                 check_ifimage_exist=False,
                 img_loader=None,
-
-                return_img_id=False   #### reutnr the image path in the datalaoder
-
+                return_img_id  = False
                  ):
         """ Image Datast :  labels + Images path on disk
         Docs:
@@ -506,6 +531,7 @@ class ImageDataset(Dataset):
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
+        self.return_img_id  = return_img_id 
 
         self.return_img_id = return_img_id
 
@@ -531,26 +557,31 @@ class ImageDataset(Dataset):
 
         self.dflabel    = dflabel
         self.label_cols = list(label_dict.keys())
-        self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-        self.label_img_dir = self.label_df[self.col_img].values
 
-
-
-        ####lable Prep  #######################################################################
         self.label_dict = {}
-        for ci in self.label_cols:
-            v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
-            v = np.array([[int(t) for t in vlist] for vlist in v])
-            self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
-
-
+        if self.return_img_id  == False:
+            ####lable Prep  #######################################################################
+            self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+            self.label_img_dir = self.label_df[self.col_img].values
+    
+            for ci in self.label_cols:
+                v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+                v = np.array([[int(t) for t in vlist] for vlist in v])
+                self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
+        else:
+            label_col = self.label_cols[0]
+            lable = label_dict[label_col]
+            self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
+            self.dflabel = self.dflabel[[col_img,label_col]]
+            self.label_img_dir = self.dflabel[self.col_img].values
+            ##Buggy 
+            self.label_dict[label_col] = torch.ones(len(self.label_img_dir),dtype=torch.float)
 
     def __len__(self) -> int:
         return len(self.label_img_dir)
 
 
     def __getitem__(self, idx: int):
-
         ##### Load Image
         # train_X = self.data[idx]
         # from PIL import Image
@@ -565,9 +596,11 @@ class ImageDataset(Dataset):
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
 
-        if self.return_img_id :
-            return  (train_X, train_y, img_dir)
-
+        if self.return_img_id == True: ##Data for Embeddings' extraction
+            img_name = img_dir.split('/')[-1].split('.')[0]
+            if "\\" in img_name:
+                img_name =  img_name.replace('\\','_')
+            return (train_X, train_y, img_name)  
         return (train_X, train_y)
 
 
@@ -622,51 +655,6 @@ def ImageDataloader(df=None, batch_size=64,
                        batch_size=batch_size, shuffle= False ,num_workers=0, drop_last=True)
 
     return train_dataloader,val_dataloader,test_dataloader
-
-
-class ImageEmbedDataset(Dataset):
-    """Custom DataGenerator using Pytorch Sequence for images
-    """
-    def __init__(self, df=None,
-                col_img: str='id',
-                transforms=None, transforms_image_size_default=64,
-                img_loader=None,
-                col_class='gender', class_lable='Men'
-                 ):
-        self.col_img    = col_img
-        self.transforms = transforms
-
-        if img_loader is None :  ### Use default loader
-           from PIL import Image
-           self.img_loader = Image.open
-        assert(df is not None)
-
-        df = df.loc[df[col_class] == class_lable]
-        df = df[[col_img,col_class]]
-        if transforms is None :
-              from torchvision import transforms
-              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
-        assert(df is not None)
-        self.label_img_dir = df[self.col_img].values
-
-
-    def __len__(self) -> int:
-        return len(self.label_img_dir)
-
-
-    def __getitem__(self, idx: int):
-
-        img_dir = self.label_img_dir[idx]
-        img     = self.img_loader(img_dir)
-        img_name = img_dir.split('/')[-1].split('.')[0]
-
-        if "\\" in img_name:
-            img_name =  img_name.replace('\\','_')
-
-        train_X = self.transforms(img)
-        return (train_X, img_name)
-
-
 
 
 ###############################################################################################
