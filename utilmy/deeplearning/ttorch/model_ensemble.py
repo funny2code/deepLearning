@@ -81,7 +81,7 @@ from torch.utils.data import DataLoader, TensorDataset, Dataset
 import torchvision
 from torchvision import transforms, datasets, models
 from pandas.core.frame import DataFrame
-
+from utilmy.deeplearning.ttorch import  util_torch as ut
 #############################################################################################
 from utilmy import log
 
@@ -1345,9 +1345,6 @@ def test6():
 
 
  #########################EMBEDDING ####################################
-    from utilmy.deeplearning.ttorch import  util_torch as ut
-    col_class= 'gender'
-    class_lable='Men'
     def custom_embedding_data():
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)
@@ -1356,14 +1353,16 @@ def test6():
          df   = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
          df = ut.dataset_add_image_fullpath(df, col_img='id', train_img_path=train_img_path)
 
+         ########### Train Test Split
+         df_train, _ , _ = ut.dataset_traintest_split(df, train_ratio=0.9, val_ratio=0.1)
+
          ##############TRANFORM IMAGE############
          tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
          transform  = transforms.Compose(tlist)
 
          ###Loads image and imagename(to save the embedding with image name)#### 
-         dataset = ut.ImageEmbedDataset(df, col_img='id', transforms=transform,
-                                        col_class=col_class, class_lable=class_lable)
-
+         label_dict = {"gender":"Men"}
+         dataset = ut.ImageDataset(label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform, return_img_id  = True)
          return dataset
 
     dataset      = custom_embedding_data()
@@ -1372,10 +1371,12 @@ def test6():
 
     print("Before Training")
     tag   ='multi'
-    dirout="./train"
-    ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
+    dirout= None
 
-    
+    dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
+                                             force_getlayer= True, pos_layer=-2)
+
+    print(dfsim)
     #### Run Model   ###################################################
     model.training(dataloader_custom = custom_dataloader ) 
     model.save_weight( 'ztmp/model_x5.pt')
@@ -1387,9 +1388,11 @@ def test6():
 
     print("After Training")
     tag   ='multi-finetuned'
-    dirout="./train"
-    ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag)
-
+    
+    #model=model.net.eval()
+    dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
+                                     force_getlayer= True, pos_layer=-2)
+    print(dfsim)
 
 
 ##### LSTM #################################################################################
@@ -1572,29 +1575,6 @@ class SequenceReshaper(nn.Module):
             return x
         else:
             return x
-
-
-class model_getlayer():
-    def __init__(self, network, backward=False, pos_layer=-2):
-        self.layers = []
-        self.get_layers_in_order(network)
-        self.last_layer = self.layers[pos_layer]
-        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
-
-    def hook_fn(self, module, input, output):
-        self.input = input
-        self.output = output
-
-    def close(self):
-        self.hook.remove()
-
-    def get_layers_in_order(self, network):
-      if len(list(network.children())) == 0:
-        self.layers.append(network)
-        return
-      for layer in network.children():
-        self.get_layers_in_order(layer)
-
 
 class model_template_MLP(torch.nn.Module):
     def __init__(self,layers_dim=[20,100,16]):
@@ -2105,7 +2085,7 @@ class model_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self, x,**kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embA = self.forward(x)
                 embA = layer_l2.output.squeeze()
                 return embA
@@ -2274,7 +2254,7 @@ class zzmodelA_create(BaseModel):
 
 
             def get_embedding(self, x,**kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embA = self.forward(x)
                 embA = layer_l2.output.squeeze()
                 return embA
@@ -2331,7 +2311,7 @@ class zzmodelB_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embB = self.forward(x)
                 embB = layer_l2.output.squeeze()
                 return embB
@@ -2387,7 +2367,7 @@ class zzmodelC_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embC = self.forward(x)
                 embC = layer_l2.output.squeeze()
                 return embC
@@ -2442,7 +2422,7 @@ class zzmodelD_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l3= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l3= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embD = self.forward(x)
                 embD = layer_l3.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
                 return embD
@@ -2455,7 +2435,7 @@ class zzmodelD_create(BaseModel):
 
 ###############################################################################################################
 if __name__ == "__main__":
-    import fire
-    fire.Fire()
+    #import fire
+    #fire.Fire()
     test6()
 
