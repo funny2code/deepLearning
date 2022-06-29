@@ -277,7 +277,7 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
                                  force_getlayer= True,
-                                  pos_layer=-2):
+                                 pos_layer=-2):
     """
     Docs:
 
@@ -500,13 +500,13 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     return df
 
 class model_getlayer():
-        """model_getlayer :  Instance of positional layer
+    """model_getlayer :  Instance of positional layer
         Docs:
 
             network (nn.module):  Model 
             backward         :    False
             pos_layer(int)   :    Position of the layer
-        """
+    """
     def __init__(self, network, backward=False, pos_layer=-2):
         self.layers = []
         self.get_layers_in_order(network)
