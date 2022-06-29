@@ -211,6 +211,7 @@ def test1():
 def test2a():
     """
     """
+    log('### test Merging list of Custom models provided')
     from box import Box ; from copy import deepcopy
     ARG = Box({
         'MODE'   : 'mode1',
@@ -311,6 +312,7 @@ def test2a():
 def test2b():
     """
     """
+    log('### test Merging pretrained CNN models provided with fake data')
     from box import Box ; from copy import deepcopy
     ARG = Box({
         'MODE'   : 'mode1',
@@ -425,6 +427,7 @@ def test2b():
 def test2c():
     """
     """
+    log('### test Merging pretrained CNN model(Resnet & EfficientNet) provided')
     from box import Box ; from copy import deepcopy
 
     ARG = Box({
@@ -563,6 +566,7 @@ def test2c():
 def test2d():
     """
     """
+    log('### test Merging pretrained CNN models with FashioMnist Dataset')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
     ARG = Box({
@@ -712,6 +716,7 @@ def test2d():
 
 ##MultiClassMultiLable
 def test3():
+   log('### test MultiClassMultiHead with single Class')
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset
 
@@ -854,6 +859,7 @@ def test3():
 
 
 def test4():
+   log('### test MultiClassMultiHead with Multi Class Multi lable')
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset, Dataset
 
