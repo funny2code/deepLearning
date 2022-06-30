@@ -348,6 +348,12 @@ def test2b():
         train_config.TEST_RATIO          = 0.1
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+
+        """       
         trainx = torch.rand(train_config.BATCH_SIZE,3,224,224)
         trainy = torch.rand(train_config.BATCH_SIZE)
         validx = torch.rand(train_config.BATCH_SIZE,3,224,224)
@@ -446,6 +452,12 @@ def test2c():
         return df
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+            
+        """  
         trainx = torch.rand(train_config.BATCH_SIZE,3,28,28)
         trainy = torch.rand(train_config.BATCH_SIZE)
         validx = torch.rand(train_config.BATCH_SIZE,3,28,28)
@@ -596,8 +608,12 @@ def test2d():
 
 
     def test_dataset_f_mnist(samples=100):
-        """function test_dataset_f_mnist
         """
+        Docs:
+            
+            Dataset : FashionMNIST dataset and splitting.
+            
+        """  
         from sklearn.model_selection import train_test_split
         from torchvision import transforms, datasets
         # Generate the transformations
@@ -624,6 +640,12 @@ def test2d():
 
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+        
+        """  
         train_X ,train_y,valid_X ,valid_y,test_X, test_y = test_dataset_f_mnist(samples=100)
         return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
@@ -750,6 +772,12 @@ def test3():
        return None
 
    def test_dataset_f_mnist(samples=100):
+       """
+       Docs:
+            
+        Dataset : FashionMNIST dataset and splitting.
+            
+       """  
        from sklearn.model_selection import train_test_split
        from torchvision import transforms, datasets
        # Generate the transformations
@@ -891,6 +919,12 @@ def test4():
    ####################################################################
    samples = 1000 ##Fake data samples
    def prepro_dataset():
+      """
+        Docs:
+            
+            Dataset : Preparing Dataset for MultiClassMultiLable model
+            
+      """  
       train_X = torch.rand(int(samples*train_config.TRAIN_RATIO),3,28,28)
       valid_X = torch.rand(int(samples*train_config.VAL_RATIO),3,28,28)
       test_X = torch.rand(int(samples*train_config.TEST_RATIO),3,28,28)
@@ -924,6 +958,13 @@ def test4():
 
    ############## Custom Data Loader #############################
    def custom_dataloader():
+       """
+        Docs:
+            
+            Dataloader : Custom dataloader for MultiClassMultiLable model
+            
+       """  
+
        class CustomImageDataset(Dataset):
            def __init__(self,data=None,lables=None,class_lable_dict=None):
                self.data    = data
@@ -1062,6 +1103,12 @@ def test5():
 
 
     def custom_label(arg:dict=None):
+        """
+        Docs:
+            
+           Download Dataset and split the data
+            
+        """  
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
 
@@ -1093,6 +1140,12 @@ def test5():
 
 
     def custom_dataloader():
+        """
+        Docs:
+            
+            Dataloader : Custom dataloader of FashionMnist for MultiClassMultiLable model
+            
+        """  
         ######CUSTOM DATASET#############################################
         # isexist(df_train, df_test, df_val, label_dict, col_img)
 
@@ -1260,6 +1313,12 @@ def test6():
 
 
     def custom_dataloader():
+        """
+        Docs:
+            
+            Dataloader : Custom dataloader of FashionMnist for MultiClassMultiLable model
+            
+        """  
         ######CUSTOM DATASET#############################################
         # isexist(df_train, df_test, df_val, label_dict, col_img)
 
@@ -1352,6 +1411,12 @@ def test6():
 
  #########################EMBEDDING ####################################
     def custom_embedding_data():
+         """
+         Docs:
+            
+            Selecting specific class and lable from MultiClassMultiLable model for embeddings
+            
+         """  
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)
          train_img_path  = dirtmp + 'data_fashion_small/train'
@@ -1461,6 +1526,8 @@ def test2_lstm():
 
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """function prepro_dataset
+        """
         train_X ,train_y,valid_X ,valid_y,test_X, test_y = test_dataset_f_mnist(samples=100)
         return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
@@ -1739,6 +1806,12 @@ class BaseModel(object):
       torch.save(ckp,path)
 
     def grad_check(self,):
+        """
+        Docs:
+            
+            Assuring Pre-trainined Models's(Merge) parameters to not to be trainable
+        
+        """
         for i in range(len(self.net.models_nets)):
             net_model = self.net.models_nets[i]
             kk = 0
@@ -1751,6 +1824,12 @@ class BaseModel(object):
 
 
     def validate_dim(self,train_loader,val_loader):
+        """
+        Docs:
+            
+            Asserting dimensions of Train and Validation Datasets
+        
+        """
         train = iter(train_loader)
         train_inp, _ = next(train)
 
