@@ -106,11 +106,11 @@ def runall(dirin='', dirout='', config=None):
     Doc::
 
         cd utilmy/nlp/tttorch/kgraph
-        python knowledge_graph test1 --dirin mydirdata/
+        python knowledge_graph test1  --dirin mydirdata/
+
 
     """
-    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
-    dname = dataset_download(url=url)
+    dname = dirin
     dname = dname.replace("\\", "/")
     path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
     df    = pd.read_csv(path, delimiter='\t')
@@ -118,20 +118,21 @@ def runall(dirin='', dirout='', config=None):
     dname = dname + "/embed/"
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
-    data_kgf = extractor.extractTriples(sents=-1)
-    extractor.export_data(data_kgf)
+    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor.extractTriples(max_text=-1)
+    extractor.export_data()
 
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
-    data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher = knowledge_grapher(embedding_dim=10)
+    grapher.load_data( data_kgf_path)
     grapher.buildGraph()
 
 
     log('##### Build KG Embeddings')
-    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    dirout_emb = dname
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
     embedder.compute_embeddings('none', batch_size=1024)
     embedder.save_embeddings()

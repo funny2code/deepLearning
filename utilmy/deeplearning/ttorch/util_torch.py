@@ -276,8 +276,8 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 
 def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                 force_getlayer= True,
-                                 pos_layer=-2):
+                                  force_getlayer= True,
+                                  pos_layer=-2):
     """
     Docs:
 
@@ -303,7 +303,7 @@ def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loa
 
 
 def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                        force_getlayer= True, pos_layer=-2):
+                                       force_getlayer= True, pos_layer=-2):
     """
     Docs:
 
@@ -498,6 +498,7 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     df = df[ df[col_img] != '' ]
     # df = df.dropna(how='any',axis=0)
     return df
+
 
 class model_getlayer():
     """model_getlayer :  Instance of positional layer
