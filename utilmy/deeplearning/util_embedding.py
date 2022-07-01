@@ -484,7 +484,8 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  
 
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
-    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True,     mdim = emb_dim)
+    vi      = [ float(v) for v in df['emb'][0].split(',')]
+    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True, mdim =len(vi))
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
@@ -984,7 +985,8 @@ if 'custom_code':
 ###############################################################################################################
 if __name__ == "__main__":
     import fire
-    fire.Fire()
+    test_all()
+    #fire.Fire()
 
 
 
