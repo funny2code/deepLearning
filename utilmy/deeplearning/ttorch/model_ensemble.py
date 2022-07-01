@@ -1119,7 +1119,30 @@ def test6():
 
 
     ##################################################################
-    ARG, train_config = init_ARG()
+    # ARG, train_config = init_ARG()
+    ARG = Box({
+        'MODE'   : 'mode1',
+        'DATASET': {},
+        'MODEL_INFO' : {},
+
+    })
+    PARAMS = Box()
+
+    ARG.MODEL_INFO.TYPE = 'dataonly'
+    #train_config
+    train_config                     = Box({})
+    train_config.LR                  = 0.001
+    train_config.SEED                = 42
+    train_config.DEVICE              = 'cpu'
+    train_config.BATCH_SIZE          = 32
+    train_config.EPOCHS              = 1
+    train_config.EARLY_STOPPING_THLD = 10
+    train_config.VALID_FREQ          = 1
+    train_config.SAVE_FILENAME       = './model.pt'
+    train_config.TRAIN_RATIO         = 0.7
+    train_config.VAL_RATIO           = 0.2
+    train_config.TEST_RATIO          = 0.1
+
 
     dirtmp      = "./"
     col_img     = 'id'
@@ -1144,6 +1167,7 @@ def test6():
 
         ########### Image files FASHION MNIST
         df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
+
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
