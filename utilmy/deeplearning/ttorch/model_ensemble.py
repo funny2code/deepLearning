@@ -1453,10 +1453,10 @@ def test6():
                                 dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
                                 num_clusters=2,
                                 )
-    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
-                                dirout=dirout + "/out/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
-                                num_clusters=2,
-                                )
+    # ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+    #                             dirout=dirout + "/out1/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
+    #                             num_clusters=2,
+    #                             )
     #### Run Model   ###################################################
     model.training(dataloader_custom = custom_dataloader ) 
     model.save_weight( 'ztmp/model_x5.pt')
@@ -1478,10 +1478,10 @@ def test6():
                                 num_clusters=2,
                                 )
 
-    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
-                                dirout=dirout + "/out/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
-                                num_clusters=2,
-                                )
+    # ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+    #                             dirout=dirout + "/out1/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
+    #                             num_clusters=2,
+    #                             )
     print(dfsim)
 
 
