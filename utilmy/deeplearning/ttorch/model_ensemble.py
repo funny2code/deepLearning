@@ -1116,33 +1116,28 @@ def test6():
     """ Multihead class fine tuning with Fashion Dataset
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
-
-
-    ##################################################################
-    # ARG, train_config = init_ARG()
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
         'MODEL_INFO' : {},
-
     })
-    PARAMS = Box()
+    PARAMS = {}
 
-    ARG.MODEL_INFO.TYPE = 'dataonly'
-    #train_config
-    train_config                     = Box({})
-    train_config.LR                  = 0.001
-    train_config.SEED                = 42
-    train_config.DEVICE              = 'cpu'
-    train_config.BATCH_SIZE          = 32
-    train_config.EPOCHS              = 1
-    train_config.EARLY_STOPPING_THLD = 10
-    train_config.VALID_FREQ          = 1
-    train_config.SAVE_FILENAME       = './model.pt'
-    train_config.TRAIN_RATIO         = 0.7
-    train_config.VAL_RATIO           = 0.2
-    train_config.TEST_RATIO          = 0.1
-
+    ##################################################################
+    if ARG.MODE == 'mode1':
+        ARG.MODEL_INFO.TYPE = 'dataonly'
+        train_config                           = Box({})
+        train_config.LR                        = 0.0001
+        train_config.SEED                      = 42
+        train_config.DEVICE                    = 'cpu'
+        train_config.BATCH_SIZE                = 8
+        train_config.EPOCHS                    = 1
+        train_config.EARLY_STOPPING_THLD       = 10
+        train_config.VALID_FREQ                = 1
+        train_config.SAVE_FILENAME             = './model.pt'
+        train_config.TRAIN_RATIO               = 0.7
+        train_config.VAL_RATIO                 = 0.2
+        train_config.TEST_RATIO                = 0.1
 
     dirtmp      = "./"
     col_img     = 'id'
@@ -1167,7 +1162,6 @@ def test6():
 
         ########### Image files FASHION MNIST
         df = ut.dataset_add_image_fullpath(df, col_img=col_img, train_img_path=train_img_path, test_img_path=test_img_path)
-
         ########### Train Test Split
         df_train, df_val, df_test = ut.dataset_traintest_split(df, train_ratio=0.6, val_ratio=0.2)
 
@@ -1180,10 +1174,10 @@ def test6():
     def custom_dataloader():
         """
         Docs:
-            
+
             Dataloader : Custom dataloader of FashionMnist for MultiClassMultiLable model
-            
-        """  
+
+        """
         ######CUSTOM DATASET#############################################
         # isexist(df_train, df_test, df_val, label_dict, col_img)
 
@@ -1278,10 +1272,10 @@ def test6():
     def custom_embedding_data():
          """
          Docs:
-            
+
             Selecting specific class and lable from MultiClassMultiLable model for embeddings
-            
-         """  
+
+         """
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)
          train_img_path  = dirtmp + 'data_fashion_small/train'
@@ -1296,7 +1290,7 @@ def test6():
          tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
          transform  = transforms.Compose(tlist)
 
-         ###Loads image and imagename(to save the embedding with image name)#### 
+         ###Loads image and imagename(to save the embedding with image name)####
          label_dict = {"gender":"Men"}
          dataset = ut.ImageDataset(label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform, return_img_id  = True)
          return dataset
@@ -1313,7 +1307,7 @@ def test6():
                                              force_getlayer= False, pos_layer=-2)
 
     print(dfsim)
-    
+
     ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
                                 dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
                                 num_clusters=2,
@@ -1323,7 +1317,7 @@ def test6():
     #                             num_clusters=2,
     #                             )
     #### Run Model   ###################################################
-    model.training(dataloader_custom = custom_dataloader ) 
+    model.training(dataloader_custom = custom_dataloader )
     model.save_weight( 'ztmp/model_x5.pt')
     model.load_weights('ztmp/model_x5.pt')
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
@@ -1333,13 +1327,13 @@ def test6():
 
     print("After Training")
     tag   ='multi-finetuned'
-    
+
     #model=model.net.eval()
     dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
                                      force_getlayer= False, pos_layer=-2)
 
-    ue.embedding_create_vizhtml(dirin= dirout + f"/df_emb_{tag}.parquet",
-                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=len(df_train),
+    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
                                 num_clusters=2,
                                 )
 
