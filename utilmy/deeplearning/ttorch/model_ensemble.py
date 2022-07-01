@@ -1116,14 +1116,33 @@ def test6():
     """ Multihead class fine tuning with Fashion Dataset
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
+    ARG = Box({
+        'MODE'   : 'mode1',
+        'DATASET': {},
+        'MODEL_INFO' : {},
+    })
+    PARAMS = {}
 
-
-    ARG, train_config = init_ARG()
-
+    ##################################################################
+    if ARG.MODE == 'mode1':
+        ARG.MODEL_INFO.TYPE = 'dataonly'
+        train_config                           = Box({})
+        train_config.LR                        = 0.0001
+        train_config.SEED                      = 42
+        train_config.DEVICE                    = 'cpu'
+        train_config.BATCH_SIZE                = 4
+        train_config.EPOCHS                    = 1
+        train_config.EARLY_STOPPING_THLD       = 10
+        train_config.VALID_FREQ                = 1
+        train_config.SAVE_FILENAME             = './model.pt'
+        train_config.TRAIN_RATIO               = 0.7
+        train_config.VAL_RATIO                 = 0.2
+        train_config.TEST_RATIO                = 0.1
 
     dirtmp      = "./"
     col_img     = 'id'
     label_list  = ['gender', 'masterCategory', 'subCategory' ]  #### Actual labels
+
 
 
     def custom_label(arg:dict=None):
