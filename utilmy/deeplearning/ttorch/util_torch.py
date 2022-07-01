@@ -235,6 +235,14 @@ def dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksm
 
 
 def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    """
+    Docs:
+        
+        Dataset : Splitting dataset as Train & val by the ratios provided
+
+
+
+    """
     #### Split anything
     val_ratio = val_ratio + train_ratio
     if isinstance(anyobject, pd.DataFrame):
@@ -268,7 +276,7 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 
 def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                 force_getlayer= True,
+                                  force_getlayer= True,
                                   pos_layer=-2):
     """
     Docs:
@@ -295,7 +303,7 @@ def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loa
 
 
 def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                        force_getlayer= True, pos_layer=-2):
+                                       force_getlayer= True, pos_layer=-2):
     """
     Docs:
 
@@ -405,6 +413,16 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
 
 
 def np_cosinus_most_similar(embv = None, emb_name_list=None):
+    """ Pairwise Cosinus Sim scores(Numpy Implementation)
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
     n = len(embv)
@@ -481,7 +499,15 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     # df = df.dropna(how='any',axis=0)
     return df
 
+
 class model_getlayer():
+    """model_getlayer :  Instance of positional layer
+        Docs:
+
+            network (nn.module):  Model 
+            backward         :    False
+            pos_layer(int)   :    Position of the layer
+    """
     def __init__(self, network, backward=False, pos_layer=-2):
         self.layers = []
         self.get_layers_in_order(network)
@@ -525,7 +551,6 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
-
             return_img_id : return image path
         """
         self.image_dir  = img_dir
