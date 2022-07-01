@@ -109,7 +109,7 @@ def test_all():
     test2_lstm()
 
 
-def init_ARGS():
+def init_ARG():
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -421,21 +421,7 @@ def test2c():
 
 
     ##################################################################
-    train_config                     = Box({})
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 4
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
 
     #### SEPARATE the models completetly, and create duplicate
