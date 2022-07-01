@@ -225,12 +225,12 @@ def test2a():
     """
     log('### test Merging list of Custom models provided')
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
+    # ARG = Box({
+    #     'MODE'   : 'mode1',
+    #     'DATASET': {},
+    #     'MODEL_INFO' : {},
+    # })
+    # PARAMS = Box()
 
 
     from utilmy.adatasets import test_dataset_classifier_fake
@@ -312,12 +312,12 @@ def test2b():
     """
     log('### test Merging pretrained CNN models provided with fake data')
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
+    # ARG = Box({
+    #     'MODE'   : 'mode1',
+    #     'DATASET': {},
+    #     'MODEL_INFO' : {},
+    # })
+    # PARAMS = Box()
 
 
     from utilmy.adatasets import test_dataset_classifier_fake
@@ -420,12 +420,12 @@ def test2c():
     log('### test Merging pretrained CNN model(Resnet & EfficientNet) provided')
     from box import Box ; from copy import deepcopy
 
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
+    # ARG = Box({
+    #     'MODE'   : 'mode1',
+    #     'DATASET': {},
+    #     'MODEL_INFO' : {},
+    # })
+    # PARAMS = Box()
 
 
     ####################################################################
@@ -565,11 +565,11 @@ def test2d():
     log('### test Merging pretrained CNN models with FashioMnist Dataset')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
+    # ARG = Box({
+    #     'MODE'   : 'mode1',
+    #     'DATASET': {},
+    #     'MODEL_INFO' : {},
+    # })
 
 
     ####################################################################
@@ -884,20 +884,7 @@ def test4():
 
 
    ##################################################################
-   if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly'
-       train_config                           = Box({})
-       train_config.LR                        = 0.001
-       train_config.SEED                      = 42
-       train_config.DEVICE                    = 'cpu'
-       train_config.BATCH_SIZE                = 64
-       train_config.EPOCHS                    = 1
-       train_config.EARLY_STOPPING_THLD       = 10
-       train_config.VALID_FREQ                = 1
-       train_config.SAVE_FILENAME             = './model.pt'
-       train_config.TRAIN_RATIO               = 0.7
-       train_config.VAL_RATIO                 = 0.2
-       train_config.TEST_RATIO                = 0.1
+   ARG, train_config = init_ARG()
 
 
    ####################################################################
@@ -1057,28 +1044,10 @@ def test5():
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
     import glob
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = {}
+
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        train_config                           = Box({})
-        train_config.LR                        = 0.001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 8
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
+    ARG, train_config = init_ARG()
 
     dirtmp      = "./"
     col_img     = 'id'
@@ -1241,28 +1210,10 @@ def test6():
     """ Multihead class fine tuning with Fashion Dataset
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = {}
+
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly' 
-        train_config                           = Box({})
-        train_config.LR                        = 0.0001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 8
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
+    ARG, train_config = init_ARG()
 
     dirtmp      = "./"
     col_img     = 'id'
@@ -1474,31 +1425,13 @@ def test2_lstm():
     log('\n\n\n\nLSTM Version')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
 
 
     ####################################################################
     def load_DataFrame():
         return None
 
-    if ARG.MODE == 'mode1':
-        train_config                           = Box({})
-        train_config.LR                        = 0.001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 64
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
-
+    ARG, train_config = init_ARG()
 
     def test_dataset_f_mnist(samples=100):
         """function test_dataset_f_mnist
