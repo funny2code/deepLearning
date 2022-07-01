@@ -678,7 +678,7 @@ def test3():
    from torch.utils.data import DataLoader, TensorDataset
 
    ##################################################################
-    ARG, train_config = init_ARG()
+   ARG, train_config = init_ARG()
 
 
    ####################################################################
