@@ -132,8 +132,8 @@ def init_ARG():
     train_config.VAL_RATIO           = 0.2
     train_config.TEST_RATIO          = 0.1   
 
-    ARG.merge_model= {}
-    ARG.merge_model.train_config  = train_config 
+    #ARG.merge_model= {}
+    #ARG.merge_model.train_config  = train_config
     return ARG, train_config
 
 
