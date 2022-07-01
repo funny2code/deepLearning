@@ -1338,8 +1338,8 @@ def test6():
     dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
                                      force_getlayer= False, pos_layer=-2)
 
-    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
-                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
+    ue.embedding_create_vizhtml(dirin= dirout + f"/df_emb_{tag}.parquet",
+                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=len(df_train),
                                 num_clusters=2,
                                 )
 
