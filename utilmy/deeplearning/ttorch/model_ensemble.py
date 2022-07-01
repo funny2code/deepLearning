@@ -109,18 +109,44 @@ def test_all():
     test2_lstm()
 
 
-
-
-def test1():
-    """
-    """
-    from box import Box ; from copy import deepcopy
+def init_ARGS():
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
         'MODEL_INFO' : {},
     })
     PARAMS = Box()
+
+    ARG.MODEL_INFO.TYPE = 'dataonly'
+    #train_config
+    train_config                     = Box({})
+    train_config.LR                  = 0.001
+    train_config.SEED                = 42
+    train_config.DEVICE              = 'cpu'
+    train_config.BATCH_SIZE          = 32
+    train_config.EPOCHS              = 1
+    train_config.EARLY_STOPPING_THLD = 10
+    train_config.VALID_FREQ          = 1
+    train_config.SAVE_FILENAME       = './model.pt'
+    train_config.TRAIN_RATIO         = 0.7
+    train_config.VAL_RATIO           = 0.2
+    train_config.TEST_RATIO          = 0.1   
+
+    ARG.merge_model= {}
+    ARG.merge_model.train_config  = train_config 
+    return ARG, train_config
+
+
+def test1():
+    """
+    """
+    from box import Box ; from copy import deepcopy
+    # ARG = Box({
+    #     'MODE'   : 'mode1',
+    #     'DATASET': {},
+    #     'MODEL_INFO' : {},
+    # })
+    # PARAMS = Box()
 
 
     from utilmy.adatasets import test_dataset_classifier_fake
@@ -133,21 +159,7 @@ def test1():
 
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
     #### SEPARATE the models completetly, and create duplicate
     ### modelA  ########################################################
@@ -231,21 +243,7 @@ def test2a():
 
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
 
     #### SEPARATE the models completetly, and create duplicate
@@ -331,21 +329,7 @@ def test2b():
         return df
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
     def prepro_dataset(self,df:pd.DataFrame=None):
         """
