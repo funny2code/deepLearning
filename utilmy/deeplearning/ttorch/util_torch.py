@@ -575,6 +575,11 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
         assert col_img in dflabel.columns
 
+        ##### Filter out label ########
+        for ci, label_list in label_dict.items():
+           label_list = [label_list] if isinstance(label_list, str) else label_list
+           dflabel[ci] = dflabel[ dflabel[ci].isin(label_list)][ci]
+
 
         if check_ifimage_exist :
            #### Bugggy, not working
