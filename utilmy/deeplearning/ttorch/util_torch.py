@@ -313,6 +313,7 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
     """
     if force_getlayer == True:
+       from utilmy.deeplearning.ttorch.util_model import model_getlayer
        model_embed_extract_fun = model_getlayer(model, pos_layer=pos_layer)
     else:
        model_embed_extract_fun = model.get_embedding
@@ -455,6 +456,7 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
     if labels_dict is not None:
         for ci, catval in labels_dict.items():
             dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+
     labels_col = labels_dict.keys()
 
     for ci in labels_col:
@@ -498,35 +500,6 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     df = df[ df[col_img] != '' ]
     # df = df.dropna(how='any',axis=0)
     return df
-
-
-class model_getlayer():
-    """model_getlayer :  Instance of positional layer
-        Docs:
-
-            network (nn.module):  Model 
-            backward         :    False
-            pos_layer(int)   :    Position of the layer
-    """
-    def __init__(self, network, backward=False, pos_layer=-2):
-        self.layers = []
-        self.get_layers_in_order(network)
-        self.last_layer = self.layers[pos_layer]
-        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
-
-    def hook_fn(self, module, input, output):
-        self.input = input
-        self.output = output
-
-    def close(self):
-        self.hook.remove()
-
-    def get_layers_in_order(self, network):
-      if len(list(network.children())) == 0:
-        self.layers.append(network)
-        return
-      for layer in network.children():
-        self.get_layers_in_order(layer)
 
 
 
