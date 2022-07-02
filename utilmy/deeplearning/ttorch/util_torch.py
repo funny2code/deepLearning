@@ -53,6 +53,10 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
+
+from utilmy.deeplearning.ttorch.util_model import (
+    model_getlayer
+)
 #############################################################################################
 from utilmy import log, os_module_name
 from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
@@ -313,7 +317,7 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
     """
     if force_getlayer == True:
-       from utilmy.deeplearning.ttorch.util_model import model_getlayer
+
        model_embed_extract_fun = model_getlayer(model, pos_layer=pos_layer)
     else:
        model_embed_extract_fun = model.get_embedding
