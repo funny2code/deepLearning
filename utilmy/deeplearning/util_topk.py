@@ -97,7 +97,7 @@ def is_available():
         return False
 
 
-class KNNClassifierFAISS:
+class faiss_KNNClassifier:
     """ Scikit-learn wrapper interface for Faiss KNN.
     Docs::
 
