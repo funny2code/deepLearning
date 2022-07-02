@@ -83,9 +83,11 @@ def test1() -> None:
 
 
 
-import numpy as np
-from sklearn.utils.validation import check_is_fitted
 
+
+########################################################################################################
+######## Nearest #######################################################################################
+from sklearn.utils.validation import check_is_fitted
 
 def is_available():
     try:
@@ -95,10 +97,6 @@ def is_available():
         return False
 
 
-
-
-########################################################################################################
-######## Nearest #######################################################################################
 class KNNClassifierFAISS:
     """ Scikit-learn wrapper interface for Faiss KNN.
     Docs::
@@ -168,23 +166,23 @@ class KNNClassifierFAISS:
 
     def get_topk(self, X, n_neighbors=None, return_distance=True):
         """Finds the K-neighbors of a point.
-        Parameters
-        ----------
-        X : array of shape (n_samples, n_features)
-            The input data.
-        n_neighbors : int
-            Number of neighbors to get (default is the value passed to the
-            constructor).
-        return_distance : boolean, optional. Defaults to True.
-            If False, distances will not be returned
-        Returns
-        -------
-        dists : list of shape = [n_samples, k]
-            The distances between the query and each sample in the region of
-            competence. The vector is ordered in an ascending fashion.
-        idx : list of shape = [n_samples, k]
-            Indices of the instances belonging to the region of competence of
-            the given query sample.
+        Docs::
+
+            X : array of shape (n_samples, n_features)
+                The input data.
+            n_neighbors : int
+                Number of neighbors to get (default is the value passed to the
+                constructor).
+            return_distance : boolean, optional. Defaults to True.
+                If False, distances will not be returned
+            Returns
+            -------
+            dists : list of shape = [n_samples, k]
+                The distances between the query and each sample in the region of
+                competence. The vector is ordered in an ascending fashion.
+            idx : list of shape = [n_samples, k]
+                Indices of the instances belonging to the region of competence of
+                the given query sample.
         """
         if n_neighbors is None:
             n_neighbors = self.n_neighbors

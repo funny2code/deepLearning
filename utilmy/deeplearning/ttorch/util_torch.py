@@ -556,13 +556,12 @@ class ImageDataset(Dataset):
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
-        self.return_img_id  = return_img_id 
-
-        self.return_img_id = return_img_id
+        self.return_img_id  = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
            self.img_loader = Image.open
+
 
         if transforms is None :
               from torchvision import transforms
@@ -575,7 +574,7 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
         assert col_img in dflabel.columns
 
-        ##### Filter out label ########
+        ##### Filter out label #####################
         for ci, label_list in label_dict.items():
            label_list = [label_list] if isinstance(label_list, str) else label_list
            dflabel[ci] = dflabel[ dflabel[ci].isin(label_list)][ci]
@@ -585,27 +584,32 @@ class ImageDataset(Dataset):
            #### Bugggy, not working
            dflabel = dataset_add_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
-        self.dflabel    = dflabel
-        self.label_cols = list(label_dict.keys())
+        self.dflabel       = dflabel
+        self.label_cols    = list(label_dict.keys())
+        self.label_img_dir = [ t.replace("\\", "/") for t in   self.dflabel[self.col_img].values ]
+
 
         self.label_dict = {}
         if self.return_img_id  == False:
             ####lable Prep  #######################################################################
-            self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-            self.label_img_dir = self.label_df[self.col_img].values
+            self.label_df      = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+            #
     
             for ci in self.label_cols:
-                v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
-                v = np.array([[int(t) for t in vlist] for vlist in v])
-                self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
+                y1hot = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+                y1hot = np.array([[int(t) for t in vlist] for vlist in y1hot])
+                self.label_dict[ci] = torch.tensor(y1hot,dtype=torch.float)
+
         else:
+            #### Validation purpose, wiht image_name_id
             label_col = self.label_cols[0]
-            lable = label_dict[label_col]
-            self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
+            # lable = label_dict[label_col]
+            # self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
             self.dflabel = self.dflabel[[col_img,label_col]]
-            self.label_img_dir = self.dflabel[self.col_img].values
+            # self.label_img_dir = self.dflabel[self.col_img].values
             ##Buggy 
             self.label_dict[label_col] = torch.ones(len(self.label_img_dir),dtype=torch.float)
+
 
     def __len__(self) -> int:
         return len(self.label_img_dir)
@@ -614,23 +618,20 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx: int):
         ##### Load Image
         # train_X = self.data[idx]
-        # from PIL import Image
         img_dir = self.label_img_dir[idx]
-        #img     = Image.open(img_dir)
         img     = self.img_loader(img_dir)
         train_X = self.transforms(img)
 
 
         train_y = {}
-        assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
 
         if self.return_img_id == True: ##Data for Embeddings' extraction
-            img_name = img_dir.split('/')[-1].split('.')[0]
-            if "\\" in img_name:
-                img_name =  img_name.replace('\\','_')
-            return (train_X, train_y, img_name)  
+            # img_dir  = img_dir.replace('\\','/')
+            img_name = img_dir.split('/')[-1]
+            return (train_X, train_y, img_name)
+
         return (train_X, train_y)
 
 
