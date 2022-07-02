@@ -379,7 +379,7 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
 
 
 
-def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False, sort=True):
     """ Pairwise Cosinus Sim scores
     Example:
         Doc::
@@ -408,6 +408,8 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
 
     dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
 
+    if sort: dfsim = dfsim.sort_values(['id1','sim_score'], ascending=[1,0]  )
+
     if is_symmetric:
         ### Add symmetric part
         dfsim3 = copy.deepcopy(dfsim)
@@ -417,25 +419,37 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
 
 
 
-def np_cosinus_most_similar(embv = None, emb_name_list=None):
+def embedding_topk(embs = None, emb_name_list=None, topk=5):
     """ Pairwise Cosinus Sim scores(Numpy Implementation)
     Example:
         Doc::
 
            embs   = np.random.random((10,200))
            idlist = [str(i) for i in range(0,10)]
-           df = sim_scores_fast(embs:np, idlist)
            df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    dfsim = embedding_cosinus_scores_pairwise(embs, name_list= emb_name_list, sort=True)
+    len( dfsim[[ 'id1', 'id2', 'sim_score']])
+
+    def to_list(dfi):
+        ### only top 5 are included
+        ss = ",".join([str(t) for t in  dfi['id2'].values][:topk])
+        return ss
+
+    df2 = dfsim.groupby('id1').apply(lambda  dfi : to_list(dfi)).reset_index()
+    df2.columns = ['id', 'similar']
+    return df2
 
     """
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
-    n = len(embv)
+    n = len(embs)
     emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
 
-    for i, emb1 in enumerate(embv):
+    for i, emb1 in enumerate(embs):
         res = []
-        for emb2 in embv:
+        for emb2 in embs:
             res.append(cosine_similarity([emb1],[emb2]))
         res[i] = -1
         max_value = max(res)
@@ -445,7 +459,7 @@ def np_cosinus_most_similar(embv = None, emb_name_list=None):
     df = pd.DataFrame(data = emb_name_list, columns=['id'])
     df['similar'] = similar_emb
     return df
-
+    """
 
 
 
