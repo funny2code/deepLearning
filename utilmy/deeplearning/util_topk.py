@@ -21,28 +21,28 @@ from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 #### Optional imports
 try :
     import faiss
-    import diskcache as dc
+    import diskcache
 except:
     print('pip install faiss-cpu')
 
 
 
 from utilmy.deeplearning.util_embedding import (
-embedding_extract_fromtransformer,
-embedding_load_pickle,
-embedding_load_parquet,
-embedding_load_word2vec,
-embedding_torchtensor_to_parquet,
-embedding_rawtext_to_parquet,
+    embedding_extract_fromtransformer,
+    embedding_load_pickle,
+    embedding_load_parquet,
+    embedding_load_word2vec,
+    embedding_torchtensor_to_parquet,
+    embedding_rawtext_to_parquet,
 
 
-db_load_dict,
-np_norm_l2,
-np_matrix_to_str,
-np_str_to_array,
-np_array_to_str,
-np_matrix_to_str2,
-np_matrix_to_str_sim
+    db_load_dict,
+    np_norm_l2,
+    np_matrix_to_str,
+    np_str_to_array,
+    np_array_to_str,
+    np_matrix_to_str2,
+    np_matrix_to_str_sim
 
 )
 

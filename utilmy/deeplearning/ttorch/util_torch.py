@@ -1012,9 +1012,9 @@ def model_summary(model, **kw):
 ########### Metrics  ##########################################################################
 from utilmy.deeplearning.util_dl import metrics_eval
 
-
+"""
 def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
-    """Compare 2 list of vectors return cosine similarity score
+    ##Compare 2 list of vectors return cosine similarity score
 
     Docs
         cola (str): list of embedding
@@ -1023,7 +1023,7 @@ def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
 
     Returns:
         pd DataFrame: 'cosine_similarity' column and return df
-    """
+    
     from sklearn.metrics.pairwise import cosine_similarity
 
     results = list()
@@ -1040,6 +1040,7 @@ def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
     if name_list is not None :
         df['name'] = name_list
     return df
+"""
 
 
 def torch_pearson_coeff(x1, x2):
