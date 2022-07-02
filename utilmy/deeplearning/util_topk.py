@@ -59,7 +59,7 @@ def help():
 
 #############################################################################################
 def test_all() -> None:
-    """ python  $utilmy/deeplearning/util_embedding.py test_all         """
+    """ python  $utilmy/deeplearning/util_topk.py test_all         """
     log(os_module_name(__file__))
     test1()
 
@@ -295,7 +295,7 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_di
              distL 0,3423.32424.,
 
     
-           python $utilmy/deeplearning/util_embedding.py  topk_calc   --diremb     --dirout
+           python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
     
 
     """
@@ -345,7 +345,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     """ Create Large scale Index
     Docs::
 
-          python util_embedding.py   faiss_create_index    --df_or_path myemb/
+          python util_topk.py   faiss_create_index    --df_or_path myemb/
 
 
     """
@@ -615,31 +615,23 @@ if 'custom_code':
         return res
 
 
-    def pd_add_onehot_encoding(dfref, img_dir, labels_col):
+    def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
+        """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
+    
+    
         """
-           id, uri, cat1, cat2, .... , cat1_onehot
-
-        """
-        import glob
-        fpaths = glob.glob(img_dir)
-        fpaths = [fi for fi in fpaths if "." in fi.split("/")[-1]]
-        log(str(fpaths)[:100])
-
-        df = pd.DataFrame(fpaths, columns=['uri'])
-        log(df.head(1).T)
-        df['id'] = df['uri'].apply(lambda x: x.split("/")[-1].split(".")[0])
-        df['id'] = df['id'].apply(lambda x: int(x))
-        df = df.merge(dfref, on='id', how='left')
-
-        # labels_col = [  'gender', 'masterCategory', 'subCategory', 'articleType' ]
-
+        if labels_dict is not None:
+            for ci, catval in labels_dict.items():
+                dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+    
+        labels_col = labels_dict.keys()
+    
         for ci in labels_col:
-            dfi_1hot = pd.get_dummies(df, columns=[ci])  ### OneHot
+            dfi_1hot = pd.get_dummies(dflabels, columns=[ci])  ### OneHot
             dfi_1hot = dfi_1hot[[t for t in dfi_1hot.columns if ci in t]]  ## keep only OneHot
-            df[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
+            dflabels[ci + "_onehot"] = dfi_1hot.apply(lambda x: ','.join([str(t) for t in x]), axis=1)
             #####  0,0,1,0 format   log(dfi_1hot)
-
-        return df
+        return dflabels
 
 
 
