@@ -98,18 +98,17 @@ def test2():
   log('######### embedding cosinus #####################')
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
 
-  log("#########  faiss_KNNClassifier")
+  log("#########  faiss_KNNClassifier ###################################")
   k = faiss_KNNClassifier()
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
 
-  log("#########  faiss_create_index")
+  log("#########  faiss_create_index  ##################################")
   emb_list = []
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1,2,3,4] * 6000,
-                      'emb': emb_list * 6000})
+  res = pd.DataFrame({'id': [1,2,3,4] * 6000, 'emb': emb_list * 6000})
 
   path = './temp/tem/'
   os.makedirs(path, exist_ok=True)
@@ -132,13 +131,13 @@ def test6():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
       
-  res = pd.DataFrame({'id': [1,2,3,4], 
-                      'emb': emb_list})
+  res = pd.DataFrame({'id': [1,2,3,4],  'emb': emb_list})
   path = './temp/tem/'
   os.makedirs(path, exist_ok=True)
   res.to_csv(f'{path}1.csv', index=False)
-
   topk_calc(diremb=f'{path}1.csv')
+
+
 
 
 def test7():
