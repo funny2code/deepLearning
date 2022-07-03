@@ -44,7 +44,7 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
-from utilmy import log
+from utilmy import (log,log2, pd_to_file, pd_read_file)
 
 
 
@@ -102,7 +102,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
 
 
-def runall(dirin='', dirout='', config=None):
+def runall(dirin='', dirout='', embed_dim=10, config=None):
 
     """  Run all steps to generate dirin
     Doc::
@@ -112,33 +112,27 @@ def runall(dirin='', dirout='', config=None):
 
 
     """
-    dname = dirin
-    dname = dname.replace("\\", "/")
-    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
-    df    = pd.read_csv(path, delimiter='\t')
+    df    = pd_read_file(dirin)
 
-    dname = dname + "/embed/"
-    if not os.path.exists(dname):
-        os.makedirs(dname)
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor = NERExtractor(dirin_or_df=df, dirout=dirout, model_name="ro_core_news_sm")
     extractor.extractTriples(max_text=-1)
     extractor.export_data()
 
 
     log('##### Build Knowledge Graph')
-    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+    data_kgf_path = os.path.join(dirout, 'data_kgf.tsv')
     grapher = knowledge_grapher(embedding_dim=10)
     grapher.load_data( data_kgf_path)
     grapher.buildGraph()
 
 
     log('##### Build KG Embeddings')
-    dirout_emb = dname
-    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
+    dirout_emb = dirout
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dirout, embedding_dim=embed_dim, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
-    embedder.compute_embeddings('none', batch_size=1024)
+    embedder.compute_embeddings('none', batch_size=64)
     embedder.save_embeddings()
 
 
