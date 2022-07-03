@@ -110,15 +110,6 @@ def test2():
 
 
 
-
-def test6():
-  
-  """  tests
-  Docs ::
-        Test Cases  topk_calc
-        1. check if dimension of dataframe embs is same as emb_dim
-  """   
-
   emb_list = []
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
@@ -132,13 +123,6 @@ def test6():
 
 
 
-def test7():
-  """  tests
-  Docs ::
-
-        Test Cases  topk_calc
-        1. check if colid, colemb exists in input data
-  """ 
   y = test_create_fake_df()
   path = './temp/tem/'
 
