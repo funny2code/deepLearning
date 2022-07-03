@@ -143,12 +143,18 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
-def hdfs_ls(path, flag="-h ", filename_only=False):
+def hdfs_ls(path, flag="-h ", filename_only=False, use_glob=False):
     """
           flag=-R
 
     """
     from subprocess import Popen, PIPE
+    import glob
+
+    if use_glob:
+        flist = glob.glob(f'{path}/**', recursive=True)
+        return flist
+
     process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
     std_out, std_err = process.communicate()
 
