@@ -116,6 +116,74 @@ def test4():
   k = KNNClassifierFAISS()
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
+  
+  def test5():
+  """  tests
+  Docs ::
+
+        Test Cases  faiss_create_index
+        1. check if df_or_path is not a string instance mentioning dirout is mandatory
+        2. check if id column in present in input dataframe
+        3. check if mentioned col parameter value is present in input dataframe
+        4. check if dimension of dataframe embs is same as emb_dim
+        5. Check if dimension D is a multiple of number of sub_quantizers
+        6. Check if number of training inputs >= number of clusters   
+
+  """   
+  emb_list = []
+  for i in range(4):
+      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
+      
+  res = pd.DataFrame({'id': [1,2,3,4] * 6000, 
+                      'emb': emb_list * 6000})
+  
+  path = './temp/tem/'
+  if not os.path.exists(path):
+    os.makedirs(path)
+  res.to_csv(f'{path}1.csv', index=False)
+
+  faiss_create_index(df_or_path=f'{path}1.csv')
+
+def test6():
+  
+  """  tests
+  Docs ::
+        Test Cases  topk_calc
+        1. check if dimension of dataframe embs is same as emb_dim
+  """   
+
+  emb_list = []
+  for i in range(4):
+      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
+      
+  res = pd.DataFrame({'id': [1,2,3,4], 
+                      'emb': emb_list})
+  path = './temp/tem/'
+  if not os.path.exists(path):
+    os.makedirs(path)
+  res.to_csv(f'{path}1.csv', index=False)
+
+  topk_calc(diremb=f'{path}1.csv')
+
+
+def test7():
+  """  tests
+  Docs ::
+        Test Cases  topk_calc
+        1. check if colid, colemb exists in input data
+  """ 
+  y = test_create_fake_df()
+  path = './temp/tem/'
+
+  if not os.path.exists(path):
+    os.makedirs(path)
+
+  y.df.to_csv(f'{path}data.csv')
+  faiss_topk_calc(df='./temp/tem/data.csv', root=path, colid='id', colemb='emb',
+                    colkey='idx', colval='id',
+                    faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path) 
+
+
 
 
 
