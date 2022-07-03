@@ -62,8 +62,7 @@ def test_all() -> None:
     """ python  $utilmy/deeplearning/util_topk.py test_all         """
     log(os_module_name(__file__))
     test2()
-    test6()
-    test7()
+
    
 
 
@@ -83,12 +82,12 @@ def test2():
   }
   path = './temp/tem/'
   os.makedirs(path, exist_ok=True)
-
   res.to_csv(f'{path}1.csv', index=False)
   df = pd_to_onehot(res, labels_dict= labels_dict )
 
   log('######### embedding cosinus #####################')
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
+
 
   log("#########  faiss_KNNClassifier ###################################")
   k = faiss_KNNClassifier()
@@ -109,26 +108,21 @@ def test2():
 
 
 
-
+  log("#########  faiss_topk_calc  ##################################")
   emb_list = []
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
       
   res = pd.DataFrame({'id': [1,2,3,4],  'emb': emb_list})
   path = './temp/tem/'
-  os.makedirs(path, exist_ok=True)
   res.to_csv(f'{path}1.csv', index=False)
   topk_calc(diremb=f'{path}1.csv')
 
 
 
-
+  log("#########  faiss_topk_calc  ##################################")
   y = test_create_fake_df()
   path = './temp/tem/'
-
-  if not os.path.exists(path):
-    os.makedirs(path)
-
   y.df.to_csv(f'{path}data.csv')
   faiss_topk_calc(df='./temp/tem/data.csv', root=path, colid='id', colemb='emb',
                     colkey='idx', colval='id',
