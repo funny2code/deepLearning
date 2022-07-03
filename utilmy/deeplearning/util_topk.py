@@ -61,20 +61,10 @@ def help():
 def test_all() -> None:
     """ python  $utilmy/deeplearning/util_topk.py test_all         """
     log(os_module_name(__file__))
-    test1()
     test2()
-    test5()
     test6()
     test7()
    
-
-def test1() -> None:
-    """function test1     
-    """
-    dirtmp ="./ztmp/"
-
-    dd = test_create_fake_df(dirout= dirtmp)
-    log(dd)
 
 
 def test2():
@@ -83,6 +73,8 @@ def test2():
 
 
   """
+  dd = test_create_fake_df(dirout= "./")
+
   res = pd.DataFrame({'id': [1,2,3,4], 'gender': [0,1,0,1], 'masterCategory': [2,1,3,4]})
 
   labels_dict = {
