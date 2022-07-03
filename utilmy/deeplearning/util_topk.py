@@ -63,8 +63,6 @@ def test_all() -> None:
     log(os_module_name(__file__))
     test1()
     test2()
-    test3()
-    test4()
     test5()
     test6()
     test7()
@@ -83,11 +81,8 @@ def test2():
   """  tests
   Docs ::
 
-        Test Cases  pd_add_onehot_encoding
-        1. check if id column is present in dfref
-        2. check if labels_col are present in dfref   
-  """ 
 
+  """
   res = pd.DataFrame({'id': [1,2,3,4], 'gender': [0,1,0,1], 'masterCategory': [2,1,3,4]})
 
   labels_dict = {
@@ -100,27 +95,13 @@ def test2():
   res.to_csv(f'{path}1.csv', index=False)
   df = pd_to_onehot(res, labels_dict= labels_dict )
 
-
-def test3():
-  """  tests
-  Docs ::
-
-        Test Cases  embedding_cosinus_scores_pairwise
-        1. check if length of word_list is same as length of emb
-  """ 
+  log('embedding cosinus')
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
 
-
-def test4():
-  """  tests
-  Docs ::
-
-        Test Cases  KNNClassifierFAISS
-        1. In fit function check if input and output dimensions are same
-        2. If algorithm is vornoni, check if number of input vecs >= number of clusters
-  """ 
+  log("Faiss")
   k = faiss_KNNClassifier()
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
+
 
   
 def test5():
@@ -144,8 +125,7 @@ def test5():
                       'emb': emb_list * 6000})
 
   path = './temp/tem/'
-  if not os.path.exists(path):
-    os.makedirs(path)
+  os.makedirs(path, exist_ok=True)
   res.to_csv(f'{path}1.csv', index=False)
 
   faiss_create_index(df_or_path=f'{path}1.csv')
@@ -167,8 +147,7 @@ def test6():
   res = pd.DataFrame({'id': [1,2,3,4], 
                       'emb': emb_list})
   path = './temp/tem/'
-  if not os.path.exists(path):
-    os.makedirs(path)
+  os.makedirs(path, exist_ok=True)
   res.to_csv(f'{path}1.csv', index=False)
 
   topk_calc(diremb=f'{path}1.csv')
