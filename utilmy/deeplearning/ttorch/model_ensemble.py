@@ -123,7 +123,7 @@ def init_ARG():
     train_config.LR                  = 0.001
     train_config.SEED                = 42
     train_config.DEVICE              = 'cpu'
-    train_config.BATCH_SIZE          = 32
+    train_config.BATCH_SIZE          = 4
     train_config.EPOCHS              = 1
     train_config.EARLY_STOPPING_THLD = 10
     train_config.VALID_FREQ          = 1
@@ -1130,7 +1130,7 @@ def test6():
         train_config.LR                        = 0.0001
         train_config.SEED                      = 42
         train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 8
+        train_config.BATCH_SIZE                = 4
         train_config.EPOCHS                    = 1
         train_config.EARLY_STOPPING_THLD       = 10
         train_config.VALID_FREQ                = 1
