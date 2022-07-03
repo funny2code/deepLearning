@@ -69,7 +69,30 @@ def test_all() -> None:
 def test2():
   """  tests
   Docs ::
+        Test Cases  pd_add_onehot_encoding
+            1. check if id column is present in dfref
+            2. check if labels_col are present in dfref 
 
+        Test Cases  embedding_cosinus_scores_pairwise
+            1. check if length of word_list is same as length of emb
+
+        Test Cases  KNNClassifierFAISS
+            1. In fit function check if input and output dimensions are same
+            2. If algorithm is vornoni, check if number of input vecs >= number of clusters
+
+        Test Cases  faiss_create_index
+            1. check if df_or_path is not a string instance mentioning dirout is mandatory
+            2. check if id column in present in input dataframe
+            3. check if mentioned col parameter value is present in input dataframe
+            4. check if dimension of dataframe embs is same as emb_dim
+            5. Check if dimension D is a multiple of number of sub_quantizers
+            6. Check if number of training inputs >= number of clusters   
+
+        Test Cases  topk_calc
+            1. check if dimension of dataframe embs is same as emb_dim
+
+         Test Cases  faiss_topk_calc
+            1. check if colid and colemb columns are present in input dataframe
 
   """
   dd = test_create_fake_df(dirout= "./")
