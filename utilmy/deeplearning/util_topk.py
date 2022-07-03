@@ -73,61 +73,45 @@ def test2():
 
   """
   dd = test_create_fake_df(dirout= "./")
+  
+  emb_list = []
+  for i in range(4):
+      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1,2,3,4], 'gender': [0,1,0,1], 'masterCategory': [2,1,3,4]})
+  res = pd.DataFrame({'id': [1,2,3,4] * 6000, 
+                      'gender': [0,1,0,1] * 6000, 
+                      'masterCategory': [2,1,3,4] * 6000, 
+                      'emb': emb_list * 6000})
 
   labels_dict = {
       'gender' : [0,1],
       'masterCategory' : [3,1,2],
   }
+
   path = './temp/tem/'
   os.makedirs(path, exist_ok=True)
   res.to_csv(f'{path}1.csv', index=False)
-  df = pd_to_onehot(res, labels_dict= labels_dict )
+
+  log('######### pd_to_onehot #####################')
+  df = pd_add_onehot_encoding(dfref=res, img_dir=f'{path}/1.csv', labels_col=labels_dict )
 
   log('######### embedding cosinus #####################')
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
 
-
   log("#########  faiss_KNNClassifier ###################################")
-  k = faiss_KNNClassifier()
+  k = KNNClassifierFAISS()
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
-
   log("#########  faiss_create_index  ##################################")
-  emb_list = []
-  for i in range(4):
-      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
-
-  res = pd.DataFrame({'id': [1,2,3,4] * 6000, 'emb': emb_list * 6000})
-
-  path = './temp/tem/'
-  os.makedirs(path, exist_ok=True)
-  res.to_csv(f'{path}1.csv', index=False)
   faiss_create_index(df_or_path=f'{path}1.csv')
 
-
-
+  log("#########  topk_calc  ##################################")
+  topk_calc(diremb=f'{path}1.csv', nexample=24000)
+  
   log("#########  faiss_topk_calc  ##################################")
-  emb_list = []
-  for i in range(4):
-      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
-      
-  res = pd.DataFrame({'id': [1,2,3,4],  'emb': emb_list})
-  path = './temp/tem/'
-  res.to_csv(f'{path}1.csv', index=False)
-  topk_calc(diremb=f'{path}1.csv')
-
-
-
-  log("#########  faiss_topk_calc  ##################################")
-  y = test_create_fake_df()
-  path = './temp/tem/'
-  y.df.to_csv(f'{path}data.csv')
-  faiss_topk_calc(df='./temp/tem/data.csv', root=path, colid='id', colemb='emb',
+  faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
                     colkey='idx', colval='id',
                     faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path) 
-
 
 
 
