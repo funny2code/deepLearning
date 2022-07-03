@@ -43,9 +43,10 @@ def test1():
 ########################################################################################################
 def generate_dataframe(N, pTarget=0.1, pTreatment=0.67, rng_key: DeviceArray=None):
   """
-    N = number of samples = number of rows in the table
+  Docs::
 
-    pTarget and pTreatment are the proportions of 1s we need to generate for the target and treatment columns respectively
+       N = number of samples = number of rows in the table
+       pTarget and pTreatment are the proportions of 1s we need to generate for the target and treatment columns respectively
 
   """
 
@@ -110,12 +111,14 @@ def get_dataset(df: pd.DataFrame, target: str = None, treatment: str=None, covar
 
 
 def model(design_matrix: jnp.ndarray, outcome: jnp.ndarray = None) -> None:
-    """
-    Model definition: Log odds of making a purchase is a linear combination
-    of covariates. Specify a Normal prior over regression coefficients.
+    """  Model
+    Docs::
 
-    :param design_matrix: Covariates. All categorical variables have been one-hot encoded.
-    :param outcome:       Binary response variable. In this case, whether or not the  customer made a purchase.
+        Model definition: Log odds of making a purchase is a linear combination
+        of covariates. Specify a Normal prior over regression coefficients.
+
+        :param design_matrix: Covariates. All categorical variables have been one-hot encoded.
+        :param outcome:       Binary response variable. In this case, whether or not the  customer made a purchase.
     """
 
     beta = numpyro.sample( "coefficients",

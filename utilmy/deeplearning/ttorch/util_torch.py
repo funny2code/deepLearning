@@ -53,6 +53,10 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
+
+from utilmy.deeplearning.ttorch.util_model import (
+    model_getlayer
+)
 #############################################################################################
 from utilmy import log, os_module_name
 from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
@@ -235,6 +239,14 @@ def dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksm
 
 
 def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    """
+    Docs:
+        
+        Dataset : Splitting dataset as Train & val by the ratios provided
+
+
+
+    """
     #### Split anything
     val_ratio = val_ratio + train_ratio
     if isinstance(anyobject, pd.DataFrame):
@@ -268,7 +280,7 @@ def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
 
 
 def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                 force_getlayer= True,
+                                  force_getlayer= True,
                                   pos_layer=-2):
     """
     Docs:
@@ -295,7 +307,7 @@ def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loa
 
 
 def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
-                                        force_getlayer= True, pos_layer=-2):
+                                       force_getlayer= True, pos_layer=-2):
     """
     Docs:
 
@@ -305,6 +317,7 @@ def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None
 
     """
     if force_getlayer == True:
+
        model_embed_extract_fun = model_getlayer(model, pos_layer=pos_layer)
     else:
        model_embed_extract_fun = model.get_embedding
@@ -366,7 +379,7 @@ def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nma
 
 
 
-def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False, sort=True):
     """ Pairwise Cosinus Sim scores
     Example:
         Doc::
@@ -395,6 +408,8 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
 
     dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
 
+    if sort: dfsim = dfsim.sort_values(['id1','sim_score'], ascending=[1,0]  )
+
     if is_symmetric:
         ### Add symmetric part
         dfsim3 = copy.deepcopy(dfsim)
@@ -404,15 +419,37 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_s
 
 
 
-def np_cosinus_most_similar(embv = None, emb_name_list=None):
+def embedding_topk(embs = None, emb_name_list=None, topk=5):
+    """ Pairwise Cosinus Sim scores(Numpy Implementation)
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    dfsim = embedding_cosinus_scores_pairwise(embs, name_list= emb_name_list, sort=True)
+    len( dfsim[[ 'id1', 'id2', 'sim_score']])
+
+    def to_list(dfi):
+        ### only top 5 are included
+        ss = ",".join([str(t) for t in  dfi['id2'].values][:topk])
+        return ss
+
+    df2 = dfsim.groupby('id1').apply(lambda  dfi : to_list(dfi)).reset_index()
+    df2.columns = ['id', 'similar']
+    return df2
+
+    """
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
-    n = len(embv)
+    n = len(embs)
     emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
 
-    for i, emb1 in enumerate(embv):
+    for i, emb1 in enumerate(embs):
         res = []
-        for emb2 in embv:
+        for emb2 in embs:
             res.append(cosine_similarity([emb1],[emb2]))
         res[i] = -1
         max_value = max(res)
@@ -422,7 +459,7 @@ def np_cosinus_most_similar(embv = None, emb_name_list=None):
     df = pd.DataFrame(data = emb_name_list, columns=['id'])
     df['similar'] = similar_emb
     return df
-
+    """
 
 
 
@@ -437,6 +474,7 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
     if labels_dict is not None:
         for ci, catval in labels_dict.items():
             dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+
     labels_col = labels_dict.keys()
 
     for ci in labels_col:
@@ -481,27 +519,6 @@ def dataset_add_image_fullpath(df, col_img='id', train_img_path="./", test_img_p
     # df = df.dropna(how='any',axis=0)
     return df
 
-class model_getlayer():
-    def __init__(self, network, backward=False, pos_layer=-2):
-        self.layers = []
-        self.get_layers_in_order(network)
-        self.last_layer = self.layers[pos_layer]
-        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
-
-    def hook_fn(self, module, input, output):
-        self.input = input
-        self.output = output
-
-    def close(self):
-        self.hook.remove()
-
-    def get_layers_in_order(self, network):
-      if len(list(network.children())) == 0:
-        self.layers.append(network)
-        return
-      for layer in network.children():
-        self.get_layers_in_order(layer)
-
 
 
 class ImageDataset(Dataset):
@@ -525,19 +542,17 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
-
             return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
-        self.return_img_id  = return_img_id 
-
-        self.return_img_id = return_img_id
+        self.return_img_id  = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
            self.img_loader = Image.open
+
 
         if transforms is None :
               from torchvision import transforms
@@ -550,32 +565,42 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
         assert col_img in dflabel.columns
 
+        ##### Filter out label #####################
+        for ci, label_list in label_dict.items():
+           label_list = [label_list] if isinstance(label_list, str) else label_list
+           dflabel[ci] = dflabel[ dflabel[ci].isin(label_list)][ci]
+
 
         if check_ifimage_exist :
            #### Bugggy, not working
            dflabel = dataset_add_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
-        self.dflabel    = dflabel
-        self.label_cols = list(label_dict.keys())
+        self.dflabel       = dflabel
+        self.label_cols    = list(label_dict.keys())
+        self.label_img_dir = [ t.replace("\\", "/") for t in   self.dflabel[self.col_img].values ]
+
 
         self.label_dict = {}
         if self.return_img_id  == False:
             ####lable Prep  #######################################################################
-            self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-            self.label_img_dir = self.label_df[self.col_img].values
+            self.label_df      = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+            #
     
             for ci in self.label_cols:
-                v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
-                v = np.array([[int(t) for t in vlist] for vlist in v])
-                self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
+                y1hot = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+                y1hot = np.array([[int(t) for t in vlist] for vlist in y1hot])
+                self.label_dict[ci] = torch.tensor(y1hot,dtype=torch.float)
+
         else:
+            #### Validation purpose, wiht image_name_id
             label_col = self.label_cols[0]
-            lable = label_dict[label_col]
-            self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
+            # lable = label_dict[label_col]
+            # self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
             self.dflabel = self.dflabel[[col_img,label_col]]
-            self.label_img_dir = self.dflabel[self.col_img].values
+            # self.label_img_dir = self.dflabel[self.col_img].values
             ##Buggy 
             self.label_dict[label_col] = torch.ones(len(self.label_img_dir),dtype=torch.float)
+
 
     def __len__(self) -> int:
         return len(self.label_img_dir)
@@ -584,23 +609,20 @@ class ImageDataset(Dataset):
     def __getitem__(self, idx: int):
         ##### Load Image
         # train_X = self.data[idx]
-        # from PIL import Image
         img_dir = self.label_img_dir[idx]
-        #img     = Image.open(img_dir)
         img     = self.img_loader(img_dir)
         train_X = self.transforms(img)
 
 
         train_y = {}
-        assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
 
         if self.return_img_id == True: ##Data for Embeddings' extraction
-            img_name = img_dir.split('/')[-1].split('.')[0]
-            if "\\" in img_name:
-                img_name =  img_name.replace('\\','_')
-            return (train_X, train_y, img_name)  
+            # img_dir  = img_dir.replace('\\','/')
+            img_name = img_dir.split('/')[-1]
+            return (train_X, train_y, img_name)
+
         return (train_X, train_y)
 
 
@@ -990,9 +1012,9 @@ def model_summary(model, **kw):
 ########### Metrics  ##########################################################################
 from utilmy.deeplearning.util_dl import metrics_eval
 
-
+"""
 def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
-    """Compare 2 list of vectors return cosine similarity score
+    ##Compare 2 list of vectors return cosine similarity score
 
     Docs
         cola (str): list of embedding
@@ -1001,7 +1023,7 @@ def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
 
     Returns:
         pd DataFrame: 'cosine_similarity' column and return df
-    """
+    
     from sklearn.metrics.pairwise import cosine_similarity
 
     results = list()
@@ -1018,6 +1040,7 @@ def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
     if name_list is not None :
         df['name'] = name_list
     return df
+"""
 
 
 def torch_pearson_coeff(x1, x2):

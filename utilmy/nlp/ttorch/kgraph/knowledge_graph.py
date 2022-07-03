@@ -66,8 +66,10 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
     dname = dname.replace("\\", "/")
     path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
     df    = pd.read_csv(path, delimiter='\t')
+    dname = os.path.join(dname, 'embed')
 
-    dname = dname + "/embed/"
+    if not os.path.exists(dname):
+        os.makedirs(dname)
 
     log('##### NER extraction from text ')
     extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
@@ -80,7 +82,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
     grapher = knowledge_grapher(embedding_dim=10)
-    grapher.load_data( data_kgf_path)
+    grapher.load_data(data_kgf_path)
     grapher.buildGraph()
     # data_kgf = knowledge_grapher.load_data(data_kgf_path)
     #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
@@ -106,32 +108,35 @@ def runall(dirin='', dirout='', config=None):
     Doc::
 
         cd utilmy/nlp/tttorch/kgraph
-        python knowledge_graph test1 --dirin mydirdata/
+        python knowledge_graph test1  --dirin mydirdata/
+
 
     """
-    url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
-    dname = dataset_download(url=url)
+    dname = dirin
     dname = dname.replace("\\", "/")
     path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
     df    = pd.read_csv(path, delimiter='\t')
 
     dname = dname + "/embed/"
+    if not os.path.exists(dname):
+        os.makedirs(dname)
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(df, embeddingFolder=dname, load_spacy=True)
-    data_kgf = extractor.extractTriples(sents=-1)
-    extractor.export_data(data_kgf)
+    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor.extractTriples(max_text=-1)
+    extractor.export_data()
 
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
-    data_kgf = knowledge_grapher.load_data(data_kgf_path)
-    grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+    grapher = knowledge_grapher(embedding_dim=10)
+    grapher.load_data( data_kgf_path)
     grapher.buildGraph()
 
 
     log('##### Build KG Embeddings')
-    embedder = KGEmbedder(dname, grapher.graph, embedding_dim=10)
+    dirout_emb = dname
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
     embedder.compute_embeddings('none', batch_size=1024)
     embedder.save_embeddings()
@@ -144,7 +149,7 @@ def runall(dirin='', dirout='', config=None):
 
 ######################################################################################################
 class knowledge_grapher():
-    def __init__(self, data_kgf:pd.DataFrame, embedding_dim:int=14,
+    def __init__(self, embedding_dim:int=14,
                 dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
                  ) -> None:
@@ -156,7 +161,6 @@ class knowledge_grapher():
                 dirin        :      PathLike, where to read input data
                 dirout       :      PathLike, where to store results
         """
-        self.data_kgf = None # data_kgf
         self.embedding_dim = embedding_dim
         self.dirin = dirin
         self.dirout = dirout
@@ -200,11 +204,11 @@ class knowledge_grapher():
         """load the data_kgf dataframe
         Docs:
 
-                path:   PathLike, where the data is stored in tsv format
+                path:   PathLike, where the data is stored in parquet format
 
         """
         try:
-            df = pd.read_csv(path, delimiter='\t')
+            df = pd.read_csv(path, delimiter="\t")
             self.data_kgf  = df
 
         except Exception as e:
@@ -406,15 +410,16 @@ class NERExtractor:
 
 
         dirout = dirout if dirout is not None else self.dirout
-        pd_to_file(train_df,   dirout + '/train_data.tsv', sep="\t")
-        pd_to_file(test_df,    dirout + '/test_data.tsv',  sep="\t")
-        pd_to_file(val_df,     dirout + '/val_data.tsv',   sep="\t")
-        pd_to_file(self.data_kgf,   dirout + '/data_kgf.tsv',   sep="\t")
+        # pd_to_file(train_df,   dirout + '/train_data.parquet', )
+        # pd_to_file(test_df,    dirout + '/test_data.parquet',  )
+        # pd_to_file(val_df,     dirout + '/val_data.parquet',   )
+        # pd_to_file(self.data_kgf,   dirout + '/data_kgf.parquet',   )
 
-        # train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        # test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
-        # val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
-        # data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        #Pykeen Requires data to be loaded in csv format!
+        train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
+        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
+        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        self.data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
         # return train_df, test_df, val_df
 
 

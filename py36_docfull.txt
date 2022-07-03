@@ -149,13 +149,15 @@ pykeen
 ### visualize emb
 mpld3
 hdbscan
-umap-learn
+umap-learn==0.5.3
 optuna
 
 
 ### ONNX part
 onnxruntime
 # onnx
+
+
 
 
 
