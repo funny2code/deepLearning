@@ -86,13 +86,16 @@ def test2():
   """ 
 
   res = pd.DataFrame({'id': [1,2,3,4], 'gender': [0,1,0,1], 'masterCategory': [2,1,3,4]})
-  
+
+  labels_dict = {
+      'gender' : [0,1],
+      'masterCategory' : [3,1,2],
+  }
   path = './temp/tem/'
-  if not os.path.exists(path):
-    os.makedirs(path)
+  os.makedirs(path, exist_ok=True)
 
   res.to_csv(f'{path}1.csv', index=False)
-  pd_add_onehot_encoding(res, f'{path}/1.csv', ['gender', 'masterCategory'])
+  df = pd_to_onehot(res, labels_dict= labels_dict )
 
 
 def test3():
@@ -113,7 +116,7 @@ def test4():
         1. In fit function check if input and output dimensions are same
         2. If algorithm is vornoni, check if number of input vecs >= number of clusters
   """ 
-  k = KNNClassifierFAISS()
+  k = faiss_KNNClassifier()
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
 
