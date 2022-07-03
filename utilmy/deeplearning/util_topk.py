@@ -123,7 +123,7 @@ def test4():
   k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
   
-  def test5():
+def test5():
   """  tests
   Docs ::
 
@@ -133,22 +133,24 @@ def test4():
         3. check if mentioned col parameter value is present in input dataframe
         4. check if dimension of dataframe embs is same as emb_dim
         5. Check if dimension D is a multiple of number of sub_quantizers
-        6. Check if number of training inputs >= number of clusters   
+        6. Check if number of training inputs >= number of clusters
 
-  """   
+  """
   emb_list = []
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
-      
-  res = pd.DataFrame({'id': [1,2,3,4] * 6000, 
+
+  res = pd.DataFrame({'id': [1,2,3,4] * 6000,
                       'emb': emb_list * 6000})
-  
+
   path = './temp/tem/'
   if not os.path.exists(path):
     os.makedirs(path)
   res.to_csv(f'{path}1.csv', index=False)
 
   faiss_create_index(df_or_path=f'{path}1.csv')
+
+
 
 def test6():
   
@@ -175,6 +177,7 @@ def test6():
 def test7():
   """  tests
   Docs ::
+
         Test Cases  topk_calc
         1. check if colid, colemb exists in input data
   """ 
