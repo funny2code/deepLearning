@@ -520,7 +520,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
            dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
            dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
            if return_dist:     dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
-           if return_simscore: dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
+           if return_simscore: dfi[ f'sim_list']   = np_matrix_to_str_sim( topk_dist )
         
            dfall = pd.concat((dfall, dfi))
 
