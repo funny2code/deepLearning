@@ -411,8 +411,8 @@ class NERExtractor:
 
         #Pykeen Requires data to be loaded in csv format!
         train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        test_df.to_csv(os.path.join(self.dirout, 'test_data.tsv'), sep="\t")
+        val_df.to_csv(os.path.join(self.dirout,  'validation_data.tsv'), sep="\t")
         self.data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
         # return train_df, test_df, val_df
 
@@ -437,7 +437,7 @@ class KGEmbedder:
 
         """
         self.graph = graph
-        self.embedding_dim = embedding_dim
+        self.embed_dim = embedding_dim
 
         train_path = os.path.join(dirin,'train_data.tsv')
         test_path  = os.path.join(dirin,'test_data.tsv')
@@ -468,10 +468,10 @@ class KGEmbedder:
         else:
             self.model = ERModel(triples_factory=self.training,
                                  interaction='distmult',
-                               # entity_representations=entity_representations
-                               entity_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1),
-                               relation_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1)
-                               )
+                                 # entity_representations=entity_representations
+                                 entity_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1),
+                                 relation_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1)
+                                 )
 
             self.optimizer = Adam(params=self.model.get_grad_params())
 
@@ -482,7 +482,7 @@ class KGEmbedder:
             )
             self.trained = False
 
-    def compute_embeddings(self, path_to_embeddings, batch_size=1024)->Tuple:
+    def compute_embeddings(self, path_to_embeddings, batch_size=64, n_epochs=8)->Tuple:
 
         """set up the training pipeline for pykeen or load the trained model
         Docs:
@@ -494,10 +494,10 @@ class KGEmbedder:
         if not self.trained:
             losses = self.training_loop.train(
                                 triples_factory=self.training,
-                                num_epochs=10,
+                                num_epochs=n_epochs,
                                 checkpoint_name='myCheckpoint.pt',
                                 checkpoint_frequency=5,
-                                batch_size=256,
+                                batch_size=batch_size,
                                 )
             torch.save(self.model, os.path.join(self.dirout, 'trained_model.pkl'))
         else:
@@ -526,7 +526,7 @@ class KGEmbedder:
         """
         if os.path.exists(os.path.join(self.dirout, 'entityEmbeddings.parquet')):
            self.embedding_df = pd.read_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
-           self.relation_df = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
+           self.relation_df  = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
            return None, None
         #else:
         #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
