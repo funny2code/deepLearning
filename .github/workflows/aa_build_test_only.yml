@@ -95,6 +95,12 @@ jobs:
       run: |
           python test.py test_import_all
 
+    #################################################################
+    - name: utilmy/deeplearning/util_topk.py
+      continue-on-error: true
+      run: |
+          python utilmy/deeplearning/util_topk.py test_all
+
 
     - name: utilmy/deeplearning/ttorch/model_ensemble.py  
       # continue-on-error: true 
@@ -120,5 +126,4 @@ jobs:
       # continue-on-error: true
       run: |
           python utilmy/deeplearning/util_embedding.py test_all
-
 
