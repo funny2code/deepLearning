@@ -122,13 +122,13 @@ def test2():
 
 
   log("#########  topk_calc  ##################################")
-  topk_calc(diremb=f'{path}1.csv', nrows=24000)
+  topk_calc(diremb=f'{path}1.csv', nrows=400)
 
   
   log("#########  faiss_topk_calc  ##################################")
   faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
                   colkey='idx', colval='id',
-                  faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path)
+                  faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path)
 
 
 
@@ -139,16 +139,6 @@ def test2():
 
 ########################################################################################################
 ######## Nearest #######################################################################################
-from sklearn.utils.validation import check_is_fitted
-
-def is_available():
-    try:
-        import faiss
-        return True
-    except ImportError:
-        return False
-
-
 class faiss_KNNClassifier:
     """ Scikit-learn wrapper interface for Faiss KNN.
     Docs::
@@ -248,6 +238,7 @@ class faiss_KNNClassifier:
                     "n_neighbors does not take {} value, "
                     "enter integer value" .format(type(n_neighbors)))
 
+        from sklearn.utils.validation import check_is_fitted
         check_is_fitted(self, 'index_')
 
         X = np.atleast_2d(X).astype(np.float32)
