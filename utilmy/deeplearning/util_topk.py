@@ -701,7 +701,7 @@ if 'custom_code':
         Docs::
 
             Parameters
-            __________
+            ----------
             dflabels (pd.dataframe): The input data. df[['id', 'gender']]
             labels_dict (dict) : key is column name, value categorical data. {'gender': ['one', 'two']  }
 
