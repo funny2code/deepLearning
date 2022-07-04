@@ -71,18 +71,10 @@ def test2():
   Docs ::
   
         Test Cases  pd_add_onehot_encoding
-
         Test Cases  embedding_cosinus_scores_pairwise
-
-
         Test Cases  KNNClassifierFAISS
-
-
         Test Cases  faiss_create_index
- 
-
         Test Cases  topk_calc
-
         Test Cases  faiss_topk_calc
 
   """
@@ -92,12 +84,12 @@ def test2():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1,2,3,4] * 6000,
-                      'gender': [0,1,0,1] * 6000, 
-                      'masterCategory': [2,1,3,4] * 6000, 
-                      'emb': emb_list * 6000})
+  res = pd.DataFrame({'id': [1, 2, 3, 4] * 5,
+                      'gender': [0, 1, 0, 1] * 5,
+                      'masterCategory': [2, 1, 3, 4] * 5,
+                      'emb': emb_list * 5})
 
-  labels_dict = { 'gender' : [0,1],
+  labels_dict = {'gender' : [0,1],
                   'masterCategory' : [3,1,2],
   }
 
@@ -118,28 +110,286 @@ def test2():
 
 
   log("#########  faiss_create_index  ################################")
-  faiss_create_index(df_or_path=f'{path}1.csv')
+  faiss_create_index(df_or_path=f'{path}1.csv',
+                     faiss_nlist=6000, faiss_M=40, faiss_nbits=8, faiss_hnsw_m=32)
+
+  log("#########  faiss_topk_calc  ##################################")
+  faiss_topk_calc(df=f'{path}1.csv', root=path,
+                  colid='id', colemb='emb',   ### id --> emb
+                  colkey='idx', colval='id',  ### dict map idx --> id
+                  faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path,
+                  faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
 
 
   log("#########  topk_calc  #########################################")
   topk_calc(diremb=f'{path}1.csv', nrows=400)
 
-  
-  log("#########  faiss_topk_calc  ##################################")
-  faiss_topk_calc(df=f'{path}1.csv', root=path,
-                  colid='id', colemb='emb',   ### id --> emb
-                  colkey='idx', colval='id',  ### dict map idx --> id
-                  faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path)
+
+
+########################################################################################################
+######## Top-K retrieval ###############################################################################
+def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
+    """ Retrieve top k nearest vectors using FAISS, raw retrievail
+    """
+    if 'faiss' in engine :
+        # cc = engine_pars
+        import faiss  
+        index = faiss.index_factory(x0.shape[1], 'Flat')
+        index.add(vector_list)
+        dist, indice = index.search(x0, topk)
+        return dist, indice
 
 
 
+def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
+    """ Get Topk vector per each element vector of dirin.
+    Doc::
 
+           Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
+             id :   id of the emb
+             emb :  [342,325345,343]   X0 embdding
+             topk:  2,5,6,5,6
+             distL  0,3423.32424.,
+
+    
+           python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
+    
+
+    """
+    from utilmy import pd_read_file
+
+    ##### Load emb data  ###############################################
+    flist    = glob_glob(diremb)
+    df       = pd_read_file(  flist , n_pool=10 )
+    df.index = np.arange(0, len(df))
+    df = df.iloc[:nrows, :]
+    log(df)
+    assert len(df[['id', 'emb' ]]) > 0
+
+
+    ##### Element X0 ####################################################
+    vectors = np_str_to_array(df['emb'].values,  mdim= emb_dim)
+    llids   = df['id'].values        if idlist is None  else idlist
+    del df ; gc.collect()
+
+    dfr = [] 
+    for ii in range(0, len(llids)) :        
+        x0      = vectors[ii]
+        xname   = llids[ii]
+        log(xname)
+        x0         = x0.reshape(1, -1).astype('float32')  
+        dist, rank = topk_nearest_vector(x0, vectors, topk= topk) 
+        
+        ss_rankid = np_array_to_str( llids[ rank[0] ] )
+        ss_distid = np_array_to_str( dist[0]  )
+
+        dfr.append([  xname, x0,  ss_rankid,  ss_distid  ])   
+
+    dfr = pd.DataFrame( dfr, columns=[  'id', 'emb', 'topk', 'dist'  ] )
+    pd_read_file( dfr, dirout + f"/topk_{tag}.parquet"  )
 
 
 
 
 ########################################################################################################
-######## Nearest #######################################################################################
+######## Top-K retrieval Faiss #########################################################################
+def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
+                       nrows=-1, faiss_nlist=6000, faiss_M=40, faiss_nbits=8, faiss_hnsw_m=32):
+    """ Create Large scale Index
+    Docs::
+
+          python util_topk.py   faiss_create_index    --df_or_path myemb/
+
+
+    """
+    import faiss
+
+    
+    dirout    =  "/".join( os.path.dirname(df_or_path).split("/")[:-1]) + "/faiss/" if dirout is None else dirout
+    os.makedirs(dirout, exist_ok=True)
+    log('dirout', dirout)
+    log('dirin',  df_or_path)
+    
+    if isinstance(df_or_path, str) :      
+       flist = sorted(glob.glob(df_or_path  ))[:nfile] 
+       log('Loading', df_or_path) 
+       df = pd_read_file(flist, n_pool=20, verbose=False)
+    else :
+       df = df_or_path
+
+    df  = df.iloc[:nrows, :]   if nrows>0  else df
+    log(df)
+        
+    tag = f"_" + str(len(df))    
+    df  = df.sort_values('id')    
+    df[ 'idx' ] = np.arange(0,len(df))
+    pd_to_file( df[[ 'idx', 'id' ]], 
+                dirout + f"/map_idx{tag}.parquet", show=1)   #### Keeping maping faiss idx, item_tag
+    
+
+    log("#### Convert parquet to numpy   ", dirout)
+    X  = np.zeros((len(df), emb_dim  ), dtype=np.float32 )    
+    vv = df[col].values
+    del df; gc.collect()
+    for i, r in enumerate(vv) :
+        try :
+          vi      = [ float(v) for v in r.split(',')]        
+          X[i, :] = vi
+        except Exception as e:
+          log(i, e)
+            
+    log("#### Preprocess X")
+    faiss.normalize_L2(X)  ### Inplace L2 normalization
+    log( X ) 
+    
+    nt = min(len(X), int(max(400000, len(X) *0.075 )) )
+    Xt = X[ np.random.randint(len(X), size=nt),:]
+    log('Nsample training', nt)
+
+    ####################################################    
+    D = emb_dim  ###   actual  embedding size
+    N = len(X)   ##### 1000000
+
+    # Param of PQ for 1 billion
+    M      = faiss_M # 16  ###  200 / 5 = 40  The number of sub-vector. Typically this is 8, 16, 32, etc.
+    nbits  = faiss_nbits        ### bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte
+    nlist  = faiss_nlist     ###  # Param of IVF,  Number of cells (space partition). Typical value is sqrt(N)
+    hnsw_m = faiss_hnsw_m       ###  # Param of HNSW Number of neighbors for HNSW. This is typically 32
+
+    # Setup  distance -> similarity in uncompressed space is  dis = 2 - 2 * sim, https://github.com/facebookresearch/faiss/issues/632
+    quantizer = faiss.IndexHNSWFlat(D, hnsw_m)
+    index     = faiss.IndexIVFPQ(quantizer, D, nlist, M, nbits)
+    
+    log('###### Train indexer')
+    index.train(Xt)      # Train
+    
+    log('###### Add vectors')
+    index.add(X)        # Add
+
+    log('###### Test values ')
+    index.nprobe = 8  # Runtime param. The number of cells that are visited for search.
+    dists, ids = index.search(x=X[:3], k=4 )  ## top4
+    log(dists, ids)
+    
+    log("##### Save Index    ")
+    dirout2 = dirout + f"/faiss_trained{tag}.index" 
+    log( dirout2 )
+    faiss.write_index(index, dirout2 )
+    return dirout2
+        
+
+
+def faiss_load_index(faiss_index_path=""):
+    return None
+
+
+
+def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
+                    faiss_index:str="", topk=200, dirout=None, npool=1, nrows=10**7, nfile=1000,
+                    colkey='idx', colval='id',
+                    return_simscore=False, return_dist=False,
+                    **kw
+
+                    ) :
+   """  Calculate top-k for each 'emb' vector of dataframe in parallel batch.
+   Doc::
+
+       df : path or DF   df[['id', 'embd' ]]
+       dirout : results path,   id, topk   :     word id, topk of id
+
+
+
+       https://github.com/facebookresearch/faiss/issues/632
+       dis = 2 - 2 * sim
+   """
+
+   faiss_index = ""  if faiss_index is None  else faiss_index
+   if isinstance(faiss_index, str) :
+        faiss_path  = faiss_index
+        faiss_index = faiss_load_index(db_path=faiss_index) 
+   faiss_index.nprobe = 12  # Runtime param. The number of cells that are visited for search.
+   log('Faiss Index: ', faiss_index)
+
+
+   ########################################################################
+   if isinstance(df, list):    ### Multi processing part
+        if len(df) < 1 : return 1
+        flist = df[0]
+        root     = os.path.abspath( os.path.dirname( flist[0] + "/../../") )  ### bug in multipro
+        dirin    = root + "/df/"
+        dir_out  = dirout
+
+   elif isinstance(df, str) : ### df == string path
+        root    = df
+        dirin   = root
+        dir_out = dirout
+        flist   = sorted(glob.glob(dirin))
+   else :
+       raise Exception('Unknonw path')
+
+   log('dir_in',  dirin)
+   log('dir_out', dir_out)
+   flist = flist[:nfile]
+   if len(flist) < 1: return 1 
+   log('Nfile', len(flist), flist )
+
+
+   ####### Parallel Mode ################################################
+   if npool > 1 and len(flist) > npool :
+        log('Parallel mode')
+        from utilmy.parallel  import multiproc_run, multiproc_tochunk
+        ll_list = multiproc_tochunk(flist, npool = npool)
+        multiproc_run(faiss_topk_calc,  ll_list,  npool, verbose=True, start_delay= 5,
+                      input_fixed = { 'faiss_index': faiss_path }, )      
+        return 1
+
+
+   ####### Single Mode #################################################
+   dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')  
+   map_idx_dict = db_load_dict(dirmap,  colkey = colkey, colval = colval )
+
+   chunk  = 200000       
+   kk     = 0
+   os.makedirs(dir_out, exist_ok=True)    
+   dirout2 = dir_out 
+   flist = [ t for t in flist if len(t)> 8 ]
+   log('\n\nN Files', len(flist), str(flist)[-100:]  ) 
+   for fi in flist :
+       if os.path.isfile( dir_out + "/" + fi.split("/")[-1] ) : continue
+       # nrows= 5000
+       df = pd_read_file( fi, n_pool=1  ) 
+       df = df.iloc[:nrows, :]
+       log(fi, df.shape)
+       df = df.sort_values('id') 
+
+       dfall  = pd.DataFrame()   ;    nchunk = int(len(df) // chunk)    
+       for i in range(0, nchunk+1):
+           if i*chunk >= len(df) : break         
+           i2 = i+1 if i < nchunk else 3*(i+1)
+        
+           x0 = np_str_to_array( df[colemb].iloc[ i*chunk:(i2*chunk)].values    )
+           log('X topk') 
+           topk_dist, topk_idx = faiss_index.search(x0, topk)            
+           log('X', topk_idx.shape) 
+                
+           dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
+           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
+           if return_dist:     dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
+           if return_simscore: dfi[ f'sim_list']   = np_matrix_to_str_sim( topk_dist )
+        
+           dfall = pd.concat((dfall, dfi))
+
+       dirout2 = dir_out + "/" + fi.split("/")[-1]      
+
+       pd_to_file(dfall, dirout2, show=1)  
+       kk    = kk + 1
+       if kk == 1 : dfall.iloc[:100,:].to_csv( dirout2.replace(".parquet", ".csv")  , sep="\t" )
+             
+   log('All finished')    
+   return os.path.dirname( dirout2 )
+
+
+
 class faiss_KNNClassifier:
     """ Scikit-learn wrapper interface for Faiss KNN.
     Docs::
@@ -303,275 +553,6 @@ class faiss_KNNClassifier:
             raise ValueError("Invalid algorithm option."
                              " Expected ['brute', 'voronoi', 'hierarchical'], "
                              "got {}" .format(self.algorithm))
-
-
-
-
-
-
-
-
-
-########################################################################################################
-######## Top-K retrieval ###############################################################################
-def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
-    """ Retrieve top k nearest vectors using FAISS, raw retrievail
-    """
-    if 'faiss' in engine :
-        # cc = engine_pars
-        import faiss  
-        index = faiss.index_factory(x0.shape[1], 'Flat')
-        index.add(vector_list)
-        dist, indice = index.search(x0, topk)
-        return dist, indice
-
-
-
-def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
-    """ Get Topk vector per each element vector of dirin.
-    Doc::
-
-           Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
-             id :   id of the emb
-             emb :  [342,325345,343]   X0 embdding
-             topk:  2,5,6,5,6
-             distL  0,3423.32424.,
-
-    
-           python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
-    
-
-    """
-    from utilmy import pd_read_file
-
-    ##### Load emb data  ###############################################
-    flist    = glob_glob(diremb)
-    df       = pd_read_file(  flist , n_pool=10 )
-    df.index = np.arange(0, len(df))
-    df = df.iloc[:nrows, :]
-    log(df)
-    assert len(df[['id', 'emb' ]]) > 0
-
-
-    ##### Element X0 ####################################################
-    vectors = np_str_to_array(df['emb'].values,  mdim= emb_dim)
-    llids   = df['id'].values        if idlist is None  else idlist
-    del df ; gc.collect()
-
-    dfr = [] 
-    for ii in range(0, len(llids)) :        
-        x0      = vectors[ii]
-        xname   = llids[ii]
-        log(xname)
-        x0         = x0.reshape(1, -1).astype('float32')  
-        dist, rank = topk_nearest_vector(x0, vectors, topk= topk) 
-        
-        ss_rankid = np_array_to_str( llids[ rank[0] ] )
-        ss_distid = np_array_to_str( dist[0]  )
-
-        dfr.append([  xname, x0,  ss_rankid,  ss_distid  ])   
-
-    dfr = pd.DataFrame( dfr, columns=[  'id', 'emb', 'topk', 'dist'  ] )
-    pd_read_file( dfr, dirout + f"/topk_{tag}.parquet"  )
-
-
-
-
-########################################################################################################
-######## Top-K retrieval Faiss #########################################################################
-def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
-                       nrows=-1):
-    """ Create Large scale Index
-    Docs::
-
-          python util_topk.py   faiss_create_index    --df_or_path myemb/
-
-
-    """
-    import faiss
-
-    
-    dirout    =  "/".join( os.path.dirname(df_or_path).split("/")[:-1]) + "/faiss/" if dirout is None else dirout
-    os.makedirs(dirout, exist_ok=True)
-    log('dirout', dirout)
-    log('dirin',  df_or_path)
-    
-    if isinstance(df_or_path, str) :      
-       flist = sorted(glob.glob(df_or_path  ))[:nfile] 
-       log('Loading', df_or_path) 
-       df = pd_read_file(flist, n_pool=20, verbose=False)
-    else :
-       df = df_or_path
-
-    df  = df.iloc[:nrows, :]   if nrows>0  else df
-    log(df)
-        
-    tag = f"_" + str(len(df))    
-    df  = df.sort_values('id')    
-    df[ 'idx' ] = np.arange(0,len(df))
-    pd_to_file( df[[ 'idx', 'id' ]], 
-                dirout + f"/map_idx{tag}.parquet", show=1)   #### Keeping maping faiss idx, item_tag
-    
-
-    log("#### Convert parquet to numpy   ", dirout)
-    X  = np.zeros((len(df), emb_dim  ), dtype=np.float32 )    
-    vv = df[col].values
-    del df; gc.collect()
-    for i, r in enumerate(vv) :
-        try :
-          vi      = [ float(v) for v in r.split(',')]        
-          X[i, :] = vi
-        except Exception as e:
-          log(i, e)
-            
-    log("#### Preprocess X")
-    faiss.normalize_L2(X)  ### Inplace L2 normalization
-    log( X ) 
-    
-    nt = min(len(X), int(max(400000, len(X) *0.075 )) )
-    Xt = X[ np.random.randint(len(X), size=nt),:]
-    log('Nsample training', nt)
-
-    ####################################################    
-    D = emb_dim  ###   actual  embedding size
-    N = len(X)   ##### 1000000
-
-    # Param of PQ for 1 billion
-    M      = 40 # 16  ###  200 / 5 = 40  The number of sub-vector. Typically this is 8, 16, 32, etc.
-    nbits  = 8        ### bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte    
-    nlist  = 6000     ###  # Param of IVF,  Number of cells (space partition). Typical value is sqrt(N)    
-    hnsw_m = 32       ###  # Param of HNSW Number of neighbors for HNSW. This is typically 32
-
-    # Setup  distance -> similarity in uncompressed space is  dis = 2 - 2 * sim, https://github.com/facebookresearch/faiss/issues/632
-    quantizer = faiss.IndexHNSWFlat(D, hnsw_m)
-    index     = faiss.IndexIVFPQ(quantizer, D, nlist, M, nbits)
-    
-    log('###### Train indexer')
-    index.train(Xt)      # Train
-    
-    log('###### Add vectors')
-    index.add(X)        # Add
-
-    log('###### Test values ')
-    index.nprobe = 8  # Runtime param. The number of cells that are visited for search.
-    dists, ids = index.search(x=X[:3], k=4 )  ## top4
-    log(dists, ids)
-    
-    log("##### Save Index    ")
-    dirout2 = dirout + f"/faiss_trained{tag}.index" 
-    log( dirout2 )
-    faiss.write_index(index, dirout2 )
-    return dirout2
-        
-
-
-def faiss_load_index(faiss_index_path=""):
-    return None
-
-
-
-def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
-                    faiss_index:str="", topk=200, dirout=None, npool=1, nrows=10**7, nfile=1000,
-                    colkey='idx', colval='id',
-                    return_simscore=False, return_dist=False,
-
-                    ) :
-   """  Calculate top-k for each 'emb' vector of dataframe in parallel batch.
-   Doc::
-
-       df : path or DF   df[['id', 'embd' ]]
-       dirout : results path,   id, topk   :     word id, topk of id
-
-
-
-       https://github.com/facebookresearch/faiss/issues/632
-       dis = 2 - 2 * sim
-   """
-
-   faiss_index = ""  if faiss_index is None  else faiss_index
-   if isinstance(faiss_index, str) :
-        faiss_path  = faiss_index
-        faiss_index = faiss_load_index(db_path=faiss_index) 
-   faiss_index.nprobe = 12  # Runtime param. The number of cells that are visited for search.
-   log('Faiss Index: ', faiss_index)
-
-
-   ########################################################################
-   if isinstance(df, list):    ### Multi processing part
-        if len(df) < 1 : return 1
-        flist = df[0]
-        root     = os.path.abspath( os.path.dirname( flist[0] + "/../../") )  ### bug in multipro
-        dirin    = root + "/df/"
-        dir_out  = dirout
-
-   elif isinstance(df, str) : ### df == string path
-        root    = df
-        dirin   = root
-        dir_out = dirout
-        flist   = sorted(glob.glob(dirin))
-   else :
-       raise Exception('Unknonw path')
-
-   log('dir_in',  dirin)
-   log('dir_out', dir_out)
-   flist = flist[:nfile]
-   if len(flist) < 1: return 1 
-   log('Nfile', len(flist), flist )
-
-
-   ####### Parallel Mode ################################################
-   if npool > 1 and len(flist) > npool :
-        log('Parallel mode')
-        from utilmy.parallel  import multiproc_run, multiproc_tochunk
-        ll_list = multiproc_tochunk(flist, npool = npool)
-        multiproc_run(faiss_topk_calc,  ll_list,  npool, verbose=True, start_delay= 5,
-                      input_fixed = { 'faiss_index': faiss_path }, )      
-        return 1
-
-
-   ####### Single Mode #################################################
-   dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')  
-   map_idx_dict = db_load_dict(dirmap,  colkey = colkey, colval = colval )
-
-   chunk  = 200000       
-   kk     = 0
-   os.makedirs(dir_out, exist_ok=True)    
-   dirout2 = dir_out 
-   flist = [ t for t in flist if len(t)> 8 ]
-   log('\n\nN Files', len(flist), str(flist)[-100:]  ) 
-   for fi in flist :
-       if os.path.isfile( dir_out + "/" + fi.split("/")[-1] ) : continue
-       # nrows= 5000
-       df = pd_read_file( fi, n_pool=1  ) 
-       df = df.iloc[:nrows, :]
-       log(fi, df.shape)
-       df = df.sort_values('id') 
-
-       dfall  = pd.DataFrame()   ;    nchunk = int(len(df) // chunk)    
-       for i in range(0, nchunk+1):
-           if i*chunk >= len(df) : break         
-           i2 = i+1 if i < nchunk else 3*(i+1)
-        
-           x0 = np_str_to_array( df[colemb].iloc[ i*chunk:(i2*chunk)].values    )
-           log('X topk') 
-           topk_dist, topk_idx = faiss_index.search(x0, topk)            
-           log('X', topk_idx.shape) 
-                
-           dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
-           dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
-           if return_dist:     dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
-           if return_simscore: dfi[ f'sim_list']   = np_matrix_to_str_sim( topk_dist )
-        
-           dfall = pd.concat((dfall, dfi))
-
-       dirout2 = dir_out + "/" + fi.split("/")[-1]      
-
-       pd_to_file(dfall, dirout2, show=1)  
-       kk    = kk + 1
-       if kk == 1 : dfall.iloc[:100,:].to_csv( dirout2.replace(".parquet", ".csv")  , sep="\t" )
-             
-   log('All finished')    
-   return os.path.dirname( dirout2 )
 
 
 
