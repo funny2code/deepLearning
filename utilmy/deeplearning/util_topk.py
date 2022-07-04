@@ -92,12 +92,12 @@ def test2():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1,2,3,4] * 6000,
-                      'gender': [0,1,0,1] * 6000, 
-                      'masterCategory': [2,1,3,4] * 6000, 
-                      'emb': emb_list * 6000})
+  res = pd.DataFrame({'id': [1, 2, 3, 4] * 5,
+                      'gender': [0, 1, 0, 1] * 5,
+                      'masterCategory': [2, 1, 3, 4] * 5,
+                      'emb': emb_list * 5})
 
-  labels_dict = { 'gender' : [0,1],
+  labels_dict = {'gender' : [0,1],
                   'masterCategory' : [3,1,2],
   }
 
@@ -128,7 +128,8 @@ def test2():
   log("#########  faiss_topk_calc  ##################################")
   faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
                   colkey='idx', colval='id',
-                  faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path)
+                  faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path,
+                  faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
 
 
 
@@ -380,7 +381,7 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=2
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
 def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
-                       nrows=-1):
+                       nrows=-1, faiss_nlist=6000, M=40, nbits=8, hnsw_m=32):
     """ Create Large scale Index
     Docs::
 
@@ -436,15 +437,9 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     D = emb_dim  ###   actual  embedding size
     N = len(X)   ##### 1000000
 
-    # Param of PQ for 1 billion
-    M      = 40 # 16  ###  200 / 5 = 40  The number of sub-vector. Typically this is 8, 16, 32, etc.
-    nbits  = 8        ### bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte    
-    nlist  = 6000     ###  # Param of IVF,  Number of cells (space partition). Typical value is sqrt(N)    
-    hnsw_m = 32       ###  # Param of HNSW Number of neighbors for HNSW. This is typically 32
-
     # Setup  distance -> similarity in uncompressed space is  dis = 2 - 2 * sim, https://github.com/facebookresearch/faiss/issues/632
     quantizer = faiss.IndexHNSWFlat(D, hnsw_m)
-    index     = faiss.IndexIVFPQ(quantizer, D, nlist, M, nbits)
+    index     = faiss.IndexIVFPQ(quantizer, D, faiss_nlist, M, nbits)
     
     log('###### Train indexer')
     index.train(Xt)      # Train
