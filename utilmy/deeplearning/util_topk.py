@@ -129,31 +129,66 @@ def test2():
 ########################################################################################################
 ######## Top-K retrieval ###############################################################################
 def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
-    """ Retrieve top k nearest vectors using FAISS, raw retrievail
-    """
-    if 'faiss' in engine :
-        # cc = engine_pars
-        import faiss  
-        index = faiss.index_factory(x0.shape[1], 'Flat')
-        index.add(vector_list)
-        dist, indice = index.search(x0, topk)
-        return dist, indice
-
-
-
-def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
-    """ Get Topk vector per each element vector of dirin.
+   """
+    Retrieve top k nearest vectors using FAISS, raw retrieval
     Doc::
+        Parameters
+        ----------
+        x0: array of shape (n_samples, n_features)
+            The input data
+        vector_list: list  (n_samples, n_features)
+                    The input data.
+        topk: int
+            Number of nearest neighbors to fetch
 
-           Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
-             id :   id of the emb
-             emb :  [342,325345,343]   X0 embdding
-             topk:  2,5,6,5,6
-             distL  0,3423.32424.,
+        Returns
+        -------
+        dist : list of shape = [n_samples, k]
+            The distances between the query and each sample in the region of
+            competence. The vector is ordered in an ascending fashion.
+        idice : list of shape = [n_samples, k]
+            Indices of the instances belonging to the region of competence of
+            the given query sample.
+   """
 
-    
-           python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
-    
+   if 'faiss' in engine:
+       # cc = engine_pars
+       import faiss
+       index = faiss.index_factory(x0.shape[1], 'Flat')
+       index.add(vector_list)
+       dist, indice = index.search(x0, topk)
+       return dist, indice
+
+
+
+def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
+    """
+    Get Topk vector per each element vector of dirin.
+    Doc::
+        Parameters
+        ----------
+        diremb: str
+                input data path
+        dirout: str
+                results path
+        topk: int (Default = 100)
+              Number of nearest neighbors to fetch
+        nrows: int (Default = 10)
+                Sample size of input data
+        idlist: list
+                Input data
+        emb_dim: int (Default = 200)
+                embedding dimension
+
+        Returns
+        ----------
+        Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
+         id :   id of the emb
+         emb :  [342,325345,343]   X0 embdding
+         topk:  2,5,6,5,6
+         distL:  0,3423.32424.,
+
+       python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
 
     """
     from utilmy import pd_read_file
@@ -198,8 +233,34 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     """ Create Large scale Index
     Docs::
 
-          python util_topk.py   faiss_create_index    --df_or_path myemb/
+        Parameters
+        ----------
+        df_or_path: str or pd.dataframe
+                    Path or dataframe df[['id', 'embd' ]]
+        col: str (Default = 'emb')
+             column name for embedding.
+        dirout: str
+                results path.
+        nrows: int (Default = 10)
+               Sample size of input data.
+        nfile: int (Default = 1000)
+               number of files to process.
+        emb_dim: int (Default = 200)
+                 embedding dimension.
+        faiss_nlist: int (Default = 6000)
+                     param of IVF, Number of cells (space partition). Typical value is sqrt(N).
+        faiss_M: int (Default = 40)
+                 The number of sub-vector. Typically this is 8, 16, 32, etc.
+        faiss_nbits: int (Default = 8)
+                     bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte.
+        faiss_hnsw_m: int (Default = 32)
+                    param of HNSW Number of neighbors for HNSW. This is typically 32.
 
+        Returns
+        ----------
+        return strs (path to faiss index)
+
+        python util_topk.py   faiss_create_index    --df_or_path myemb/
 
     """
     import faiss
@@ -290,14 +351,41 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
                     return_simscore=False, return_dist=False,
                     **kw
 
-                    ) :
-   """  Calculate top-k for each 'emb' vector of dataframe in parallel batch.
+                    ):
+
+   """
+   Calculate top-k for each 'emb' vector of dataframe in parallel batch.
    Doc::
+        Parameters
+        ----------
+        df: str or pd.dataframe
+            path or DF   df[['id', 'embd' ]]
+        colid: str (Default = 'id')
+              column name for id.
+        colemb : str (Default = 'emb')
+                column name for embedding.
+        faiss_index: str (Default = "")
+                    path to index
+        topk: int (Default = 200)
+              Number of nearest neighbors to fetch
+        dirout: str
+               results path.
+        npool: int (Default = 1)
+               num_cores for parallel processing
+        nfile: int (Default = 1000)
+               number of files to process.
+        colkey: str (Default = 'id')
+                map_idx.parquet id col
+        colval: str (Default = 'idx')
+                map_idx.parquet idx col
+        return_simscore: boolean, optional. (Defaults to False.)
+                        If True, score will returned
+        return_dist: boolean, optional. (Defaults to False.)
+                        If True, distances will returned
 
-       df : path or DF   df[['id', 'embd' ]]
-       dirout : results path,   id, topk   :     word id, topk of id
-
-
+        Returns
+        ----------
+        return results path, id, topk : word id, topk of id
 
        https://github.com/facebookresearch/faiss/issues/632
        dis = 2 - 2 * sim
@@ -638,7 +726,19 @@ if 'custom_code':
 
     def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFrame:
         """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
-    
+        Docs::
+            Parameters
+            __________
+
+            dflabels : dataframe
+                    The input data. df[['id', 'gender']]
+            labels_dict : dictionary
+                    key is column name, value categorical data.
+                    {'gender': ['one', 'two']  }
+
+            Returns
+            -------
+            return dataframe df[['id', 'gender', 'gender_onehot']]
     
         """
         if labels_dict is not None:
