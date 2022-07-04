@@ -92,7 +92,7 @@ def test2():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  df = pd.DataFrame({'id': [1,2,3,4] * 6000, 
+  res = pd.DataFrame({'id': [1,2,3,4] * 6000,
                       'gender': [0,1,0,1] * 6000, 
                       'masterCategory': [2,1,3,4] * 6000, 
                       'emb': emb_list * 6000})
@@ -103,10 +103,10 @@ def test2():
 
   path = './temp/tem/'
   os.makedirs(path, exist_ok=True)
-  df.to_csv(f'{path}1.csv', index=False)
+  res.to_csv(f'{path}1.csv', index=False)
 
   log('######### pd_to_onehot #####################')
-  df = pd_to_onehot(df,  labels_dict=labels_dict )
+  df = pd_to_onehot(res,  labels_dict=labels_dict )
 
   log('######### embedding cosinus #####################')
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
@@ -335,7 +335,7 @@ def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss',
 
 
 
-def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_dim=200, tag=None, debug=True):
+def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
     """ Get Topk vector per each element vector of dirin.
     Example:
         Doc::
@@ -357,19 +357,15 @@ def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nexample=10, emb_di
     flist    = glob_glob(diremb)
     df       = pd_read_file(  flist , n_pool=10 )
     df.index = np.arange(0, len(df))
+    df = df.iloc[:nrows, :]
     log(df)
-
     assert len(df[['id', 'emb' ]]) > 0
 
 
     ##### Element X0 ####################################################
     vectors = np_str_to_array(df['emb'].values,  mdim= emb_dim)
+    llids   = df['id'].values        if idlist is None  else idlist
     del df ; gc.collect()
-
-    llids = idlist
-    if idlist is None :    
-       llids = df['id'].values    
-       llids = llids[:nexample]
 
     dfr = [] 
     for ii in range(0, len(llids)) :        
