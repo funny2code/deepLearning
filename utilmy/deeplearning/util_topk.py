@@ -133,14 +133,11 @@ def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss',
     Retrieve top k nearest vectors using FAISS, raw retrieval
     Doc::
 
-        Parameters
-        ----------
-        x0 (np.array): Input data shape (n_samples, n_features)
-        vector_list (list): Input data shape  (n_samples, n_features)
-        topk (int): Number of nearest neighbors to fetch
+        x0 (np.array)      : Input data shape (n_samples, n_features)
+        vector_list (list) : Input data shape  (n_samples, n_features)
+        topk (int)         : Number of nearest neighbors to fetch
 
         Returns
-        -------
         dist (list): shape = [n_samples, k]
             The distances between the query and each sample in the region of
             competence. The vector is ordered in an ascending fashion.
@@ -164,17 +161,13 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
     Get Topk vector per each element vector of dirin.
     Doc::
 
-        Parameters
-        ----------
-        diremb (str): Input data path.
-        dirout (str): Results path
-        topk (int): Number of nearest neighbors to fetch. (Default = 100)
-        nrows (int): Sample size of input data. (Default = 10)
-        idlist (list): Input data
-        emb_dim (int): Embedding dimension (Default = 200)
+        diremb (str)  : Input data path.
+        dirout (str)  : Results path
+        topk (int)    : Number of nearest neighbors to fetch. (Default = 100)
+        nrows (int)   : Sample size of input data. (Default = 10)
+        idlist (list) : Input data
+        emb_dim (int) : Embedding dimension (Default = 200)
 
-        Returns
-        ----------
         Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
          id :   id of the emb
          emb :  [342,325345,343]   X0 embdding
@@ -226,21 +219,17 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     """ Create Large scale Index
     Docs::
 
-        Parameters
-        ----------
-        df_or_path (str): Path or dataframe df[['id', 'embd' ]]
-        col (str): Column name for embedding. (Default = 'emb')
-        dirout (str): Results path.
-        nrows (int): Sample size of input data. (Default = 10)
-        nfile (int): Number of files to process. (Default = 1000)
-        emb_dim (int): Embedding dimension. (Default = 200)
-        faiss_nlist : Param of IVF, Number of cells (space partition). Typical value is sqrt(N). (Default = 6000)
-        faiss_M (int): The number of sub-vector. Typically this is 8, 16, 32, etc. (Default = 40)
-        faiss_nbits (int): Bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte. (Default = 8)
-        faiss_hnsw_m (int): Param of HNSW Number of neighbors for HNSW. This is typically 32. (Default = 32)
+        df_or_path (str)   : Path or dataframe df[['id', 'embd' ]]
+        col (str)          : Column name for embedding. (Default = 'emb')
+        dirout (str)       : Results path.
+        nrows (int)        : Sample size of input data. (Default = 10)
+        nfile (int)        : Number of files to process. (Default = 1000)
+        emb_dim (int)      : Embedding dimension. (Default = 200)
+        faiss_nlist        : Param of IVF, Number of cells (space partition). Typical value is sqrt(N). (Default = 6000)
+        faiss_M (int)      : The number of sub-vector. Typically this is 8, 16, 32, etc. (Default = 40)
+        faiss_nbits (int)  : Bits per sub-vector. This is typically 8, so that each sub-vec is encoded by 1 byte. (Default = 8)
+        faiss_hnsw_m (int) : Param of HNSW Number of neighbors for HNSW. This is typically 32. (Default = 32)
 
-        Returns
-        ----------
         return strs (path to faiss index)
 
         python util_topk.py   faiss_create_index    --df_or_path myemb/
@@ -340,27 +329,23 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
    Calculate top-k for each 'emb' vector of dataframe in parallel batch.
    Doc::
 
-        Parameters
-        ----------
-        df (str or pd.dataframe): Path or DF   df[['id', 'embd' ]]
-        colid (str): Column name for id. (Default = 'id')
-        colemb (str): Column name for embedding. (Default = 'emb')
-        faiss_index (str): Path to index. (Default = "")
-        topk (int): Number of nearest neighbors to fetch. (Default = 200)
-        dirout (str): Results path.
-        npool (int): num_cores for parallel processing. (Default = 1)
-        nfile (int): Number of files to process. (Default = 1000)
-        colkey (str): map_idx.parquet id col. (Default = 'id')
-        colval (str): map_idx.parquet idx col. (Default = 'idx')
-        return_simscore (boolean):optional  If True, score will returned. (Defaults to False.)
-        return_dist(boolean): optional If True, distances will returned. (Defaults to False.)
+        df (str or pd.dataframe)  : Path or DF   df[['id', 'embd' ]]
+        colid (str)               : Column name for id. (Default = 'id')
+        colemb (str)              : Column name for embedding. (Default = 'emb')
+        faiss_index (str)         : Path to index. (Default = "")
+        topk (int)                : Number of nearest neighbors to fetch. (Default = 200)
+        dirout (str)              : Results path.
+        npool (int)               : num_cores for parallel processing. (Default = 1)
+        nfile (int)               : Number of files to process. (Default = 1000)
+        colkey (str)              : map_idx.parquet id col. (Default = 'id')
+        colval (str)              : map_idx.parquet idx col. (Default = 'idx')
+        return_simscore (boolean) : optional  If True, score will returned. (Defaults to False.)
+        return_dist(boolean)      : optional If True, distances will returned. (Defaults to False.)
 
-        Returns
-        ----------
         return results path, id, topk : word id, topk of id
 
-       https://github.com/facebookresearch/faiss/issues/632
-       dis = 2 - 2 * sim
+        https://github.com/facebookresearch/faiss/issues/632
+        dis = 2 - 2 * sim
    """
 
    faiss_index = ""  if faiss_index is None  else faiss_index
@@ -620,8 +605,7 @@ class faiss_KNNClassifier:
 ############## Loader of embeddings #####################################################################
 def embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list=None, is_symmetric=False):
     """ Pairwise Cosinus Sim scores
-    Example:
-        Doc::
+    Doc::
 
            embs   = np.random.random((10,200))
            idlist = [str(i) for i in range(0,10)]
@@ -700,13 +684,9 @@ if 'custom_code':
         """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
         Docs::
 
-            Parameters
-            ----------
             dflabels (pd.dataframe): The input data. df[['id', 'gender']]
             labels_dict (dict) : key is column name, value categorical data. {'gender': ['one', 'two']  }
 
-            Returns
-            -------
             return dataframe df[['id', 'gender', 'gender_onehot']]
     
         """
