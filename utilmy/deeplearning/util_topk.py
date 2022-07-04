@@ -122,13 +122,13 @@ def test2():
 
 
   log("#########  topk_calc  ##################################")
-  topk_calc(diremb=f'{path}1.csv', nexample=24000)
+  topk_calc(diremb=f'{path}1.csv', nrows=24000)
 
   
   log("#########  faiss_topk_calc  ##################################")
   faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
-                    colkey='idx', colval='id',
-                    faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path) 
+                  colkey='idx', colval='id',
+                  faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path)
 
 
 
@@ -481,6 +481,7 @@ def faiss_load_index(faiss_index_path=""):
 
 def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
                     faiss_index:str="", topk=200, dirout=None, npool=1, nrows=10**7, nfile=1000,
+                    colkey='idx', colval='id',
                     return_simscore=False, return_dist=False,
 
                     ) :
@@ -539,7 +540,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
 
    ####### Single Mode #################################################
    dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')  
-   map_idx_dict = db_load_dict(dirmap,  colkey = 'idx', colval = 'item_tag_vran' )
+   map_idx_dict = db_load_dict(dirmap,  colkey = colkey, colval = colval )
 
    chunk  = 200000       
    kk     = 0
