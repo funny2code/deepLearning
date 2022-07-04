@@ -149,21 +149,27 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_glob=False):
 
     """
     from subprocess import Popen, PIPE
-    import glob
+    import subprocess, re, glob
 
     if use_glob:
         flist = glob.glob(f'{path}/**', recursive=True)
         return flist
-
-    process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
-    std_out, std_err = process.communicate()
-
+        
+    files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
+    flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
     if filename_only:
-       list_of_file_names = [fn.split(' ')[-1].split('/')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
-       return list_of_file_names
-
-    flist_full_address = [fn.split(' ')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
+        return [fn.split('/')[-1] for fn in flist_full_address]
     return flist_full_address
+
+    # process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
+    # std_out, std_err = process.communicate()
+
+    # if filename_only:
+    #    list_of_file_names = [fn.split(' ')[-1].split('/')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
+    #    return list_of_file_names
+
+    # flist_full_address = [fn.split(' ')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
+    # return flist_full_address
 
      
 def hdfs_mkdir(hdfs_dir):
