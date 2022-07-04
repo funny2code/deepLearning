@@ -143,33 +143,34 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
-def hdfs_ls(path, flag="-h ", filename_only=False, use_glob=False):
+def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False):
     """
-          flag=-R
+        flag=-R
+        if use_regex == True
+            1) can search for specific files using star *
+            2) downloading files with specific patterns
 
     """
     from subprocess import Popen, PIPE
-    import subprocess, re, glob
+    import subprocess, re
+    
+    if use_regex:
+        files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
+        flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
+        # if filename_only:
+        #     return [fn.split('/')[-1] for fn in flist_full_address]
+        return flist_full_address
 
-    if use_glob:
-        flist = glob.glob(f'{path}/**', recursive=True)
-        return flist
-        
-    files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
-    flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
+    process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
+    std_out, std_err = process.communicate()
+
     if filename_only:
-        return [fn.split('/')[-1] for fn in flist_full_address]
+       list_of_file_names = [fn.split(' ')[-1].split('/')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
+       return list_of_file_names
+
+    flist_full_address = [fn.split(' ')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
     return flist_full_address
 
-    # process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
-    # std_out, std_err = process.communicate()
-
-    # if filename_only:
-    #    list_of_file_names = [fn.split(' ')[-1].split('/')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
-    #    return list_of_file_names
-
-    # flist_full_address = [fn.split(' ')[-1] for fn in std_out.decode().split('\n')[1:]][:-1]
-    # return flist_full_address
 
      
 def hdfs_mkdir(hdfs_dir):
