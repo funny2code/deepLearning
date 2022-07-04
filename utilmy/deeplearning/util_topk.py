@@ -61,22 +61,74 @@ def help():
 def test_all() -> None:
     """ python  $utilmy/deeplearning/util_topk.py test_all         """
     log(os_module_name(__file__))
-    test1()
+    test2()
+
+   
 
 
-def test1() -> None:
-    """function test1     
-    """
-    dirtmp ="./ztmp/"
+def test2():
+  """  tests
+  Docs ::
+  
+        Test Cases  pd_add_onehot_encoding
 
-    dd = test_create_fake_df(dirout= dirtmp)
-    log(dd)
-
-
+        Test Cases  embedding_cosinus_scores_pairwise
 
 
+        Test Cases  KNNClassifierFAISS
 
 
+        Test Cases  faiss_create_index
+ 
+
+        Test Cases  topk_calc
+
+        Test Cases  faiss_topk_calc
+
+  """
+  dd = test_create_fake_df(dirout= "./")
+  
+  emb_list = []
+  for i in range(4):
+      emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
+
+  df = pd.DataFrame({'id': [1,2,3,4] * 6000, 
+                      'gender': [0,1,0,1] * 6000, 
+                      'masterCategory': [2,1,3,4] * 6000, 
+                      'emb': emb_list * 6000})
+
+  labels_dict = { 'gender' : [0,1],
+                  'masterCategory' : [3,1,2],
+  }
+
+  path = './temp/tem/'
+  os.makedirs(path, exist_ok=True)
+  df.to_csv(f'{path}1.csv', index=False)
+
+  log('######### pd_to_onehot #####################')
+  df = pd_to_onehot(df,  labels_dict=labels_dict )
+
+  log('######### embedding cosinus #####################')
+  embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
+
+
+  log("#########  faiss_KNNClassifier ###################################")
+  k = faiss_KNNClassifier()
+  k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
+
+
+  log("#########  faiss_create_index  ##################################")
+  faiss_create_index(df_or_path=f'{path}1.csv')
+
+
+  log("#########  topk_calc  ##################################")
+  topk_calc(diremb=f'{path}1.csv', nexample=24000)
+
+  
+  log("#########  faiss_topk_calc  ##################################")
+  faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
+                    colkey='idx', colval='id',
+                    faiss_index="./temp/faiss/faiss_trained_24000.index", dirout=path) 
 
 
 
@@ -520,7 +572,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
            dfi                   = df.iloc[i*chunk:(i2*chunk), :][[ colid ]]
            dfi[ f'{colid}_list'] = np_matrix_to_str2( topk_idx, map_idx_dict)  ### to actual id
            if return_dist:     dfi[ f'dist_list']  = np_matrix_to_str( topk_dist )
-           if return_simscore: dfi[ f'sim_list']     = np_matrix_to_str_sim( topk_dist )
+           if return_simscore: dfi[ f'sim_list']   = np_matrix_to_str_sim( topk_dist )
         
            dfall = pd.concat((dfall, dfi))
 

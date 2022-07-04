@@ -44,7 +44,7 @@ from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from box import Box
-from utilmy import log
+from utilmy import (log,log2, pd_to_file, pd_read_file)
 
 
 
@@ -102,7 +102,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
 
 
-def runall(dirin='', dirout='', config=None):
+def runall(dirin='', dirout='', embed_dim=10, config=None):
 
     """  Run all steps to generate dirin
     Doc::
@@ -112,33 +112,27 @@ def runall(dirin='', dirout='', config=None):
 
 
     """
-    dname = dirin
-    dname = dname.replace("\\", "/")
-    path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
-    df    = pd.read_csv(path, delimiter='\t')
+    df    = pd_read_file(dirin)
 
-    dname = dname + "/embed/"
-    if not os.path.exists(dname):
-        os.makedirs(dname)
 
     log('##### NER extraction from text ')
-    extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+    extractor = NERExtractor(dirin_or_df=df, dirout=dirout, model_name="ro_core_news_sm")
     extractor.extractTriples(max_text=-1)
     extractor.export_data()
 
 
     log('##### Build Knowledge Graph')
-    data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+    data_kgf_path = os.path.join(dirout, 'data_kgf.tsv')
     grapher = knowledge_grapher(embedding_dim=10)
     grapher.load_data( data_kgf_path)
     grapher.buildGraph()
 
 
     log('##### Build KG Embeddings')
-    dirout_emb = dname
-    embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
+    dirout_emb = dirout
+    embedder = KGEmbedder(graph= grapher.graph, dirin=dirout, embedding_dim=embed_dim, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
-    embedder.compute_embeddings('none', batch_size=1024)
+    embedder.compute_embeddings('none', batch_size=64)
     embedder.save_embeddings()
 
 
@@ -417,8 +411,8 @@ class NERExtractor:
 
         #Pykeen Requires data to be loaded in csv format!
         train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.dirout,'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.dirout,'validation_data.tsv'), sep="\t")
+        test_df.to_csv(os.path.join(self.dirout, 'test_data.tsv'), sep="\t")
+        val_df.to_csv(os.path.join(self.dirout,  'validation_data.tsv'), sep="\t")
         self.data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
         # return train_df, test_df, val_df
 
@@ -443,7 +437,7 @@ class KGEmbedder:
 
         """
         self.graph = graph
-        self.embedding_dim = embedding_dim
+        self.embed_dim = embedding_dim
 
         train_path = os.path.join(dirin,'train_data.tsv')
         test_path  = os.path.join(dirin,'test_data.tsv')
@@ -474,10 +468,10 @@ class KGEmbedder:
         else:
             self.model = ERModel(triples_factory=self.training,
                                  interaction='distmult',
-                               # entity_representations=entity_representations
-                               entity_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1),
-                               relation_representations_kwargs = dict(embedding_dim=self.embedding_dim, dropout=0.1)
-                               )
+                                 # entity_representations=entity_representations
+                                 entity_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1),
+                                 relation_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1)
+                                 )
 
             self.optimizer = Adam(params=self.model.get_grad_params())
 
@@ -488,7 +482,7 @@ class KGEmbedder:
             )
             self.trained = False
 
-    def compute_embeddings(self, path_to_embeddings, batch_size=1024)->Tuple:
+    def compute_embeddings(self, path_to_embeddings, batch_size=64, n_epochs=8)->Tuple:
 
         """set up the training pipeline for pykeen or load the trained model
         Docs:
@@ -500,10 +494,10 @@ class KGEmbedder:
         if not self.trained:
             losses = self.training_loop.train(
                                 triples_factory=self.training,
-                                num_epochs=10,
+                                num_epochs=n_epochs,
                                 checkpoint_name='myCheckpoint.pt',
                                 checkpoint_frequency=5,
-                                batch_size=256,
+                                batch_size=batch_size,
                                 )
             torch.save(self.model, os.path.join(self.dirout, 'trained_model.pkl'))
         else:
@@ -532,7 +526,7 @@ class KGEmbedder:
         """
         if os.path.exists(os.path.join(self.dirout, 'entityEmbeddings.parquet')):
            self.embedding_df = pd.read_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
-           self.relation_df = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
+           self.relation_df  = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
            return None, None
         #else:
         #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
