@@ -112,22 +112,23 @@ def test2():
   embedding_cosinus_scores_pairwise(embs=np.random.random((5,5)), word_list=np.array([1,2,3,4,5]))
 
 
-  log("#########  faiss_KNNClassifier ###################################")
-  k = faiss_KNNClassifier()
-  k = k.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
+  log("#########  faiss_KNNClassifier ################################")
+  model = faiss_KNNClassifier()
+  model = model.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
 
-  log("#########  faiss_create_index  ##################################")
+  log("#########  faiss_create_index  ################################")
   faiss_create_index(df_or_path=f'{path}1.csv')
 
 
-  log("#########  topk_calc  ##################################")
+  log("#########  topk_calc  #########################################")
   topk_calc(diremb=f'{path}1.csv', nrows=400)
 
   
   log("#########  faiss_topk_calc  ##################################")
-  faiss_topk_calc(df=f'{path}1.csv', root=path, colid='id', colemb='emb',
-                  colkey='idx', colval='id',
+  faiss_topk_calc(df=f'{path}1.csv', root=path,
+                  colid='id', colemb='emb',   ### id --> emb
+                  colkey='idx', colval='id',  ### dict map idx --> id
                   faiss_index="./temp/faiss/faiss_trained_400.index", dirout=path)
 
 
@@ -328,14 +329,13 @@ def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss',
 
 def topk_calc( diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=200, tag=None, debug=True):
     """ Get Topk vector per each element vector of dirin.
-    Example:
-        Doc::
+    Doc::
 
            Return  pd.DataFrame( columns=[  'id', 'emb', 'topk', 'dist'  ] )
-             id : id of the emb
-             emb : [342,325345,343]   X0 embdding
+             id :   id of the emb
+             emb :  [342,325345,343]   X0 embdding
              topk:  2,5,6,5,6
-             distL 0,3423.32424.,
+             distL  0,3423.32424.,
 
     
            python $utilmy/deeplearning/util_topk.py  topk_calc   --diremb     --dirout
