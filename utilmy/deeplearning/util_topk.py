@@ -128,6 +128,26 @@ def test2():
 
 ########################################################################################################
 ######## Top-K retrieval ###############################################################################
+class TOPK(object):
+    def init(self, modelname='faiss', **kw):
+        self.name = modelname
+        self.pars = kw
+
+    def index_load(self, dirin, **kw):
+        if self.name == 'faiss':
+            faiss_load_index(self.dirin, **kw)
+
+    def index_fit(sel):
+        pass
+
+    def index_save(sel):
+        pass
+
+    def topk(self):
+        pass
+
+
+    
 def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
    """
     Retrieve top k nearest vectors using FAISS, raw retrieval
