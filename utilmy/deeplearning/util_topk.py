@@ -214,6 +214,23 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
 
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
+FAISS_CONFIG = Box({
+   'size_10m' :  {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+   'size_100k': {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+   'size_10k': {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+})
+
+
+
 def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
                        nrows=-1, faiss_nlist=6000, faiss_M=40, faiss_nbits=8, faiss_hnsw_m=32):
     """ Create Large scale Index
