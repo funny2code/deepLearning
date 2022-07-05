@@ -129,6 +129,11 @@ def test2():
 ########################################################################################################
 ######## Top-K retrieval ###############################################################################
 class TOPK(object):
+    """  Generic interface for topk
+
+
+
+    """
     def init(self, modelname='faiss', **kw):
         self.name = modelname
         self.pars = kw
@@ -147,7 +152,11 @@ class TOPK(object):
         pass
 
 
-    
+    def topk_batch(self):
+        pass
+
+
+
 def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
    """
     Retrieve top k nearest vectors using FAISS, raw retrieval
@@ -239,11 +248,11 @@ FAISS_CONFIG = Box({
     },
 
 
-   'size_100k': {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+   'size_100k': {'faiss_nlist':1000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
     },
 
 
-   'size_10k': {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+   'size_10k': {'faiss_nlist':100, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
     },
 
 
