@@ -128,6 +128,35 @@ def test2():
 
 ########################################################################################################
 ######## Top-K retrieval ###############################################################################
+class TOPK(object):
+    """  Generic interface for topk
+
+
+
+    """
+    def init(self, modelname='faiss', **kw):
+        self.name = modelname
+        self.pars = kw
+
+    def index_load(self, dirin, **kw):
+        if self.name == 'faiss':
+            faiss_load_index(self.dirin, **kw)
+
+    def index_fit(sel):
+        pass
+
+    def index_save(sel):
+        pass
+
+    def topk(self):
+        pass
+
+
+    def topk_batch(self):
+        pass
+
+
+
 def topk_nearest_vector(x0:np.ndarray, vector_list:list, topk=3, engine='faiss', engine_pars:dict=None) :
    """
     Retrieve top k nearest vectors using FAISS, raw retrieval
@@ -214,6 +243,23 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
 
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
+FAISS_CONFIG = Box({
+   'size_10m' :  {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+   'size_100k': {'faiss_nlist':1000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+   'size_10k': {'faiss_nlist':100, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+    },
+
+
+})
+
+
+
 def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4096,Flat", nfile=1000, emb_dim=200,
                        nrows=-1, faiss_nlist=6000, faiss_M=40, faiss_nbits=8, faiss_hnsw_m=32):
     """ Create Large scale Index
@@ -312,8 +358,28 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
         
 
 
-def faiss_load_index(faiss_index_path=""):
-    return None
+def faiss_load_index(path_or_faiss_index=None, colkey='id', colval='idx'):
+    """ load index + mapping
+    Docs::
+
+        https://www.programcreek.com/python/example/112280/faiss.read_index
+    """
+    faiss_index = path_or_faiss_index
+    faiss_index = ""  if faiss_index is None  else faiss_index
+    if isinstance(faiss_index, str) :
+        faiss_path  = faiss_index
+        faiss_index = faiss.read_index(faiss_path)
+
+    faiss_index.nprobe = 12  # Runtime param. The number of cells that are visited for search.
+    log('Faiss Index: ', faiss_index)
+
+    try :
+       dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')
+       map_idx_dict = db_load_dict(dirmap,  colkey = colkey, colval = colval )
+    except:
+       map_idx_dict = {}
+
+    return faiss_index, map_idx_dict
 
 
 
@@ -325,8 +391,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
 
                     ):
 
-   """
-   Calculate top-k for each 'emb' vector of dataframe in parallel batch.
+   """Calculate top-k for each 'emb' vector of dataframe in parallel batch.
    Doc::
 
         df (str or pd.dataframe)  : Path or DF   df[['id', 'embd' ]]
@@ -684,13 +749,9 @@ if 'custom_code':
         """ Label INTO 1-hot encoding   {'gender': ['one', 'two']  }
         Docs::
 
-            Parameters
-            __________
             dflabels (pd.dataframe): The input data. df[['id', 'gender']]
             labels_dict (dict) : key is column name, value categorical data. {'gender': ['one', 'two']  }
 
-            Returns
-            -------
             return dataframe df[['id', 'gender', 'gender_onehot']]
     
         """
