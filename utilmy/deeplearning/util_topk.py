@@ -312,8 +312,28 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
         
 
 
-def faiss_load_index(faiss_index_path=""):
-    return None
+def faiss_load_index(path_or_faiss_index=None, colkey='id', colval='idx'):
+    """ load index + mapping
+    Docs::
+
+        https://www.programcreek.com/python/example/112280/faiss.read_index
+    """
+    faiss_index = path_or_faiss_index
+    faiss_index = ""  if faiss_index is None  else faiss_index
+    if isinstance(faiss_index, str) :
+        faiss_path  = faiss_index
+        faiss_index = faiss.read_index(faiss_path)
+
+    faiss_index.nprobe = 12  # Runtime param. The number of cells that are visited for search.
+    log('Faiss Index: ', faiss_index)
+
+    try :
+       dirmap       = faiss_path.replace("faiss_trained", "map_idx").replace(".index", '.parquet')
+       map_idx_dict = db_load_dict(dirmap,  colkey = colkey, colval = colval )
+    except:
+       map_idx_dict = {}
+
+    return faiss_index, map_idx_dict
 
 
 
@@ -325,8 +345,7 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
 
                     ):
 
-   """
-   Calculate top-k for each 'emb' vector of dataframe in parallel batch.
+   """Calculate top-k for each 'emb' vector of dataframe in parallel batch.
    Doc::
 
         df (str or pd.dataframe)  : Path or DF   df[['id', 'embd' ]]
