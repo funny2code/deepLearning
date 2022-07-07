@@ -544,10 +544,10 @@ class KGEmbedder:
         entity_embeddings = self.model.entity_representations[0]
         relation_embeddings = self.model.relation_representations[0]
 
-        self.relation_dict = get_embeddings(relation_to_ids, relation_embeddings)
-        self.entity_dict = get_embeddings(entities_to_ids, entity_embeddings)
-        df_entities = embeddings_to_df(self.entity_dict, 'entity')
-        df_relation = embeddings_to_df(self.relation_dict, 'relation')
+        self.relation_dict = pykeen_get_embeddings(relation_to_ids, relation_embeddings)
+        self.entity_dict = pykeen_get_embeddings(entities_to_ids, entity_embeddings)
+        df_entities = pykeen_embedding_to_df(self.entity_dict, 'entity')
+        df_relation = pykeen_embedding_to_df(self.relation_dict, 'relation')
 
         df_entities.to_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
         df_relation.to_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
@@ -610,7 +610,7 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
 
 
 
-def get_embeddings(id_to_label:Dict[int, str], embedding):
+def pykeen_get_embeddings(id_to_label:Dict[int, str], embedding):
     """parse the triple [label id embedding] from the pykeen API
     Docs:
 
@@ -628,7 +628,7 @@ def get_embeddings(id_to_label:Dict[int, str], embedding):
 
 
 
-def embeddings_to_df(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+def pykeen_embedding_to_df(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
     """turn the results from pykeen in a more manageable format
     Docs:
 
