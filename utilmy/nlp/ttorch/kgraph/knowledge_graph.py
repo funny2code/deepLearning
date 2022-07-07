@@ -457,7 +457,7 @@ class KGEmbedder:
                                             relation_to_id= self.training.relation_to_id)
 
 
-    def set_up_embeddings(self,):
+    def setup_embeddings(self, ):
         """set up the training pipeline for pykeen or load the trained model
         """
         # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
@@ -490,7 +490,7 @@ class KGEmbedder:
                 path_to_embeddings: PathLike
                 batch_size        : int, batch_size for the pykeen nn
         """
-        self.set_up_embeddings()
+        self.setup_embeddings()
         if not self.trained:
             losses = self.training_loop.train(
                                 triples_factory=self.training,

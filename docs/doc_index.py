@@ -2216,7 +2216,7 @@ KGEmbedder.__init__(self, dataFolder, graph:ntx.MultiDiGraph, embedding_dim:int,
 KGEmbedder.compute_embeddings(self, path_to_embeddings, batch_size = 1024)
 KGEmbedder.load_embeddings(self, path_to_embeddings:str)
 KGEmbedder.save_embeddings(self, )
-KGEmbedder.set_up_embeddings(self, )
+KGEmbedder.setup_embeddings(self, )
 NERExtractor.__init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy = True, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
 NERExtractor.export_data(self, data_kgf:pd.DataFrame)
 NERExtractor.extractTriples(self, max_text:int)
