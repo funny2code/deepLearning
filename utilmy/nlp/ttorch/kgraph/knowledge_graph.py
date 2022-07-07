@@ -73,7 +73,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
     log('##### NER extraction from text ')
     extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
-    extractor.extractTriples(max_text=-1)
+    extractor.extract_triples(max_text=-1)
     extractor.export_data()
     # data_kgf  = extractor.extractTriples(max_text=-1)
     # extractor.export_data(data_kgf)
@@ -83,7 +83,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
     data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
     grapher = knowledge_grapher(embedding_dim=10)
     grapher.load_data(data_kgf_path)
-    grapher.buildGraph()
+    grapher.build_graph()
     # data_kgf = knowledge_grapher.load_data(data_kgf_path)
     #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
 
@@ -117,7 +117,7 @@ def runall(dirin='', dirout='', embed_dim=10, config=None):
 
     log('##### NER extraction from text ')
     extractor = NERExtractor(dirin_or_df=df, dirout=dirout, model_name="ro_core_news_sm")
-    extractor.extractTriples(max_text=-1)
+    extractor.extract_triples(max_text=-1)
     extractor.export_data()
 
 
@@ -125,7 +125,7 @@ def runall(dirin='', dirout='', embed_dim=10, config=None):
     data_kgf_path = os.path.join(dirout, 'data_kgf.tsv')
     grapher = knowledge_grapher(embedding_dim=10)
     grapher.load_data( data_kgf_path)
-    grapher.buildGraph()
+    grapher.build_graph()
 
 
     log('##### Build KG Embeddings')
@@ -159,7 +159,7 @@ class knowledge_grapher():
         self.dirin = dirin
         self.dirout = dirout
 
-    def buildGraph(self, relation = None)->None:
+    def build_graph(self, relation = None)->None:
         """build knowledge graph
         Docs:
 
@@ -361,7 +361,7 @@ class NERExtractor:
             print('No match found for this entry!')
             return None
 
-    def extractTriples(self, max_text:int, return_val=False) -> pd.DataFrame:
+    def extract_triples(self, max_text:int, return_val=False) -> pd.DataFrame:
 
         """extracting triples of the form [source relation target]
         Docs:
@@ -546,8 +546,8 @@ class KGEmbedder:
 
         self.relation_dict = get_embeddings(relation_to_ids, relation_embeddings)
         self.entity_dict = get_embeddings(entities_to_ids, entity_embeddings)
-        df_entities = embeddingsToDF(self.entity_dict, 'entity')
-        df_relation = embeddingsToDF(self.relation_dict, 'relation')
+        df_entities = embeddings_to_df(self.entity_dict, 'entity')
+        df_relation = embeddings_to_df(self.relation_dict, 'relation')
 
         df_entities.to_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
         df_relation.to_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
@@ -628,7 +628,7 @@ def get_embeddings(id_to_label:Dict[int, str], embedding):
 
 
 
-def embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
+def embeddings_to_df(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)->pd.DataFrame:
     """turn the results from pykeen in a more manageable format
     Docs:
 
