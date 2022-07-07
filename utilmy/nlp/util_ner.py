@@ -53,6 +53,26 @@ def test2() -> None:
 
 #############################################################################################
 #                            NER                                              #
+def  ner_batch_process(dirin, dirout,  model_id_name,   **pars):
+    """  NER Batch processing.
+    Docs :
+
+        from utilmy.nlp.util_ner import ner_batch_process
+        dirin =  ""
+        dirout = ""
+        ner_batch_process(dirin, dirout, model_id_name, pars)
+
+        
+
+    """
+    pass  
+
+
+
+
+
+#############################################################################################
+#                            NER                                              #
 
 def ner_spacy_displacy(txt, ner=None, lst_tag_filter=None, title=None, serve=False):
     '''

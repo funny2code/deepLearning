@@ -72,32 +72,26 @@ def help():
 #############################################################################################
 def test_all():
     """function test_all"""
-    test1()
-    test2()
-    test3()
-    test4()
+    ztest1()
+    ztest4()
+    ztest5()
 
 
-def test1():
+def ztest1():
     log('### test dataloader_create, model_train, model_evaluate')
-
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
 
     model = nn.Sequential(nn.Linear(50, 20), nn.Linear(20, 1))
-    args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
+    args  = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
 
-    model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
-    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
+    model_train(model=model,   loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
+    model_evaluate(model=model,loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
 
 
-def test2():
-    log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
+    log('### test model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
     from torchvision import models
-
-    _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
-    
     model = models.resnet50()
     os.makedirs('./tests_temp_dir/', exist_ok=True)
     dir_checkpoint = model_save(model, dir_checkpoint='./tests_temp_dir/check.pt', cc=model.state_dict())
@@ -106,20 +100,19 @@ def test2():
 
     kwargs = {'input_size': (1, 3, 224, 224)}
     model_summary(model=model, **kwargs)
-
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
-def test3():
-    log('### test device_setup, dataset_traintest_split')
+    log('### test device_setup, dataset_traintest_split, pd_to_onehot')
     device_setup(device='cpu', seed=123)
     assert torch.initial_seed() == 123, 'Seed assigning failed.'
-
     train_subset, val_subset, test_subset = dataset_traintest_split(range(10), train_ratio=.7, val_ratio=.2)
     assert len(train_subset) == 7 and len(val_subset) == 2 and len(test_subset) == 1, 'Dataset split failed.'
 
+    _ = pd_to_onehot(pd.DataFrame({'gender': [1, 0, 1, 0, 1, 1, 0]}), labels_dict={'gender': [0, 1]})
 
-def test4():
+
+def ztest4():
     log("### test torch_metric_accuracy, torch_pearson_coeff  ")
     model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
@@ -146,6 +139,22 @@ def test4():
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
     # l = loss(output, labels[:64])
+
+
+def ztest5():
+    log('### test dataset_download, ImageDataloader, pd_to_onehot, dataset_add_image_fullpath, embedding_load_parquet')
+    dataset_path = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
+    df = pd.read_csv(dataset_path + '/csv/styles_df.csv')
+    train_subset, val_subset, test_subset = ImageDataloader(df)
+    _ = dataset_add_image_fullpath(df)
+    # _ = embedding_load_parquet(dataset_path + '/csv/styles_df.csv', col_embed='articleType')
+
+
+
+
+
+
+
 
 
 ###############################################################################################
