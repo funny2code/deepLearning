@@ -76,6 +76,7 @@ def test_all():
     test2()
     test3()
     test4()
+    test5()
 
 
 def test1():
@@ -93,11 +94,9 @@ def test1():
 
 
 def test2():
-    log('### test dataset_download, model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
+    log('### test model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
     from torchvision import models
 
-    _ = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
-    
     model = models.resnet50()
     os.makedirs('./tests_temp_dir/', exist_ok=True)
     dir_checkpoint = model_save(model, dir_checkpoint='./tests_temp_dir/check.pt', cc=model.state_dict())
@@ -111,12 +110,14 @@ def test2():
 
 
 def test3():
-    log('### test device_setup, dataset_traintest_split')
+    log('### test device_setup, dataset_traintest_split, pd_to_onehot')
     device_setup(device='cpu', seed=123)
     assert torch.initial_seed() == 123, 'Seed assigning failed.'
 
     train_subset, val_subset, test_subset = dataset_traintest_split(range(10), train_ratio=.7, val_ratio=.2)
     assert len(train_subset) == 7 and len(val_subset) == 2 and len(test_subset) == 1, 'Dataset split failed.'
+
+    _ = pd_to_onehot(pd.DataFrame({'gender': [1, 0, 1, 0, 1, 1, 0]}), labels_dict={'gender': [0, 1]})
 
 
 def test4():
@@ -146,6 +147,19 @@ def test4():
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
     # l = loss(output, labels[:64])
+
+
+def test5():
+    log('### test dataset_download, ImageDataloader, pd_to_onehot, dataset_add_image_fullpath, embedding_load_parquet')
+
+    dataset_path = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
+
+    df = pd.read_csv(dataset_path + '/csv/styles_df.csv')
+    train_subset, val_subset, test_subset = ImageDataloader(df)
+
+    _ = dataset_add_image_fullpath(df)
+    
+    # _ = embedding_load_parquet(dataset_path + '/csv/styles_df.csv', col_embed='articleType')
 
 
 ###############################################################################################
