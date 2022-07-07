@@ -61,12 +61,12 @@ def help():
 def test_all() -> None:
     """ python  $utilmy/deeplearning/util_topk.py test_all         """
     log(os_module_name(__file__))
-    test2()
+    ztest2()
 
    
 
 
-def test2():
+def ztest2():
   """  tests
   Docs ::
   
@@ -78,7 +78,7 @@ def test2():
         Test Cases  faiss_topk_calc
 
   """
-  dd = test_create_fake_df(dirout= "./")
+  dd = ztest_create_fake_df(dirout="./")
   
   emb_list = []
   for i in range(4):
@@ -711,7 +711,7 @@ def embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list=None, is_s
 
 ########################################################################################################
 if 'custom_code':
-    def test_create_fake_df(dirout="./ztmp/", nrows=100):
+    def ztest_create_fake_df(dirout="./ztmp/", nrows=100):
         """ Creates a fake embeddingdataframe
         """
         res  = Box({})
