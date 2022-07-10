@@ -873,7 +873,27 @@ if 'utils_vector':
             for xi in v:
                 ss += str(map_dict.get(xi, "")) + ","
             res.append(ss[:-1])
-        return res    
+        return res
+
+
+    def np_matrix_to_str3(array_2d, map_dict: dict = None):
+        """ 2D numpy or List of List into list of string and apply map_dict.
+
+        Doc::
+            map_dict = { 4:'four', 3: 'three' }
+            m= [[ 0,3,4  ], [2,4,5]]
+            np_matrix_to_str3(m, map_dict)
+            --> [ ",threee,four" ,   ",four," ]
+
+        """
+        map_dict = {} if map_dict is None else map_dict
+        res = []
+        for v in array_2d:
+            ss = ""
+            for xi in v:
+                ss += str(map_dict.get(str(xi), "")) + ","
+            res.append(ss[:-1])
+        return res
 
 
     def np_matrix_to_str(m):
