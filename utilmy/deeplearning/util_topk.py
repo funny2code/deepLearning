@@ -85,10 +85,10 @@ def ztest2():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1, 2, 3, 4] * 10,
-                      'gender': [0, 1, 0, 1] * 10,
-                      'masterCategory': [2, 1, 3, 4] * 10,
-                      'emb': emb_list * 10})
+  res = pd.DataFrame({'id': [1, 2, 3, 4] * 5,
+                      'gender': [0, 1, 0, 1] * 5,
+                      'masterCategory': [2, 1, 3, 4] * 5,
+                      'emb': emb_list * 5})
 
   labels_dict = {'gender' : [0,1],
                   'masterCategory' : [3,1,2],
@@ -127,10 +127,10 @@ def ztest2():
                   colid='id',   colemb='emb',  ### id --> emb
                   colkey='idx', colval='id',  ### dict map idx --> id
                   faiss_index="./temp/faiss/faiss_trained_40.index", dirout='./temp/result/',
-                  npool=2, chunk=20)
+                  npool=2, chunk=10)
 
   log("#########  topk_calc  #########################################")
-  topk_calc(diremb=f'{path}1.csv', nrows=400)
+  topk_calc(diremb=f'{path}1.csv', nrows=40)
 
 
 
