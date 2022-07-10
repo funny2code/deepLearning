@@ -42,7 +42,7 @@ from utilmy.deeplearning.util_embedding import (
     np_str_to_array,
     np_array_to_str,
     np_matrix_to_str2,
-    # np_matrix_to_str3,
+    np_matrix_to_str3,
     np_matrix_to_str_sim
 
 )
@@ -366,8 +366,13 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
 
 def faiss_load_index(path_or_faiss_index=None, colkey='id', colval='idx'):
     """ load index + mapping
-    Docs::
+    Doc::
 
+        path_or_faiss_index (str): Path
+        colkey (str): map_idx.parquet id col. (Default = 'id')
+        colval (str): map_idx.parquet idx col. (Default = 'idx')
+
+        return faiss_index, mapping
         https://www.programcreek.com/python/example/112280/faiss.read_index
     """
     faiss_index = path_or_faiss_index
@@ -414,6 +419,8 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
         return_dist(boolean)      : optional If True, distances will returned. (Defaults to False.)
 
         return results path, id, topk : word id, topk of id
+        cmd:  python util_topk.py faiss_topk_calc2 --df './temp/tem/*' --faiss_index './temp/faiss/faiss_trained_40.index' --dirout './temp/result/' --npool 2 --chunks 20
+        Jupyter/Colab : cannot run
 
         https://github.com/facebookresearch/faiss/issues/632
         dis = 2 - 2 * sim
