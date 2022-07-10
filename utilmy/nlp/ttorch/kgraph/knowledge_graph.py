@@ -53,7 +53,7 @@ def test_all():
     pass
 
 
-def test1(dirin='final_dataset_clean_v2 .tsv'):
+def ztest1(dirin='final_dataset_clean_v2 .tsv'):
 
     """
     Doc::
@@ -102,7 +102,7 @@ def test1(dirin='final_dataset_clean_v2 .tsv'):
 
 
 
-def runall(dirin='', dirout='', embed_dim=10, config=None):
+def runall(config=None, config_field=None,  dirin='', dirout='', embed_dim=10, batch_size=64 ):
 
     """  Run all steps to generate dirin
     Doc::
@@ -112,8 +112,17 @@ def runall(dirin='', dirout='', embed_dim=10, config=None):
 
 
     """
-    df    = pd_read_file(dirin)
 
+    #### Config  ##############################
+    from utilmy import config_load
+    cfg =  config_load(config, config_field_name= config_field)
+    embed_dim = cfg.get('embed_dim', embed_dim)
+    dirin     = cfg.get('dirin',  dirin)
+    dirout    = cfg.get('dirout', dirout)
+
+
+
+    df    = pd_read_file(dirin)
 
     log('##### NER extraction from text ')
     extractor = NERExtractor(dirin_or_df=df, dirout=dirout, model_name="ro_core_news_sm")
@@ -123,7 +132,7 @@ def runall(dirin='', dirout='', embed_dim=10, config=None):
 
     log('##### Build Knowledge Graph')
     data_kgf_path = os.path.join(dirout, 'data_kgf.tsv')
-    grapher = knowledge_grapher(embedding_dim=10)
+    grapher = knowledge_grapher(embedding_dim= embed_dim)
     grapher.load_data( data_kgf_path)
     grapher.build_graph()
 
@@ -132,7 +141,7 @@ def runall(dirin='', dirout='', embed_dim=10, config=None):
     dirout_emb = dirout
     embedder = KGEmbedder(graph= grapher.graph, dirin=dirout, embedding_dim=embed_dim, dirout= dirout_emb)
     # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
-    embedder.compute_embeddings('none', batch_size=64)
+    embedder.compute_embeddings('none', batch_size= batch_size)
     embedder.save_embeddings()
 
 
@@ -180,7 +189,7 @@ class knowledge_grapher():
         plt.figure(figsize=(14, 14))
         posn = ntx.spring_layout(self.graph)
         ntx.draw(self.graph, with_labels=True, node_color='green', edge_cmap=plt.cm.Blues, pos = posn)
-        plt.savefig(os.path.join(self.dirout,'graphPlot.jpg'))
+        plt.savefig(self.dirout +"/"+'graphPlot.jpg')
         plt.close()
 
     def compute_centrality(self,)->None:
@@ -266,7 +275,6 @@ class knowledge_grapher():
 class NERExtractor:
 
     def __init__(self, dirin_or_df:pd.DataFrame,
-                 # dirin:str="./mydatain/",
                  dirout:str="./mydataout/",
                  model_name="ro_core_news_sm"
                  ):
@@ -281,7 +289,7 @@ class NERExtractor:
 
         self.nlp = spacy.load(model_name)
         # self.dirin = dirin
-        self.dirout = dirout
+        self.dirout = dirout.replace("\\", "/")
 
         if isinstance(dirin_or_df, pd.DataFrame):
             self.data = dirin_or_df
@@ -409,11 +417,17 @@ class NERExtractor:
         # pd_to_file(val_df,     dirout + '/val_data.parquet',   )
         # pd_to_file(self.data_kgf,   dirout + '/data_kgf.parquet',   )
 
+        pd_to_file(train_df,   dirout + '/train_data.csv', sep="\t")
+        pd_to_file(test_df,    dirout + '/test_data.csv', sep="\t" )
+        pd_to_file(val_df,     dirout + '/validation_data.csv',  sep="\t" )
+        pd_to_file(self.data_kgf,   dirout + '/data_kgf.csv',  sep="\t" )
+
+
         #Pykeen Requires data to be loaded in csv format!
-        train_df.to_csv(os.path.join(self.dirout,'train_data.tsv'), sep="\t")
-        test_df.to_csv(os.path.join(self.dirout, 'test_data.tsv'), sep="\t")
-        val_df.to_csv(os.path.join(self.dirout,  'validation_data.tsv'), sep="\t")
-        self.data_kgf.to_csv(os.path.join(self.dirout,'data_kgf.tsv'), sep="\t")
+        # train_df.to_csv(self.dirout +"/"+'train_data.tsv'), sep="\t")
+        # test_df.to_csv(self.dirout +'/test_data.tsv'), sep="\t")
+        # val_df.to_csv(self.dirout +"/"+  'validation_data.tsv'), sep="\t")
+        # self.data_kgf.to_csv(self.dirout +"/"+'data_kgf.tsv'), sep="\t")
         # return train_df, test_df, val_df
 
 
@@ -462,14 +476,14 @@ class KGEmbedder:
         """
         # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
 
-        if os.path.exists(os.path.join(self.dirout, 'trained_model.pkl')):
-            self.model = torch.load(os.path.join(self.dirout, 'trained_model.pkl'))
+        if os.path.exists(self.dirout +'/trained_model.pkl'):
+            self.model = torch.load(self.dirout +'/trained_model.pkl')
             self.trained = True
         else:
             self.model = ERModel(triples_factory=self.training,
                                  interaction='distmult',
                                  # entity_representations=entity_representations
-                                 entity_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1),
+                                 entity_representations_kwargs   = dict(embedding_dim=self.embed_dim, dropout=0.1),
                                  relation_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1)
                                  )
 
@@ -482,7 +496,7 @@ class KGEmbedder:
             )
             self.trained = False
 
-    def compute_embeddings(self, path_to_embeddings, batch_size=64, n_epochs=8)->Tuple:
+    def compute_embeddings(self,  batch_size=64, n_epochs=8)->Tuple:
 
         """set up the training pipeline for pykeen or load the trained model
         Docs:
@@ -499,24 +513,21 @@ class KGEmbedder:
                                 checkpoint_frequency=5,
                                 batch_size=batch_size,
                                 )
-            torch.save(self.model, os.path.join(self.dirout, 'trained_model.pkl'))
+            torch.save(self.model, self.dirout +'/trained_model.pkl')
         else:
             losses = None
 
         # Pick an evaluator
         evaluator = RankBasedEvaluator()
+        
         # Get triples to test
-
         mapped_triples = self.testing.mapped_triples
+        
         # Evaluate
-        results = evaluator.evaluate(
-            model=self.model,
+        results = evaluator.evaluate( model=self.model,
             mapped_triples=mapped_triples,
             batch_size=batch_size,
-            additional_filter_triples=[
-                self.training.mapped_triples,
-                self.validation.mapped_triples,
-            ],
+            additional_filter_triples=[  self.training.mapped_triples,  self.validation.mapped_triples, ],
         )
         return losses, results
 
@@ -524,33 +535,34 @@ class KGEmbedder:
     def load_embeddings(self, path_to_embeddings:str):
         """load the embedding parquet files
         """
-        if os.path.exists(os.path.join(self.dirout, 'entityEmbeddings.parquet')):
-           self.embedding_df = pd.read_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
-           self.relation_df  = pd.read_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
-           return None, None
+        self.embedding_df = pd_read_file(self.dirout +'/entityEmbeddings.parquet')
+        self.relation_df  = pd_read_file(self.dirout +'/relationEmbeddings.parquet')
+        return None, None
         #else:
         #    return self.compute_embeddings(path_to_embeddings, batch_size=1024)
 
     def save_embeddings(self,):
         """save the embedding parquet files
         """
-        entities = tuple(self.graph.nodes.values())
+        entities      = tuple(self.graph.nodes.values())
         tripleFactory = self.training
 
         entities_to_ids:Dict = tripleFactory.entity_id_to_label
         relation_to_ids:Dict = tripleFactory.relation_id_to_label
 
         # TransE model has only one embedding per entity/relation
-        entity_embeddings = self.model.entity_representations[0]
+        entity_embeddings   = self.model.entity_representations[0]
         relation_embeddings = self.model.relation_representations[0]
 
         self.relation_dict = pykeen_get_embeddings(relation_to_ids, relation_embeddings)
-        self.entity_dict = pykeen_get_embeddings(entities_to_ids, entity_embeddings)
-        df_entities = pykeen_embedding_to_df(self.entity_dict, 'entity')
+        self.entity_dict   = pykeen_get_embeddings(entities_to_ids, entity_embeddings)
+        df_entities = pykeen_embedding_to_df(self.entity_dict,   'entity')
         df_relation = pykeen_embedding_to_df(self.relation_dict, 'relation')
 
-        df_entities.to_parquet(os.path.join(self.dirout, 'entityEmbeddings.parquet'))
-        df_relation.to_parquet(os.path.join(self.dirout, 'relationEmbeddings.parquet'))
+
+        pd_to_file( df_entities, self.dirout +'/entityEmbeddings.parquet')
+        pd_to_file( df_relation, self.dirout +'/relationEmbeddings.parquet')
+
 
 
 

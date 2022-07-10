@@ -85,6 +85,7 @@ def config_load(
         path_default:   str  = None,
         config_default: dict = None,
         save_default:   bool = False,
+        config_field_name :  str  = None,
 ) -> Union[dict, Box]:
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties
     Doc::
@@ -151,6 +152,10 @@ def config_load(
 
         if to_dataclass:  ### myconfig.val  , myconfig.val2
             return Box(cfg)
+
+        if config_field_name in cfg :
+            return cfg[config_field_name]
+
         return cfg
 
     except Exception as e:
@@ -164,6 +169,8 @@ def config_load(
         os.makedirs(path_default, exist_ok=True)
         with open(config_path_default, mode="w") as fp:
             yaml.dump(config_default, fp)
+
+
     return config_default
 
 
