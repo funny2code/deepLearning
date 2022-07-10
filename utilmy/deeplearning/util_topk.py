@@ -42,11 +42,30 @@ from utilmy.deeplearning.util_embedding import (
     np_str_to_array,
     np_array_to_str,
     np_matrix_to_str2,
-    np_matrix_to_str3,
+    # np_matrix_to_str3,
     np_matrix_to_str_sim
 
 )
 
+
+def np_matrix_to_str3(array_2d, map_dict: dict = None):
+    """ 2D numpy or List of List into list of string and apply map_dict.
+
+    Doc::
+        map_dict = { 4:'four', 3: 'three' }
+        m= [[ 0,3,4  ], [2,4,5]]
+        np_matrix_to_str3(m, map_dict)
+        --> [ ",threee,four" ,   ",four," ]
+
+    """
+    map_dict = {} if map_dict is None else map_dict
+    res = []
+    for v in array_2d:
+        ss = ""
+        for xi in v:
+            ss += str(map_dict.get(str(xi), "")) + ","
+        res.append(ss[:-1])
+    return res
 
 #############################################################################################
 from utilmy import log, log2, os_module_name
@@ -118,7 +137,7 @@ def ztest2():
   faiss_topk_calc(df=f'{path}1.csv', root=path,
                       colid='id',   colemb='emb',  ### id --> emb
                       colkey='idx', colval='id',  ### dict map idx --> id
-                      faiss_index="./temp/faiss/faiss_trained_40.index", dirout=path,
+                      faiss_index="./temp/faiss/faiss_trained_20.index", dirout=path,
                       npool=1,
                       faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
 
