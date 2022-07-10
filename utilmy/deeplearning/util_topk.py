@@ -293,6 +293,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
     """
     import faiss
 
+    assert(emb_dim % faiss_M == 0 and emb_dim / faiss_M >= math.pow(2, faiss_nbits)), " Failed faiss conditions"
     
     dirout    =  "/".join( os.path.dirname(df_or_path).split("/")[:-1]) + "/faiss/" if dirout is None else dirout
     os.makedirs(dirout, exist_ok=True)
