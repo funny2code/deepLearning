@@ -617,7 +617,7 @@ def spark_df_isempty(df:sp_dataframe)->bool:
 
 
 
-def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "", nsample:int=10,
+def spark_df_check(df:sp_dataframe, tag="check", conf:dict=None, dirout:str= "./", nsample:int=10,
                    save=True, verbose=True, returnval=False, pandasonly=False):
     """ Checkpointing dataframe for easy debugging in long pipelines
     Doc::
@@ -693,9 +693,9 @@ def spark_df_write(df:sp_dataframe, dirout:str= "",  npartitions:int=None, mode:
         format: parquet, csv, json ...
     """
     if npartitions:
-        df.coalesce(npartitions).write.mode(mode).save(dirout, format)
+        df.coalesce(npartitions).write.format(format).mode(mode).save(dirout)
     else:
-        df.write.mode(mode).save(dirout, format)
+        df.write.format(format).mode(mode).save(dirout)
 
     if show>0:
         df.show(3)
