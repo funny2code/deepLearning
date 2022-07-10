@@ -126,7 +126,7 @@ def ztest2():
   faiss_topk_calc(df=f'{path}*', root=path,
                   colid='id',   colemb='emb',  ### id --> emb
                   colkey='idx', colval='id',  ### dict map idx --> id
-                  faiss_index="./temp/faiss/faiss_trained_40.index", dirout='./temp/result/',
+                  faiss_index="./temp/faiss/faiss_trained_20.index", dirout='./temp/result/',
                   npool=2, chunk=10)
 
   log("#########  topk_calc  #########################################")
