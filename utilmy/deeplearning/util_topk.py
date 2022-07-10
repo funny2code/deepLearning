@@ -417,11 +417,6 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
         colval (str)              : map_idx.parquet idx col. (Default = 'idx')
         return_simscore (boolean) : optional  If True, score will returned. (Defaults to False.)
         return_dist(boolean)      : optional If True, distances will returned. (Defaults to False.)
-
-        return results path, id, topk : word id, topk of id
-        cmd:  python util_topk.py faiss_topk_calc2 --df './temp/tem/*' --faiss_index './temp/faiss/faiss_trained_40.index' --dirout './temp/result/' --npool 2 --chunks 20
-        Jupyter/Colab : cannot run
-
         https://github.com/facebookresearch/faiss/issues/632
         dis = 2 - 2 * sim
    """
@@ -521,6 +516,7 @@ def faiss_topk_calc2(df=None, root=None, colid='id', colemb='emb',
                     ):
     """Calculate top-k for each 'emb' vector of dataframe in parallel batch.
     Doc::
+
          df (str)                  : Path to DF   df[['id', 'embd' ]]
          colid (str)               : Column name for id. (Default = 'id')
          colemb (str)              : Column name for embedding. (Default = 'emb')
@@ -534,6 +530,9 @@ def faiss_topk_calc2(df=None, root=None, colid='id', colemb='emb',
          return_simscore (boolean) : optional  If True, score will returned. (Defaults to False.)
          return_dist(boolean)      : optional If True, distances will returned. (Defaults to False.)
          return results path, id, topk : word id, topk of id
+
+         cmd:  python util_topk.py faiss_topk_calc2 --df './temp/tem/*' --faiss_index './temp/faiss/faiss_trained_40.index' --dirout './temp/result/' --npool 2 --chunks 20
+         Jupyter/Colab : cannot run
          https://github.com/facebookresearch/faiss/issues/632
          dis = 2 - 2 * sim
     """
