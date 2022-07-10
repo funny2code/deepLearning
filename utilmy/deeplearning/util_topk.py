@@ -107,7 +107,7 @@ def ztest2():
 
   log("#########  faiss_KNNClassifier ################################")
   model = faiss_KNNClassifier()
-  model = model.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
+  model.fit(np.random.random((5,5)), np.array([0,1,2,3,4]))
 
 
   log("#########  faiss_create_index  ################################")
@@ -116,15 +116,15 @@ def ztest2():
 
   log("#########  faiss_topk_calc  ##################################")
   faiss_topk_calc(df=f'{path}1.csv', root=path,
-                      colid='id', colemb='emb',  ### id --> emb
+                      colid='id',   colemb='emb',  ### id --> emb
                       colkey='idx', colval='id',  ### dict map idx --> id
                       faiss_index="./temp/faiss/faiss_trained_40.index", dirout=path,
                       npool=1,
                       faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
 
-  log("#########  faiss_topk_calc2 parallel  ##################################")
+  log("#########  faiss_topk_calc parallel  ##################################")
   faiss_topk_calc(df=f'{path}*', root=path,
-                  colid='id', colemb='emb',  ### id --> emb
+                  colid='id',   colemb='emb',  ### id --> emb
                   colkey='idx', colval='id',  ### dict map idx --> id
                   faiss_index="./temp/faiss/faiss_trained_40.index", dirout='./temp/result/',
                   npool=2, chunk=20)
@@ -415,14 +415,25 @@ def faiss_topk_calc(df=None, root=None, colid='id', colemb='emb',
          nfile (int)               : Number of files to process. (Default = 1000)
          colkey (str)              : map_idx.parquet id col. (Default = 'id')
          colval (str)              : map_idx.parquet idx col. (Default = 'idx')
-         return_simscore (boolean) : optional  If True, score will returned. (Defaults to False.)
-         return_dist(boolean)      : optional If True, distances will returned. (Defaults to False.)
+         return_simscore (boolean) : If True, score will returned. (Defaults to False.)
+         return_dist(boolean)      : If True, distances will returned. (Defaults to False.)
          return results path, id, topk : word id, topk of id
 
-         cmd:  python util_topk.py faiss_topk_calc2 --df './temp/tem/*' --faiss_index './temp/faiss/faiss_trained_40.index' --dirout './temp/result/' --npool 2 --chunks 20
-         Jupyter/Colab : cannot run
-         https://github.com/facebookresearch/faiss/issues/632
-         dis = 2 - 2 * sim
+         -- Parallel mode, ONLY in CLI (Jupyter cannot)
+             python util_topk.py faiss_topk_calc2 --df './temp/tem/*' --faiss_index './temp/faiss/faiss_trained_40.index' --dirout './temp/result/' --npool 2 --chunks 20
+
+         -- Faiss params
+             https://github.com/facebookresearch/faiss/issues/632
+             dis = 2 - 2 * sim
+
+         -- Code
+             faiss_topk_calc(df=f'{path}1.csv', root=path,
+                              colid='id', colemb='emb',  ### id --> emb
+                              colkey='idx', colval='id',  ### dict map idx --> id
+                              faiss_index="./temp/faiss/faiss_trained_40.index", dirout=path,
+                              npool=1,
+                              faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
+
     """
 
     faiss_index = "" if faiss_index is None else faiss_index
