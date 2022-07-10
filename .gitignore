@@ -175,3 +175,5 @@ utilmy/deeplearning/ttorch/zzzzz.py
 /test_recorder/
 /data_fashion_small/
 /tests_temp_dir/
+temp
+/**/*temp
