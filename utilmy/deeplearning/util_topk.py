@@ -251,16 +251,19 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
 
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
+# 2 checks to always ensure while creating index
+# emb_dim % faiss_M == 0 and emb_dim / faiss_M >= 2^(faiss_nbits)
+
 FAISS_CONFIG = Box({
-   'size_10m' :  {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+   'size_10m':  {'faiss_nlist': 6000, 'faiss_M': 40, 'faiss_nbits': 8, 'faiss_hnsw_m': 32
     },
 
 
-   'size_100k': {'faiss_nlist':1000, 'faiss_M':40, 'faiss_nbits':4, 'faiss_hnsw_m':32
+   'size_100k': {'faiss_nlist': 1000, 'faiss_M': 40, 'faiss_nbits': 4, 'faiss_hnsw_m': 32
     },
 
 
-   'size_10k': {'faiss_nlist':100, 'faiss_M':40, 'faiss_nbits':4, 'faiss_hnsw_m':32
+   'size_10k': {'faiss_nlist': 100, 'faiss_M': 40, 'faiss_nbits': 4, 'faiss_hnsw_m': 32
     },
 
 
@@ -284,7 +287,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
         faiss_hnsw_m (int) : Param of HNSW Number of neighbors for HNSW. This is typically 32. (Default = 32)
 
         return strs (path to faiss index)
-
+        Please ensure these conditions: emb_dim % faiss_M == 0 and emb_dim / faiss_M >= 2^(faiss_nbits)
         python util_topk.py   faiss_create_index    --df_or_path myemb/
 
     """
