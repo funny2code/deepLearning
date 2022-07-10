@@ -85,10 +85,10 @@ def ztest2():
   for i in range(4):
       emb_list.append( ','.join([str(x) for x in np.random.random(200)]))
 
-  res = pd.DataFrame({'id': [1, 2, 3, 4] * 10,
-                      'gender': [0, 1, 0, 1] * 10,
-                      'masterCategory': [2, 1, 3, 4] * 10,
-                      'emb': emb_list * 10})
+  res = pd.DataFrame({'id': [1, 2, 3, 4] * 5,
+                      'gender': [0, 1, 0, 1] * 5,
+                      'masterCategory': [2, 1, 3, 4] * 5,
+                      'emb': emb_list * 5})
 
   labels_dict = {'gender' : [0,1],
                   'masterCategory' : [3,1,2],
@@ -118,7 +118,7 @@ def ztest2():
   faiss_topk_calc(df=f'{path}1.csv', root=path,
                       colid='id',   colemb='emb',  ### id --> emb
                       colkey='idx', colval='id',  ### dict map idx --> id
-                      faiss_index="./temp/faiss/faiss_trained_40.index", dirout=path,
+                      faiss_index="./temp/faiss/faiss_trained_20.index", dirout=path,
                       npool=1,
                       faiss_nlist=4, M=4, nbits=2, hnsw_m=32)
 
@@ -126,11 +126,11 @@ def ztest2():
   faiss_topk_calc(df=f'{path}*', root=path,
                   colid='id',   colemb='emb',  ### id --> emb
                   colkey='idx', colval='id',  ### dict map idx --> id
-                  faiss_index="./temp/faiss/faiss_trained_40.index", dirout='./temp/result/',
-                  npool=2, chunk=20)
+                  faiss_index="./temp/faiss/faiss_trained_20.index", dirout='./temp/result/',
+                  npool=2, chunk=10)
 
   log("#########  topk_calc  #########################################")
-  topk_calc(diremb=f'{path}1.csv', nrows=400)
+  topk_calc(diremb=f'{path}1.csv', nrows=40)
 
 
 
@@ -251,16 +251,19 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
 
 ########################################################################################################
 ######## Top-K retrieval Faiss #########################################################################
+# 2 checks to always ensure while creating index
+# emb_dim % faiss_M == 0 and emb_dim / faiss_M >= 2^(faiss_nbits)
+
 FAISS_CONFIG = Box({
-   'size_10m' :  {'faiss_nlist':6000, 'faiss_M':40, 'faiss_nbits':8, 'faiss_hnsw_m':32
+   'size_10m':  {'faiss_nlist': 6000, 'faiss_M': 40, 'faiss_nbits': 8, 'faiss_hnsw_m': 32
     },
 
 
-   'size_100k': {'faiss_nlist':1000, 'faiss_M':40, 'faiss_nbits':4, 'faiss_hnsw_m':32
+   'size_100k': {'faiss_nlist': 1000, 'faiss_M': 40, 'faiss_nbits': 4, 'faiss_hnsw_m': 32
     },
 
 
-   'size_10k': {'faiss_nlist':100, 'faiss_M':40, 'faiss_nbits':4, 'faiss_hnsw_m':32
+   'size_10k': {'faiss_nlist': 100, 'faiss_M': 40, 'faiss_nbits': 4, 'faiss_hnsw_m': 32
     },
 
 
@@ -284,7 +287,7 @@ def faiss_create_index(df_or_path=None, col='emb', dirout=None,  db_type = "IVF4
         faiss_hnsw_m (int) : Param of HNSW Number of neighbors for HNSW. This is typically 32. (Default = 32)
 
         return strs (path to faiss index)
-
+        Please ensure these conditions: emb_dim % faiss_M == 0 and emb_dim / faiss_M >= 2^(faiss_nbits)
         python util_topk.py   faiss_create_index    --df_or_path myemb/
 
     """
