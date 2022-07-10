@@ -42,7 +42,7 @@ from utilmy.deeplearning.util_embedding import (
     np_str_to_array,
     np_array_to_str,
     np_matrix_to_str2,
-    np_matrix_to_str3,
+    # np_matrix_to_str3,
     np_matrix_to_str_sim
 
 )
@@ -565,7 +565,7 @@ def faiss_topk_calc2(df=None, root=None, colid='id', colemb='emb',
         log('Parallel mode')
         from utilmy.parallel  import multiproc_run, multiproc_tochunk
         ll_list = multiproc_tochunk(flist, npool=npool)
-        multiproc_run(faiss_topk_calc, ll_list, npool, verbose=True, start_delay=50,
+        multiproc_run(faiss_topk_calc2, ll_list, npool, verbose=True, start_delay=5,
                       input_fixed={'faiss_index': faiss_path, 'dirout': dirout}, )
 
         return 1
