@@ -301,13 +301,16 @@ def ner_spacy_add_tag_features(data, column, ner=None, lst_tag_filter=None, gram
 def ner_freq_spacy_tag(tags, top=30, figsize=(10,5)):
     '''
     Compute frequency of spacy tags.
+
     '''
+    from matplotlib import pyplot as plt
+    import seaborn as sns
     tags_list = tags.sum()
-    map_lst = list(map(lambda x: list(x.keys())[0], tags_list))
-    dtf_tags = pd.DataFrame(map_lst, columns=['tag','type'])
+    map_lst   = list(map(lambda x: list(x.keys())[0], tags_list))
+    dtf_tags  = pd.DataFrame(map_lst, columns=['tag','type'])
     dtf_tags["count"] = 1
     dtf_tags = dtf_tags.groupby(['type','tag']).count().reset_index().sort_values("count", ascending=False)
-    fig, ax = plt.subplots(figsize=figsize)
+    fig, ax  = plt.subplots(figsize=figsize)
     fig.suptitle("Top frequent tags", fontsize=12)
     sns.barplot(x="count", y="tag", hue="type", data=dtf_tags.iloc[:top,:], dodge=False, ax=ax)
     ax.set(ylabel=None)
@@ -330,6 +333,7 @@ def ner_spacy_retrain(train_data, output_dir, model="blank", n_iter=100):
         model: string - "blanck" or "en_core_web_lg", ...
         n_iter: num - number of iteration
     '''
+    import random
     try:
         ## prepare data
 #        train_data = []
