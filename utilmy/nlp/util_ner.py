@@ -10,10 +10,11 @@ import os, sys, glob, time,gc, datetime, numpy as np, pandas as pd
 from typing import List, Optional, Tuple, Union
 from numpy import ndarray
 from box import Box
+import collections, re
 
 
 import spacy
-import tner
+
 import json
 import pyarrow
 
@@ -67,6 +68,7 @@ def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
         ner_batch_process(dirin, dirout, model_id_name, pars)
 
     """
+    import tner
     tner_model = tner.TransformersNER(model_name)
     file_list = glob.glob(dir_in+"/*.txt", recursive = True)
     dfner = None
@@ -206,7 +208,7 @@ def ner_spacy_add_tag_features(data, column, ner=None, lst_tag_filter=None, gram
 
     ## tag text and exctract tags
     print("--- tagging ---")
-    dtf[[column+"_tagged", "tags"]] = dtf[[column]].apply(lambda x: utils_ner_text(x[0], ner, lst_tag_filter, grams_join),
+    dtf[[column+"_tagged", "tags"]] = dtf[[column]].apply(lambda x: ner_spacy_text(x[0], ner, lst_tag_filter, grams_join),
                                                           axis=1, result_type='expand')
 
     ## put all tags in a column
