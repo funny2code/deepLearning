@@ -57,7 +57,9 @@ def test2() -> None:
 
 #############################################################################################
 #                            NER                                              #
-def  ner_batch_process(dirin: str="./*.txt", dirout: str="./out/",  model_id_name: str="modelid",   **pars):
+def  ner_batch_process(dirin: str="./*.txt", dirout: str=None,
+                       model_id_name: str="asahi417/tner-xlm-roberta-large-all-english",
+                       return_val=True, **pars):
 
     """  NER Batch processing
     Docs :
@@ -67,70 +69,19 @@ def  ner_batch_process(dirin: str="./*.txt", dirout: str="./out/",  model_id_nam
         dirout = output file location where we want .parquet file to be present.
         ner_batch_process(dirin, dirout, model_id_name, pars)
 
-    Usage(in google colab):
-        !pip install tner
 
-        import tner
-        import glob
-        import pandas as pd
-        import json
-        import pyarrow
-
-        def  ner_batch_process(dirin: str="./*.txt", dirout: str="./out/",  model_id_name: str="modelid",   **pars):
-          tner_model = tner.TransformersNER(model_id_name, **pars)
-          file_list = glob.glob(dirin, recursive = True)
-          dfner = None
-
-          for file in file_list:
-            log(file)
-            file_text_list = []
-            for line in open(file):
-              file_text_list.append(line.replace('\n',''))
-            predictions = tner_model.predict(file_text_list)
-            df       = pd.DataFrame(predictions)
-            sentence = df['sentence'].values.tolist()
-            lst      = []
-            for i,entity in enumerate(df['entity'].values.tolist()):
-
-              ner_dict = {}
-              if len(sentence[i])==0:
-
-                continue
-
-              if len(entity)==0:
-                ner_dict['sentence'] = sentence[i]
-                lst.append(ner_dict)
-
-              if len(entity)==1:
-                ner_dict['word']     = entity[0]['mention']
-                ner_dict['ner_tag']  = entity[0]['type']
-                ner_dict['ner_json'] = json.dumps(entity[0])
-                ner_dict['sentence'] = sentence[i]
-                lst.append(ner_dict)
-
-              if len(entity)>1:
-                for ent in entity:
-                  ner_ent = {}
-                  ner_ent['word']     = ent['mention']
-                  ner_ent['ner_tag']  = ent['type']
-                  ner_ent['ner_json'] = json.dumps(ent)
-                  ner_ent['sentence'] = sentence[i]
-                  lst.append(ner_ent)
-            entity_extract = pd.DataFrame(lst)
-            if dfner is None:
-              dfner = entity_extract
-            else:
-              dfner = pd.concat([dfner,entity_extract], axis=1)
-
-            fout = file.split("/")[-1].split(".")[0]
-            pd_to_file(dfner, dirout + f"/{fout}.parquet", engine='pyarrow', show=1)
-
-        ner_batch_processing(dir_in ="/content/drive/MyDrive/utilmy_ner/input/*.txt",dir_out= "/content/drive/MyDrive/utilmy_ner/out/",model_name = "asahi417/tner-xlm-roberta-large-all-english")
+        from utilmy.nlp import util_ner as uner
+        uner.ner_batch_processing(dirin ="utilmy_ner/input/*.txt",
+                                   dirout= "utilmy_ner/out/",
+                                   model_name = "asahi417/tner-xlm-roberta-large-all-english")
     """
     import tner
     tner_model = tner.TransformersNER(model_id_name, **pars)
-    file_list = glob.glob(dirin, recursive = True)
+    file_list  = glob.glob(dirin, recursive = True)
     dfner = None
+
+    if dirout is not None :
+        os.makedirs(dirout, exist_ok=True)
 
     for file in file_list:
         log(file)
@@ -165,16 +116,17 @@ def  ner_batch_process(dirin: str="./*.txt", dirout: str="./out/",  model_id_nam
                     ner_ent['ner_json'] = json.dumps(ent)
                     ner_ent['sentence'] = sentence[i]
                     lst.append(ner_ent)
-        entity_extract = pd.DataFrame(lst)
-        if dfner is None:
-            dfner = entity_extract
-        else:
-            dfner = pd.concat([dfner,entity_extract], axis=1)
 
-        fout = file.split("/")[-1].split(".")[0]
-        pd_to_file(dfner, dirout + f"/{fout}.parquet", engine='pyarrow', show=1)
+        dfi = pd.DataFrame(lst)
+        if len(str(dirout)) < 5 :
+            dfner = pd.concat([dfner,dfi], axis=1)  if dfner is not None else dfi
+        else :
 
+            fout = file.split("/")[-1].split(".")[0]
+            pd_to_file(dfi, dirout + f"/{fout}.parquet", engine='pyarrow', show=1)
 
+    if  dfner is not None and return_val:
+        return dfner
 
 
 
