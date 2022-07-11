@@ -57,9 +57,9 @@ def test2() -> None:
 
 #############################################################################################
 #                            NER                                              #
-def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
+def  ner_batch_process(dirin: str="./*.txt", dirout: str="./out/",  model_id_name: str="modelid",   **pars):
 
-    """  NER Batch processing.
+    """  NER Batch processing
     Docs :
 
         from utilmy.nlp.util_ner import ner_batch_process
@@ -69,35 +69,40 @@ def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
 
     """
     import tner
-    tner_model = tner.TransformersNER(model_id_name)
-    file_list = glob.glob(dirin+"/*.txt", recursive = True)
+    tner_model = tner.TransformersNER(model_id_name, **pars)
+    file_list = glob.glob(dirin, recursive = True)
     dfner = None
+
     for file in file_list:
+        log(file)
         file_text_list = []
         for line in open(file):
             file_text_list.append(line.replace('\n',''))
         predictions = tner_model.predict(file_text_list)
-        df = pd.DataFrame(predictions)
+        df       = pd.DataFrame(predictions)
         sentence = df['sentence'].values.tolist()
-        lst = []
+        lst      = []
         for i,entity in enumerate(df['entity'].values.tolist()):
             ner_dict = {}
             if len(sentence[i])==0:
                 continue
+
             if len(entity)==0:
                 ner_dict['sentence'] = sentence[i]
                 lst.append(ner_dict)
+
             if len(entity)==1:
-                ner_dict['word'] = entity[0]['mention']
-                ner_dict['ner_tag'] = entity[0]['type']
+                ner_dict['word']     = entity[0]['mention']
+                ner_dict['ner_tag']  = entity[0]['type']
                 ner_dict['ner_json'] = json.dumps(entity[0])
                 ner_dict['sentence'] = sentence[i]
                 lst.append(ner_dict)
+
             if len(entity)>1:
                 for ent in entity:
                     ner_ent = {}
-                    ner_ent['word'] = ent['mention']
-                    ner_ent['ner_tag'] = ent['type']
+                    ner_ent['word']     = ent['mention']
+                    ner_ent['ner_tag']  = ent['type']
                     ner_ent['ner_json'] = json.dumps(ent)
                     ner_ent['sentence'] = sentence[i]
                     lst.append(ner_ent)
@@ -106,7 +111,9 @@ def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
             dfner = entity_extract
         else:
             dfner = pd.concat([dfner,entity_extract], axis=1)
-    return pd_to_file(dfner, dirout + ".parquet", engine='pyarrow')
+
+        fout = file.split("/")[-1].split(".")[0]
+        pd_to_file(dfner, dirout + f"/{fout}.parquet", engine='pyarrow', show=1)
 
 
 
