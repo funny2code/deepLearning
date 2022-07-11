@@ -18,7 +18,7 @@ import json
 import pyarrow
 
 #############################################################################################
-from utilmy import log, log2,help_create
+from utilmy import log, log2,help_create, pd_to_file
 
 def help():
     """function help"""
@@ -56,14 +56,14 @@ def test2() -> None:
 
 #############################################################################################
 #                            NER                                              #
-def  ner_batch_process(dirin: input_folder, dirout,  model_id_name,   **pars):
+def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
 
     """  NER Batch processing.
     Docs :
 
         from utilmy.nlp.util_ner import ner_batch_process
-        dirin = file location where all .txt files are present
-        dirout = .parquet file where we want to save dataframe as binary format
+        dirin = input file location where all .txt files are present
+        dirout = output file location where we want .parquet file to be present.
         ner_batch_process(dirin, dirout, model_id_name, pars)
 
     """
@@ -99,7 +99,7 @@ def  ner_batch_process(dirin: input_folder, dirout,  model_id_name,   **pars):
             ner_ent['sentence'] = sentence[i]
             lst.append(ner_ent)
     entity_extract = pd.DataFrame(lst)
-    return entity_extract.to_parquet(dir_out, engine='pyarrow')
+    return pd_to_file(entity_extract, dir_out + "ner_01.parquet", engine='pyarrow')
 
 
 
