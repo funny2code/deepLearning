@@ -64,10 +64,9 @@ def  ner_batch_process(dirin: str="./*.txt", dirout: str=None,
     """  NER Batch processing
     Docs :
 
-        from utilmy.nlp.util_ner import ner_batch_process
-        dirin = input file location where all .txt files are present
-        dirout = output file location where we want .parquet file to be present.
-        ner_batch_process(dirin, dirout, model_id_name, pars)
+        dirin :  input file location where all .txt files are present
+        dirout : output file location where we want .parquet file to be present.
+
 
 
         from utilmy.nlp import util_ner as uner
