@@ -11,12 +11,10 @@ from typing import List, Optional, Tuple, Union
 from numpy import ndarray
 from box import Box
 import collections, re
-
-
 import spacy
-
 import json
-import pyarrow
+
+
 
 #############################################################################################
 from utilmy import log, log2,help_create, pd_to_file
@@ -33,35 +31,35 @@ def test_all() -> None:
 
     """
     log(MNAME)
-    test1()
-    test2()
+    ztest1()
 
 
-def test1() -> None:
+def ztest1() -> None:
     """function test1
     Args:
     Returns:
 
     """
-    pass
+    from utilmy import adatasets as ad
+
+    df = ad.test_dataset_txt_newsreuters(nrows=10)
+    pd_to_file( df[['text']], "./ztmp/text.csv", sep=" " )
+
+    ner_transformer_batch_process(dirin  = "utilmy_ner/*.txt",
+                                  dirout = "utilmy_ner/out/",
+                                  model_name = "asahi417/tner-xlm-roberta-large-all-english")
 
 
-def test2() -> None:
-    """function test2
-    Args:
-    Returns:
 
-    """
-    pass
 
 
 #############################################################################################
-#                            NER                                              #
-def  ner_batch_process(dirin: str="./*.txt", dirout: str=None,
+######### NER                                              #
+def  ner_transformer_batch_process(dirin: str="./*.txt", dirout: str=None,
                        model_id_name: str="asahi417/tner-xlm-roberta-large-all-english",
                        return_val=True, **pars):
 
-    """  NER Batch processing
+    """  NER Tranfromer Batch processing  pip install tner
     Docs :
 
         dirin :  input file location where all .txt files are present
@@ -70,11 +68,11 @@ def  ner_batch_process(dirin: str="./*.txt", dirout: str=None,
 
 
         from utilmy.nlp import util_ner as uner
-        uner.ner_batch_processing(dirin ="utilmy_ner/input/*.txt",
+        uner.ner_transformer_batch_process(dirin ="utilmy_ner/input/*.txt",
                                    dirout= "utilmy_ner/out/",
                                    model_name = "asahi417/tner-xlm-roberta-large-all-english")
     """
-    import tner
+    import tner, pyarrow
     tner_model = tner.TransformersNER(model_id_name, **pars)
     file_list  = glob.glob(dirin, recursive = True)
     dfner = None
