@@ -69,37 +69,43 @@ def  ner_batch_process(dirin: str, dirout: str,  model_id_name: str,   **pars):
     """
     tner_model = tner.TransformersNER(model_name)
     file_list = glob.glob(dir_in+"/*.txt", recursive = True)
-    txt_list = []
+    dfner = None
     for file in file_list:
+        file_text_list = []
         for line in open(file):
-        txt_list.append(line.replace('\n',''))
-    predictions = tner_model.predict(txt_list)
-    df = pd.DataFrame(predictions)
-    sentence = df['sentence'].values.tolist()
-    lst = []
-    for i,entity in enumerate(df['entity'].values.tolist()):
-        ner_dict = {}
-        if len(sentence[i])==0:
-        continue
-        if len(entity)==0:
-        ner_dict['sentence'] = sentence[i]
-        lst.append(ner_dict)
-        if len(entity)==1:
-        ner_dict['word'] = entity[0]['mention']
-        ner_dict['ner_tag'] = entity[0]['type']
-        ner_dict['ner_json'] = json.dumps(entity[0])
-        ner_dict['sentence'] = sentence[i]
-        lst.append(ner_dict)
-        if len(entity)>1:
-        for ent in entity:
-            ner_ent = {}
-            ner_ent['word'] = ent['mention']
-            ner_ent['ner_tag'] = ent['type']
-            ner_ent['ner_json'] = json.dumps(ent)
-            ner_ent['sentence'] = sentence[i]
-            lst.append(ner_ent)
-    entity_extract = pd.DataFrame(lst)
-    return pd_to_file(entity_extract, dir_out + "ner_01.parquet", engine='pyarrow')
+            file_text_list.append(line.replace('\n',''))
+        predictions = tner_model.predict(file_text_list)
+        df = pd.DataFrame(predictions)
+        sentence = df['sentence'].values.tolist()
+        lst = []
+        for i,entity in enumerate(df['entity'].values.tolist()):
+            ner_dict = {}
+            if len(sentence[i])==0:
+            continue
+            if len(entity)==0:
+            ner_dict['sentence'] = sentence[i]
+            lst.append(ner_dict)
+            if len(entity)==1:
+            ner_dict['word'] = entity[0]['mention']
+            ner_dict['ner_tag'] = entity[0]['type']
+            ner_dict['ner_json'] = json.dumps(entity[0])
+            ner_dict['sentence'] = sentence[i]
+            lst.append(ner_dict)
+            if len(entity)>1:
+            for ent in entity:
+                ner_ent = {}
+                ner_ent['word'] = ent['mention']
+                ner_ent['ner_tag'] = ent['type']
+                ner_ent['ner_json'] = json.dumps(ent)
+                ner_ent['sentence'] = sentence[i]
+                lst.append(ner_ent)
+        entity_extract = pd.DataFrame(lst)
+        if dfner is None:
+            dfner = entity_extract
+        else:
+            dfner = pd.concat([dfner,entity_extract], axis=1)
+    return pd_to_file(dfner, dir_out + ".parquet", engine='pyarrow')
+
 
 
 
