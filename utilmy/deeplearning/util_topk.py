@@ -257,7 +257,7 @@ def topk_calc(diremb="", dirout="", topk=100,  idlist=None, nrows=10, emb_dim=20
 
 FAISS_CONFIG = Box({
    #### Faiss constraints: emb_dim % faiss_M == 0 and emb_dim / faiss_M >= 2^(faiss_nbits)
-    
+
    'size_10m':  {'faiss_nlist': 6000, 'faiss_M': 40, 'faiss_nbits': 8, 'faiss_hnsw_m': 32
     },
 

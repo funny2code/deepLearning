@@ -10,12 +10,14 @@ import os, sys, glob, time,gc, datetime, numpy as np, pandas as pd
 from typing import List, Optional, Tuple, Union
 from numpy import ndarray
 from box import Box
-
-
+import collections, re
 import spacy
+import json
+
+
 
 #############################################################################################
-from utilmy import log, log2,help_create
+from utilmy import log, log2,help_create, pd_to_file
 
 def help():
     """function help"""
@@ -29,43 +31,99 @@ def test_all() -> None:
 
     """
     log(MNAME)
-    test1()
-    test2()
+    ztest1()
 
 
-def test1() -> None:
+def ztest1() -> None:
     """function test1
     Args:
     Returns:
 
     """
-    pass
+    from utilmy import adatasets as ad
+
+    df = ad.test_dataset_txt_newsreuters(nrows=10)
+    pd_to_file( df[['text']], "./ztmp/text.csv", sep=" " )
+
+    ner_transformer_batch_process(dirin  = "utilmy_ner/*.txt",
+                                  dirout = "utilmy_ner/out/",
+                                  model_name = "asahi417/tner-xlm-roberta-large-all-english")
 
 
-def test2() -> None:
-    """function test2
-    Args:
-    Returns:
 
-    """
-    pass
 
 
 #############################################################################################
-#                            NER                                              #
-def  ner_batch_process(dirin, dirout,  model_id_name,   **pars):
-    """  NER Batch processing.
+######### NER                                              #
+def  ner_transformer_batch_process(dirin: str="./*.txt", dirout: str=None,
+                       model_id_name: str="asahi417/tner-xlm-roberta-large-all-english",
+                       return_val=True, **pars):
+
+    """  NER Tranfromer Batch processing  pip install tner
     Docs :
 
-        from utilmy.nlp.util_ner import ner_batch_process
-        dirin =  ""
-        dirout = ""
-        ner_batch_process(dirin, dirout, model_id_name, pars)
+        dirin :  input file location where all .txt files are present
+        dirout : output file location where we want .parquet file to be present.
 
-        
 
+
+        from utilmy.nlp import util_ner as uner
+        uner.ner_transformer_batch_process(dirin ="utilmy_ner/input/*.txt",
+                                   dirout= "utilmy_ner/out/",
+                                   model_name = "asahi417/tner-xlm-roberta-large-all-english")
     """
-    pass  
+    import tner, pyarrow
+    tner_model = tner.TransformersNER(model_id_name, **pars)
+    file_list  = glob.glob(dirin, recursive = True)
+    dfner = None
+
+    if dirout is not None :
+        os.makedirs(dirout, exist_ok=True)
+
+    for file in file_list:
+        log(file)
+        file_text_list = []
+        for line in open(file):
+            file_text_list.append(line.replace('\n',''))
+        predictions = tner_model.predict(file_text_list)
+        df       = pd.DataFrame(predictions)
+        sentence = df['sentence'].values.tolist()
+        lst      = []
+        for i,entity in enumerate(df['entity'].values.tolist()):
+            ner_dict = {}
+            if len(sentence[i])==0:
+                continue
+
+            if len(entity)==0:
+                ner_dict['sentence'] = sentence[i]
+                lst.append(ner_dict)
+
+            if len(entity)==1:
+                ner_dict['word']     = entity[0]['mention']
+                ner_dict['ner_tag']  = entity[0]['type']
+                ner_dict['ner_json'] = json.dumps(entity[0])
+                ner_dict['sentence'] = sentence[i]
+                lst.append(ner_dict)
+
+            if len(entity)>1:
+                for ent in entity:
+                    ner_ent = {}
+                    ner_ent['word']     = ent['mention']
+                    ner_ent['ner_tag']  = ent['type']
+                    ner_ent['ner_json'] = json.dumps(ent)
+                    ner_ent['sentence'] = sentence[i]
+                    lst.append(ner_ent)
+
+        dfi = pd.DataFrame(lst)
+        if len(str(dirout)) < 5 :
+            dfner = pd.concat([dfner,dfi], axis=1)  if dfner is not None else dfi
+        else :
+
+            fout = file.split("/")[-1].split(".")[0]
+            pd_to_file(dfi, dirout + f"/{fout}.parquet", engine='pyarrow', show=1)
+
+    if  dfner is not None and return_val:
+        return dfner
 
 
 
@@ -165,7 +223,7 @@ def ner_spacy_add_tag_features(data, column, ner=None, lst_tag_filter=None, gram
 
     ## tag text and exctract tags
     print("--- tagging ---")
-    dtf[[column+"_tagged", "tags"]] = dtf[[column]].apply(lambda x: utils_ner_text(x[0], ner, lst_tag_filter, grams_join),
+    dtf[[column+"_tagged", "tags"]] = dtf[[column]].apply(lambda x: ner_spacy_text(x[0], ner, lst_tag_filter, grams_join),
                                                           axis=1, result_type='expand')
 
     ## put all tags in a column
@@ -192,13 +250,16 @@ def ner_spacy_add_tag_features(data, column, ner=None, lst_tag_filter=None, gram
 def ner_freq_spacy_tag(tags, top=30, figsize=(10,5)):
     '''
     Compute frequency of spacy tags.
+
     '''
+    from matplotlib import pyplot as plt
+    import seaborn as sns
     tags_list = tags.sum()
-    map_lst = list(map(lambda x: list(x.keys())[0], tags_list))
-    dtf_tags = pd.DataFrame(map_lst, columns=['tag','type'])
+    map_lst   = list(map(lambda x: list(x.keys())[0], tags_list))
+    dtf_tags  = pd.DataFrame(map_lst, columns=['tag','type'])
     dtf_tags["count"] = 1
     dtf_tags = dtf_tags.groupby(['type','tag']).count().reset_index().sort_values("count", ascending=False)
-    fig, ax = plt.subplots(figsize=figsize)
+    fig, ax  = plt.subplots(figsize=figsize)
     fig.suptitle("Top frequent tags", fontsize=12)
     sns.barplot(x="count", y="tag", hue="type", data=dtf_tags.iloc[:top,:], dodge=False, ax=ax)
     ax.set(ylabel=None)
@@ -221,6 +282,7 @@ def ner_spacy_retrain(train_data, output_dir, model="blank", n_iter=100):
         model: string - "blanck" or "en_core_web_lg", ...
         n_iter: num - number of iteration
     '''
+    import random
     try:
         ## prepare data
 #        train_data = []
