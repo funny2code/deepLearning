@@ -1069,7 +1069,7 @@ def os_platform_ip():
 
 
 def os_memory():
-    """ Get node total memory and memory usage in linux
+    """ Get total memory and memory usage in linux
     """
     with open('/proc/meminfo', 'r') as mem:
         ret = {}
@@ -1136,6 +1136,49 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
     return r * 0.0000001
 
+
+
+def glob_glob(dirin, exclude="", include="", nfiles=99999):
+    import glob
+    files = glob.glob(dirin)
+    files = sorted(files)
+    for exi in exclude.split(","):
+        if len(exi) > 0:
+           files = [  fi for fi in files if exi not in fi ]
+    return files
+
+
+def os_remove_file_big(dirin="folder/**/*.parquet", size_mb=1, nfiles=1000000, exclude="", dry=1) :
+    """  Delete files bigger than some size
+
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry ==True or dry==1 else False
+
+    files = glob_glob(dirin, exclude=exclude, include="", nfiles=999999999)
+    print('now',   )
+    flist2=[]
+    for fi in files[:nfiles]:
+        try :
+          if os.path.getsize(fi) < size_mb*0.001 :   #set file size in kb
+            flist2.append(fi)
+        except : pass
+
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi)
+        except Exception as e :
+            print(fi, e)
+
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
 
 
 
