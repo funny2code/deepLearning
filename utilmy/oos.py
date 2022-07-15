@@ -1139,6 +1139,50 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
+def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
+    """  Delete files older than ndays.
+    
+    
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry ==True or dry==1 else False
+
+    files = glob.glob(dirin)
+    files = sorted(files)
+    for exi in exclude.split(","):
+        if len(exi) > 0: 
+           files = [  fi for fi in files if exi not in fi ]
+
+    now = time.time()
+    cutoff = now - ( abs(ndays_past) * 86400)
+    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"), 
+          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+    flist2=[]
+    for fi in files[:nfiles]:
+        try :
+          t = os.stat( fi)
+          c = t.st_ctime
+          # delete file if older than 10 days
+          if c < cutoff:
+            flist2.append(fi)
+        except : pass  
+
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :         
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi) 
+        except Exception as e :
+            print(fi, e)     
+    
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
+
 
 
 def os_removedirs(path, verbose=False):
