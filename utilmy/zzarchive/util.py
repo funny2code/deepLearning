@@ -1003,9 +1003,9 @@ def os_file_isame(file1, file2) :
 
 def os_file_get_file_extension(file_path):
     """
-    >>> get_file_extension("/a/b/c")
+    >>> get_file_extension("/tmp/b/c")
     ''
-    >>> get_file_extension("/a/b/c.tar.xz")
+    >>> get_file_extension("/tmp/b/c.tar.xz")
     'xz'
     """
     _ext = os.path.splitext(file_path)[-1]
