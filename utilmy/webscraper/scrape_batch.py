@@ -70,7 +70,7 @@ html1 ="""
         <script src="/static/js/bootstrap.min.js"></script>
         <script src="/static/js/d3.v3.min.js"></script>
         <script src="/static/google-code-prettify/prettify.js"></script>
-        <script src="/static/js/d3_scoupon.js"></script>
+        <script src="/static/js/d3_aa.js"></script>
 
     
     
@@ -118,7 +118,7 @@ html1 ="""
 
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="/logout">Logout scoupon</a></li>
+                    <li><a href="/logout">Logout aa</a></li>
                 </ul>
             </div>
         </div>

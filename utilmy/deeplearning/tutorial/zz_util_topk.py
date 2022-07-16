@@ -455,7 +455,7 @@ def topk_export():     #### python prepro.py  topk_export
 1      cs6481-01_1-4.png   kids          shoes       shoes  ...                   5               20              151                7
 
 
-     hdfs dfs -put  /data/womg_trche_best_best_good_epoch_313/fashion_emb_500k/                /user/scoupon/zexport/z/
+     hdfs dfs -put  /data/womg_trche_best_best_good_epoch_313/fashion_emb_500k/                /user/aa/zexport/z/
 
     """
     dir_in  = "/daain9b_g3_-img_trai000-cache_best_best_good_epoch_313/*.parquet" 
