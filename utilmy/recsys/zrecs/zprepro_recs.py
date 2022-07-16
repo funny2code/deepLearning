@@ -70,132 +70,23 @@ if 'path':
     dirs.brw_dir      = "/tmp//"   ## User History
     # dirs.clk_dir      = "/tmp//brw_item_v15/"  ### ~last 120 days of click, Only ITEMS
 
-    dirs.sc_clk_dir   = "/tmp//"  ####  ~last 400 days of click
-    dirs.sc_pur_dir   = "/tmp//"  ###   ~last 400 days of purchase
-    dirs.sc_imp_dir   = "/tmp/"  ###   ~last 120 days of impression
-
-    pur_dir      = "/tmp/"
-    brw_dir      = "/tmp//"   ## User History
-    # dirs.clk_dir      = "/tmp//brw_item_v15/"  ### ~last 120 days of click, Only ITEMS
-
-    sc_clk_dir   = "/tmp//sc_widget_clk/"  ####  ~last 400 days of click
-    sc_pur_dir   = "/tmp//sc_widget_pur/"  ###   ~last 400 days of purchase
-    sc_imp_dir   = "/tmp//sc_widget_imp/"  ###   ~last 120 days of impression
-
-
-    dir_scitems = "/301/s05/pydata/sc_items/sc_campaign_items.tsv"
-    dir_pydata  = "/tmp//"
-
-    dir_ngsiid  = "//tmp//sc_block_user_item/"
-    dir_ngsiid2 = "/tmps07/ndata/cpa/hdfs/sc_block_user_item/"
-
-
-    #dir_rec = zlocal.dir_rec
-    dir_rec     = '/data/workspaces/takos01/cpa/'
-    dir_out0    = '/data/workspaces/cpa/'
-
-
-    dir_hive    = "/tmp//ndata/cpa/input"
-    dir_res     = "/tmp//ndata/cpa//res/"
-
-    dir_norec   = "/tmp//ndata/cpa/res/norec.sh"
-    dir_nohist  = "/tmp//ndata/cpa/res/nohist.sh"
-
-
-    dir_rec3    = '/a//ndata/cpa/'   ### 66 Tb
-    dir_cpaloc  = "/cpa/"
-    dir_cpa3    = '/cpa/'    ### 3 Tb
-
-
-if 'path_ca':
-    dir_ca       = '/tmps07/ndata/cpa/ca_check/'
-    dir_ca_hdfs  = dir_ca + "/hdfs//"
-    dir_ca_stats = dir_ca + "/stats/"
-    dir_ca_daily = dir_ca + "/daily/"
-
-    ### New items daily
-    dir_ca_dailyitem = "/301/s05/pydata/sc_items/sc_campaign_items.tsv"
-
-    table_ca_all_100d = "nono3.ca_daily_coupons10c"  ### 100 recent days ranid
-    table_ca_all_300d = "nono3.ca_daily_coupons11c"  ### all days with ranid
-
-    table_ca_100d = "nono3.ca_daily_coupons10b"  ### 100 recent days NO ranid
-    table_ca_300d = "nono3.ca_daily_coupons11"   ### all days with   NO ranid
-
-    dir_export = "/tmps07/ntmp/export/ca/rec/"
-    dir_ca_prod = "/tmp/sc-coupon-advance-batches/"
-
-    flog_warning = "/tmps07/ndata/cpa/log/log_gpu/aaa_Warning.py"
-
-
-
-if 'cols':
-    ### can be used for training
-    cols_scstream_item_vec_df = ['genre_name_path', 'item_emb', 'item_id', 'item_name', 'item_text','price', 'review_num', 'shop_id', 'shop_name', 'siid']
-    cols_scstream_item = ['genre_id', 'genre_name_path', 'genre_path', 'image_url', 'item_id', 'item_name', 'price', 'ran_cd', 'review_avg', 'review_num',
-                         'shop_id', 'shop_name', 'siid']
-
-    cols_pur   = ['basket_id', 'easy_id', 'gbuy_flg', 'genre_id', 'item_id', 'order_number', 'postage', 'price', 'ran_id', 'sender_zip', 'series_id', 'sg_id',
-                  'shop_id', 'super_auction_flg', 'tax', 'units', 'unix_time']
-
-    cols_brw      = ['easy_id', 'genre_id', 'item_id', 'ran_id', 'ref', 'ref_type', 'series_id', 'sg_id', 'shop_id', 'time_key'],
-    cols_item     = ['basket_id', 'easy_id', 'gbuy_flg', 'genre_id', 'item_id',  'order_number', 'postage', 'price', 'ran_id', 'sender_zip', 'series_id',
-                     'sg_id', 'shop_id', 'super_auction_flg', 'tax', 'units', 'unix_time']
-
-    cols_sc_imp   = ['channel', 'easy_id', 'item_id', 'logic_hash', 'query', 'shop_id',    'sid', 'timestamp']
-    cols_sc_clk   = ['channel', 'easy_id', 'item_id', 'logic_hash', 'query', 'shop_id',   'sid', 'timestamp']
-    cols_sc_pur   = ['channel', 'discount', 'easy_id', 'item_id', 'logic_hash', 'price', 'shop_id', 'timestamp', 'units' ]
-
-
-    cols_itemv15 = ['genre_id', 'item_id', 'ran_id', 'series_id', 'sg_id', 'shop_id']   ### int64
-    cols_itemv16 = ['genre_id', 'item_id', 'ran_id', 'series_id', 'sg_id', 'shop_id']   ### int64
-
 
 
 
 #### DB Path   ############################################################################
 if 'db diskcache':
-    db_easyid_topgenre_pur = {}; db_itemid_vran= {}; db_ca_genre_siid= {};
-    db_easyid_topgenre_brw = {}; db_easyid_topgenre_intra= {} ; db_easyid_topgenre_merge = {};
-    db_ca_siid_genre = {}; db_imaster = {}; db_ivector = {} ; db_uvector = {}
-    ca_genreid_global = None  ; clientdrant = None ; ok_global = None
+    global = None  ; clientdrant = None ; ok_global = None
 
     #db_dir = "/data/workspaces/takos01/cpa/db/"
     db_dir  = "/sys/fs/cgroup/cpa/db"
 
     db = Box({
         #'db_itemtag_items_path'  :  f"{db_dir}/map_sampling_itemtag_siid.cache",
-        #'db_itemid_itemtag_path' :  f"{db_dir}/map_itemid_itemtag.cache",
-        # 'db_easyid_hist_path'    :  f"{db_dir}/easyid_hist_day_.db",
-        #'db_easyid_group_path'   :  f"{db_dir}/easyid_group.db",
-        # 'db_easyid_rec_path'     :  f"{db_dir}/easyid_rec.db",
-        #'db_timekey_easyidlist_path' : f"{db_dir}/timekey_easyidlist.db",
 
-        'db_itemid_vran_path' : f"{db_dir}/db_itemid_vran.db",
-
+        'db_itemid_path' : f"{db_dir}/db_itemid_vran.db",
 
         ### 2mio tag
         #'db_itemid_itemtag_2m_path' :  f"{db_dir}/map_itemid_itemtag_2m.cache",
-
-        #### Local IMaster for check
-        'db_imaster' :  f"{db_dir}/imaster.cache",   ####  IMaster cache
-        'db_ivector' :  f"{db_dir}/ivector.cache",   #### Item embedding cache
-
-        'db_uvector' :  f"{db_dir}/uvector.cache",   #### User embedding cache
-
-
-         #### Topk per itemid
-        'db_item_toprank' : f"{db_dir}/db_item_toprank.db",
-
-        #### Genre Rec
-        'db_ca_genre_siid'       :  f"{db_dir}/db_ca_genre_siid.cache",
-        'db_ca_siid_genre'       :  f"{db_dir}/db_ca_siid_genre.cache",
-
-        'db_easyid_topgenre_pur' :    f"{db_dir}/db_easyid_topg_pur.cache",
-        'db_easyid_topgenre_brw' :    f"{db_dir}/db_easyid_topg_brw.cache",
-        'db_easyid_topgenre_intra' :  f"{db_dir}/db_easyid_topg_intra.cache",    ### Intra updates
-
-        'db_easyid_topgenre_freqpur' :  f"{db_dir}/db_easyid_topg_freqpur.cache",    ### Intra updates
 
         # 'db_easyid_topgenre_merge' :  f"{db_dir}/db_easyid_topg_merge.cache",   #### Hybrid scores
     })
@@ -243,22 +134,6 @@ if 'db diskcache':
             no history for easyid 385680657, no history for easyid 431723304,no history for easyid 346710171,
 
         """
-
-        val1 = db_easyid_hist.get(366260203, "")
-
-
-        llist = db_timekey_easyidlist["pur_18879"]
-
-        v = diskcache_getval(db_easyid_hist)
-        print(str(v)[:500] )
-
-
-        # print( db_easyid_hist.check() )
-        ss = 'SELECT key,value FROM Cache WHERE key={key} LIMIT 1'
-
-        for ii, k in enumerate(llist) :
-           v = db_easyid_hist._sql( ss.format(key= k) ).fetchall()
-           print(str(v)[:100])
 
 
         return 1
