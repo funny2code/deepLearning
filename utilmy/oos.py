@@ -7,7 +7,7 @@ https://github.com/uqfoundation/pox/tree/master/pox
 
 
 """
-import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np
+import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
 
 
 #################################################################
@@ -450,6 +450,67 @@ def is_float(x):
 
 
 ########################################################################################################
+
+
+class toFileSafe(object):
+   def __init__(self,fpath):
+      """ Thread Safe file writer
+        tofile = toFileSafe('mylog.log)
+        tofile.w("msg")
+      """
+      import logging
+      logger = logging.getLogger('logsafe')
+      logger.setLevel(logging.INFO)
+      ch = logging.FileHandler(fpath)
+      ch.setFormatter(logging.Formatter('%(message)s'))
+      logger.addHandler(ch)
+      self.logger = logger
+
+   def write(self, msg):
+        """ toFileSafe:write
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+   def log(self, msg):
+        """ toFileSafe:log
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+   def w(self, msg):
+        """ toFileSafe:w
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+
+def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
+    """function date_to_timezone
+    Args:
+        tdate:
+        fmt="%Y%m%d-%H:
+        timezone:
+    Returns:
+
+    """
+    # "%Y-%m-%d %H:%M:%S %Z%z"
+    from pytz import timezone as tzone
+    import datetime
+    # Convert to US/Pacific time zone
+    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
+    return now_pacific.strftime(fmt)
+
+
 ##### OS, cofnfig ######################################################################################
 def os_monkeypatch_help():
     """function os_monkeypatch_help
@@ -504,28 +565,10 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     try :
       mtime  = os.path.getmtime(dirin)
       mtime2 = datetime.datetime.utcfromtimestamp(mtime)
-      mtime2 = mdate2.astimezone(tzone(timezone))
+      mtime2 = mtime2.astimezone(tzone(timezone))
       return mtime2.strftime(fmt)
     except:
       return ""  
-
-
-def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """function date_to_timezone
-    Args:
-        tdate:   
-        fmt="%Y%m%d-%H:   
-        timezone:   
-    Returns:
-        
-    """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Convert to US/Pacific time zone
-    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
-    return now_pacific.strftime(fmt)
-
 
 
 def os_process_list():
@@ -557,49 +600,7 @@ def os_wait_processes(nhours=7):
        log("sleep 30min", ll)     
        time.sleep(3600* 0.5)
 
-    
-    
-class toFileSafe(object):
-   def __init__(self,fpath):
-      """ Thread Safe file writer
-        tofile = toFileSafe('mylog.log)
-        tofile.w("msg")
-      """
-      logger = logging.getLogger('logsafe')
-      logger.setLevel(logging.INFO)
-      ch = logging.FileHandler(fpath)
-      ch.setFormatter(logging.Formatter('%(message)s'))
-      logger.addHandler(ch)     
-      self.logger = logger
-      
-   def write(self, msg):   
-        """ toFileSafe:write
-        Args:
-            msg:     
-        Returns:
-           
-        """
-        self.logger.info( msg)
-    
-   def log(self, msg):   
-        """ toFileSafe:log
-        Args:
-            msg:     
-        Returns:
-           
-        """
-        self.logger.info( msg)    
 
-   def w(self, msg):   
-        """ toFileSafe:w
-        Args:
-            msg:     
-        Returns:
-           
-        """
-        self.logger.info( msg)   
-
-        
         
 def os_path_size(path = '.'):
     """function os_path_size
@@ -744,7 +745,8 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
 os_copy = os_copy_safe
 
 
-def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
+def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
+                  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
     """function os_merge_safe
     Args:
         dirin_list:   
@@ -787,11 +789,6 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
 
 
 
-
-
-
-    
-    
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
@@ -1148,7 +1145,45 @@ def glob_glob(dirin, exclude="", include="", nfiles=99999):
     return files
 
 
-def os_remove_file_big(dirin="folder/**/*.parquet", size_mb=1, nfiles=1000000, exclude="", dry=1) :
+def os_copy(dirfrom="folder/**/*.parquet", dirto="",  min_size_mb=0, max_size_mb=1,
+            exclude="", include="",
+            from_ndays=1000, start_date='1970-01-01', end_date='2050-01-01',
+            path_structure_only=False,
+            overwrite=False,
+            re_start=1,
+            nfiles=99999999,
+            dry=0
+            ) :
+    """  Advance copy with filter.
+
+
+
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry ==True or dry==1 else False
+    fflist = glob_glob(dirfrom, exclude=exclude, include=include, nfiles=nfiles)
+    jj =0
+
+
+
+
+
+
+
+    if dry :  print('dry mode only')
+    else :    print('copied', jj)
+
+
+
+
+def os_remove_file(dirin="folder/**/*.parquet",
+            min_size_mb=0, max_size_mb=1,
+            exclude="", include="",
+            from_ndays=1000, start_date='1970-01-01', end_date='2050-01-01',
+            nfiles=99999999,
+            dry=0):
+
     """  Delete files bigger than some size
 
     """
@@ -1156,14 +1191,17 @@ def os_remove_file_big(dirin="folder/**/*.parquet", size_mb=1, nfiles=1000000, e
 
     dry = True if dry ==True or dry==1 else False
 
-    files = glob_glob(dirin, exclude=exclude, include="", nfiles=999999999)
-    print('now',   )
+    files = glob_glob(dirin, exclude=exclude, include=include, nfiles=nfiles)
+
+
     flist2=[]
     for fi in files[:nfiles]:
         try :
-          if os.path.getsize(fi) < size_mb*0.001 :   #set file size in kb
+          if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
             flist2.append(fi)
         except : pass
+
+
 
     print ('Nfiles', len(flist2))
     jj = 0
@@ -1179,7 +1217,6 @@ def os_remove_file_big(dirin="folder/**/*.parquet", size_mb=1, nfiles=1000000, e
 
     if dry :  print('dry mode only')
     else :    print('deleted', jj)
-
 
 
 def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
@@ -1225,7 +1262,6 @@ def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10000
     
     if dry :  print('dry mode only')
     else :    print('deleted', jj)
-
 
 
 def os_removedirs(path, verbose=False):
