@@ -593,9 +593,7 @@ def os_wait_processes(nhours=7):
     """
     t0 = time.time()
     while (time.time() - t0 ) < nhours * 3600 :
-       hdfs_export()            
        ll = os_process_list()
-       ll = [t for t in ll if 'scoupon' in t and 'python ' in t ]
        if len(ll) < 2 : break   ### Process are not running anymore 
        log("sleep 30min", ll)     
        time.sleep(3600* 0.5)
