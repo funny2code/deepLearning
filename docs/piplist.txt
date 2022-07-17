@@ -1,5 +1,5 @@
 absl-py==1.1.0
-alembic==1.8.0
+alembic==1.8.1
 arrow==1.2.2
 asttokens==2.0.5
 astunparse==1.6.3
@@ -23,7 +23,7 @@ cliff==3.10.1
 cligj==0.7.2
 cloudpickle==2.1.0
 cmaes==0.8.2
-cmd2==2.4.1
+cmd2==2.4.2
 colorama==0.4.5
 colorlog==6.6.0
 convertdate==2.4.0
@@ -51,7 +51,7 @@ future==0.18.2
 gast==0.4.0
 gensim==4.1.2
 geopandas==0.10.2
-google-auth==2.9.0
+google-auth==2.9.1
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 greenlet==1.1.2
@@ -71,7 +71,7 @@ importlib-metadata==4.2.0
 importlib-resources==5.8.0
 iniconfig==1.1.1
 ipython==7.34.0
-jarowinkler==1.1.1
+jarowinkler==1.1.2
 jax==0.3.14
 jaxlib==0.3.14
 jedi==0.18.1
@@ -80,7 +80,7 @@ joblib==1.1.0
 jsonpickle==2.2.0
 keras==2.7.0
 Keras-Preprocessing==1.1.2
-kiwisolver==1.4.3
+kiwisolver==1.4.4
 korean-lunar-calendar==0.2.1
 langcodes==3.3.0
 libclang==14.0.1
@@ -131,7 +131,7 @@ pickleshare==0.7.5
 Pillow==9.2.0
 pluggy==1.0.0
 pmlb==1.0.1.post3
-polars==0.13.52
+polars==0.13.54
 preshed==3.0.6
 pretty-html-table==0.9.16
 prettytable==3.3.0
@@ -145,7 +145,7 @@ pyarrow==8.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycodestyle==2.8.0
-pydantic==1.8.2
+pydantic==1.9.1
 pyflakes==2.4.0
 Pygments==2.12.0
 pyinstrument==4.2.0
@@ -187,9 +187,9 @@ sklearn==0.0
 smart-open==5.2.1
 snoop==0.4.1
 soupsieve==2.3.2.post1
-spacy==3.3.1
+spacy==3.4.0
 spacy-legacy==3.0.9
-spacy-loggers==1.0.2
+spacy-loggers==1.0.3
 SQLAlchemy==1.4.39
 srsly==2.4.3
 statsmodels==0.13.2
@@ -204,7 +204,7 @@ tensorflow-cpu==2.7.3
 tensorflow-estimator==2.7.0
 tensorflow-io-gcs-filesystem==0.26.0
 termcolor==1.1.0
-thinc==8.0.17
+thinc==8.1.0
 threadpoolctl==3.1.0
 tifffile==2021.11.2
 tokenizers==0.12.1
@@ -222,11 +222,11 @@ tzlocal==4.2
 umap-learn==0.5.3
 urllib3==1.26.10
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@0b9ebfccbb5228d8879a8d83b2a3f315d2209697#egg=utilmy
+-e git+https://github.com/arita37/myutil@3f3a450efb8f9127a18829401ccc251a42b23d4f#egg=utilmy
 visions==0.7.4
 wasabi==0.9.1
 wcwidth==0.2.5
 Werkzeug==2.1.2
 wget==3.2
 wrapt==1.14.1
-zipp==3.8.0
+zipp==3.8.1
