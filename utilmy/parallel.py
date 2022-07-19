@@ -573,16 +573,16 @@ def multithread_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verb
     """  Run Multi-thread fun_async on input_list.
     Doc:: 
 
-        def test_fun_run(list_vars, const=1, const2=1):
+        def test_fun(list_vars, const=1, const2=1):
             print(f'Var: {list_vars[0]}')
             print('Fixed Const: ', const)
             return f"{const*const2} {str(list_vars[0])}"
 
-        input       = [ ( [1,2, "Hello"], [2,4, "World"], [3,4, "Thread3"], [4,5, "Thread4"], [5,2, "Thread5"], ),    ]
+        input_arg   = [ ( [1,2, "Hello"], [2,4, "World"], [3,4, "Thread3"], [4,5, "Thread4"], [5,2, "Thread5"], ),    ]
         input_fixed = {'const': 50, 'const2': i}
 
         from utilmy import parallel as par
-        res = par.multithread_run(test_fun_run, input, n_pool=3, input_fixed=input_fixed)
+        res = par.multithread_run(test_fun, input_arg, n_pool=3, input_fixed=input_fixed)
         print(res)
 
 
