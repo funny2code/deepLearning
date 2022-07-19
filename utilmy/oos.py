@@ -1133,12 +1133,23 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
-def glob_glob(dirin, exclude="", include="", include_only="", nfiles=99999,
+def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            exclude="", include_only="",
             from_ndays=3000, start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0,
 ):
+    """ Advanced Glob filtering
+    Docs:
+
+        https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
+
+        dirin, 
+        exclude="",  include_only="", 
+        min_size_mb=0, max_size_mb=500000,
+        from_ndays=3000, start_date='1970-01-01', end_date='2050-01-01',
+        nfiles=99999999, verbose=0,
+
+    """
     import glob, copy, datetime as dt, time
     files = glob.glob(dirin)
     files = sorted(files)
