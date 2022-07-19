@@ -1137,7 +1137,7 @@ def glob_glob(dirin, exclude="", include="", include_only="", nfiles=99999,
             min_size_mb=0, max_size_mb=500000,
             exclude="", include_only="",
             from_ndays=3000, start_date='1970-01-01', end_date='2050-01-01',
-            nfiles=99999999,
+            nfiles=99999999, verbose=0,
 ):
     import glob, copy, datetime as dt, time
     files = glob.glob(dirin)
@@ -1162,10 +1162,11 @@ def glob_glob(dirin, exclude="", include="", include_only="", nfiles=99999,
     flist = copy.deepcopy(flist2)    
 
     #######  date filtering  ################################################## 
-    now = time.time()
+    now    = time.time()
     cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"), 
-          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+    if verbose > 0 :
+          print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"), 
+               ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
     flist2=[]
     for fi in files[:nfiles]:
         try :
@@ -1450,6 +1451,51 @@ def profiler_stop():
 
 
 
+
+def aaa_bash_help():
+    """ Shorcuts for Bash
+    Docs::
+
+
+        --  Glob in Bash
+        setopt extendedglob
+        ls *(<tab>                                                    # to get help regarding globbing
+        rm ../debianpackage(.)                                        # remove files only
+        ls -d *(/)                                                    # list directories only
+        ls /etc/*(@)                                                  # list symlinks only
+        ls -l *.(png|jpg|gif)                                         # list pictures only
+        ls *(*)                                                       # list executables only
+        ls /etc/**/zsh                                                # which directories contain 'zsh'?
+        ls **/*(-@)                                                   # list dangling symlinks ('**' recurses down directory trees)
+        ls foo*~*bar*                                                 # match everything that starts with foo but doesn't contain bar
+        ls *(e:'file $REPLY | grep -q JPEG':)                         # match all files of which file says that they are JPEGs
+        ls -ldrt -- *(mm+15)                                          # List all files older than 15mins
+        ls -ldrt -- *(.mm+15)                                         # List Just regular files
+        ls -ld /my/path/**/*(D@-^@)                                   # List the unbroken sysmlinks under a directory.
+        ls -Lldrt -- *(-mm+15)                                        # List the age of the pointed to file for symlinks
+        ls -l **/README                                               # Search for `README' in all Subdirectories
+        ls -l foo<23->                                                # List files beginning at `foo23' upwards (foo23, foo24, foo25, ..)
+        ls -l 200406{04..10}*(N)                                      # List all files that begin with the date strings from June 4 through June 9 of 2004
+        ls -l 200306<4-10>.*                                          # or if they are of the form 200406XX (require ``setopt extended_glob'')
+        ls -l *.(c|h)                                                 # Show only all *.c and *.h - Files
+        ls -l *(R)                                                    # Show only world-readable files
+        ls -fld *(OL)                                                 # Sort the output from `ls -l' by file size
+        ls -fl *(DOL[1,5])                                            # Print only 5 lines by "ls" command (like ``ls -laS | head -n 5'')
+        ls -l *(G[users])                                             # Show only files are owned from group `users'
+        ls *(L0f.go-w.)                                               # Show only empty files which nor `group' or `world writable'
+        ls *.c~foo.c                                                  # Show only all *.c - files and ignore `foo.c'
+        print -rl /home/me/**/*(D/e{'reply=($REPLY/*(N[-1]:t))'})     # Find all directories, list their contents and output the first item in the above list
+        print -rl /**/*~^*/path(|/*)                                  # Find command to search for directory name instead of basename
+        print -l ~/*(ND.^w)                                           # List files in the current directory are not writable by the owner
+        print -rl -- *(Dmh+10^/)                                      # List all files which have not been updated since last 10 hours
+        print -rl -- **/*(Dom[1,10])                                  # List the ten newest files in directories and subdirs (recursive)
+        print -rl -- /path/to/dir/**/*(D.om[5,10])                    # Display the 5-10 last modified files
+        print -rl -- **/*.c(D.OL[1,10]:h) | sort -u                   # Print the path of the directories holding the ten biggest C regular files in the current directory and subdirectories.
+        setopt dotglob ; print directory/**/*(om[1])                  # Find most recent file in a directory
+        for a in ./**/*\ *(Dod); do mv $a ${a:h}/${a:t:gs/ /_}; done  # Remove spaces from filenames
+
+
+    """
 
 ###################################################################################################
 if __name__ == "__main__":
