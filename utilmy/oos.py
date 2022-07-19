@@ -17,10 +17,10 @@ def help():
     """function help
     Args:
     Returns:
-        
+
     """
     from utilmy import help_create
-    ss = help_create(__file__) 
+    ss = help_create(__file__)
     print(ss)
 
 
@@ -29,7 +29,7 @@ def test_all():
     """
     #### python test.py   test_oos
     """
-    return 1  
+    return 1
     log("Testing oos.py............................")
     from utilmy import oos as m
     from utilmy import pd_random
@@ -67,8 +67,8 @@ def test_all():
         log("Testing logs ...")
         log2("log2")
         log5("log5")
-    
-    
+
+
     def int_float_test():
         log("Testing int/float ..")
         from utilmy.oos import is_float,to_float,is_int,to_int
@@ -78,34 +78,34 @@ def test_all():
         is_float(float_)
         to_float(int_)
         to_int(float_)
-    
+
     def os_path_size_test():
         log("Testing os_path_size() ..")
         from utilmy.oos import os_path_size
         size_ = os_path_size()
         log("total size", size_)
-    
+
     def os_path_split_test():
         log("Testing os_path_split() ..")
         from utilmy.oos import os_path_split
         result_ = os_path_split("test/tmp/test.txt")
         log("result", result_)
-    
+
     def os_file_replacestring_test():
         log("Testing os_file_replacestring() ..")
-        
+
     def os_walk_test():
         log("Testing os_walk() ..")
         from utilmy.oos import os_walk
         import os
         cwd = os.getcwd()
         # log(os_walk(cwd))
-    
+
     def os_copy_safe_test():
         log("Testing os_copy_safe() ..")
         from utilmy.oos import os_copy_safe
         os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
-    
+
     def z_os_search_fast_test():
         log("Testing z_os_search_fast() ..")
         from utilmy.oos import z_os_search_fast
@@ -113,7 +113,7 @@ def test_all():
             file.write("Dummy text to test fast search string")
         res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
         print(res)
-    
+
     def os_search_content_test():
         log("Testing os_search_content() ..")
         from utilmy.oos import os_search_content
@@ -126,12 +126,12 @@ def test_all():
         res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
         log(res)
         '''
-    
+
     def os_get_function_name_test():
         log("Testing os_get_function_name() ..")
         from utilmy.oos import os_get_function_name
         log(os_get_function_name())
-    
+
     def os_variables_test():
         log("Testing os_variables_test ..")
         from utilmy.oos import os_variable_init, os_variable_check, os_variable_exist, os_import, os_clean_memory
@@ -149,13 +149,13 @@ def test_all():
         from utilmy.oos import os_system_list
         cmd = ["pwd","whoami"]
         os_system_list(cmd, sleep_sec=0)
-    
+
     def os_file_check_test():
         log("Testing os_file_check()")
         from utilmy.oos import os_to_file, os_file_check
         os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
         os_file_check("./testdata/tmp/test/file_test.txt")
-    
+
     def os_utils_test():
         log("Testing os utils...")
         from utilmy.oos import os_platform_os, os_cpu, os_memory,os_getcwd, os_sleep_cpu,os_copy,\
@@ -168,7 +168,7 @@ def test_all():
         os_makedirs("./testdata/tmp/test")
         with open("./testdata/tmp/test/os_utils_test.txt", 'w') as file:
             file.write("Dummy file to test os utils")
-            
+
         os_makedirs("./testdata/tmp/test/os_test")
         from utilmy.oos import os_file_replacestring
         with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
@@ -204,12 +204,12 @@ def test_all():
     #os_system_test()
 
 
-    
-def test0(): 
+
+def test0():
     """function test0
     Args:
     Returns:
-        
+
     """
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
@@ -236,7 +236,7 @@ def test1():
     """function test1
     Args:
     Returns:
-        
+
     """
     int_ = 1
     float_ = 1.1
@@ -249,7 +249,7 @@ def test2():
     """function test2
     Args:
     Returns:
-        
+
     """
     size_ = os_path_size()
     log("total size", size_)
@@ -278,7 +278,7 @@ def test4():
     """function test4
     Args:
     Returns:
-        
+
     """
     log(os_get_function_name())
     cwd = os.getcwd()
@@ -293,7 +293,7 @@ def test4():
     os_import(mod_name="pandas", globs=globs)
     os_clean_memory(["test_var"], globs)
     log(os_variable_exist("test_var",globs))
-    
+
     os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
     os_file_check("./testdata/tmp/test/file_test.txt")
 
@@ -301,7 +301,7 @@ def test5():
     """function test5
     Args:
     Returns:
-        
+
     """
     log("Testing os utils...")
     from utilmy import pd_random
@@ -314,9 +314,9 @@ def test5():
     log(os_sizeof(pd_df, set()))
 
 
-    
-    
-    
+
+
+
 
 ########################################################################################################
 ########################################################################################################
@@ -325,9 +325,9 @@ class dict_to_namespace(object):
     def __init__(self, d):
         """ dict_to_namespace:__init__
         Args:
-            d:     
+            d:
         Returns:
-           
+
         """
         self.__dict__ = d
 
@@ -335,9 +335,9 @@ class dict_to_namespace(object):
 def to_dict(**kw):
   """function to_dict
   Args:
-      **kw:   
+      **kw:
   Returns:
-      
+
   """
   ## return dict version of the params
   return kw
@@ -346,9 +346,9 @@ def to_dict(**kw):
 def to_timeunix(datex="2018-01-16"):
   """function to_timeunix
   Args:
-      datex:   
+      datex:
   Returns:
-      
+
   """
   if isinstance(datex, str)  :
      return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
@@ -360,9 +360,9 @@ def to_timeunix(datex="2018-01-16"):
 def to_datetime(x) :
   """function to_datetime
   Args:
-      x:   
+      x:
   Returns:
-      
+
   """
   import pandas as pd
   return pd.to_datetime( str(x) )
@@ -371,10 +371,10 @@ def to_datetime(x) :
 def np_list_intersection(l1, l2) :
   """function np_list_intersection
   Args:
-      l1:   
-      l2:   
+      l1:
+      l2:
   Returns:
-      
+
   """
   return [x for x in l1 if x in l2]
 
@@ -382,11 +382,11 @@ def np_list_intersection(l1, l2) :
 def np_add_remove(set_, to_remove, to_add):
     """function np_add_remove
     Args:
-        set_:   
-        to_remove:   
-        to_add:   
+        set_:
+        to_remove:
+        to_add:
     Returns:
-        
+
     """
     # a function that removes list of elements and adds an element from a set
     result_temp = set_.copy()
@@ -399,9 +399,9 @@ def np_add_remove(set_, to_remove, to_add):
 def to_float(x):
     """function to_float
     Args:
-        x:   
+        x:
     Returns:
-        
+
     """
     try :
         return float(x)
@@ -412,9 +412,9 @@ def to_float(x):
 def to_int(x):
     """function to_int
     Args:
-        x:   
+        x:
     Returns:
-        
+
     """
     try :
         return int(x)
@@ -425,28 +425,28 @@ def to_int(x):
 def is_int(x):
     """function is_int
     Args:
-        x:   
+        x:
     Returns:
-        
+
     """
     try :
         int(x)
         return True
     except :
-        return False    
+        return False
 
 def is_float(x):
     """function is_float
     Args:
-        x:   
+        x:
     Returns:
-        
+
     """
     try :
         float(x)
         return True
     except :
-        return False   
+        return False
 
 
 ########################################################################################################
@@ -516,15 +516,15 @@ def os_monkeypatch_help():
     """function os_monkeypatch_help
     Args:
     Returns:
-        
+
     """
     print( """
     https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
     
     
     """)
-    
-    
+
+
 def os_module_uncache(exclude='os.system'):
     """Remove package modules from cache except excluded ones.
        On next import they will be reloaded.  Useful for monkey patching
@@ -555,12 +555,12 @@ def os_module_uncache(exclude='os.system'):
     for mod in to_uncache:
         del sys.modules[mod]
 
-        
-        
+
+
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
     """
-    import datetime 
+    import datetime
     from pytz import timezone as tzone
     try :
       mtime  = os.path.getmtime(dirin)
@@ -568,14 +568,14 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
       mtime2 = mtime2.astimezone(tzone(timezone))
       return mtime2.strftime(fmt)
     except:
-      return ""  
+      return ""
 
 
 def os_process_list():
      """  List of processes
      #ll = os_process_list()
      #ll = [t for t in ll if 'root' in t and 'python ' in t ]
-     ### root   ....  python run          
+     ### root   ....  python run
      """
      import subprocess
      ps = subprocess.Popen('ps -ef', shell=True, stdout=subprocess.PIPE)
@@ -584,28 +584,28 @@ def os_process_list():
      return ll
 
 
-def os_wait_processes(nhours=7):        
+def os_wait_processes(nhours=7):
     """function os_wait_processes
     Args:
-        nhours:   
+        nhours:
     Returns:
-        
+
     """
     t0 = time.time()
     while (time.time() - t0 ) < nhours * 3600 :
        ll = os_process_list()
-       if len(ll) < 2 : break   ### Process are not running anymore 
-       log("sleep 30min", ll)     
+       if len(ll) < 2 : break   ### Process are not running anymore
+       log("sleep 30min", ll)
        time.sleep(3600* 0.5)
 
 
-        
+
 def os_path_size(path = '.'):
     """function os_path_size
     Args:
-        path :   
+        path :
     Returns:
-        
+
     """
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(path):
@@ -621,9 +621,9 @@ def os_path_size(path = '.'):
 def os_path_split(fpath:str=""):
     """function os_path_split
     Args:
-        fpath ( str ) :   
+        fpath ( str ) :
     Returns:
-        
+
     """
     #### Get path split
     fpath = fpath.replace("\\", "/")
@@ -677,20 +677,20 @@ def os_walk(path, pattern="*", dirlevel=50):
     for root, dirs, files in os.walk(dir1):
         root = root.replace("\\", "/")
         for fi in files :
-            if root.count("/") > num_sep + dirlevel: continue 
+            if root.count("/") > num_sep + dirlevel: continue
             matches['file'].append(os.path.join(root, fi).replace("\\","/"))
 
         for di in dirs :
-            if root.count("/") > num_sep + dirlevel: continue 
+            if root.count("/") > num_sep + dirlevel: continue
             matches['dir'].append(os.path.join(root, di).replace("\\","/") + "/")
 
     ### Filter files
-    matches['file'] = [ t for t in fnmatch.filter(matches['file'], pattern) ] 
+    matches['file'] = [ t for t in fnmatch.filter(matches['file'], pattern) ]
     return  matches
 
 
 def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir="./", pattern="*", exclude="", force=False, sleep=0.5, cmd_fallback="",
-                 verbose=True):  ### 
+                 verbose=True):  ###
     """ Copy safe
     """
     import shutil, time, os, glob
@@ -698,11 +698,11 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
     flist = [] ; dirinj = dirin
     for j in range(nlevel):
         ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
-        dirinj = dirinj + "/*/"             
+        dirinj = dirinj + "/*/"
         if len(ztmp) < 1 : break
         flist  = flist + ztmp
 
-    flist2 = []    
+    flist2 = []
     for x in exclude.split(","):
         if len(x) <=1 : continue
         for t in flist :
@@ -739,7 +739,7 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
                 ntry = ntry + 1
     log('Scanned', i, 'transfered', kk)
 
-### Alias       
+### Alias
 os_copy = os_copy_safe
 
 
@@ -747,54 +747,54 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
                   cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
     """function os_merge_safe
     Args:
-        dirin_list:   
-        dirout:   
-        nlevel:   
-        nfile:   
-        nrows:   
-        cmd_fallback :   
-        sleep:   
+        dirin_list:
+        dirout:
+        nlevel:
+        nfile:
+        nrows:
+        cmd_fallback :
+        sleep:
     Returns:
-        
+
     """
     ### merge file in safe way
     nrows = 10**8
     flist = []
     for fi in dirin_list :
         flist = flist + glob.glob(fi)
-    log(flist); time.sleep(2)    
+    log(flist); time.sleep(2)
 
-    os_makedirs(dirout)            
+    os_makedirs(dirout)
     fout = open(dirout,'a')
-    for fi in flist :    
-        log(fi)             
+    for fi in flist :
+        log(fi)
         ii   = 0
         fin  = open(fi,'r')
         while True:
             try :
               ii = ii + 1
               if ii % 100000 == 0 : time.sleep(sleep)
-              if ii > nrows : break      
+              if ii > nrows : break
               x = fin.readline()
-              if not x: break        
+              if not x: break
               fout.write(x.strip()+"\n")
             except Exception as e:
               log(e)
               os.system(cmd_fallback)
               time.sleep(10)
-              fout.write(x.strip()+"\n") 
-        fin.close()    
+              fout.write(x.strip()+"\n")
+        fin.close()
 
 
 
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
-        fname:   
-        texts:   
-        mode:   
+        fname:
+        texts:
+        mode:
     Returns:
-        
+
     """
     import re
     if texts is None:
@@ -859,7 +859,7 @@ def os_get_function_name():
     """function os_get_function_name
     Args:
     Returns:
-        
+
     """
     ### Get ane,
     import sys, socket
@@ -876,10 +876,10 @@ def os_get_function_name():
 def os_variable_init(ll, globs):
     """function os_variable_init
     Args:
-        ll:   
-        globs:   
+        ll:
+        globs:
     Returns:
-        
+
     """
     for x in ll :
         try :
@@ -891,11 +891,11 @@ def os_variable_init(ll, globs):
 def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
     """function os_import
     Args:
-        mod_name:   
-        globs:   
-        verbose:   
+        mod_name:
+        globs:
+        verbose:
     Returns:
-        
+
     """
     ### Import in Current Python Session a module   from module import *
     ### from mod_name import *
@@ -926,11 +926,11 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 def os_variable_exist(x ,globs, msg="") :
     """function os_variable_exist
     Args:
-        x:   
-        globs:   
-        msg:   
+        x:
+        globs:
+        msg:
     Returns:
-        
+
     """
     x_str = str(globs.get(x, None))
     if "None" in x_str:
@@ -944,11 +944,11 @@ def os_variable_exist(x ,globs, msg="") :
 def os_variable_check(ll, globs=None, do_terminate=True):
   """function os_variable_check
   Args:
-      ll:   
-      globs:   
-      do_terminate:   
+      ll:
+      globs:
+      do_terminate:
   Returns:
-      
+
   """
   import sys
   for x in ll :
@@ -964,10 +964,10 @@ def os_variable_check(ll, globs=None, do_terminate=True):
 def os_clean_memory( varlist , globx):
   """function os_clean_memory
   Args:
-      varlist:   
-      globx:   
+      varlist:
+      globx:
   Returns:
-      
+
   """
   for x in varlist :
     try :
@@ -979,11 +979,11 @@ def os_clean_memory( varlist , globx):
 def os_system_list(ll, logfile=None, sleep_sec=10):
    """function os_system_list
    Args:
-       ll:   
-       logfile:   
-       sleep_sec:   
+       ll:
+       logfile:
+       sleep_sec:
    Returns:
-       
+
    """
    ### Execute a sequence of cmd
    import time, sys
@@ -1009,9 +1009,9 @@ def os_system_list(ll, logfile=None, sleep_sec=10):
 def os_file_check(fp):
    """function os_file_check
    Args:
-       fp:   
+       fp:
    Returns:
-       
+
    """
    import os, time
    try :
@@ -1023,11 +1023,11 @@ def os_file_check(fp):
 def os_to_file( txt="", filename="ztmp.txt",  mode='a'):
     """function os_to_file
     Args:
-        txt:   
-        filename:   
-        mode:   
+        txt:
+        filename:
+        mode:
     Returns:
-        
+
     """
     with open(filename, mode=mode) as fp:
         fp.write(txt + "\n")
@@ -1037,7 +1037,7 @@ def os_platform_os():
     """function os_platform_os
     Args:
     Returns:
-        
+
     """
     #### get linux or windows
     return sys.platform
@@ -1047,7 +1047,7 @@ def os_cpu():
     """function os_cpu
     Args:
     Returns:
-        
+
     """
     ### Nb of cpus cores
     return os.cpu_count()
@@ -1057,7 +1057,7 @@ def os_platform_ip():
     """function os_platform_ip
     Args:
     Returns:
-        
+
     """
     ### IP
     pass
@@ -1085,11 +1085,11 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     Docs::
 
         Args:
-            cpu_min:   
-            sleep:   
-            interval:   
-            msg:   
-            verbose:   
+            cpu_min:
+            sleep:
+            interval:
+            msg:
+            verbose:
         Returns:
     """
     #### Sleep until CPU becomes normal usage
@@ -1099,14 +1099,14 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
         ui = psutil.cpu_percent(interval=interval)
         aux = 0.5 * (aux +  ui)
         if verbose : log( 'Sleep sec', sleep, ' Usage %', aux, ui, msg )
-        time.sleep(sleep)        
+        time.sleep(sleep)
     return aux
 
 
 def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
     """ Find the memory footprint of a Python object
     Docs::
-        
+
         deep_getsizeof(df_pd, set())
         The sys.getsizeof function does a shallow size of only. It counts each
         object inside a container as pointer only regardless of how big it
@@ -1138,7 +1138,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            ndays_past=3000, nmin_past=0,  start_date='1970-01-01', end_date='2050-01-01',
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0,
 ):
     """ Advanced Glob filtering.
@@ -1162,7 +1162,7 @@ def glob_glob(dirin, exclude="", include_only="",
     files = glob.glob(dirin)
     files = sorted(files)
 
-    ####### Exclude/Include  ################################################## 
+    ####### Exclude/Include  ##################################################
     for xi in exclude.split(","):
         if len(xi) > 0:
            files = [  fi for fi in files if xi not in fi ]
@@ -1171,24 +1171,24 @@ def glob_glob(dirin, exclude="", include_only="",
         if len(xi) > 0:
            files = [  fi for fi in files if xi  in fi ]
 
-    ####### size filtering  ################################################## 
+    ####### size filtering  ##################################################
     flist2=[]
     for fi in files[:nfiles]:
         try :
           if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
             flist2.append(fi)
         except : pass
-    flist = copy.deepcopy(flist2)    
+    flist = copy.deepcopy(flist2)
 
-    #######  date filtering  ################################################## 
+    #######  date filtering  ##################################################
     now    = time.time()
     cutoff = 0
 
-    if ndays_past > 0 :
+    if ndays_past > -1 :
         cutoff = now - ( abs(ndays_past) * 86400)
 
-    if ndays_past > 0 :
-        cutoff = cutoff - ( abs(nmin_past) * 3600 )
+    if nmin_past > -1 :
+        cutoff = cutoff - ( abs(nmin_past) * 60  )
 
     if cutoff > 0:
         if verbose > 0 :
@@ -1203,7 +1203,7 @@ def glob_glob(dirin, exclude="", include_only="",
                 flist2.append(fi)
             except : pass
 
-    #######  date filtering  ################################################## 
+    #######  date filtering  ##################################################
 
 
     return files
@@ -1256,7 +1256,7 @@ def os_remove_file(dirin="folder/**/*.parquet",
 
     dry = True if dry in {True, 1} else False
 
-    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only, 
+    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
             min_size_mb= min_size_mb, max_size_mb= max_size_mb,
             from_ndays=from_ndays, start_date=start_date, end_date=end_date,
             nfiles=nfiles,
@@ -1280,8 +1280,8 @@ def os_remove_file(dirin="folder/**/*.parquet",
 
 def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
     """  Delete files older than ndays.
-    
-    
+
+
     """
     import os, sys, time, glob, datetime as dt
 
@@ -1290,12 +1290,12 @@ def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10000
     files = glob.glob(dirin)
     files = sorted(files)
     for exi in exclude.split(","):
-        if len(exi) > 0: 
+        if len(exi) > 0:
            files = [  fi for fi in files if exi not in fi ]
 
     now = time.time()
     cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"), 
+    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
           ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
     flist2=[]
     for fi in files[:nfiles]:
@@ -1305,20 +1305,20 @@ def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10000
           # delete file if older than 10 days
           if c < cutoff:
             flist2.append(fi)
-        except : pass  
+        except : pass
 
     print ('Nfiles', len(flist2))
     jj = 0
-    for fi in flist2 :         
+    for fi in flist2 :
         try :
             if not dry :
                os.remove(fi)
                jj = jj +1
             else :
-               print(fi) 
+               print(fi)
         except Exception as e :
-            print(fi, e)     
-    
+            print(fi, e)
+
     if dry :  print('dry mode only')
     else :    print('deleted', jj)
 
@@ -1341,14 +1341,14 @@ def os_removedirs(path, verbose=False):
               if verbose: log(name)
             except Exception as e :
               log('error', name, e)
-            
+
         for name in dirs:
             try :
               os.rmdir(os.path.join(root, name))
               if verbose: log(name)
             except  Exception as e:
               log('error', name, e)
-            
+
     try :
       os.rmdir(path)
     except: pass
@@ -1359,7 +1359,7 @@ def os_getcwd():
     """function os_getcwd
     Args:
     Returns:
-        
+
     """
     ## This is for Windows Path normalized As Linux /
     root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
@@ -1386,9 +1386,9 @@ def os_system(cmd, doprint=False):
 def os_makedirs(dir_or_file):
     """function os_makedirs
     Args:
-        dir_or_file:   
+        dir_or_file:
     Returns:
-        
+
     """
     if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
         os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
@@ -1417,36 +1417,36 @@ def print_everywhere():
     import snoop
     snoop.install()  ### can be used anywhere"
     print("Decaorator @snoop ")
-    
-    
+
+
 def log10(*s, nmax=60):
     """ Display variable name, type when showing,  pip install varname
-    
+
     """
     from varname import varname, nameof
     for x in s :
         print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
-        
-    
+
+
 def log5(*s):
     """    ### Equivalent of print, but more :  https://github.com/gruns/icecream
     pip install icrecream
     ic()  --->  ic| example.py:4 in foo()
     ic(var)  -->   ic| d['key'][1]: 'one'
-    
+
     """
     from icecream import ic
     return ic(*s)
-    
-    
+
+
 def log_trace(msg="", dump_path="", globs=None):
     """function log_trace
     Args:
-        msg:   
-        dump_path:   
-        globs:   
+        msg:
+        dump_path:
+        globs:
     Returns:
-        
+
     """
     print(msg)
     import pdb;
@@ -1457,7 +1457,7 @@ def profiler_start():
     """function profiler_start
     Args:
     Returns:
-        
+
     """
     ### Code profiling
     from pyinstrument import Profiler
@@ -1470,7 +1470,7 @@ def profiler_stop():
     """function profiler_stop
     Args:
     Returns:
-        
+
     """
     global profiler
     profiler.stop()
