@@ -249,9 +249,9 @@ def pd_read_file(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=False
         :return:
     """
     import glob, gc,  pandas as pd, os
-    
+
     if isinstance(path_glob, pd.DataFrame ) : return path_glob   ### Helpers
-    
+
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
     def log(*s, **kw):  print(*s, flush=True, **kw)
     readers = {
@@ -293,8 +293,8 @@ def pd_read_file(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=False
             if fun_apply is not None  :       dfi = dfi.apply(lambda  x : fun_apply(x), axis=1)
             return dfi
 
-            
-            
+
+
     ### Parallel run #################################
     import concurrent.futures
     dfall  = pd.DataFrame(columns=cols) if cols is not None else pd.DataFrame()
@@ -324,9 +324,9 @@ def pd_read_file2(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=Fals
         return: pd.DataFrame
     """
     import glob, gc,  pandas as pd, os
-    if isinstance(path_glob, pd.DataFrame ) : return path_glob   ### Helpers    
+    if isinstance(path_glob, pd.DataFrame ) : return path_glob   ### Helpers
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
-    
+
     def log(*s, **kw):
         print(*s, flush=True, **kw)
     readers = {
@@ -404,7 +404,7 @@ def pd_read_file2(path_glob="*.pkl", ignore_index=True,  cols=None, verbose=Fals
                   del dfi; gc.collect()
             except Exception as e:
                 log('error', filei, e)
-          
+
 
     pool.close() ; pool.join() ;  pool = None
     if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
@@ -447,6 +447,20 @@ def pd_groupby_parallel2(df, colsgroup=None, fun_apply=None,
 
 def pd_groupby_parallel(df, colsgroup=None, fun_apply=None, n_pool=4, npool=None)->pd.DataFrame:
     """Use of multi-thread on group by apply when order is not important.
+    Doc::
+
+        df  = pd_random(1*10**5, ncols=3)
+
+        def test_fun_sum_inv(group, name=None):         # Inverse cumulative sum
+            group["inv_sum"] = group.iloc[::-1]["1"].cumsum()[::-1].shift(-1).fillna(0)
+            return group
+
+        colsgroup = ['0']
+        df1 = df.groupby(colsgroup).apply(lambda dfi : test_fun_sum_inv(dfi ) )
+
+        from utilmy import parallel as par
+        df2 = par.pd_groupby_parallel(df, colsgroup, fun_apply= test_fun_sum_inv, npool=4 )
+
     """
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
     import pandas as pd, concurrent.futures
@@ -469,8 +483,19 @@ def pd_groupby_parallel(df, colsgroup=None, fun_apply=None, n_pool=4, npool=None
     return df_out
 
 
+
 def pd_apply_parallel(df, fun_apply=None, npool=5, verbose=True )->pd.DataFrame:
     """ Pandas parallel apply, using multi-thread
+    Doc::
+
+        df  = pd_random(1*10**5, ncols=3)
+        def test_sum(x):
+            return  x['0'] + x['1']
+
+
+        from utilmy import parallel as par
+        df['s1'] = pd_apply_parallel(df, fun_apply= test_sum, npool=7 )   ### Failed due to groupby part
+
     """
     import pandas as pd, numpy as np, time, gc
 
@@ -503,29 +528,27 @@ def pd_apply_parallel(df, fun_apply=None, npool=5, verbose=True )->pd.DataFrame:
 
 
 ############################################################################################################
-def multiproc_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, npool=None, **kw):
-    """  Multiprocessing execute.
+def multiproc_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, input_fixed:dict=None, npool=None,  verbose=True, **kw):
+    """  Run a function into mutiprocessing
     Doc::
 
-        input is as list of tuples  [(x1,x2,x3), (y1,y2,y3) ]
-        def fun_async(xlist):
-        for x in xlist :
-                download.upload(x[0], x[1])
-            def f(i, n):
-        return i * i + 2*n
-        ..
-        from itertools import repeat
-        N = 10000
-        from pathos.pools import ProcessPool as Pool
-        pool = Pool()
-        ans = pool.map(f, xrange(1000), repeat(20))
-        ans[:10]
-        [40, 41, 44, 49, 56, 65, 76, 89, 104, 121]
-        # this also works
-        ans = pool.map(lambda x: f(x, 20), xrange(1000))
-        ans[:10]
-        [40, 41, 44, 49, 56, 65, 76, 89, 104, 121]
-        input_fixed = {'const': 555}
+        def test_fun_sum2(list_vars, const=1, const2=1):
+            print( list_vars )
+            si = 0
+            for xi in list_vars :
+                print(xi)
+                si = si + xi if isinstance(xi, int) else si + sum(xi)
+            return si
+
+        input_list  = [ [1,1,], [2,2, ], [3,3, ], [4,4,], [5,5, ], [6,6, ], [7,7, ],  ]
+        input_fixed = {'const': 50, 'const2': i}
+
+        from utilmy import parallel as par
+        res = par.multiproc_run(test_fun_sum2, input_list= input_list, input_fixed= input_fixed, n_pool= 3 )
+        print(  res,  )
+
+
+
     """
     import time, functools
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
@@ -570,14 +593,22 @@ def multiproc_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verbos
 
 
 def multithread_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, npool=None, **kw):
-    """  Run Multi-thread fun_async on input_list
-    Doc:: 
+    """  Run Multi-thread fun_async on input_list.
+    Doc::
 
-        input is as list of tuples  [(x1,x2,x3), (y1,y2,y3) ]
-        def fun_async(xlist):
-        for x in xlist :
-                hdfs.upload(x[0], x[1])
-        input_fixed = {'const_var' : 1 }
+        def test_fun(list_vars, const=1, const2=1):
+            print(f'Var: {list_vars[0]}')
+            print('Fixed Const: ', const)
+            return f"{const*const2} {str(list_vars[0])}"
+
+        input_arg   = [ ( [1,2, "Hello"], [2,4, "World"], [3,4, "Thread3"], [4,5, "Thread4"], [5,2, "Thread5"], ),    ]
+        input_fixed = {'const': 50, 'const2': i}
+
+        from utilmy import parallel as par
+        res = par.multithread_run(test_fun, input_arg, n_pool=3, input_fixed=input_fixed)
+        print(res)
+
+
     """
     import time, functools
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
@@ -627,7 +658,7 @@ def multiproc_tochunk(flist:list, npool=2 ):
     Doc::
 
        returns list of list
- 
+
     """
     ll = []
     chunk = len(flist) // npool
@@ -642,7 +673,7 @@ def multiproc_tochunk(flist:list, npool=2 ):
 def multithread_run_list(**kwargs):
     """ Creating n number of threads.
     Docs::
-    
+
         1 thread per function,    starting them and waiting for their subsequent completion
         os_multithread(function1=(test_print, ("some text",)),
                             function2=(test_print, ("bbbbb",)),
