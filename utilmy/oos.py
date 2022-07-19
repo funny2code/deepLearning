@@ -1082,14 +1082,15 @@ def os_memory():
 
 def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     """function os_sleep_cpu
-    Args:
-        cpu_min:   
-        sleep:   
-        interval:   
-        msg:   
-        verbose:   
-    Returns:
-        
+    Docs::
+
+        Args:
+            cpu_min:   
+            sleep:   
+            interval:   
+            msg:   
+            verbose:   
+        Returns:
     """
     #### Sleep until CPU becomes normal usage
     import psutil, time
@@ -1103,10 +1104,12 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
 
 
 def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
-    """ deep_getsizeof(df_pd, set())
-    Find the memory footprint of a Python object
-    The sys.getsizeof function does a shallow size of only. It counts each
-    object inside a container as pointer only regardless of how big it
+    """ Find the memory footprint of a Python object
+    Docs::
+        
+        deep_getsizeof(df_pd, set())
+        The sys.getsizeof function does a shallow size of only. It counts each
+        object inside a container as pointer only regardless of how big it
     """
     from collections import Mapping, Container
     from sys import getsizeof
