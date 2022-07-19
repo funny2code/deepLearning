@@ -447,6 +447,20 @@ def pd_groupby_parallel2(df, colsgroup=None, fun_apply=None,
 
 def pd_groupby_parallel(df, colsgroup=None, fun_apply=None, n_pool=4, npool=None)->pd.DataFrame:
     """Use of multi-thread on group by apply when order is not important.
+    Doc::
+
+        df  = pd_random(1*10**5, ncols=3)
+
+        def test_fun_sum_inv(group, name=None):         # Inverse cumulative sum
+            group["inv_sum"] = group.iloc[::-1]["1"].cumsum()[::-1].shift(-1).fillna(0)
+            return group
+
+        colsgroup = ['0']
+        df1 = df.groupby(colsgroup).apply(lambda dfi : test_fun_sum_inv(dfi ) )
+
+        from utilmy import parallel as par
+        df2 = par.pd_groupby_parallel(df, colsgroup, fun_apply= test_fun_sum_inv, npool=4 )
+
     """
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
     import pandas as pd, concurrent.futures
@@ -469,8 +483,19 @@ def pd_groupby_parallel(df, colsgroup=None, fun_apply=None, n_pool=4, npool=None
     return df_out
 
 
+
 def pd_apply_parallel(df, fun_apply=None, npool=5, verbose=True )->pd.DataFrame:
     """ Pandas parallel apply, using multi-thread
+    Doc::
+
+        df  = pd_random(1*10**5, ncols=3)
+        def test_sum(x):
+            return  x['0'] + x['1']
+
+
+        from utilmy import parallel as par
+        df['s1'] = pd_apply_parallel(df, fun_apply= test_sum, npool=7 )   ### Failed due to groupby part
+
     """
     import pandas as pd, numpy as np, time, gc
 

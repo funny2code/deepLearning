@@ -174,7 +174,7 @@ if 'check if .py compile':
 
 #############################################################################################
 ########## Formatters #######################################################################
-def codesource_extrac_block(txt)
+def codesource_extrac_block(txt):
     """ Split the code source into Code Blocks:
        header
        import
@@ -239,7 +239,7 @@ def format_import_merge(text):
     import_list = [] ; from_list = []
     for line in lines :
       if "import " in line :
-         if "from " in li : from_list.append(line)
+         if "from " in line : from_list.append(line)
          else :             import_list.append(line)
 
             
@@ -249,7 +249,7 @@ def format_import_merge(text):
         ll    = [ t.strip for t in  imp.split(",") if 'import' not in t ]
         llall = llall + ll
 
-    lall = sorted( lall )
+    lall = sorted( llall )
     ssall = ""
     for mi in lall:
        ss =  ss + mi + ","
@@ -458,7 +458,7 @@ def format_add_header(txt:str):
 
 
     ### Write down and check
-    to_file(ll2, finew)
+    to_file(ll2)
     isok  = os_file_compile_check(finew)
     if isok :
         os.remove(fi)
