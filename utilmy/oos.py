@@ -1138,7 +1138,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            ndays_past=3000, nmin_past=0,  start_date='1970-01-01', end_date='2050-01-01',
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0,
 ):
     """ Advanced Glob filtering.
@@ -1184,11 +1184,11 @@ def glob_glob(dirin, exclude="", include_only="",
     now    = time.time()
     cutoff = 0
 
-    if ndays_past > 0 :
+    if ndays_past > -1 :
         cutoff = now - ( abs(ndays_past) * 86400)
 
-    if ndays_past > 0 :
-        cutoff = cutoff - ( abs(nmin_past) * 3600 )
+    if nmin_past > -1 :
+        cutoff = cutoff - ( abs(nmin_past) * 60  )
 
     if cutoff > 0:
         if verbose > 0 :
