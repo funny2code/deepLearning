@@ -1133,14 +1133,53 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
-def glob_glob(dirin, exclude="", include="", nfiles=99999):
-    import glob
+def glob_glob(dirin, exclude="", include="", include_only="", nfiles=99999,
+            min_size_mb=0, max_size_mb=500000,
+            exclude="", include_only="",
+            from_ndays=3000, start_date='1970-01-01', end_date='2050-01-01',
+            nfiles=99999999,
+):
+    import glob, copy, datetime as dt, time
     files = glob.glob(dirin)
     files = sorted(files)
-    for exi in exclude.split(","):
+
+    ####### Exclude/Include  ################################################## 
+    for xi in exclude.split(","):
         if len(exi) > 0:
-           files = [  fi for fi in files if exi not in fi ]
+           files = [  fi for fi in files if xi not in fi ]
+
+    for xi in include_only.split(","):
+        if len(xi) > 0:
+           files = [  fi for fi in files if xi  in fi ]
+
+    ####### size filtering  ################################################## 
+    flist2=[]
+    for fi in files[:nfiles]:
+        try :
+          if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
+            flist2.append(fi)
+        except : pass
+    flist = copy.deepcopy(flist2)    
+
+    #######  date filtering  ################################################## 
+    now = time.time()
+    cutoff = now - ( abs(ndays_past) * 86400)
+    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"), 
+          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+    flist2=[]
+    for fi in files[:nfiles]:
+        try :
+          t = os.stat( fi)
+          c = t.st_ctime
+          if c < cutoff:             # delete file if older than 10 days
+            flist2.append(fi)
+        except : pass 
+
+    #######  date filtering  ################################################## 
+
+
     return files
+
 
 
 def os_copy(dirfrom="folder/**/*.parquet", dirto="",  min_size_mb=0, max_size_mb=1,
@@ -1177,7 +1216,7 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",  min_size_mb=0, max_size_mb
 
 def os_remove_file(dirin="folder/**/*.parquet",
             min_size_mb=0, max_size_mb=1,
-            exclude="", include="",
+            exclude="", include_only="",
             from_ndays=1000, start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999,
             dry=0):
@@ -1187,19 +1226,13 @@ def os_remove_file(dirin="folder/**/*.parquet",
     """
     import os, sys, time, glob, datetime as dt
 
-    dry = True if dry ==True or dry==1 else False
+    dry = True if dry in {True, 1} else False
 
-    files = glob_glob(dirin, exclude=exclude, include=include, nfiles=nfiles)
-
-
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
-            flist2.append(fi)
-        except : pass
-
-
+    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only, 
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            from_ndays=from_ndays, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,
+    )
 
     print ('Nfiles', len(flist2))
     jj = 0
