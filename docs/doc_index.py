@@ -2568,8 +2568,9 @@ fixedDict._check_size_limit(self)
 
 utilmy/oos.py
 -------------------------functions----------------------
+aaa_bash_help()
 date_to_timezone(tdate, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
-glob_glob(dirin, exclude = "", include = "", nfiles = 99999)
+glob_glob(dirin, exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
 help()
 is_float(x)
 is_int(x)
@@ -2597,7 +2598,7 @@ os_path_split(fpath:str = "")
 os_platform_ip()
 os_platform_os()
 os_process_list()
-os_remove_file(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
+os_remove_file(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
 os_remove_file_past(dirin = "folder/**/*.parquet", ndays_past = 20, nfiles = 1000000, exclude = "", dry = 1)
 os_removedirs(path, verbose = False)
 os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
@@ -2679,7 +2680,7 @@ test_use_operon()
 utilmy/parallel.py
 -------------------------functions----------------------
 help()
-multiproc_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, npool = None, **kw)
+multiproc_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, input_fixed:dict = None, npool = None, verbose = True, **kw)
 multiproc_tochunk(flist:list, npool = 2)
 multithread_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, npool = None, **kw)
 multithread_run_list(**kwargs)
