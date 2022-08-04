@@ -1139,7 +1139,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
+            nfiles=99999999, verbose=0, npool=1
 ):
     """ Advanced Glob filtering.
     Docs:
@@ -1159,54 +1159,73 @@ def glob_glob(dirin, exclude="", include_only="",
 
     """
     import glob, copy, datetime as dt, time
-    files = glob.glob(dirin)
-    files = sorted(files)
 
-    ####### Exclude/Include  ##################################################
-    for xi in exclude.split(","):
-        if len(xi) > 0:
-           files = [  fi for fi in files if xi not in fi ]
 
-    for xi in include_only.split(","):
-        if len(xi) > 0:
-           files = [  fi for fi in files if xi  in fi ]
+    def fun_glob(dirin, exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
+            nfiles=99999999, verbose=0):
+        files = glob.glob(dirin)
+        files = sorted(files)
 
-    ####### size filtering  ##################################################
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
-            flist2.append(fi)
-        except : pass
-    flist = copy.deepcopy(flist2)
+        ####### Exclude/Include  ##################################################
+        for xi in exclude.split(","):
+            if len(xi) > 0:
+               files = [  fi for fi in files if xi not in fi ]
 
-    #######  date filtering  ##################################################
-    now    = time.time()
-    cutoff = 0
+        for xi in include_only.split(","):
+            if len(xi) > 0:
+               files = [  fi for fi in files if xi  in fi ]
 
-    if ndays_past > -1 :
-        cutoff = now - ( abs(ndays_past) * 86400)
-
-    if nmin_past > -1 :
-        cutoff = cutoff - ( abs(nmin_past) * 60  )
-
-    if cutoff > 0:
-        if verbose > 0 :
-              print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-                   ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+        ####### size filtering  ##################################################
         flist2=[]
         for fi in files[:nfiles]:
             try :
-              t = os.stat( fi)
-              c = t.st_ctime
-              if c < cutoff:             # delete file if older than 10 days
+              if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
                 flist2.append(fi)
             except : pass
+        flist = copy.deepcopy(flist2)
 
-    #######  date filtering  ##################################################
+        #######  date filtering  ##################################################
+        now    = time.time()
+        cutoff = 0
+
+        if ndays_past > -1 :
+            cutoff = now - ( abs(ndays_past) * 86400)
+
+        if nmin_past > -1 :
+            cutoff = cutoff - ( abs(nmin_past) * 60  )
+
+        if cutoff > 0:
+            if verbose > 0 :
+                  print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
+                       ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+            flist2=[]
+            for fi in files[:nfiles]:
+                try :
+                  t = os.stat( fi)
+                  c = t.st_ctime
+                  if c < cutoff:             # delete file if older than 10 days
+                    flist2.append(fi)
+                except : pass
+
+        return files
+
+    if npool ==  1:
+         return fun_glob(dirin, exclude, include_only,
+            min_size_mb, max_size_mb,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
+            nfiles=99999999, verbose=0)
+
+    else :
+         from utilmy import parallel as par
+
+         fdir = os.walk(dirin)
+
+         res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
+         # res =sum(res) ### merge
 
 
-    return files
 
 
 
