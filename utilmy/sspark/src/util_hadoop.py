@@ -143,22 +143,35 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
-def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False):
+def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file=''):
     """
         flag=-R
         if use_regex == True
             1) can search for specific files using star *
             2) downloading files with specific patterns
 
+        
+        the use of globre:
+            Example:
+            if match_file is 'path/to/*.txt'
+            names = [
+            '/path/to/file.txt',
+            '/path/to/config.ini',
+            '/path/to/subdir/base.ini',
+            ]
+            txt_names = [name for name in names if globre.match('/path/to/*.txt', name)]
+            out:
+                ['/path/to/file.txt']
+
     """
     from subprocess import Popen, PIPE
-    import subprocess, re
+    import subprocess, re, globre
     
     if use_regex:
         files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
         flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
-        # if filename_only:
-        #     return [fn.split('/')[-1] for fn in flist_full_address]
+        if match_file:
+            return [fn for fn in flist_full_address if globre.match(match_file, fn)]
         return flist_full_address
 
     process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)

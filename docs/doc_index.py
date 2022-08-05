@@ -91,7 +91,7 @@ utilmy/configs/util_config.py
 -------------------------functions----------------------
 config_isvalid_pydantic(config_dict: dict, pydanctic_schema: str  =  'config_py.yaml', silent: bool  =  False)
 config_isvalid_yamlschema(config_dict: dict, schema_path: str  =  'config_val.yaml', silent: bool  =  False)
-config_load(config_path:    str   =  None, to_dataclass:   bool  =  True, path_default:   str   =  None, config_default: dict  =  None, save_default:   bool  =  False, )
+config_load(config_path:    str   =  None, to_dataclass:   bool  =  True, path_default:   str   =  None, config_default: dict  =  None, save_default:   bool  =  False, config_field_name :  str   =  None, )
 convert_dict_to_pydantic(config_dict: dict, schema_name: str)
 convert_yaml_to_box(yaml_path: str)
 global_verbosity(cur_path, path_relative = "/../../config.json", default = 5, key = 'verbosity', )
@@ -1213,11 +1213,6 @@ np_matrix_to_str2(m, map_dict:dict)
 np_matrix_to_str_sim(m)
 np_str_to_array(vv, mdim  =  200, l2_norm_faiss = False, l2_norm_sklearn = True)
 pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict  =  None)
-test1()
-test2()
-test3()
-test4()
-test5()
 test_all()
 test_create_model_pytorch(dirsave = None, model_name = "")
 test_dataset_classification_fake(nrows = 500)
@@ -1229,6 +1224,9 @@ torch_effective_dim(X, center  =  True)
 torch_metric_accuracy(output  =  None, labels  =  None)
 torch_pearson_coeff(x1, x2)
 torch_pearson_coeff_pairs(x)
+ztest1()
+ztest4()
+ztest5()
 
 -------------------------methods----------------------
 ImageDataset.__getitem__(self, idx: int)
@@ -1744,12 +1742,13 @@ utilmy/deeplearning/util_topk.py
 embedding_cosinus_scores_pairwise(embs:np.ndarray, word_list:list = None, is_symmetric = False)
 faiss_create_index(df_or_path = None, col = 'emb', dirout = None, db_type  =  "IVF4096,Flat", nfile = 1000, emb_dim = 200, nrows = -1, faiss_nlist = 6000, faiss_M = 40, faiss_nbits = 8, faiss_hnsw_m = 32)
 faiss_load_index(path_or_faiss_index = None, colkey = 'id', colval = 'idx')
-faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index:str = "", topk = 200, dirout = None, npool = 1, nrows = 10**7, nfile = 1000, colkey = 'idx', colval = 'id', return_simscore = False, return_dist = False, **kw)
+faiss_topk_calc(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index: str  =  "", topk = 200, dirout = None, npool = 1, nrows = 10 ** 7, nfile = 1000, colkey = 'idx', colval = 'id', chunk = 200000, return_simscore = False, return_dist = False, **kw)
 help()
 test_all()
 topk_calc(diremb = "", dirout = "", topk = 100, idlist = None, nrows = 10, emb_dim = 200, tag = None, debug = True)
 topk_nearest_vector(x0:np.ndarray, vector_list:list, topk = 3, engine = 'faiss', engine_pars:dict = None)
 ztest2()
+zz_faiss_topk_calc_old(df = None, root = None, colid = 'id', colemb = 'emb', faiss_index:str = "", topk = 200, dirout = None, npool = 1, nrows = 10**7, nfile = 1000, colkey = 'idx', colval = 'id', return_simscore = False, return_dist = False, **kw)
 
 -------------------------methods----------------------
 TOPK.index_fit(sel)
@@ -2147,6 +2146,20 @@ loaddf()
 
 
 
+utilmy/globre.py
+-------------------------functions----------------------
+compile(pattern, flags = 0, sep = None, split_prefix = False)
+iswild(pattern)
+match(pattern, string, sep = None, flags = 0)
+search(pattern, string, sep = None, flags = 0)
+
+-------------------------methods----------------------
+Tokenizer.__init__(self, source)
+Tokenizer._outer(self)
+Tokenizer._scan(self, target)
+Tokenizer.tokens(self)
+
+
 utilmy/graph.py
 
 
@@ -2237,25 +2250,25 @@ utilmy/nlp/ttorch/kgraph/knowledge_graph.py
 -------------------------functions----------------------
 dataset_download(url    = "https =  "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
 dataset_traintest_split(anyobject:Any, train_ratio:float = 0.6, val_ratio:float = 0.2)
-embeddingsToDF(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)
-get_embeddings(id_to_label:Dict[int, str], embedding)
-runall(dirin = '', dirout = '', embed_dim = 10, config = None)
-test1(dirin = 'final_dataset_clean_v2 .tsv')
+pykeen_embedding_to_df(embeddingDict:Dict[str, Dict[str, Union[int, torch.tensor]]], entityOrRelation:str)
+pykeen_get_embeddings(id_to_label:Dict[int, str], embedding)
+runall(config = None, config_field = None, dirin = '', dirout = '', embed_dim = 10, batch_size = 64)
 test_all()
+ztest1(dirin = 'final_dataset_clean_v2 .tsv')
 
 -------------------------methods----------------------
 KGEmbedder.__init__(self, graph:ntx.MultiDiGraph, embedding_dim:int, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
-KGEmbedder.compute_embeddings(self, path_to_embeddings, batch_size = 64, n_epochs = 8)
+KGEmbedder.compute_embeddings(self, batch_size = 64, n_epochs = 8)
 KGEmbedder.load_embeddings(self, path_to_embeddings:str)
 KGEmbedder.save_embeddings(self, )
 KGEmbedder.setup_embeddings(self, )
-NERExtractor.__init__(self, data:pd.DataFrame, embeddingFolder:str, load_spacy = True, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
-NERExtractor.export_data(self, data_kgf:pd.DataFrame)
-NERExtractor.extractTriples(self, max_text:int)
-NERExtractor.extract_entities(self, sents)
+NERExtractor.__init__(self, dirin_or_df:pd.DataFrame, dirout:str = "./mydataout/", model_name = "ro_core_news_sm")
+NERExtractor.export_data(self, dirout = None)
+NERExtractor.extract_entities(self, sents:List[str])
+NERExtractor.extract_triples(self, max_text:int, return_val = False)
 NERExtractor.obtain_relation(self, sent)
 knowledge_grapher.__init__(self, embedding_dim:int = 14, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
-knowledge_grapher.buildGraph(self, relation  =  None)
+knowledge_grapher.build_graph(self, relation  =  None)
 knowledge_grapher.compute_centrality(self, )
 knowledge_grapher.get_centers(self, max_centers:int = 5)
 knowledge_grapher.load_data(self, path)
@@ -2438,9 +2451,8 @@ ner_spacy_add_tag_features(data, column, ner = None, lst_tag_filter = None, gram
 ner_spacy_displacy(txt, ner = None, lst_tag_filter = None, title = None, serve = False)
 ner_spacy_retrain(train_data, output_dir, model = "blank", n_iter = 100)
 ner_spacy_text(txt, ner = None, lst_tag_filter = None, grams_join = "_")
-test1()
-test2()
 test_all()
+ztest1()
 
 
 
@@ -2556,7 +2568,9 @@ fixedDict._check_size_limit(self)
 
 utilmy/oos.py
 -------------------------functions----------------------
+aaa_bash_help()
 date_to_timezone(tdate, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
+glob_glob(dirin, exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
 help()
 is_float(x)
 is_int(x)
@@ -2566,6 +2580,7 @@ log_trace(msg = "", dump_path = "", globs = None)
 np_add_remove(set_, to_remove, to_add)
 np_list_intersection(l1, l2)
 os_clean_memory(varlist, globx)
+os_copy(dirfrom = "folder/**/*.parquet", dirto = "", min_size_mb = 0, max_size_mb = 1, exclude = "", include = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', path_structure_only = False, overwrite = False, re_start = 1, nfiles = 99999999, dry = 0)
 os_copy_safe(dirin:str = None, dirout:str = None, nlevel = 5, nfile = 5000, logdir = "./", pattern = "*", exclude = "", force = False, sleep = 0.5, cmd_fallback = "", verbose = Trueimport shutil, time, os, globflist = [] ; dirinj = dirinnlevel) =  [] ; dirinj = dirinnlevel):)
 os_cpu()
 os_file_check(fp)
@@ -2583,6 +2598,8 @@ os_path_split(fpath:str = "")
 os_platform_ip()
 os_platform_os()
 os_process_list()
+os_remove_file(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
+os_remove_file_past(dirin = "folder/**/*.parquet", ndays_past = 20, nfiles = 1000000, exclude = "", dry = 1)
 os_removedirs(path, verbose = False)
 os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
 os_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
@@ -2663,7 +2680,7 @@ test_use_operon()
 utilmy/parallel.py
 -------------------------functions----------------------
 help()
-multiproc_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, npool = None, **kw)
+multiproc_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, input_fixed:dict = None, npool = None, verbose = True, **kw)
 multiproc_tochunk(flist:list, npool = 2)
 multithread_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, npool = None, **kw)
 multithread_run_list(**kwargs)
@@ -3296,9 +3313,6 @@ VectorStoreCache.__init__(self, prefix = "m001", cass_query = None, nmax = 10**6
 VectorStoreCache.get_multi(self, siids, use_dict = True, update_cache = True)
 
 
-utilmy/recsys/zprepro_recs.py
-
-
 utilmy/recsys/zrecs/docs/source/conf.py
 
 
@@ -3773,6 +3787,9 @@ utilmy/recsys/zrecs/tools/generate_conda_file.py
 utilmy/recsys/zrecs/tools/generate_requirements_txt.py
 
 
+utilmy/recsys/zrecs/zprepro_recs.py
+
+
 utilmy/sspark/__init__.py
 
 
@@ -3972,7 +3989,7 @@ hdfs_dir_list(path, recursive = False)
 hdfs_dir_rm(path)
 hdfs_download(dirin = "", dirout = "./", verbose = False, n_pool = 1, **kw)
 hdfs_file_exists(filename)
-hdfs_ls(path, flag = "-h ", filename_only = False, use_regex = False)
+hdfs_ls(path, flag = "-h ", filename_only = False, use_regex = False, match_file = '')
 hdfs_mkdir(hdfs_dir)
 hive_csv_tohive(folder, tablename = "ztmp", tableref = "nono2.table2")
 hive_db_dumpall()
