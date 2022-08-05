@@ -1214,8 +1214,8 @@ def glob_glob(dirin, exclude="", include_only="",
     if npool ==  1:
          return fun_glob(dirin, exclude, include_only,
             min_size_mb, max_size_mb,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
-            nfiles=99999999, verbose=0)
+            ndays_past, nmin_past,  start_date, end_date,
+            nfiles, verbose)
 
     else :
          from utilmy import parallel as par
