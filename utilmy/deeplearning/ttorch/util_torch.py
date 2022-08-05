@@ -4,16 +4,32 @@ Doc::
 
     utilmy/deeplearning/ttorch/util_torch.py
     -------------------------functions----------------------
+    ImageDataloader(df = None, batch_size = 64, label_list = ['gender', 'masterCategory', 'subCategory' ], col_img = 'id', train_img_path   =  'data_fashion_small/train', test_img_path    =  'data_fashion_small/test', train_ratio = 0.5, val_ratio = 0.2, transform_train = None, transform_test = None, )
+    cos_similar_embedding(embv  =  None, img_names = None)
     dataloader_create(train_X = None, train_y = None, valid_X = None, valid_y = None, test_X = None, test_y = None, batch_size = 64, shuffle = True, device = 'cpu', batch_size_val = None, batch_size_test = None)
+    dataset_add_image_fullpath(df, col_img = 'id', train_img_path = "./", test_img_path = './')
+    dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip", dirout  =  "./")
+    dataset_traintest_split(anyobject, train_ratio = 0.6, val_ratio = 0.2)
     device_setup(device = 'cpu', seed = 42, arg:dict = None)
-    help()
-    model_evaluation(model, loss_task_fun, test_loader, arg, )
+    embedding_load_parquet(dirin = "df.parquet", colid =  'id', col_embed =  'emb', nmax  = None)
+    embedding_torchtensor_to_parquet(model  =  None, dirout  =  './', data_loader = None, tag = "")
+    model_evaluate(model, loss_task_fun, test_loader, arg, )
     model_load(dir_checkpoint:str, torch_model = None, doeval = True, dotrain = False, device = 'cpu', input_shape = None, **kw)
-    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict[str, torch.Tensor])
+    model_load_partially_compatible(model, dir_weights = '', device = 'cpu')
+    model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict)
     model_save(torch_model = None, dir_checkpoint:str = "./checkpoint/check.pt", optimizer = None, cc:dict = None, epoch = -1, loss_val = 0.0, show = 1, **kw)
     model_summary(model, **kw)
     model_train(model, loss_calc, optimizer = None, train_loader = None, valid_loader = None, arg:dict = None)
+    pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict  =  None)
 
+
+    -------------------------methods----------------------
+    DataForEmbedding.__getitem__(self, idx: int)
+    DataForEmbedding.__init__(self, df = None, col_img: str = 'id', transforms = None, transforms_image_size_default = 64, img_loader = None)
+    DataForEmbedding.__len__(self)
+    ImageDataset.__getitem__(self, idx: int)
+    ImageDataset.__init__(self, img_dir:str = "images/", col_img: str = 'id', label_dir:str    = "labels/mylabel.csv", label_dict:dict  = None, transforms = None, transforms_image_size_default = 64, check_ifimage_exist = False, img_loader = None)
+    ImageDataset.__len__(self)
 
 
     Utils for torch training
@@ -37,13 +53,17 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
+
+from utilmy.deeplearning.ttorch.util_model import (
+    model_getlayer
+)
 #############################################################################################
 from utilmy import log, os_module_name
 from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 MNAME = os_module_name(__file__)
 
 def help():
-    """function help  """
+    """function help"""
     from utilmy import help_create
     ss = help_create(MNAME)
     log(ss)
@@ -51,90 +71,54 @@ def help():
 
 #############################################################################################
 def test_all():
-    """function test_all  
-    """
-    log(MNAME)
-    test1()
-    test2()
+    """function test_all"""
+    ztest1()
+    ztest4()
+    ztest5()
 
 
-
-def test1():
-    """function test2
-    """
-    arg = Box({
-      "dataurl":  "https://github.com/caravanuden/cardio/raw/master/cardio_train.csv",
-      "datapath": './cardio_train.csv',
-
-      ##### Rules
-      "rules" : {},
-
-      #####
-      "train_ratio": 0.7,
-      "validation_ratio": 0.1,
-      "test_ratio": 0.2,
-
-      "model_type": 'dataonly',
-      "input_dim_encoder": 16,
-      "output_dim_encoder": 16,
-      "hidden_dim_encoder": 100,
-      "hidden_dim_db": 16,
-      "n_layers": 1,
-
-
-      ##### Training
-      "seed": 42,
-      "device": 'cpu',  ### 'cuda:0',
-      "batch_size": 32,
-      "epochs": 1,
-      "early_stopping_thld": 10,
-      "valid_freq": 1,
-      'saved_filename' :'./model.pt',
-
-    })
-
-
-def test2():
-    """
-    """
-    from torchvision import models
-
+def ztest1():
+    log('### test dataloader_create, model_train, model_evaluate')
     X, y = sklearn.datasets.make_classification(n_samples=100, n_features=50)
     train_loader, val_dl, tt_dl = dataloader_create(train_X=X, train_y=y, valid_X=X, valid_y=y, test_X=X, test_y=y)
-    # X, y        = torch.randn(100, 40), torch.randint(0, 2, size=(100,))
-    # test_loader = DataLoader(dataset=TensorDataset(X, y), batch_size=16)
 
-
-
-    model = nn.Sequential(nn.Linear(50, 20),      nn.Linear(20, 1))
-    args = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
+    model = nn.Sequential(nn.Linear(50, 20), nn.Linear(20, 1))
+    args  = {'model_info': {'simple':None}, 'lr':1e-3, 'epochs':2, 'model_type': 'simple',
             'dir_modelsave': 'model.pt', 'valid_freq': 1}
-    
-    model_train(model=model, loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
-    model_evaluate(model=model, loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
+
+    model_train(model=model,   loss_calc=nn.MSELoss(), train_loader=train_loader, valid_loader=train_loader, arg=args)
+    model_evaluate(model=model,loss_task_fun=nn.CrossEntropyLoss(), test_loader=train_loader, arg=args)
 
 
+    log('### test model_save, model_load, model_summary, model_load_state_dict_with_low_memory')
+    from torchvision import models
     model = models.resnet50()
-    torch.save({'model_state_dict': model.state_dict()}, 'resnet50_ckpt.pth')
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=True)
-    model = model_load(dir_checkpoint='resnet50_ckpt.pth', torch_model=model, doeval=False, dotrain=True)
+    os.makedirs('./tests_temp_dir/', exist_ok=True)
+    dir_checkpoint = model_save(model, dir_checkpoint='./tests_temp_dir/check.pt', cc=model.state_dict())
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=True)
+    model = model_load(dir_checkpoint=dir_checkpoint, torch_model=model, doeval=False, dotrain=True)
 
-
-    model = models.resnet50()
-    kwargs = {'input_size': (3, 224, 224)}
+    kwargs = {'input_size': (1, 3, 224, 224)}
     model_summary(model=model, **kwargs)
-
-
-    model = models.resnet50()
     model_load_state_dict_with_low_memory(model=model, state_dict=model.state_dict())
 
 
-    ### Matrics for pytorch
-    model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained = True)
+    log('### test device_setup, dataset_traintest_split, pd_to_onehot')
+    device_setup(device='cpu', seed=123)
+    assert torch.initial_seed() == 123, 'Seed assigning failed.'
+    train_subset, val_subset, test_subset = dataset_traintest_split(range(10), train_ratio=.7, val_ratio=.2)
+    assert len(train_subset) == 7 and len(val_subset) == 2 and len(test_subset) == 1, 'Dataset split failed.'
+
+    _ = pd_to_onehot(pd.DataFrame({'gender': [1, 0, 1, 0, 1, 1, 0]}), labels_dict={'gender': [0, 1]})
+
+
+def ztest4():
+    log("### test torch_metric_accuracy, torch_pearson_coeff  ")
+    model  = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
     data   = torch.rand(64, 3, 224, 224)
     output = model(data)
-    labels = torch.randint(1000, (64,)) #random labels
-    acc    = torch_metric_accuracy(output = output, labels = labels) 
+    labels = torch.randint(1000, (64,)) # random labels
+    acc    = torch_metric_accuracy(output=output, labels=labels) 
 
     x1 = torch.rand(100,)
     x2 = torch.rand(100,)
@@ -143,18 +127,32 @@ def test2():
     x = torch.rand(100, 30)
     r_pairs = torch_pearson_coeff_pairs(x)
 
-
     data = torch.rand(64, 3, 224, 224)
     output = model(data)
+
     # This is just an example where class coded by 999 has more occurences
     # No train test splits are applied to lead to the overrepresentation of class 999 
-    p = [(1-0.05)/1000]*999
-    p.append(1-sum(p))
-    labels = np.random.choice(list(range(1000)),   size = (10000,),   p = p)#imbalanced 1000-class labels
+    p = [(1 - 0.05) / 1000] * 999
+    p.append(1 - sum(p))
+    labels = np.random.choice(list(range(1000)), size=(10000,), p=p) # imbalanced 1000-class labels
     labels = torch.Tensor(labels).long()
     weight, label_weight = torch_class_weights(labels)
     loss = torch.nn.CrossEntropyLoss(weight = weight)
-    l = loss(output, labels[:64])
+    # l = loss(output, labels[:64])
+
+
+def ztest5():
+    log('### test dataset_download, ImageDataloader, pd_to_onehot, dataset_add_image_fullpath, embedding_load_parquet')
+    dataset_path = dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip")
+    df = pd.read_csv(dataset_path + '/csv/styles_df.csv')
+    train_subset, val_subset, test_subset = ImageDataloader(df)
+    _ = dataset_add_image_fullpath(df)
+    # _ = embedding_load_parquet(dataset_path + '/csv/styles_df.csv', col_embed='articleType')
+
+
+
+
+
 
 
 
@@ -180,6 +178,8 @@ def device_setup( device='cpu', seed=42, arg:dict=None):
             log(e)
             device = 'cpu'
     return device
+
+
 
 
 
@@ -219,8 +219,7 @@ def dataloader_create(train_X=None, train_y=None, valid_X=None, valid_y=None, te
     return train_loader, valid_loader, test_loader
 
 
-
-def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
+def dataset_download(url="https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip",
                      dirout = "./"):
     """ Downloading Dataset from github  and unzip it
 
@@ -248,8 +247,15 @@ def dataset_download(url    = "https://github.com/arita37/data/raw/main/fashion_
     return dname
 
 
-
 def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
+    """
+    Docs:
+        
+        Dataset : Splitting dataset as Train & val by the ratios provided
+
+
+
+    """
     #### Split anything
     val_ratio = val_ratio + train_ratio
     if isinstance(anyobject, pd.DataFrame):
@@ -269,29 +275,86 @@ def dataset_traintest_split(anyobject, train_ratio=0.6, val_ratio=0.2):
         return df_train, df_val, df_test
 
 
-def embedding_torchtensor_to_parquet(model = None, dirout = './', data_loader=None,tag=""):
-    # from utilmy.deeplearning import  util_embedding as ue
-    import time
-    
-    df= []
-    assert(model is not None and data_loader is not None)
-    for img , img_names in data_loader:
-        with torch.no_grad():
-            emb = model.get_embedding(img)   #### Need to get the layer !!!!!
-            for i in range(emb.size()[0]):
-                ss = np_array_to_str(emb[i].numpy())
-                df.append([ img_names[i], ss])
 
-    df = pd.DataFrame(df, columns= ['id', 'emb'])
+
+
+###############################################################################################
+####### Embedding #############################################################################
+def model_diagnostic(model, data_loader, dirout="", tag="before_training"):
+    """  output model otuput, embedding.
+
+    """
+    pass
+
+
+
+def model_embedding_extract_check(model=None,  dirin=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
+                                  force_getlayer= True,
+                                  pos_layer=-2):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    if dirin is not None:
+        embv1, img_names,df = embedding_load_parquet(dirin=f"{dirin}/df_emb_{tag}.parquet",
+                                                     colid= colid, col_embed= colemb)
+    else :
+        emb_list = model_embedding_extract_to_parquet(model, dirout, data_loader, tag=tag, colid=colid, colemb=colemb,
+                                            force_getlayer= force_getlayer, pos_layer=pos_layer)
+        embv1    = [ x[1] for x in emb_list]
+
+
+    dfsim = embedding_cosinus_scores_pairwise(embv1, name_list=None, is_symmetric=False)
+    
+    if dirout is not None:
+        pd_to_file(dfsim, dirout +"/df_emb_cosim.parquet", show=1)
+    return dfsim
+
+
+def model_embedding_extract_to_parquet(model=None, dirout=None, data_loader=None, tag="", colid='id', colemb='emb',
+                                       force_getlayer= True, pos_layer=-2):
+    """
+    Docs:
+
+        model : Pytorch requires  get_embedding(X)  method to extract embedding
+
+
+
+    """
+    if force_getlayer == True:
+
+       model_embed_extract_fun = model_getlayer(model, pos_layer=pos_layer)
+    else:
+       model_embed_extract_fun = model.get_embedding
+
+    llist= []
+    for X , lable, id_sample in data_loader:
+        with torch.no_grad():
+            #emb = model.get_embedding(X)   #### Need to get the layer !!!!!
+            if force_getlayer == True:
+               emb = model(X)
+               emb = model_embed_extract_fun.output.squeeze()
+            else:
+                emb = model_embed_extract_fun(X)
+            for i in range(emb.size()[0]):
+                ss = emb[i].numpy()
+                llist.append([ id_sample[i], ss])
+
 
     if dirout is not None :
-      log(dirout) ; os_makedirs(dirout)  ; time.sleep(4)
-      dirout2 = dirout + f"/df_emb_{tag}.parquet"
-      pd_to_file(df, dirout2, show=1 )
-    return df
+        df2 = [ (k, np_array_to_str(v) )  for (k,v) in llist ]    ####  array as string
+        df2 = pd.DataFrame(df2, columns= ['id', 'emb'])
+        dirout2 = dirout + f"/df_emb_{tag}.parquet"
+        pd_to_file(df2, dirout2, show=1 )
+
+    return llist
 
 
-def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nmax =None ):
+def embedding_load_parquet(dirin="df.parquet", colid='id', col_embed= 'emb', nmax =None ):
     """  Required columns : id, emb (string , separated)
     
     """
@@ -325,62 +388,88 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',nm
 
 
 
-class DataForEmbedding(Dataset):
-    """Custom DataGenerator using Pytorch Sequence for images
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False, sort=True):
+    """ Pairwise Cosinus Sim scores
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist, is_symmetric=False)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
     """
-    def __init__(self, df=None,
-                col_img: str='id',
-                transforms=None, transforms_image_size_default=64,
-                img_loader=None
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    name_list = np.arange(0, n) if name_list is None else name_list
+    dfsim = []
+    for i in  range(0, len(name_list) - 1) :
+        vi = embs[i]
+        normi = np.sqrt(np.dot(vi,vi))
+        for j in range(i+1, len(name_list)) :
+            # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
+            vj = embs[j]
+            normj = np.sqrt(np.dot(vj, vj))
+            simij = np.dot( vi ,  vj  ) / (normi * normj)
+            dfsim.append([name_list[i], name_list[j], simij])
+            # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
 
-                 ):
-        self.col_img    = col_img
-        self.transforms = transforms
+    dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
 
-        if img_loader is None :  ### Use default loader
-           from PIL import Image
-           self.img_loader = Image.open
+    if sort: dfsim = dfsim.sort_values(['id1','sim_score'], ascending=[1,0]  )
 
-        if transforms is None :
-              from torchvision import transforms
-              self.transforms = [transforms.ToTensor(),transforms.Resize((transforms_image_size_default, transforms_image_size_default))]
-        assert(df is not None)
-        self.label_img_dir = df[self.col_img].values
-
-
-    def __len__(self) -> int:
-        return len(self.label_img_dir)
-
-
-    def __getitem__(self, idx: int):
-
-        img_dir = self.label_img_dir[idx]
-        img     = self.img_loader(img_dir)
-        img_name = img_dir.split('/')[-1].split('.')[0]
-
-        if "\\" in img_name:
-            img_name =  img_name.replace('\\','_')
-
-        train_X = self.transforms(img)
-        return (train_X, img_name)
+    if is_symmetric:
+        ### Add symmetric part
+        dfsim3 = copy.deepcopy(dfsim)
+        dfsim3.columns = ['id2', 'id1', 'sim_score' ]
+        dfsim          = pd.concat(( dfsim, dfsim3 ))
+    return dfsim
 
 
-def cos_similar_embedding(embv = None, img_names=None):
+
+def embedding_topk(embs = None, emb_name_list=None, topk=5):
+    """ Pairwise Cosinus Sim scores(Numpy Implementation)
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    dfsim = embedding_cosinus_scores_pairwise(embs, name_list= emb_name_list, sort=True)
+    len( dfsim[[ 'id1', 'id2', 'sim_score']])
+
+    def to_list(dfi):
+        ### only top 5 are included
+        ss = ",".join([str(t) for t in  dfi['id2'].values][:topk])
+        return ss
+
+    df2 = dfsim.groupby('id1').apply(lambda  dfi : to_list(dfi)).reset_index()
+    df2.columns = ['id', 'similar']
+    return df2
+
+    """
     from sklearn.metrics.pairwise import cosine_similarity
     similar_emb = []
-    if embv is not None and img_names is not None:
-        df = pd.DataFrame(data = img_names, columns=['id'] )
-        for i, emb1 in enumerate(embv):
-            res = []
-            for emb2 in embv:
-                res.append(cosine_similarity([emb1],[emb2]))
-                print()
-            res[i] = -1
-            max_value = max(res)
-            img_name = img_names[res.index(max_value)]
-            similar_emb.append(img_name)
-        df['similar'] = similar_emb
+    n = len(embs)
+    emb_name_list = np.arange(0, n) if emb_name_list is None else emb_name_list
+
+    for i, emb1 in enumerate(embs):
+        res = []
+        for emb2 in embs:
+            res.append(cosine_similarity([emb1],[emb2]))
+        res[i] = -1
+        max_value = max(res)
+        img_name = emb_name_list[res.index(max_value)]
+        similar_emb.append(img_name)
+
+    df = pd.DataFrame(data = emb_name_list, columns=['id'])
+    df['similar'] = similar_emb
     return df
+    """
+
 
 
 
@@ -394,6 +483,7 @@ def pd_to_onehot(dflabels: pd.DataFrame, labels_dict: dict = None) -> pd.DataFra
     if labels_dict is not None:
         for ci, catval in labels_dict.items():
             dflabels[ci] = pd.Categorical(dflabels[ci], categories=catval)
+
     labels_col = labels_dict.keys()
 
     for ci in labels_col:
@@ -447,14 +537,12 @@ class ImageDataset(Dataset):
     """
     def __init__(self, img_dir:str="images/",
                 col_img: str='id',
-
                 label_dir:str   ="labels/mylabel.csv",
                 label_dict:dict =None,
-
                 transforms=None, transforms_image_size_default=64,
                 check_ifimage_exist=False,
-                img_loader=None
-
+                img_loader=None,
+                return_img_id  = False
                  ):
         """ Image Datast :  labels + Images path on disk
         Docs:
@@ -463,14 +551,17 @@ class ImageDataset(Dataset):
             label_dir (DataFrame): Dataset for Generator
             label_dict (dict):    {label_name : list of values }
             transforms (str): type of transformations to perform on images. Defaults to None.
+            return_img_id : return image path
         """
         self.image_dir  = img_dir
         self.col_img    = col_img
         self.transforms = transforms
+        self.return_img_id  = return_img_id
 
         if img_loader is None :  ### Use default loader
            from PIL import Image
            self.img_loader = Image.open
+
 
         if transforms is None :
               from torchvision import transforms
@@ -483,25 +574,41 @@ class ImageDataset(Dataset):
         dflabel     = dflabel.dropna()
         assert col_img in dflabel.columns
 
+        ##### Filter out label #####################
+        for ci, label_list in label_dict.items():
+           label_list = [label_list] if isinstance(label_list, str) else label_list
+           dflabel[ci] = dflabel[ dflabel[ci].isin(label_list)][ci]
+
 
         if check_ifimage_exist :
            #### Bugggy, not working
            dflabel = dataset_add_image_fullpath(dflabel, col_img=col_img, train_img_path=img_dir, test_img_path= img_dir)
 
-        self.dflabel    = dflabel
-        self.label_cols = list(label_dict.keys())
-        self.label_df   = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
-        self.label_img_dir = self.label_df[self.col_img].values
+        self.dflabel       = dflabel
+        self.label_cols    = list(label_dict.keys())
+        self.label_img_dir = [ t.replace("\\", "/") for t in   self.dflabel[self.col_img].values ]
 
 
-
-        ####lable Prep  #######################################################################
         self.label_dict = {}
-        for ci in self.label_cols:
-            v = [x.split(",") for x in self.label_df[ci + "_onehot"]]
-            v = np.array([[int(t) for t in vlist] for vlist in v])
-            self.label_dict[ci] = torch.tensor(v,dtype=torch.float)
+        if self.return_img_id  == False:
+            ####lable Prep  #######################################################################
+            self.label_df      = pd_to_onehot(dflabel, labels_dict=label_dict)  ### One Hot encoding
+            #
+    
+            for ci in self.label_cols:
+                y1hot = [x.split(",") for x in self.label_df[ci + "_onehot"]]
+                y1hot = np.array([[int(t) for t in vlist] for vlist in y1hot])
+                self.label_dict[ci] = torch.tensor(y1hot,dtype=torch.float)
 
+        else:
+            #### Validation purpose, wiht image_name_id
+            label_col = self.label_cols[0]
+            # lable = label_dict[label_col]
+            # self.dflabel = self.dflabel.loc[self.dflabel[label_col] == lable]
+            self.dflabel = self.dflabel[[col_img,label_col]]
+            # self.label_img_dir = self.dflabel[self.col_img].values
+            ##Buggy 
+            self.label_dict[label_col] = torch.ones(len(self.label_img_dir),dtype=torch.float)
 
 
     def __len__(self) -> int:
@@ -509,22 +616,23 @@ class ImageDataset(Dataset):
 
 
     def __getitem__(self, idx: int):
-
         ##### Load Image
         # train_X = self.data[idx]
-        # from PIL import Image
         img_dir = self.label_img_dir[idx]
-        #img     = Image.open(img_dir)
         img     = self.img_loader(img_dir)
         train_X = self.transforms(img)
 
 
         train_y = {}
-        assert(len(self.label_dict) != 0)
         for classname, n_unique_label in self.label_dict.items():
             train_y[classname] = self.label_dict[classname][idx]
-        return (train_X, train_y)
 
+        if self.return_img_id == True: ##Data for Embeddings' extraction
+            # img_dir  = img_dir.replace('\\','/')
+            img_name = img_dir.split('/')[-1]
+            return (train_X, train_y, img_name)
+
+        return (train_X, train_y)
 
 
 
@@ -580,10 +688,8 @@ def ImageDataloader(df=None, batch_size=64,
     return train_dataloader,val_dataloader,test_dataloader
 
 
-
-
-
 ###############################################################################################
+########### Save, load, train, evaluate, summary ##############################################
 def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", optimizer=None, cc:dict=None,
                epoch=-1, loss_val=0.0, show=1, **kw):
     """function model_save
@@ -604,7 +710,6 @@ def model_save(torch_model=None, dir_checkpoint:str="./checkpoint/check.pt", opt
     return dir_checkpoint
 
 
-
 def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False, device='cpu', input_shape=None, **kw):
     """function model_load from checkpoint
     Doc::
@@ -614,7 +719,7 @@ def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False,
         model_load(dir_checkpoint, torch_model=None, doeval=True, dotrain=False, device='cpu')
     """
 
-    if isinstance( torch_model, str) : ### "path/mymodule.py:myModel"
+    if isinstance(torch_model, str) : ### "path/mymodule.py:myModel"
         torch_class_name = load_function_uri(uri_name= torch_model)
         torch_model      = torch_class_name() #### Class Instance  Buggy
         log('loaded from file ', torch_model)
@@ -641,7 +746,7 @@ def model_load(dir_checkpoint:str, torch_model=None, doeval=True, dotrain=False,
       torch_model.train()  
 
     return torch_model 
-    
+
 
 def model_load_state_dict_with_low_memory(model: nn.Module, state_dict: dict):
     """  using 1x RAM for large model
@@ -702,8 +807,6 @@ def model_load_partially_compatible(model, dir_weights='', device='cpu'):
                     }
     current_model.load_state_dict(new_state_dict)
     return current_model
-
-
 
 
 def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loader=None, arg:dict=None ):
@@ -804,7 +907,6 @@ def model_train(model, loss_calc, optimizer=None, train_loader=None, valid_loade
               counter_early_stopping += 1
 
 
-
 def model_evaluate(model, loss_task_fun, test_loader, arg, ):
     """function model_evaluation
     Doc::
@@ -820,8 +922,6 @@ def model_evaluate(model, loss_task_fun, test_loader, arg, ):
 
         https://arita37.github.io/myutil/en/zdocs_y23487teg65f6/utilmy.deeplearning.html#utilmy.deeplearning.util_dl.metrics_eval
     """
-
-
     from utilmy.deeplearning.util_dl import metrics_eval
     dfmetric = pd.DataFrame()
 
@@ -831,14 +931,11 @@ def model_evaluate(model, loss_task_fun, test_loader, arg, ):
         for Xval, yval in test_loader:
             yval = yval.unsqueeze(-1)
             ypred = model(Xval) 
-
-            loss_val = loss_task_fun(ypred, yval.view(ypred.size(0))).item() # modified by Abrham 
-            ypred = torch.argmax(ypred, dim=1) # Added by Abrham
-
-            dfi = metrics_eval(ypred.numpy(), yval.numpy(), metric_list=['accuracy_score']) # modified by Abrham
+            loss_val = loss_task_fun(ypred, yval)
+            ypred = torch.argmax(ypred, dim=1)
+            dfi = metrics_eval(ypred.numpy(), yval.numpy(), metric_list=['accuracy_score'])
             dfmetric = pd.concat((dfmetric, dfi, pd.DataFrame([['loss', loss_val]], columns=['name', 'metric_val'])))
     return dfmetric
-
 
 
 def model_summary(model, **kw):
@@ -912,149 +1009,150 @@ def model_summary(model, **kw):
         ModelStatistics object
                 See torchsummary/model_statistics.py for more information.
     """
-    from .torchinfo import summary
+    from torchinfo import summary
 
     return summary(model, **kw)
 
 
 
+
+
 ###############################################################################################
 ########### Metrics  ##########################################################################
-if 'metrics':
-    #### Numpy metrics
-    from utilmy.deeplearning.util_dl import metrics_eval
+from utilmy.deeplearning.util_dl import metrics_eval
+
+"""
+def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
+    ##Compare 2 list of vectors return cosine similarity score
+
+    Docs
+        cola (str): list of embedding
+        colb (str): list of embedding
+        model (model instance): Pretrained sentence transformer model
+
+    Returns:
+        pd DataFrame: 'cosine_similarity' column and return df
+    
+    from sklearn.metrics.pairwise import cosine_similarity
+
+    results = list()
+    for emb1,emb2 in zip(emb_list1, emb_list2):
+
+        #if isinstance(emb1, torch.Tensor) :
+        #    emb1 = emb1
+
+        result = cosine_similarity([emb1],[emb2])
+        results.append(result[0])
+
+    df = pd.DataFrame(results, columns=['cos_sim'])
+
+    if name_list is not None :
+        df['name'] = name_list
+    return df
+"""
 
 
-    def metrics_cosinus_similarity(emb_list1=None, emb_list2=None, name_list=None):
-        """Compare 2 list of vectors return cosine similarity score
-
-        Docs
-            cola (str): list of embedding
-            colb (str): list of embedding
-            model (model instance): Pretrained sentence transformer model
-
-        Returns:
-            pd DataFrame: 'cosine_similarity' column and return df
-        """
-        from sklearn.metrics.pairwise import cosine_similarity
-
-        results = list()
-        for emb1,emb2 in zip(emb_list1, emb_list2):
-
-            #if isinstance(emb1, torch.Tensor) :
-            #    emb1 = emb1
-
-            result = cosine_similarity([emb1],[emb2])
-            results.append(result[0])
-
-        df = pd.DataFrame(results, columns=['cos_sim'])
-
-        if name_list is not None :
-          df['name'] = name_list
-        return df
+def torch_pearson_coeff(x1, x2):
+    '''Computes pearson correlation coefficient between two 1D tensors
+    with torch
+    
+    Input
+    -----
+    x1: 1D torch.Tensor of shape (N,)
+    
+    x2: 1D torch.Tensor of shape (N,)
+    
+    Output
+    ------
+    r: scalar pearson correllation coefficient 
+    '''
+    cos = torch.nn.CosineSimilarity(dim = 0, eps = 1e-6)
+    r = cos(x1 - x1.mean(dim = 0, keepdim = True), 
+            x2 - x2.mean(dim = 0, keepdim = True))
+    
+    return r
 
 
-    def torch_pearson_coeff(x1, x2):
-        '''Computes pearson correlation coefficient between two 1D tensors
-        with torch
-        
-        Input
-        -----
-        x1: 1D torch.Tensor of shape (N,)
-        
-        x2: 1D torch.Tensor of shape (N,)
-        
-        Output
-        ------
-        r: scalar pearson correllation coefficient 
-        '''
-        cos = torch.nn.CosineSimilarity(dim = 0, eps = 1e-6)
-        r = cos(x1 - x1.mean(dim = 0, keepdim = True), 
-                x2 - x2.mean(dim = 0, keepdim = True))
-        
-        return r
+def torch_pearson_coeff_pairs(x): 
+    '''Computes pearson correlation coefficient across 
+    the 1st dimension of a 2D tensor  
+    
+    Input
+    -----
+    x: 2D torch.Tensor of shape (N,M)
+    correlation coefficients will be computed between 
+    all unique pairs across the first dimension
+    x[1,M] x[2,M], ...x[i,M] x[j,M], for unique pairs (i,j)
+
+    Output
+    ------
+    r: list of tuples such that r[n][0] scalar denoting the 
+    pearson correllation coefficient of the pair of tensors with idx in 
+    tuple r[n][1] 
+    '''
+    from itertools import combinations 
+    all_un_pair_comb = [comb for comb in combinations(list(range(x.shape[0])), 2)]
+    r = []
+    for aupc in all_un_pair_comb:
+        current_r = torch_pearson_coeff(x[aupc[0], :], x[aupc[1], :])    
+        r.append((current_r, (aupc[0], aupc[1])))
+    
+    return r
 
 
-    def torch_pearson_coeff_pairs(x): 
-        '''Computes pearson correlation coefficient across 
-        the 1st dimension of a 2D tensor  
-        
-        Input
-        -----
-        x: 2D torch.Tensor of shape (N,M)
-        correlation coefficients will be computed between 
-        all unique pairs across the first dimension
-        x[1,M] x[2,M], ...x[i,M] x[j,M], for unique pairs (i,j)
+def torch_metric_accuracy(output = None, labels = None):
+    ''' Classification accuracy calculation as acc = (TP + TN) / nr total pred
+    
+    Input
+    -----
+    output: torch.Tensor of size (N,M) where N are the observations and 
+        M the classes. Values must be such that highest values denote the 
+        most probable class prediction.
+    
+    labels: torch.Tensor tensor of size (N,) of int denoting for each of the N
+        observations the class that it belongs to, thus int must be in the 
+        range 0 to M-1
+    
+    Output
+    ------
+    acc: float, accuracy of the predictions    
+    '''
+    _ , predicted = torch.max(output.data, 1)
+    total = labels.size(0)
+    correct = (predicted == labels).sum().item()
+    acc = 100*(correct/total)
 
-        Output
-        ------
-        r: list of tuples such that r[n][0] scalar denoting the 
-        pearson correllation coefficient of the pair of tensors with idx in 
-        tuple r[n][1] 
-        '''
-        from itertools import combinations 
-        all_un_pair_comb = [comb for comb in combinations(list(range(x.shape[0])), 2)]
-        r = []
-        for aupc in all_un_pair_comb:
-            current_r = torch_pearson_coeff(x[aupc[0], :], x[aupc[1], :])    
-            r.append((current_r, (aupc[0], aupc[1])))
-        
-        return r
+    return acc 
 
 
-    def torch_metric_accuracy(output = None, labels = None):
-        ''' Classification accuracy calculation as acc = (TP + TN) / nr total pred
-        
-        Input
-        -----
-        output: torch.Tensor of size (N,M) where N are the observations and 
-            M the classes. Values must be such that highest values denote the 
-            most probable class prediction.
-        
-        labels: torch.Tensor tensor of size (N,) of int denoting for each of the N
-            observations the class that it belongs to, thus int must be in the 
-            range 0 to M-1
-        
-        Output
-        ------
-        acc: float, accuracy of the predictions    
-        '''
-        _ , predicted = torch.max(output.data, 1)
-        total = labels.size(0)
-        correct = (predicted == labels).sum().item()
-        acc = 100*(correct/total)
-
-        return acc 
-
-
-    def torch_class_weights(labels):
-        '''Compute class weights for imbalanced classes
-        
-        Input
-        -----
-        labels: torch.Tensor of shape (N,) of int ranging from 0,1,..C-1 where
-            C is the number of classes
-        
-        Output
-        ------
-        weights: torch.Tensor of shape (C,) where C is the number of classes 
-            with the weights of each class based on the occurence of each class
-            NOTE: computed as weights_c = min(occurence) / occurence_c
-            for class c
-        
-        labels_weights: dict, with keys the unique int for each class and values
-            the weight assigned to each class based on the occurence of each class    
-        '''
-        labels_unique = torch.unique(labels)
-        occurence = [len(torch.where(lu == labels)[0]) for lu in labels_unique]
-        weights = [min(occurence) / o for o in occurence]
-        labels_weights = {lu.item():w for lu,w in zip(labels_unique, weights)}
-        weights = torch.Tensor(weights)
-        
-        return weights, labels_weights
+def torch_class_weights(labels):
+    '''Compute class weights for imbalanced classes
+    
+    Input
+    -----
+    labels: torch.Tensor of shape (N,) of int ranging from 0,1,..C-1 where
+        C is the number of classes
+    
+    Output
+    ------
+    weights: torch.Tensor of shape (C,) where C is the number of classes 
+        with the weights of each class based on the occurence of each class
+        NOTE: computed as weights_c = min(occurence) / occurence_c
+        for class c
+    
+    labels_weights: dict, with keys the unique int for each class and values
+        the weight assigned to each class based on the occurence of each class    
+    '''
+    labels_unique = torch.unique(labels)
+    occurence = [len(torch.where(lu == labels)[0]) for lu in labels_unique]
+    weights = [min(occurence) / o for o in occurence]
+    labels_weights = {lu.item():w for lu,w in zip(labels_unique, weights)}
+    weights = torch.Tensor(weights)
+    
+    return weights, labels_weights
 
 
-    def torch_effective_dim(X, center = True):
+def torch_effective_dim(X, center = True):
         '''Compute the effective dimension based on the eigenvalues of X
         
         Input
@@ -1082,130 +1180,130 @@ if 'metrics':
 
 
 
-
 #############################################################################################
-#############################################################################################
-if 'utils':
-    def to_numpy(tensor):
-        return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
-
-    from utilmy.utilmy import load_function_uri
-
-    def test_load_function_uri():
-        uri_name = "./testdata/ttorch/models.py:SuperResolutionNet"
-        myclass = load_function_uri(uri_name)
-        log(myclass)
+########### Utils  ##########################################################################
+from utilmy.utilmy import load_function_uri
 
 
-    def test_create_model_pytorch(dirsave=None, model_name=""):
-        """   Create model classfor testing purpose
-
-        
-        """    
-        ss = """import torch ;  import torch.nn as nn; import torch.nn.functional as F
-        class SuperResolutionNet(nn.Module):
-            def __init__(self, upscale_factor, inplace=False):
-                super(SuperResolutionNet, self).__init__()
-
-                self.relu = nn.ReLU(inplace=inplace)
-                self.conv1 = nn.Conv2d(1, 64, (5, 5), (1, 1), (2, 2))
-                self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
-                self.conv3 = nn.Conv2d(64, 32, (3, 3), (1, 1), (1, 1))
-                self.conv4 = nn.Conv2d(32, upscale_factor ** 2, (3, 3), (1, 1), (1, 1))
-                self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
-
-                self._initialize_weights()
-
-            def forward(self, x):
-                x = self.relu(self.conv1(x))
-                x = self.relu(self.conv2(x))
-                x = self.relu(self.conv3(x))
-                x = self.pixel_shuffle(self.conv4(x))
-                return x
-
-            def _initialize_weights(self):
-                init.orthogonal_(self.conv1.weight, init.calculate_gain('relu'))
-                init.orthogonal_(self.conv2.weight, init.calculate_gain('relu'))
-                init.orthogonal_(self.conv3.weight, init.calculate_gain('relu'))
-                init.orthogonal_(self.conv4.weight)    
-
-        """
-        ss = ss.replace("    ", "")  ### for indentation
-
-        if dirsave  is not None :
-            with open(dirsave, mode='w') as fp:
-                fp.write(ss)
-            return dirsave    
-        else :
-            SuperResolutionNet =  None
-            eval(ss)        ## trick
-            return SuperResolutionNet  ## return the class
+def to_numpy(tensor):
+    return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
 
-    def np_array_to_str(vv, ):
-        """ array/list into  "," delimited string """
-        vv= np.array(vv, dtype='float32')
-        vv= [ str(x) for x in vv]
-        return ",".join(vv)
+def test_load_function_uri():
+    uri_name = "./testdata/ttorch/models.py:SuperResolutionNet"
+    myclass = load_function_uri(uri_name)
+    log(myclass)
 
 
-    def np_str_to_array(vv,   mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
-        """ Convert list of string into numpy 2D Array
-        Docs::
+def test_create_model_pytorch(dirsave=None, model_name=""):
+    """   Create model classfor testing purpose
 
-             np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
+    
+    """    
+    ss = """import torch ;  import torch.nn as nn; import torch.nn.functional as F
+    class SuperResolutionNet(nn.Module):
+        def __init__(self, upscale_factor, inplace=False):
+            super(SuperResolutionNet, self).__init__()
 
-        """
+            self.relu = nn.ReLU(inplace=inplace)
+            self.conv1 = nn.Conv2d(1, 64, (5, 5), (1, 1), (2, 2))
+            self.conv2 = nn.Conv2d(64, 64, (3, 3), (1, 1), (1, 1))
+            self.conv3 = nn.Conv2d(64, 32, (3, 3), (1, 1), (1, 1))
+            self.conv4 = nn.Conv2d(32, upscale_factor ** 2, (3, 3), (1, 1), (1, 1))
+            self.pixel_shuffle = nn.PixelShuffle(upscale_factor)
 
-        X = np.zeros(( len(vv) , mdim  ), dtype='float32')
-        for i, r in enumerate(vv) :
-            try :
-              vi      = [ float(v) for v in r.split(',')]
-              X[i, :] = vi
-            except Exception as e:
-              log(i, e)
+            self._initialize_weights()
 
+        def forward(self, x):
+            x = self.relu(self.conv1(x))
+            x = self.relu(self.conv2(x))
+            x = self.relu(self.conv3(x))
+            x = self.pixel_shuffle(self.conv4(x))
+            return x
 
-        if l2_norm_sklearn:
-            from sklearn.preprocessing import normalize
-            normalize(X, norm='l2', copy=False)
+        def _initialize_weights(self):
+            init.orthogonal_(self.conv1.weight, init.calculate_gain('relu'))
+            init.orthogonal_(self.conv2.weight, init.calculate_gain('relu'))
+            init.orthogonal_(self.conv3.weight, init.calculate_gain('relu'))
+            init.orthogonal_(self.conv4.weight)    
 
-        if l2_norm_faiss:
-            import faiss   #### pip install faiss-cpu
-            faiss.normalize_L2(X)  ### Inplace L2 normalization
-            log("Normalized X")
-        return X
+    """
+    ss = ss.replace("    ", "")  ### for indentation
 
-
-    def np_matrix_to_str2(m, map_dict:dict):
-        """ 2D numpy into list of string and apply map_dict.
-
-        Doc::
-            map_dict = { 4:'four', 3: 'three' }
-            m= [[ 0,3,4  ], [2,4,5]]
-            np_matrix_to_str2(m, map_dict)
-
-        """
-        res = []
-        for v in m:
-            ss = ""
-            for xi in v:
-                ss += str(map_dict.get(xi, "")) + ","
-            res.append(ss[:-1])
-        return res
-
-
-    def np_matrix_to_str(m):
-        res = []
-        for v in m:
-            ss = ""
-            for xi in v:
-                ss += str(xi) + ","
-            res.append(ss[:-1])
-        return res
+    if dirsave  is not None :
+        with open(dirsave, mode='w') as fp:
+            fp.write(ss)
+        return dirsave    
+    else :
+        SuperResolutionNet =  None
+        eval(ss)        ## trick
+        return SuperResolutionNet  ## return the class
 
 
-    def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
+def np_array_to_str(vv, ):
+    """ array/list into  "," delimited string """
+    vv= np.array(vv, dtype='float32')
+    vv= [ str(x) for x in vv]
+    return ",".join(vv)
+
+
+def np_str_to_array(vv, mdim = 200, l2_norm_faiss=False, l2_norm_sklearn=True):
+    """ Convert list of string into numpy 2D Array
+    Docs::
+
+            np_str_to_array(vv=[ '3,4,5', '7,8,9'],  mdim = 3)
+
+    """
+
+    X = np.zeros(( len(vv) , mdim  ), dtype='float32')
+    for i, r in enumerate(vv) :
+        try :
+            vi      = [ float(v) for v in r.split(',')]
+            X[i, :] = vi
+        except Exception as e:
+            log(i, e)
+
+
+    if l2_norm_sklearn:
+        from sklearn.preprocessing import normalize
+        normalize(X, norm='l2', copy=False)
+
+    if l2_norm_faiss:
+        import faiss   #### pip install faiss-cpu
+        faiss.normalize_L2(X)  ### Inplace L2 normalization
+        log("Normalized X")
+    return X
+
+
+def np_matrix_to_str2(m, map_dict:dict):
+    """ 2D numpy into list of string and apply map_dict.
+
+    Doc::
+        map_dict = { 4:'four', 3: 'three' }
+        m= [[ 0,3,4  ], [2,4,5]]
+        np_matrix_to_str2(m, map_dict)
+
+    """
+    res = []
+    for v in m:
+        ss = ""
+        for xi in v:
+            ss += str(map_dict.get(xi, "")) + ","
+        res.append(ss[:-1])
+    return res
+
+
+def np_matrix_to_str(m):
+    res = []
+    for v in m:
+        ss = ""
+        for xi in v:
+            ss += str(xi) + ","
+        res.append(ss[:-1])
+    return res
+
+
+def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
         res = []
         for v in m:
             ss = ""
@@ -1217,60 +1315,57 @@ if 'utils':
 
 
 
-
-
-
-
-if 'test_utils':
-    class test_model_dummy(nn.Module):
-      def __init__(self, input_dim, output_dim, hidden_dim=4):
+#############################################################################################
+########### Test Utils  #####################################################################
+class test_model_dummy(nn.Module):
+    def __init__(self, input_dim, output_dim, hidden_dim=4):
         super(test_model_dummy, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.net = nn.Sequential(nn.Linear(input_dim, hidden_dim),
-                                 nn.ReLU(),
-                                 nn.Linear(hidden_dim, output_dim))
+                                nn.ReLU(),
+                                nn.Linear(hidden_dim, output_dim))
 
-      def forward(self, x):
+    def forward(self, x):
         return self.net(x)
 
 
-    class test_model_dummy2(nn.Sequential):
-        def __init__(self):
-            super().__init__()
-            self.in_proj = nn.Linear(2, 10)
-            self.stages = nn.Sequential(
-                 nn.Linear(10, 10),
-                 nn.Linear(10, 10)
-            )
-            self.out_proj = nn.Linear(10, 2)
+class test_model_dummy2(nn.Sequential):
+    def __init__(self):
+        super().__init__()
+        self.in_proj = nn.Linear(2, 10)
+        self.stages = nn.Sequential(
+            nn.Linear(10, 10),
+            nn.Linear(10, 10)
+        )
+        self.out_proj = nn.Linear(10, 2)
 
 
-    def test_dataset_classification_fake(nrows=500):
-        """function test_dataset_classification_fake
-        Args:
-            nrows:
-        Returns:
+def test_dataset_classification_fake(nrows=500):
+    """function test_dataset_classification_fake
+    Args:
+        nrows:
+    Returns:
 
-        """
-        from sklearn import datasets as sklearn_datasets
-        ndim    =11
-        coly    = 'y'
-        colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
-        colcat  = ['colcat_1']
-        X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
-                                                       n_informative=ndim-2)
-        df         = pd.DataFrame(X,  columns= colnum)
-        df[coly]   = y.reshape(-1, 1)
+    """
+    from sklearn import datasets as sklearn_datasets
+    ndim    =11
+    coly    = 'y'
+    colnum  = ["colnum_" +str(i) for i in range(0, ndim) ]
+    colcat  = ['colcat_1']
+    X, y    = sklearn_datasets.make_classification(n_samples=nrows, n_features=ndim, n_classes=1,
+                                                    n_informative=ndim-2)
+    df         = pd.DataFrame(X,  columns= colnum)
+    df[coly]   = y.reshape(-1, 1)
 
-        for ci in colcat :
-          df[ci] = np.random.randint(0,1, len(df))
+    for ci in colcat :
+        df[ci] = np.random.randint(0,1, len(df))
 
-        pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
-        return df, pars
+    pars = { 'colnum': colnum, 'colcat': colcat, "coly": coly }
+    return df, pars
 
 
-    def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False,
+def test_dataset_fashion_mnist(samples=100, random_crop=False, random_erasing=False,
                                 convert_to_RGB=False,val_set_ratio=0.2, test_set_ratio=0.1,num_workers=1):
         """function test_dataset_f_mnist
         """
@@ -1368,11 +1463,7 @@ if 'test_utils':
         return train_X, train_y,   valid_X, valid_y,   test_X , test_y
 
 
-
-
 ###################################################################################################
-
-
-
-
-
+if __name__ == "__main__":
+    import fire
+    fire.Fire()

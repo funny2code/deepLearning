@@ -484,7 +484,8 @@ def embedding_load_parquet(dirin="df.parquet",  colid= 'id', col_embed= 'emb',  
 
     ###########################################################################
     ###### Split embed numpy array, id_map list,  #############################
-    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True,     mdim = emb_dim)
+    vi      = [ float(v) for v in df['emb'][0].split(',')]
+    embs    = np_str_to_array(df['emb'].values,  l2_norm_sklearn=True, mdim =len(vi))
     id_map  = { name: i for i,name in enumerate(df[colid].values) }     
     log(",", str(embs)[:50], ",", str(id_map)[:50] )
     
@@ -601,6 +602,48 @@ def embedding_extract_fromtransformer(model,Xinput:list):
     # torch.Size([1, 5, 768])
     # len(example)
     return yout
+
+
+
+def embedding_cosinus_scores_pairwise(embs:np.ndarray, name_list:list=None, is_symmetric=False):
+    """ Pairwise Cosinus Sim scores
+    Example:
+        Doc::
+
+           embs   = np.random.random((10,200))
+           idlist = [str(i) for i in range(0,10)]
+           df = sim_scores_fast(embs:np, idlist, is_symmetric=False)
+           df[[ 'id1', 'id2', 'sim_score'  ]]
+
+    """
+    import copy, numpy as np
+    # from sklearn.metrics.pairwise import cosine_similarity
+    n= len(embs)
+    name_list = np.arange(0, n) if name_list is None else name_list
+    dfsim = []
+    for i in  range(0, len(name_list) - 1) :
+        vi = embs[i,:]
+        normi = np.sqrt(np.dot(vi,vi))
+        for j in range(i+1, len(name_list)) :
+            # simij = cosine_similarity( embs[i,:].reshape(1, -1) , embs[j,:].reshape(1, -1)     )
+            vj = embs[j,:]
+            normj = np.sqrt(np.dot(vj, vj))
+            simij = np.dot( vi ,  vj  ) / (normi * normj)
+            dfsim.append([name_list[i], name_list[j], simij])
+            # dfsim2.append([ nwords[i], nwords[j],  simij[0][0]  ])
+
+    dfsim  = pd.DataFrame(dfsim, columns= ['id1', 'id2', 'sim_score' ] )
+
+    if is_symmetric:
+        ### Add symmetric part
+        dfsim3 = copy.deepcopy(dfsim)
+        dfsim3.columns = ['id2', 'id1', 'sim_score' ]
+        dfsim          = pd.concat(( dfsim, dfsim3 ))
+    return dfsim
+
+
+
+
 
 
 
@@ -796,7 +839,7 @@ if 'utils_vector':
         return X
 
 
-    def  np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
+    def np_norm_l2(X, l2_norm_numpy=True, l2_norm_sklearn=False, l2_norm_faiss=False):
         """  L2 Normalize
         """
         if l2_norm_numpy:
@@ -813,25 +856,54 @@ if 'utils_vector':
         return X
 
 
-    def np_matrix_to_str2(m, map_dict:dict):
-        """ 2D numpy into list of string and apply map_dict.
+    def np_matrix_to_str2(array_2d, map_dict:dict=None):
+        """ 2D numpy or List of List into list of string and apply map_dict.
         
         Doc::
             map_dict = { 4:'four', 3: 'three' }
             m= [[ 0,3,4  ], [2,4,5]]
             np_matrix_to_str2(m, map_dict)
+            --> [ ",threee,four" ,   ",four," ]
 
         """
+        map_dict = {} if map_dict is None else map_dict
         res = []
-        for v in m:
+        for v in array_2d:
             ss = ""
             for xi in v:
                 ss += str(map_dict.get(xi, "")) + ","
             res.append(ss[:-1])
-        return res    
+        return res
+
+
+    def np_matrix_to_str3(array_2d, map_dict: dict = None):
+        """ 2D numpy or List of List into list of string and apply map_dict.
+
+        Doc::
+            map_dict = { 4:'four', 3: 'three' }
+            m= [[ 0,3,4  ], [2,4,5]]
+            np_matrix_to_str3(m, map_dict)
+            --> [ ",threee,four" ,   ",four," ]
+
+        """
+        map_dict = {} if map_dict is None else map_dict
+        res = []
+        for v in array_2d:
+            ss = ""
+            for xi in v:
+                ss += str(map_dict.get(str(xi), "")) + ","
+            res.append(ss[:-1])
+        return res
 
 
     def np_matrix_to_str(m):
+        """ 2D numpy into list of string and apply map_dict.
+
+        Doc::
+            m= [[ 0,3,4  ], [2,4,5]]
+            --> [ "0,3,4" ,   "2,4,5" ]
+
+        """
         res = []
         for v in m:
             ss = ""
@@ -841,7 +913,14 @@ if 'utils_vector':
         return res            
                 
     
-    def np_matrix_to_str_sim(m):   ### Simcore = 1 - 0.5 * dist**2
+    def np_matrix_to_str_sim(m):
+        """
+        Docs::
+
+             Return Simcore = 1 - 0.5 * dist**2
+
+
+        """
         res = []
         for v in m:
             ss = ""
@@ -849,8 +928,6 @@ if 'utils_vector':
                 ss += str(1-0.5*di) + ","
             res.append(ss[:-1])
         return res   
-
-
 
 
 
@@ -928,7 +1005,8 @@ if 'custom_code':
 ###############################################################################################################
 if __name__ == "__main__":
     import fire
-    fire.Fire()
+    test_all()
+    #fire.Fire()
 
 
 

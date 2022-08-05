@@ -118,11 +118,13 @@ bootstrapped
 mmh3  
 imodels   ### rule generator
 mapie  ### Uncertainty est.
-
+numpyro==0.9.2
 
 #######################################################
 ## utilmy.recsys
 ## abracadabra
+
+
 
 
 ########################################################
@@ -147,13 +149,15 @@ pykeen
 ### visualize emb
 mpld3
 hdbscan
-umap-learn
+umap-learn==0.5.3
 optuna
 
 
 ### ONNX part
 onnxruntime
 # onnx
+
+
 
 
 

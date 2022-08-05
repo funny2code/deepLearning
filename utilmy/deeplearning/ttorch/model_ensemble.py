@@ -81,10 +81,10 @@ from torch.utils.data import DataLoader, TensorDataset, Dataset
 import torchvision
 from torchvision import transforms, datasets, models
 from pandas.core.frame import DataFrame
-
+from utilmy.deeplearning.ttorch import  util_torch as ut
 #############################################################################################
 from utilmy import log
-
+from utilmy.deeplearning import  util_embedding as ue
 ##############################################################################################
 def help():
     """function help
@@ -109,12 +109,7 @@ def test_all():
     test2_lstm()
 
 
-
-
-def test1():
-    """
-    """
-    from box import Box ; from copy import deepcopy
+def init_ARG():
     ARG = Box({
         'MODE'   : 'mode1',
         'DATASET': {},
@@ -122,7 +117,30 @@ def test1():
     })
     PARAMS = Box()
 
+    ARG.MODEL_INFO.TYPE = 'dataonly'
+    #train_config
+    train_config                     = Box({})
+    train_config.LR                  = 0.001
+    train_config.SEED                = 42
+    train_config.DEVICE              = 'cpu'
+    train_config.BATCH_SIZE          = 4
+    train_config.EPOCHS              = 1
+    train_config.EARLY_STOPPING_THLD = 10
+    train_config.VALID_FREQ          = 1
+    train_config.SAVE_FILENAME       = './model.pt'
+    train_config.TRAIN_RATIO         = 0.7
+    train_config.VAL_RATIO           = 0.2
+    train_config.TEST_RATIO          = 0.1   
 
+    #ARG.merge_model= {}
+    #ARG.merge_model.train_config  = train_config
+    return ARG, train_config
+
+
+def test1():
+    """
+    """
+    from box import Box ; from copy import deepcopy
     from utilmy.adatasets import test_dataset_classifier_fake
     df, cols_dict = test_dataset_classifier_fake(100, normalized=True)
 
@@ -133,21 +151,7 @@ def test1():
 
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
     #### SEPARATE the models completetly, and create duplicate
     ### modelA  ########################################################
@@ -211,14 +215,8 @@ def test1():
 def test2a():
     """
     """
+    log('### test Merging list of Custom models provided')
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
-
 
     from utilmy.adatasets import test_dataset_classifier_fake
     df, cols_dict = test_dataset_classifier_fake(100, normalized=True)
@@ -228,23 +226,8 @@ def test2a():
 
     prepro_dataset = None
 
-
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
 
     #### SEPARATE the models completetly, and create duplicate
@@ -311,14 +294,8 @@ def test2a():
 def test2b():
     """
     """
+    log('### test Merging pretrained CNN models provided with fake data')
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
-
 
     from utilmy.adatasets import test_dataset_classifier_fake
     df, cols_dict = test_dataset_classifier_fake(100, normalized=True)
@@ -329,23 +306,15 @@ def test2b():
         return df
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config                     = Box({})
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 32
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+
+        """       
         trainx = torch.rand(train_config.BATCH_SIZE,3,224,224)
         trainy = torch.rand(train_config.BATCH_SIZE)
         validx = torch.rand(train_config.BATCH_SIZE,3,224,224)
@@ -425,15 +394,8 @@ def test2b():
 def test2c():
     """
     """
+    log('### test Merging pretrained CNN model(Resnet & EfficientNet) provided')
     from box import Box ; from copy import deepcopy
-
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = Box()
-
 
     ####################################################################
     from utilmy.adatasets import test_dataset_classifier_fake
@@ -443,6 +405,12 @@ def test2c():
         return df
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+            
+        """  
         trainx = torch.rand(train_config.BATCH_SIZE,3,28,28)
         trainy = torch.rand(train_config.BATCH_SIZE)
         validx = torch.rand(train_config.BATCH_SIZE,3,28,28)
@@ -453,21 +421,7 @@ def test2c():
 
 
     ##################################################################
-    train_config                     = Box({})
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        #train_config
-        train_config.LR                  = 0.001
-        train_config.SEED                = 42
-        train_config.DEVICE              = 'cpu'
-        train_config.BATCH_SIZE          = 4
-        train_config.EPOCHS              = 1
-        train_config.EARLY_STOPPING_THLD = 10
-        train_config.VALID_FREQ          = 1
-        train_config.SAVE_FILENAME       = './model.pt'
-        train_config.TRAIN_RATIO         = 0.7
-        train_config.VAL_RATIO           = 0.2
-        train_config.TEST_RATIO          = 0.1
+    ARG, train_config = init_ARG()
 
 
     #### SEPARATE the models completetly, and create duplicate
@@ -563,37 +517,24 @@ def test2c():
 def test2d():
     """
     """
+    log('### test Merging pretrained CNN models with FashioMnist Dataset')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-
 
     ####################################################################
     def load_DataFrame():
         return None
 
-    if ARG.MODE == 'mode1':
-        train_config                           = Box({})
-        train_config.LR                        = 0.001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 64
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
+    ARG, train_config = init_ARG()
 
 
     def test_dataset_f_mnist(samples=100):
-        """function test_dataset_f_mnist
         """
+        Docs:
+            
+            Dataset : FashionMNIST dataset and splitting.
+            
+        """  
         from sklearn.model_selection import train_test_split
         from torchvision import transforms, datasets
         # Generate the transformations
@@ -620,6 +561,12 @@ def test2d():
 
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """
+        Docs:
+            
+            Dataset : Preparing random Image dataset for torchvision models
+        
+        """  
         train_X ,train_y,valid_X ,valid_y,test_X, test_y = test_dataset_f_mnist(samples=100)
         return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
@@ -712,32 +659,12 @@ def test2d():
 
 ##MultiClassMultiLable
 def test3():
+   log('### test MultiClassMultiHead with single Class')
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset
 
-   ARG = Box({
-       'MODE'   : 'mode1',
-       'DATASET': {},
-       'MODEL_INFO' : {},
-   })
-   PARAMS = {}
-
-
    ##################################################################
-   if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly'
-       train_config                           = Box({})
-       train_config.LR                        = 0.001
-       train_config.SEED                      = 42
-       train_config.DEVICE                    = 'cpu'
-       train_config.BATCH_SIZE                = 64
-       train_config.EPOCHS                    = 1
-       train_config.EARLY_STOPPING_THLD       = 10
-       train_config.VALID_FREQ                = 1
-       train_config.SAVE_FILENAME             = './model.pt'
-       train_config.TRAIN_RATIO               = 0.7
-       train_config.VAL_RATIO                 = 0.2
-       train_config.TEST_RATIO                = 0.1
+   ARG, train_config = init_ARG()
 
 
    ####################################################################
@@ -745,6 +672,12 @@ def test3():
        return None
 
    def test_dataset_f_mnist(samples=100):
+       """
+       Docs:
+            
+        Dataset : FashionMNIST dataset and splitting.
+            
+       """  
        from sklearn.model_selection import train_test_split
        from torchvision import transforms, datasets
        # Generate the transformations
@@ -854,37 +787,23 @@ def test3():
 
 
 def test4():
+   log('### test MultiClassMultiHead with Multi Class Multi lable')
    from box import Box ; from copy import deepcopy
    from torch.utils.data import DataLoader, TensorDataset, Dataset
 
-   ARG = Box({
-       'MODE'   : 'mode1',
-       'DATASET': {},
-       'MODEL_INFO' : {},
-   })
-   PARAMS = {}
-
-
    ##################################################################
-   if ARG.MODE == 'mode1':
-       ARG.MODEL_INFO.TYPE = 'dataonly'
-       train_config                           = Box({})
-       train_config.LR                        = 0.001
-       train_config.SEED                      = 42
-       train_config.DEVICE                    = 'cpu'
-       train_config.BATCH_SIZE                = 64
-       train_config.EPOCHS                    = 1
-       train_config.EARLY_STOPPING_THLD       = 10
-       train_config.VALID_FREQ                = 1
-       train_config.SAVE_FILENAME             = './model.pt'
-       train_config.TRAIN_RATIO               = 0.7
-       train_config.VAL_RATIO                 = 0.2
-       train_config.TEST_RATIO                = 0.1
+   ARG, train_config = init_ARG()
 
 
    ####################################################################
    samples = 1000 ##Fake data samples
    def prepro_dataset():
+      """
+        Docs:
+            
+            Dataset : Preparing Dataset for MultiClassMultiLable model
+            
+      """  
       train_X = torch.rand(int(samples*train_config.TRAIN_RATIO),3,28,28)
       valid_X = torch.rand(int(samples*train_config.VAL_RATIO),3,28,28)
       test_X = torch.rand(int(samples*train_config.TEST_RATIO),3,28,28)
@@ -918,6 +837,13 @@ def test4():
 
    ############## Custom Data Loader #############################
    def custom_dataloader():
+       """
+        Docs:
+            
+            Dataloader : Custom dataloader for MultiClassMultiLable model
+            
+       """  
+
        class CustomImageDataset(Dataset):
            def __init__(self,data=None,lables=None,class_lable_dict=None):
                self.data    = data
@@ -1019,35 +945,15 @@ def test4():
    print(outputs)
 
 
-
-
 def test5():
     """ Multihead class fine tuning with Fashion Dataset
     """
     from utilmy.deeplearning.ttorch import  util_torch as ut
     import glob
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
-    PARAMS = {}
+
 
     ##################################################################
-    if ARG.MODE == 'mode1':
-        ARG.MODEL_INFO.TYPE = 'dataonly'
-        train_config                           = Box({})
-        train_config.LR                        = 0.001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 8
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
+    ARG, train_config = init_ARG()
 
     dirtmp      = "./"
     col_img     = 'id'
@@ -1056,6 +962,12 @@ def test5():
 
 
     def custom_label(arg:dict=None):
+        """
+        Docs:
+            
+           Download Dataset and split the data
+            
+        """  
         ########## Downloading Dataset######
         dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
 
@@ -1087,6 +999,12 @@ def test5():
 
 
     def custom_dataloader():
+        """
+        Docs:
+            
+            Dataloader : Custom dataloader of FashionMnist for MultiClassMultiLable model
+            
+        """  
         ######CUSTOM DATASET#############################################
         # isexist(df_train, df_test, df_val, label_dict, col_img)
 
@@ -1209,10 +1127,10 @@ def test6():
     if ARG.MODE == 'mode1':
         ARG.MODEL_INFO.TYPE = 'dataonly'
         train_config                           = Box({})
-        train_config.LR                        = 0.001
+        train_config.LR                        = 0.0001
         train_config.SEED                      = 42
         train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 8
+        train_config.BATCH_SIZE                = 4
         train_config.EPOCHS                    = 1
         train_config.EARLY_STOPPING_THLD       = 10
         train_config.VALID_FREQ                = 1
@@ -1254,6 +1172,12 @@ def test6():
 
 
     def custom_dataloader():
+        """
+        Docs:
+
+            Dataloader : Custom dataloader of FashionMnist for MultiClassMultiLable model
+
+        """
         ######CUSTOM DATASET#############################################
         # isexist(df_train, df_test, df_val, label_dict, col_img)
 
@@ -1345,8 +1269,13 @@ def test6():
 
 
  #########################EMBEDDING ####################################
-    from utilmy.deeplearning.ttorch import  util_torch as ut
     def custom_embedding_data():
+         """
+         Docs:
+
+            Selecting specific class and lable from MultiClassMultiLable model for embeddings
+
+         """
          dataset_url = "https://github.com/arita37/data/raw/main/fashion_40ksmall/data_fashion_small.zip"
          ut.dataset_download(dataset_url, dirout=dirtmp)
          train_img_path  = dirtmp + 'data_fashion_small/train'
@@ -1354,55 +1283,65 @@ def test6():
          df   = pd.read_csv(label_path,error_bad_lines=False, warn_bad_lines=False)
          df = ut.dataset_add_image_fullpath(df, col_img='id', train_img_path=train_img_path)
 
+         ########### Train Test Split
+         df_train, _ , _ = ut.dataset_traintest_split(df, train_ratio=0.9, val_ratio=0.1)
+
          ##############TRANFORM IMAGE############
          tlist = [transforms.ToTensor(),transforms.Resize((64,64))]
          transform  = transforms.Compose(tlist)
 
          ###Loads image and imagename(to save the embedding with image name)####
-         dataset = ut.DataForEmbedding( df ,col_img='id', transforms=transform)
-
+         label_dict = {"gender":"Men"}
+         dataset = ut.ImageDataset(label_dir=df_train, label_dict=label_dict, col_img='id', transforms=transform, return_img_id  = True)
          return dataset
 
+    dataset      = custom_embedding_data()
+    train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
+
+
+    print("Before Training")
+    tag   ='multi'
+    dirout= "./temp"
+
+    dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
+                                             force_getlayer= False, pos_layer=-2)
+
+    print(dfsim)
+
+    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
+                                num_clusters=2,
+                                )
+    # ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+    #                             dirout=dirout + "/out1/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
+    #                             num_clusters=2,
+    #                             )
     #### Run Model   ###################################################
     model.training(dataloader_custom = custom_dataloader )
-    model.save_weight('ztmp/model_x5.pt')
+    model.save_weight( 'ztmp/model_x5.pt')
     model.load_weights('ztmp/model_x5.pt')
     inputs = torch.randn((train_config.BATCH_SIZE,3,28,28)).to(model.device)
     outputs = model.predict(inputs)
-    print(outputs)
-    ######To predict lables
-    for i in range(train_config.BATCH_SIZE):
-        sum = {}
-        for key, val in outputs.items():
-            sum[key] = outputs[key].sum()
-        Keymax = max(zip(sum.values(), sum.keys()))[1]
-        print(Keymax)
-    dataset = custom_embedding_data()
-    train_loader = DataLoader(dataset,batch_size=4, drop_last=True)
+    #print(outputs)
 
-    tag='multi'
-    dirout="./train"
-    ut.embedding_torchtensor_to_parquet(model=model.net.eval(), dirout=dirout, data_loader=train_loader,tag=tag)
-    embv, img_names,df = ut.embedding_load_parquet(dirin="{}/df_emb_{}.parquet".format(dirout,tag),  colid= 'id', col_embed= 'emb')
 
-    ####Cosine similarity b/w Merged Embeddings
-    df = ut.cos_similar_embedding(embv=embv,img_names = df['id'].values)
+    print("After Training")
+    tag   ='multi-finetuned'
 
-    #########Cosine similarity b/w lables of 2 items Embeddings
-    from sklearn.metrics.pairwise import cosine_similarity
-    for i, emb1 in enumerate(embv):
-        emb1 = torch.tensor(emb1)
-        res1 = head_custom(emb1)
-        for emb2 in embv:
-            emb2 = torch.tensor(emb2)
-            if torch.all(emb1.eq(emb2)) == True:
-               continue
-            res = head_custom(emb2)
-            for key, value in res.items():
-                vec1 = res1[key].detach().numpy()
-                vec2 = value.detach().numpy()
-                score = cosine_similarity([vec1],[vec2])
-                print(score)
+    #model=model.net.eval()
+    dfsim = ut.model_embedding_extract_check(model=model.net.eval(), dirout=dirout, data_loader=train_loader, tag=tag,
+                                     force_getlayer= False, pos_layer=-2)
+
+    ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+                                dirout=dirout + "/out/", dim_reduction='mds', nmax=200, ntrain=df_train.shape[0],
+                                num_clusters=2,
+                                )
+
+    # ue.embedding_create_vizhtml(dirin=dirout + f"/df_emb_{tag}.parquet",
+    #                             dirout=dirout + "/out1/", dim_reduction='umap', nmax=200, ntrain=df_train.shape[0],
+    #                             num_clusters=2,
+    #                             )
+    print(dfsim)
 
 
 ##### LSTM #################################################################################
@@ -1410,31 +1349,13 @@ def test2_lstm():
     log('\n\n\n\nLSTM Version')
     from utilmy.deeplearning.ttorch import model_ensemble as me
     from box import Box ; from copy import deepcopy
-    ARG = Box({
-        'MODE'   : 'mode1',
-        'DATASET': {},
-        'MODEL_INFO' : {},
-    })
 
 
     ####################################################################
     def load_DataFrame():
         return None
 
-    if ARG.MODE == 'mode1':
-        train_config                           = Box({})
-        train_config.LR                        = 0.001
-        train_config.SEED                      = 42
-        train_config.DEVICE                    = 'cpu'
-        train_config.BATCH_SIZE                = 64
-        train_config.EPOCHS                    = 1
-        train_config.EARLY_STOPPING_THLD       = 10
-        train_config.VALID_FREQ                = 1
-        train_config.SAVE_FILENAME             = './model.pt'
-        train_config.TRAIN_RATIO               = 0.7
-        train_config.VAL_RATIO                 = 0.2
-        train_config.TEST_RATIO                = 0.1
-
+    ARG, train_config = init_ARG()
 
     def test_dataset_f_mnist(samples=100):
         """function test_dataset_f_mnist
@@ -1465,6 +1386,8 @@ def test2_lstm():
 
 
     def prepro_dataset(self,df:pd.DataFrame=None):
+        """function prepro_dataset
+        """
         train_X ,train_y,valid_X ,valid_y,test_X, test_y = test_dataset_f_mnist(samples=100)
         return train_X ,train_y,valid_X ,valid_y,test_X,test_y
 
@@ -1585,29 +1508,6 @@ class SequenceReshaper(nn.Module):
             return x
         else:
             return x
-
-
-class model_getlayer():
-    def __init__(self, network, backward=False, pos_layer=-2):
-        self.layers = []
-        self.get_layers_in_order(network)
-        self.last_layer = self.layers[pos_layer]
-        self.hook       = self.last_layer.register_forward_hook(self.hook_fn)
-
-    def hook_fn(self, module, input, output):
-        self.input = input
-        self.output = output
-
-    def close(self):
-        self.hook.remove()
-
-    def get_layers_in_order(self, network):
-      if len(list(network.children())) == 0:
-        self.layers.append(network)
-        return
-      for layer in network.children():
-        self.get_layers_in_order(layer)
-
 
 class model_template_MLP(torch.nn.Module):
     def __init__(self,layers_dim=[20,100,16]):
@@ -1766,6 +1666,12 @@ class BaseModel(object):
       torch.save(ckp,path)
 
     def grad_check(self,):
+        """
+        Docs:
+            
+            Assuring Pre-trainined Models's(Merge) parameters to not to be trainable
+        
+        """
         for i in range(len(self.net.models_nets)):
             net_model = self.net.models_nets[i]
             kk = 0
@@ -1778,6 +1684,12 @@ class BaseModel(object):
 
 
     def validate_dim(self,train_loader,val_loader):
+        """
+        Docs:
+            
+            Asserting dimensions of Train and Validation Datasets
+        
+        """
         train = iter(train_loader)
         train_inp, _ = next(train)
 
@@ -1963,7 +1875,10 @@ class MergeModel_create(BaseModel):
 
         #### BE cacreful to include all the params if COmbine loss.
         #### Here, only head_task
-        self.optimizer = torch.optim.Adam(self.net.head_task.parameters())
+        # self.optimizer = torch.optim.Adam({ **self.net.merge_task.parameters() ,
+        #                                    **self.net.head_task.parameters() ,  })
+        #### contains all the params,  and pre-trained models are FREEZED
+        self.optimizer = torch.optim.Adam(self.net.parameters())
 
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.5, patience=5,
                          verbose=True, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
@@ -2115,7 +2030,7 @@ class model_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self, x,**kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embA = self.forward(x)
                 embA = layer_l2.output.squeeze()
                 return embA
@@ -2284,7 +2199,7 @@ class zzmodelA_create(BaseModel):
 
 
             def get_embedding(self, x,**kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embA = self.forward(x)
                 embA = layer_l2.output.squeeze()
                 return embA
@@ -2341,7 +2256,7 @@ class zzmodelB_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embB = self.forward(x)
                 embB = layer_l2.output.squeeze()
                 return embB
@@ -2397,7 +2312,7 @@ class zzmodelC_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l2= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l2= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embC = self.forward(x)
                 embC = layer_l2.output.squeeze()
                 return embC
@@ -2452,7 +2367,7 @@ class zzmodelD_create(BaseModel):
                 return self.head_task(x)
 
             def get_embedding(self,x, **kwargs):
-                layer_l3= model_getlayer(self.head_task, pos_layer=-2)
+                layer_l3= ut.model_getlayer(self.head_task, pos_layer=-2)
                 embD = self.forward(x)
                 embD = layer_l3.output[0][:,-1,:].squeeze() #Because LSTM cell gives 3D batched output
                 return embD
@@ -2465,7 +2380,8 @@ class zzmodelD_create(BaseModel):
 
 ###############################################################################################################
 if __name__ == "__main__":
-    import fire
-    fire.Fire()
-    # test_all()
+    #import fire
+    #fire.Fire()
+    test6()
+
 

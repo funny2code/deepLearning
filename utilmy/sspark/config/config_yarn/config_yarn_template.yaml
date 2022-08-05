@@ -212,7 +212,7 @@ spark_local_config:
 
 export PYSPARK_PYTHON="./CONDA_ENV/bin/python"
 export PYSPARK_DRIVER_PYTHON=$PYSPARK_PYTHON
-export KEYTAB=$DIRECTORY/scoupon.prod.keytab
+export KEYTAB=$DIRECTORY/aa.prod.keytab
 export ZIP_CONDA_PATH=$HOME/.envs/base_env.zip
 
 

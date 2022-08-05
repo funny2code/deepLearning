@@ -66,136 +66,27 @@ if 'import':
 ####################################################################################################
 if 'path':
     dirs = Box({})
-    dirs.pur_dir      = "/a/"
-    dirs.brw_dir      = "/a//"   ## User History
-    # dirs.clk_dir      = "/a/pydata/brw_item_v15/"  ### ~last 120 days of click, Only ITEMS
-
-    dirs.sc_clk_dir   = "/a//"  ####  ~last 400 days of click
-    dirs.sc_pur_dir   = "/a//"  ###   ~last 400 days of purchase
-    dirs.sc_imp_dir   = "/a/"  ###   ~last 120 days of impression
-
-    pur_dir      = "/a/"
-    brw_dir      = "/a//"   ## User History
-    # dirs.clk_dir      = "/a/pydata/brw_item_v15/"  ### ~last 120 days of click, Only ITEMS
-
-    sc_clk_dir   = "/a/pydata/sc_widget_clk/"  ####  ~last 400 days of click
-    sc_pur_dir   = "/a/pydata/sc_widget_pur/"  ###   ~last 400 days of purchase
-    sc_imp_dir   = "/a/pydata/sc_widget_imp/"  ###   ~last 120 days of impression
-
-
-    dir_scitems = "/301/s05/pydata/sc_items/sc_campaign_items.tsv"
-    dir_pydata  = "/a/pydata/"
-
-    dir_ngsiid  = "//a/pydata/sc_block_user_item/"
-    dir_ngsiid2 = "/a/gfs101/s07/ndata/cpa/hdfs/sc_block_user_item/"
-
-
-    #dir_rec = zlocal.dir_rec
-    dir_rec     = '/data/workspaces/takos01/cpa/'
-    dir_out0    = '/data/workspaces/cpa/'
-
-
-    dir_hive    = "/a//ndata/cpa/input"
-    dir_res     = "/a//ndata/cpa//res/"
-
-    dir_norec   = "/a//ndata/cpa/res/norec.sh"
-    dir_nohist  = "/a//ndata/cpa/res/nohist.sh"
-
-
-    dir_rec3    = '/a//ndata/cpa/'   ### 66 Tb
-    dir_cpaloc  = "/cpa/"
-    dir_cpa3    = '/cpa/'    ### 3 Tb
-
-
-if 'path_ca':
-    dir_ca       = '/a/gfs101/s07/ndata/cpa/ca_check/'
-    dir_ca_hdfs  = dir_ca + "/hdfs//"
-    dir_ca_stats = dir_ca + "/stats/"
-    dir_ca_daily = dir_ca + "/daily/"
-
-    ### New items daily
-    dir_ca_dailyitem = "/301/s05/pydata/sc_items/sc_campaign_items.tsv"
-
-    table_ca_all_100d = "nono3.ca_daily_coupons10c"  ### 100 recent days ranid
-    table_ca_all_300d = "nono3.ca_daily_coupons11c"  ### all days with ranid
-
-    table_ca_100d = "nono3.ca_daily_coupons10b"  ### 100 recent days NO ranid
-    table_ca_300d = "nono3.ca_daily_coupons11"   ### all days with   NO ranid
-
-    dir_export = "/a/gfs101/s07/ntmp/export/ca/rec/"
-    dir_ca_prod = "/a/sc-coupon-advance-batches/"
-
-    flog_warning = "/a/gfs101/s07/ndata/cpa/log/log_gpu/aaa_Warning.py"
-
-
-
-if 'cols':
-    ### can be used for training
-    cols_scstream_item_vec_df = ['genre_name_path', 'item_emb', 'item_id', 'item_name', 'item_text','price', 'review_num', 'shop_id', 'shop_name', 'siid']
-    cols_scstream_item = ['genre_id', 'genre_name_path', 'genre_path', 'image_url', 'item_id', 'item_name', 'price', 'ran_cd', 'review_avg', 'review_num',
-                         'shop_id', 'shop_name', 'siid']
-
-    cols_pur   = ['basket_id', 'easy_id', 'gbuy_flg', 'genre_id', 'item_id', 'order_number', 'postage', 'price', 'ran_id', 'sender_zip', 'series_id', 'sg_id',
-                  'shop_id', 'super_auction_flg', 'tax', 'units', 'unix_time']
-
-    cols_brw      = ['easy_id', 'genre_id', 'item_id', 'ran_id', 'ref', 'ref_type', 'series_id', 'sg_id', 'shop_id', 'time_key'],
-    cols_item     = ['basket_id', 'easy_id', 'gbuy_flg', 'genre_id', 'item_id',  'order_number', 'postage', 'price', 'ran_id', 'sender_zip', 'series_id',
-                     'sg_id', 'shop_id', 'super_auction_flg', 'tax', 'units', 'unix_time']
-
-    cols_sc_imp   = ['channel', 'easy_id', 'item_id', 'logic_hash', 'query', 'shop_id',    'sid', 'timestamp']
-    cols_sc_clk   = ['channel', 'easy_id', 'item_id', 'logic_hash', 'query', 'shop_id',   'sid', 'timestamp']
-    cols_sc_pur   = ['channel', 'discount', 'easy_id', 'item_id', 'logic_hash', 'price', 'shop_id', 'timestamp', 'units' ]
-
-
-    cols_itemv15 = ['genre_id', 'item_id', 'ran_id', 'series_id', 'sg_id', 'shop_id']   ### int64
-    cols_itemv16 = ['genre_id', 'item_id', 'ran_id', 'series_id', 'sg_id', 'shop_id']   ### int64
+    dirs.pur_dir      = "/tmp/"
+    dirs.brw_dir      = "/tmp//"   ## User History
+    # dirs.clk_dir      = "/tmp//brw_item_v15/"  ### ~last 120 days of click, Only ITEMS
 
 
 
 
 #### DB Path   ############################################################################
 if 'db diskcache':
-    db_easyid_topgenre_pur = {}; db_itemid_vran= {}; db_ca_genre_siid= {};
-    db_easyid_topgenre_brw = {}; db_easyid_topgenre_intra= {} ; db_easyid_topgenre_merge = {};
-    db_ca_siid_genre = {}; db_imaster = {}; db_ivector = {} ; db_uvector = {}
-    ca_genreid_global = None  ; clientdrant = None ; ok_global = None
+    global = None  ; clientdrant = None ; ok_global = None
 
     #db_dir = "/data/workspaces/takos01/cpa/db/"
     db_dir  = "/sys/fs/cgroup/cpa/db"
 
     db = Box({
         #'db_itemtag_items_path'  :  f"{db_dir}/map_sampling_itemtag_siid.cache",
-        #'db_itemid_itemtag_path' :  f"{db_dir}/map_itemid_itemtag.cache",
-        # 'db_easyid_hist_path'    :  f"{db_dir}/easyid_hist_day_.db",
-        #'db_easyid_group_path'   :  f"{db_dir}/easyid_group.db",
-        # 'db_easyid_rec_path'     :  f"{db_dir}/easyid_rec.db",
-        #'db_timekey_easyidlist_path' : f"{db_dir}/timekey_easyidlist.db",
 
-        'db_itemid_vran_path' : f"{db_dir}/db_itemid_vran.db",
-
+        'db_itemid_path' : f"{db_dir}/db_itemid_vran.db",
 
         ### 2mio tag
         #'db_itemid_itemtag_2m_path' :  f"{db_dir}/map_itemid_itemtag_2m.cache",
-
-        #### Local IMaster for check
-        'db_imaster' :  f"{db_dir}/imaster.cache",   ####  IMaster cache
-        'db_ivector' :  f"{db_dir}/ivector.cache",   #### Item embedding cache
-
-        'db_uvector' :  f"{db_dir}/uvector.cache",   #### User embedding cache
-
-
-         #### Topk per itemid
-        'db_item_toprank' : f"{db_dir}/db_item_toprank.db",
-
-        #### Genre Rec
-        'db_ca_genre_siid'       :  f"{db_dir}/db_ca_genre_siid.cache",
-        'db_ca_siid_genre'       :  f"{db_dir}/db_ca_siid_genre.cache",
-
-        'db_easyid_topgenre_pur' :    f"{db_dir}/db_easyid_topg_pur.cache",
-        'db_easyid_topgenre_brw' :    f"{db_dir}/db_easyid_topg_brw.cache",
-        'db_easyid_topgenre_intra' :  f"{db_dir}/db_easyid_topg_intra.cache",    ### Intra updates
-
-        'db_easyid_topgenre_freqpur' :  f"{db_dir}/db_easyid_topg_freqpur.cache",    ### Intra updates
 
         # 'db_easyid_topgenre_merge' :  f"{db_dir}/db_easyid_topg_merge.cache",   #### Hybrid scores
     })
@@ -243,22 +134,6 @@ if 'db diskcache':
             no history for easyid 385680657, no history for easyid 431723304,no history for easyid 346710171,
 
         """
-
-        val1 = db_easyid_hist.get(366260203, "")
-
-
-        llist = db_timekey_easyidlist["pur_18879"]
-
-        v = diskcache_getval(db_easyid_hist)
-        print(str(v)[:500] )
-
-
-        # print( db_easyid_hist.check() )
-        ss = 'SELECT key,value FROM Cache WHERE key={key} LIMIT 1'
-
-        for ii, k in enumerate(llist) :
-           v = db_easyid_hist._sql( ss.format(key= k) ).fetchall()
-           print(str(v)[:100])
 
 
         return 1
@@ -1110,7 +985,7 @@ if 'word2vec' :
           -saveOutput         whether output params should be saved [0]
 
 
-          /a/gfs101/s07/ndata/cpa/emb/seq/ichiba_order_20210901b_itemtagb2/ccountlog_ranid
+          /tmps07/ndata/cpa/emb/seq/ichiba_order_20210901b_itemtagb2/ccountlog_ranid
 
         """
         dim_vec = 200    ###95000 tokens
@@ -1130,7 +1005,7 @@ if 'word2vec' :
         #dir_data = "/204/h03/ndata/cpa/emb/"
         #dir_out  = "/data/workspaces/takos01/cpa/"
 
-        dir_data = "/a/gfs101/s07/ndata/cpa/emb/"
+        dir_data = "/tmps07/ndata/cpa/emb/"
         dir_out  = "/data/workspaces/takos01/cpa/"
 
         tag = "v16merge_50n"
@@ -1592,7 +1467,7 @@ if 'backup' :
         # dirout = "/204/h03/ndata/cpa/emb/emb/"
         if dirin is None :
            dirin  = "/201/h03/ndata/cpa/emb/emb/ichiba_order_20210901b_itemtagb2/aseq_full_hash3v24full/topk_ranid/"
-           dirout = "/a/ndata/cpa/cpa/topk/ichiba_pur/topk_ranid/"
+           dirout = "/tmp/ndata/cpa/cpa/topk/ichiba_pur/topk_ranid/"
 
         flist = [] ; dirinj = dirin
         for j in range(nlevel):
@@ -1667,7 +1542,7 @@ if 'backup' :
 
         dirin  = [ "/data/workspaces/takos01/cpa/emb/seq/ichiba_order_20210901b_itemtagb2/ccount_log2/*.txt" ]
 
-        dirout = "/a/gfs101/s07/ndata/cpa/emb/seq/ichiba_order_20210901b_itemtagb2/ccountlog_ranid/seq_pur_manual_ccount.txt"
+        dirout = "/tmps07/ndata/cpa/emb/seq/ichiba_order_20210901b_itemtagb2/ccountlog_ranid/seq_pur_manual_ccount.txt"
 
         os_merge_safe(dirin_list= dirin, dirout= dirout, nlevel=5, nfile=5000,  cmd_fallback="")
 
@@ -1675,13 +1550,13 @@ if 'backup' :
 
     def backup_emb():   # python prepro.py backup_emb &
         dirin  = "/data/workspaces/takos01/cpa/emb/"
-        dirout = "/a/gfs101/s07/ndata/cpa/emb/"
+        dirout = "/tmps07/ndata/cpa/emb/"
 
         os_copy_safe(dirin, dirout, nlevel=15, nfile=500000, logdir="./", cmd_fallback= cmd_mountgs )
 
     def backup_img():   # python prepro.py backup_img &
         dirin  = "/data/workspaces/img/models/"
-        dirout = "/a/gfs101/s07/ndata/cpa/img/models/"
+        dirout = "/tmps07/ndata/cpa/img/models/"
 
         os_copy_safe(dirin, dirout, nlevel=20, nfile=500000, logdir="./", cmd_fallback= cmd_mountgs )
 
@@ -1691,7 +1566,7 @@ if 'backup' :
         t0      = str(date_now_jp() )
         dirin   = "/sys/fs/cgroup/cpa/db"
         #dirout = "/201/h03/ndata/cpa/db/db"
-        dirout  = "/a/gfs101/s07/ndata/cpa/db/db"
+        dirout  = "/tmps07/ndata/cpa/db/db"
         log(t0, dirin, dirout)
         os.system( f"mv   {dirout}  {dirout + t0}   ")     ### Rename
 
@@ -1701,8 +1576,8 @@ if 'backup' :
     def backup_code():   # py backup_code &
         t0      = str(date_now_jp() )
         dirin   = "/home/test_code"
-        dirout1 = "/a/gfs101/s07/ndata/zbackup/cd/latest/"
-        dirout2 = "/a/gfs101/s07/ndata/zbackup/cd/" + str(t0) + "/"
+        dirout1 = "/tmps07/ndata/zbackup/cd/latest/"
+        dirout2 = "/tmps07/ndata/zbackup/cd/" + str(t0) + "/"
         log(t0, dirin, dirout2)
         try :
           os.rename( dirout1, dirout2)
@@ -2174,7 +2049,7 @@ if 'daily_check':
         (f"/hdfs/daily_user_hist/{tk2}/brw_ran/",  'user hist brw'),
         (f"/hdfs/daily_user_hist/{tk2}/pur_ran/",  'user hist pur top 10'),
 
-        (f"/hdfs/daily_user_eod/{tk1}/brw_ran_v15/",      'T-2 user list'),
+        (f"/hdfs/daily_user_eod/{tk1}/tmpv15/",      'T-2 user list'),
         (f"/hdfs/daily_user_eod/{tk1}/sc_stream/",        'T-2, T-1'),
         (f"/hdfs/daily_user_eod/{tk1}/sc_stream_intra/",  'T-2,T-1, realtime'),
         (f"/hdfs/daily_user_eod/{tk1}/sc_stream_item/",   'T-2,T-1, realtime'),
@@ -2185,8 +2060,8 @@ if 'daily_check':
         (f'/log/log_gpu/*{today}*db*topg_pur*.py', 'DB easyid topmerge'),
 
 
-        (f'/a/gfs101/s07/ndata/cpa/input/*genre_brw*{today2}*', 'HIVE genre BRW'),
-        (f'/a/gfs101/s07/ndata/cpa/input/*genre_pur*{today2}*', 'HIVE genre PUR'),
+        (f'/tmps07/ndata/cpa/input/*genre_brw*{today2}*', 'HIVE genre BRW'),
+        (f'/tmps07/ndata/cpa/input/*genre_pur*{today2}*', 'HIVE genre PUR'),
 
 
         ('', "\nCA"),
@@ -2201,7 +2076,7 @@ if 'daily_check':
         ('', "\ntopk"),
         (f'/hdfs/daily_usertopk/m001/{tk}/daily_user_eod/',       'topk all eod'),
         (f'/hdfs/daily_usertopk/m001/{tk}/daily_user_eod_genre/', 'topk all eod genre'),
-        (f'/a/gfs101/s07/ndata/export/ca/rec/{today}/', 'Neil Export'),
+        (f'/tmps07/ndata/export/ca/rec/{today}/', 'Neil Export'),
 
         ('', "\ntopk valid"),
         (f'/hdfs/daily_usertopk/m001/{tk}/daily_user_eod_eval/',       'topk eod valid'),
@@ -3721,8 +3596,8 @@ if 'rec_genre':
 
         ##### Input Data in T-1
         tk = get_timekey() - 1 + add_days
-        if 'new' in tag :    dirin_list = [f"/a/gfs101/s07/ndata/cpa/hdfs/daily_user_eod/", ]
-        elif tag == 'sc':    dirin_list = [f"/a/pydata/sc_widget_pur/"]
+        if 'new' in tag :    dirin_list = [f"/tmps07/ndata/cpa/hdfs/daily_user_eod/", ]
+        elif tag == 'sc':    dirin_list = [f"/tmp//sc_widget_pur/"]
         else:  return 'no tag early finish'
         log('users', dirin_list);  # time.sleep(1)
 
@@ -4135,11 +4010,11 @@ if 'daily_batch':
         tmin,tmax = get_timekey() - 2, get_timekey()
 
         tag    = "a"
-        dirout = '/a/gfs101/s07/ndata/cpa/map/'    ;  os.makedirs(dirout, exist_ok=True)
+        dirout = '/tmps07/ndata/cpa/map/'    ;  os.makedirs(dirout, exist_ok=True)
         cols   = ['shop_id', 'item_id', 'ran_id']
 
-        if mode == 'pur':  dirin = dir_pydata  + "/pur_ran_v15/"
-        else :             dirin = dir_pydata  + "/brw_ran_v15/"
+        if mode == 'pur':  dirin = dir_pydata  + "/tmpv15/"
+        else :             dirin = dir_pydata  + "/tmpv15/"
 
         #keys     = diskcache_getkeys(db_itemid_vran )
         db_path = db.db_itemid_vran_path
@@ -4395,8 +4270,8 @@ if 'daily_afternoon':
         tmax    = get_timekey() + add_days
         log(tk_list); time.sleep(5)
 
-        if  'all' in tag : dirin_list = [ f"/a/pydata/brw_ran_v15/",   ]
-        elif 'sc' in tag : dirin_list = [ f"/a/pydata/sc_widget_pur/"  ]
+        if  'all' in tag : dirin_list = [ f"/tmp//tmpv15/",   ]
+        elif 'sc' in tag : dirin_list = [ f"/tmp//sc_widget_pur/"  ]
         else :             return 'no tag early finish'
         log('users', dirin_list) ; time.sleep(5)
 
@@ -4414,7 +4289,7 @@ if 'daily_afternoon':
             flist  = []
 
             #### Pur only
-            #dirin2 = f"/a/pydata/pur_ran_v15/"
+            #dirin2 = f"/tmp//tmpv15/"
             #for tk in tk_list2:
             #    flist = flist +  glob.glob(dirin2 + f"/{bk}/*{tk}*"  )
 
@@ -4424,7 +4299,7 @@ if 'daily_afternoon':
                     flist = flist +  glob.glob(dirin + f"/{bk}/*{tk}*"  )
 
             if len(flist) < 1 : continue
-            group   = "brw_ran_v15"   ### flist[-1].split("/")[-3]
+            group   = "tmpv15"   ### flist[-1].split("/")[-3]
             dirouti = dirout + f"/{group}/user_eod_{bk}_{tk}.parquet"
             # if os.path.isfile(dirouti) : continue
 
@@ -4482,9 +4357,9 @@ if 'daily_afternoon':
 
         for tk in tk_list :
             dirin_list = []
-            if 'pur' in mode : dirin_list.append( f"/a/pydata/pur_ran_v15/*/*{tk}*.parquet"  )
-            if 'brw' in mode : dirin_list.append( f"/a/pydata/brw_ran_v15/*/*{tk}*.parquet"  )
-            # f"/a/pydata/sc_widget_clk/*/*{tk}*.parquet"
+            if 'pur' in mode : dirin_list.append( f"/tmp//tmpv15/*/*{tk}*.parquet"  )
+            if 'brw' in mode : dirin_list.append( f"/tmp//tmpv15/*/*{tk}*.parquet"  )
+            # f"/tmp//sc_widget_clk/*/*{tk}*.parquet"
 
             for dirin in dirin_list :
                 flist = glob_glob(dirin , 5000 )
@@ -4526,12 +4401,12 @@ if 'daily_afternoon':
         tmax = get_timekey()
 
         if  'brw' in tag :
-            dirin   = f"/a/pydata/brw_ran_v15/"
+            dirin   = f"/tmp//tmpv15/"
             dbname  = 'db_easyid_topgenre_brw'
             tk_list = [ t for t in range(t0-60  , t0+1  , 1)  ]   ### Past 5 day ONLY
 
         elif 'pur' in tag :
-            dirin   = f"/a/pydata/pur_ran_v15/"
+            dirin   = f"/tmp//tmpv15/"
             dbname  = 'db_easyid_topgenre_pur'
             tk_list = [ t for t in range(t0-120  , t0+1  , 1)  ]   ### Past 5 day ONLY
 
@@ -4670,7 +4545,7 @@ if 'daily_afternoon':
 
         if mode == 'merge':
             dirout =  dir_cpa3   + "/hdfs/items/"
-            dirin  =  dir_pydata + "/brw_ran_v15/"
+            dirin  =  dir_pydata + "/tmpv15/"
             df    = pd.DataFrame()
             flist = sorted( glob_glob(dirout + f"/*18*.parquet") )
             for fi in flist[-1:]:
@@ -4683,7 +4558,7 @@ if 'daily_afternoon':
 
         if mode == 'daily':
             dirout =  dir_cpa3    + "/hdfs/items/"
-            dirin  =  dir_pydata  + f"/brw_ran_v15/"
+            dirin  =  dir_pydata  + f"/tmpv15/"
             for tk in tlist :
                 dirouti = dirout + f'/item_{tk}.parquet'
                 if os.path.isfile(dirouti) : continue
@@ -4695,14 +4570,14 @@ if 'daily_afternoon':
 
         if mode == 'pur':
             dirout =  dir_cpa3   + "/hdfs/items_pur/"
-            dirin  =  dir_pydata + f"/pur_ran_v15/*/*{tk}*.parquet"
+            dirin  =  dir_pydata + f"/tmpv15/*/*{tk}*.parquet"
             df  = pd_groupby_pur(dirin, use_cache=False)
             pd_to_file(df, dirout + f'/itempur_{tk}.parquet', show=1)
 
 
         if mode == 'brw':
             dirout =  dir_cpa3   + "/hdfs/items_brw/"
-            dirin  =  dir_pydata + f"/brw_ran_v15/*/*{tk}*.parquet"
+            dirin  =  dir_pydata + f"/tmpv15/*/*{tk}*.parquet"
             df  = pd_groupby_clk(dirin, use_cache=False)
             pd_to_file(df, dirout + f'/itembrw_{tk}.parquet', show=1)
 
@@ -4725,11 +4600,11 @@ if 'daily_afternoon':
             batch_split_run(cmd, split=split, sleep= random.randint(2, 10) ) ; return 'done'
         
         if  'brw' in tag :
-            dirin_list = [ f"/a/pydata/brw_ran_v15/",   ]
+            dirin_list = [ f"/tmp//tmpv15/",   ]
             group      = "brw_ran" + mode
 
         elif 'pur' in tag:
-            dirin_list = [ f"/a/pydata/pur_ran_v15/",   ]
+            dirin_list = [ f"/tmp//tmpv15/",   ]
             group      = "pur_ran" + mode
 
         else :             return 'no tag early finish'
@@ -4796,8 +4671,8 @@ if 'daily_afternoon':
         #dirout0 = dir_cpa3 + f"/hdfs/daily_user_hist/ok2_{tag}/"
 
         t0 = "18977"
-        dirin   = dir_cpa3 + "/hdfs/daily_user_eod/18978/brw_ran_v15/*.parquet"
-        dirout0 = dir_cpa3 + "/hdfs/daily_user_eod/18978/brw_ran_v15_v2/"
+        dirin   = dir_cpa3 + "/hdfs/daily_user_eod/18978/tmpv15/*.parquet"
+        dirout0 = dir_cpa3 + "/hdfs/daily_user_eod/18978/tmpv15_v2/"
 
 
         #### Load ALL and re-distribute
@@ -4887,7 +4762,7 @@ if 'daily_rec_topk':
         today1 = date_now_jp("%Y%m%d", add_days=add_days,  timezone= 'jp')
         tk     = get_timekey()+add_days
         dirin  = dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*.parquet"
-        dirin2 = dir_cpa3 + f"/hdfs/daily_user_eod/{tk}/brw_ran_v15/*.parquet"
+        dirin2 = dir_cpa3 + f"/hdfs/daily_user_eod/{tk}/tmpv15/*.parquet"
         dirout = dir_cpa3 + f"/hdfs/daily_user_eod/{tk}/sc_stream/"
         log(dirin, dirin2, dirout)
 
@@ -4895,7 +4770,7 @@ if 'daily_rec_topk':
         log(dirin2)
         df2 = pd.DataFrame();  ti = tk
         while len(df2) < 1 :
-           dirin2 = dir_cpa3 + f"/hdfs/daily_user_eod/{ti}/brw_ran_v15/*.parquet"
+           dirin2 = dir_cpa3 + f"/hdfs/daily_user_eod/{ti}/tmpv15/*.parquet"
            # cols2  = [ 'easy_id', 'shop_id', 'item_id', 'genre_id'   ]
            df2    = pd_read_file2(dirin2, n_pool=25)  ; log(df2)
            if len(df2) > 10000 : break
@@ -5274,7 +5149,7 @@ if 'daily_rec_topk':
 
          if tag in ['all', 'new'] and len( os_process_find("python prepro_prod.py daily_eod_user --ii 0 ") ) > 0 :
             log('process Already running, terminating', ); return 1
-         # logfile = f"/a/gfs101/s07/ndata/cpa/log/log_gpu/log_{today}_daily_ca_02_user_topk_0.py"
+         # logfile = f"/tmps07/ndata/cpa/log/log_gpu/log_{today}_daily_ca_02_user_topk_0.py"
 
          if 'rename' in tag:  ## Rename previous folder
             tk = get_timekey()
@@ -5301,10 +5176,10 @@ if 'daily_rec_topk':
         tk_list = [ t for t in range(t0-0  , t0 + 1 , 1)  ]   ### Past 5 day ONLY
         tmax = t0
 
-        if    'new' in tag :   dirin_list = [ f"/a/gfs101/s07/ndata/cpa/hdfs/daily_user_eod/",   ]
-        elif  'all' in tag :   dirin_list = [ f"/a/pydata/brw_ran_v15/",   ]
-        elif tag == 'sc'  :    dirin_list = [ f"/a/pydata/sc_widget_pur/"  ]
-        elif tag == 'sclk'  :  dirin_list = [ f"/a/pydata/sc_widget_clk/"  ]
+        if    'new' in tag :   dirin_list = [ f"/tmps07/ndata/cpa/hdfs/daily_user_eod/",   ]
+        elif  'all' in tag :   dirin_list = [ f"/tmp//tmpv15/",   ]
+        elif tag == 'sc'  :    dirin_list = [ f"/tmp//sc_widget_pur/"  ]
+        elif tag == 'sclk'  :  dirin_list = [ f"/tmp//sc_widget_clk/"  ]
         else :              return 'no tag early finish'
         log('users', dirin_list) ; # time.sleep(1)
 
@@ -5770,7 +5645,7 @@ if 'intraday, easyid topk':
 
     def intra_i_jax(today=None):   intraday_item_vec_calc(today)
     def intraday_item_vec_calc(today= None):    ### py intraday_item_vec_calc     ### every 10mins
-        ### */5 * * * * /python prepro_prod.py intraday_item_vec_calc  > "/a/gfs101/s07/ndata/cpa/log/log_gpu/1hour.py"  2>&1   &
+        ### */5 * * * * /python prepro_prod.py intraday_item_vec_calc  > "/tmps07/ndata/cpa/log/log_gpu/1hour.py"  2>&1   &
         ###   in  daily_1hour.sh
         today = date_now_jp("%Y%m%d", timezone='jp' ) if today is None else today
         log(' Intraday  Item updater', today)
@@ -7752,7 +7627,7 @@ if 'ab_test':
     def user_tohtml(dfa1, add_days=0):
         tk     = get_timekey() + add_days
         dirout  = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/easyid_eval/"
-        dirout2 = f"/a/gfs101/s07/offline/backend_data/log/ztmp/check/{tk}/"
+        dirout2 = f"/tmps07/offline/backend_data/log/ztmp/check/{tk}/"
 
 
         def conv2(ll):
@@ -7907,7 +7782,7 @@ if 'daily_stats':
                 leasyid = set( leasyid['easy_id'].values )
                 log( 'Neasyid in ca_pur',  len(leasyid))
 
-                flist = glob_glob( brw_dir + f"/{bkt}/brw_ran_{tk}.parquet" , 10000 )
+                flist = glob_glob( brw_dir + f"/{bkt}/tmp{tk}.parquet" , 10000 )
 
                 fj = []; jj=0;  df = pd.DataFrame()
                 for fi in flist :
@@ -7934,17 +7809,8 @@ if 'daily_stats':
 if 'hadoop':
 
     def hdfs_down():
-        """   python prepro.py  hdfs_down
+        """   python prepro.py 
 
-        kdestroy && kinit -kt  /usr/local/hdp26/keytabs/scoupon.prod.keytab scoupon  && klist
-
-        hdfs dfs  -copyToLocal  hdfs://nameservice1/user/hive/warehouse/nono3.db/shopid_itemlist_img_full/   /data/workspaces/takos01/a
-
-        hdfs dfs  -ls   hdfs://nameservice1/user/hive/warehouse/nono3.db/shopid_itemlist_img_full/
-
-        hdfs dfs  -ls   hdfs://nameservice1/user/hive/warehouse/nono3.db/siid_feat_20210526_v2b/
-
-        hdfs dfs  -copyFromLocal   /data/workspaces/img/models/fashion/dcf_vae/   hdfs://nameservice1/scoupon/nono/zimg/
 
         https://hadoop.apache.org/docs/current/hadoop-distcp/DistCp.html
 
@@ -8000,7 +7866,7 @@ if 'hadoop':
 
     def hdfs_put(from_dir="", to_dir="",  verbose=True, n_pool=15, dirlevel=50,  **kw):
         """  python prepro.py  hdfs_put
-        /user/scoupon/zexport/z/fashion_emb_100k
+        /user/aa/zexport/z/fashion_emb_100k
 
         from_dir = "hdfs://nameservice1/user/hive/warehouse/nono3.db/shop_v1_20210526"
         to_dir   = "data/workspaces/img/models/fashion/dcf_vae/auto_album/"
@@ -8008,7 +7874,7 @@ if 'hadoop':
 
         """
         from_dir   = "/data/workspaces/img/models/fashion/dcf_vae/m_train9pred/res/m_train9b_g3_-img_train_r2p2_200k_clean_nobg_256_256-500000-cache_best_best_good_epoch_313/fashion_emb_100k/"
-        to_dir     = "hdfs://nameservice1/user/scoupon/zexport/z/fashion_emb_100k/"
+        to_dir     = "hdfs://nameservice1/user/aa/zexport/z/fashion_emb_100k/"
         # verbose= True
 
         import glob, gc,os, time, pyarrow as pa
@@ -8078,9 +7944,9 @@ if 'hadoop':
 
 
     def hdfs_walk(path="", dirlevel=3, hdfs=None):   ### python  prepro.py hdfs_walk
-        # path =  "hdfs://nameservice1/user/scoupon/nono/z/dcf_vae/m_train9pred/"
+        # path =  "hdfs://nameservice1/user/aa/nono/z/dcf_vae/m_train9pred/"
         import pyarrow as pa
-        # path = "/user/scoupon/zexport/"
+        # path = "/user/aa/zexport/"
         hdfs = pa.hdfs.connect() if hdfs is None else hdfs
         path = "hdfs://nameservice1/" + path if 'hdfs://' not in path else path
 
