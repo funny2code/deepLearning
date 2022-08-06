@@ -1175,12 +1175,10 @@ def glob_glob(dirin, exclude="", include_only="",
         
         if include_only:
             tmp_list = [] # add multi files
-            tmp_str = "" # avoid add same files
             for xi in include_only.split(","):
-                if len(xi) > 0 and xi not in tmp_str:
-                    tmp_str += xi + ","
+                if len(xi) > 0:
                     tmp_list += [  fi for fi in files if xi in fi ]
-            files = sorted(tmp_list)
+            files = sorted(set(tmp_list))
 
         ####### size filtering  ##################################################
         flist2=[]
