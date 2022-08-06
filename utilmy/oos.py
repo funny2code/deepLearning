@@ -1156,6 +1156,7 @@ def glob_glob(dirin, exclude="", include_only="",
             end_date='2050-01-01'
             nfiles=99999999
             verbose=0
+            npool=1 multithread
 
     """
     import glob, copy, datetime as dt, time
@@ -1208,7 +1209,6 @@ def glob_glob(dirin, exclude="", include_only="",
                 try :
                     t = os.stat( fi)
                     c = t.st_ctime
-                    print(dt.datetime.utcfromtimestamp(c).strftime("%Y-%m-%d %H:%M:%S"))
                     if c < cutoff:             # delete file if older than 10 days
                         flist2.append(fi)
                 except : pass
@@ -1225,7 +1225,7 @@ def glob_glob(dirin, exclude="", include_only="",
     else :
         from utilmy import parallel as par
 
-        fdir = os.walk(dirin)
+        fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
 
         res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
         # res =sum(res) ### merge
