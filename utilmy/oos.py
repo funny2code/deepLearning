@@ -1140,7 +1140,7 @@ def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
-):
+    ):
     """ Advanced Glob filtering.
     Docs:
 
@@ -1171,7 +1171,7 @@ def glob_glob(dirin, exclude="", include_only="",
         ####### Exclude/Include  ##################################################
         for xi in exclude.split(","):
             if len(xi) > 0:
-               files = [  fi for fi in files if xi not in fi ]
+                files = [  fi for fi in files if xi not in fi ]
         
         if include_only:
             tmp_list = [] # add multi files
@@ -1184,10 +1184,10 @@ def glob_glob(dirin, exclude="", include_only="",
         flist2=[]
         for fi in files[:nfiles]:
             try :
-              if os.path.getsize(fi)/1024/1024 < max_size_mb :   #set file size in kb
-                flist2.append(fi)
+                if os.path.getsize(fi)/1024/1024 < max_size_mb :   #set file size in Mb
+                    flist2.append(fi)
             except : pass
-        flist = copy.deepcopy(flist2)
+        files = copy.deepcopy(flist2)
 
         #######  date filtering  ##################################################
         now    = time.time()
@@ -1201,32 +1201,34 @@ def glob_glob(dirin, exclude="", include_only="",
 
         if cutoff > 0:
             if verbose > 0 :
-                  print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-                       ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+                print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S"),
+                       ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d %H:%M:%S") )
             flist2=[]
             for fi in files[:nfiles]:
                 try :
-                  t = os.stat( fi)
-                  c = t.st_ctime
-                  if c < cutoff:             # delete file if older than 10 days
-                    flist2.append(fi)
+                    t = os.stat( fi)
+                    c = t.st_ctime
+                    print(dt.datetime.utcfromtimestamp(c).strftime("%Y-%m-%d %H:%M:%S"))
+                    if c < cutoff:             # delete file if older than 10 days
+                        flist2.append(fi)
                 except : pass
+            files = copy.deepcopy(flist2)
 
         return files
 
     if npool ==  1:
-         return fun_glob(dirin, exclude, include_only,
+        return fun_glob(dirin, exclude, include_only,
             min_size_mb, max_size_mb,
             ndays_past, nmin_past,  start_date, end_date,
             nfiles, verbose)
 
     else :
-         from utilmy import parallel as par
+        from utilmy import parallel as par
 
-         fdir = os.walk(dirin)
+        fdir = os.walk(dirin)
 
-         res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
-         # res =sum(res) ### merge
+        res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
+        # res =sum(res) ### merge
 
 
 
