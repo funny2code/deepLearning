@@ -1165,23 +1165,28 @@ def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0):
-        files = glob.glob(dirin)
+        files = glob.glob(dirin, recursive=True)
         files = sorted(files)
 
         ####### Exclude/Include  ##################################################
         for xi in exclude.split(","):
             if len(xi) > 0:
                files = [  fi for fi in files if xi not in fi ]
-
-        for xi in include_only.split(","):
-            if len(xi) > 0:
-               files = [  fi for fi in files if xi  in fi ]
+        
+        if include_only:
+            tmp_list = [] # add multi files
+            tmp_str = "" # avoid add same files
+            for xi in include_only.split(","):
+                if len(xi) > 0 and xi not in tmp_str:
+                    tmp_str += xi + ","
+                    tmp_list += [  fi for fi in files if xi in fi ]
+            files = sorted(tmp_list)
 
         ####### size filtering  ##################################################
         flist2=[]
         for fi in files[:nfiles]:
             try :
-              if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
+              if os.path.getsize(fi)/1024/1024 < max_size_mb :   #set file size in kb
                 flist2.append(fi)
             except : pass
         flist = copy.deepcopy(flist2)
@@ -1306,7 +1311,7 @@ def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10000
 
     dry = True if dry ==True or dry==1 else False
 
-    files = glob.glob(dirin)
+    files = glob.glob(dirin, recursive=True)
     files = sorted(files)
     for exi in exclude.split(","):
         if len(exi) > 0:
