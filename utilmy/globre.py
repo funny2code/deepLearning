@@ -1,26 +1,10 @@
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------------------------
-# file: $Id$
-# auth: metagriffin <mg.github@uberdev.org>
-# date: 2013/09/22
-# copy: (C) Copyright 2013-EOT metagriffin -- see LICENSE.txt
-#------------------------------------------------------------------------------
-# This software is free software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# This software is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see http://www.gnu.org/licenses/.
+"""  Glob Regex
+Original
 
-# https://github.com/metagriffin/globre/blob/master/globre/__init__.py
-#------------------------------------------------------------------------------
-
+https://github.com/metagriffin/globre/blob/master/globre/__init__.py
+------------------------------------------------------------------------------
+"""
 import re
 
 # new flags that apply to globs only...
@@ -120,38 +104,43 @@ def iswild(pattern):
 
 #------------------------------------------------------------------------------
 def compile(pattern, flags=0, sep=None, split_prefix=False):
-  '''
-  Converts a glob-matching pattern (using Apache Cocoon style rules)
-  to a regular expression, which basically means that the following
-  characters have special meanings:
-  * ``?``:     matches any single character excluding the separator character
-  * ``*``:     matches zero or more characters excluding the separator character
-  * ``**``:    matches zero or more characters including the separator character
-  * ``\``:     escape character used to precede any of the others for a literal
-  * ``[...]``: matches any character in the specified regex-style range
-  * ``{...}``: inlines a regex expression
-  :Parameters:
-  sep : str; default: "/"
-    The `sep` parameter specifies the hierarchical path component
-    separator to use. By default, it uses the unix-style forward-slash
-    separator (``"/"``), but can be overriden to be a sequence of
-    alternative valid hierarchical path component separator characters.
-    Note that although `sep` *could* be set to both forward- and back-
-    slashes (i.e. ``"/\\"``) to, theoretically, support either unix- and
-    windows-style path components, this has the significant flaw that
-    then *both* characters can be used within the same path as
-    separators.
-  flags : int; default: 0
-    The `flags` bit mask can contain all the standard `re` flags, in
-    addition to the ``globre.EXACT`` flag. If EXACT is set, then the
-    returned regex will include a leading '^' and trailing '$', meaning
-    that the regex must match the entire string, from beginning to end.
-  split_prefix : bool; default: false
-    If `split_prefix` is truthy, the return value becomes a tuple with
-    the first element set to any initial non-wildcarded string found in
-    the pattern. The second element remains the regex object as before.
-    For example, the pattern ``foo/**.ini`` would result in a tuple
-    equivalent to ``('foo/', re.compile('foo/.*\\.ini'))``.
+  ''' compile
+  Docs::
+
+    Converts a glob-matching pattern (using Apache Cocoon style rules)
+    to a regular expression, which basically means that the following
+    characters have special meanings:
+    * ``?``:     matches any single character excluding the separator character
+    * ``*``:     matches zero or more characters excluding the separator character
+    * ``**``:    matches zero or more characters including the separator character
+    * ``\``:     escape character used to precede any of the others for a literal
+    * ``[...]``: matches any character in the specified regex-style range
+    * ``{...}``: inlines a regex expression
+
+
+    sep : str; default: "/"
+      The `sep` parameter specifies the hierarchical path component
+      separator to use. By default, it uses the unix-style forward-slash
+      separator (``"/"``), but can be overriden to be a sequence of
+      alternative valid hierarchical path component separator characters.
+      Note that although `sep` *could* be set to both forward- and back-
+      slashes (i.e. ``"/\\"``) to, theoretically, support either unix- and
+      windows-style path components, this has the significant flaw that
+      then *both* characters can be used within the same path as
+      separators.
+
+    flags : int; default: 0
+      The `flags` bit mask can contain all the standard `re` flags, in
+      addition to the ``globre.EXACT`` flag. If EXACT is set, then the
+      returned regex will include a leading '^' and trailing '$', meaning
+      that the regex must match the entire string, from beginning to end.
+
+    split_prefix : bool; default: false
+      If `split_prefix` is truthy, the return value becomes a tuple with
+      the first element set to any initial non-wildcarded string found in
+      the pattern. The second element remains the regex object as before.
+      For example, the pattern ``foo/**.ini`` would result in a tuple
+      equivalent to ``('foo/', re.compile('foo/.*\\.ini'))``.
   '''
 
   prefix = None

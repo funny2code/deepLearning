@@ -76,6 +76,7 @@ def test_run_multithread2(thread_name, arg):
     print(f'End thread: {thread_name}')
     return arg
 
+
 def test_sum(x):
     return  x['0'] + x['1']
 
