@@ -1186,7 +1186,7 @@ def glob_glob(dirin, exclude="", include_only="",
         flist2=[]
         for fi in files[:nfiles]:
             try :
-              if os.path.getsize(fi) < max_size_mb*0.001 :   #set file size in kb
+              if os.path.getsize(fi)/1024/1024 < max_size_mb :   #set file size in kb
                 flist2.append(fi)
             except : pass
         flist = copy.deepcopy(flist2)
