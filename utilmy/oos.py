@@ -1214,6 +1214,25 @@ def glob_glob(dirin, exclude="", include_only="",
                 except : pass
             files = copy.deepcopy(flist2)
 
+        ####### filter files between start_date and end_date  ##################################################
+        if start_date and end_date:
+            start_ = time.strptime(str(start_date), "%Y-%m-%d")
+            start_timestamp = time.mktime(start_)
+            end_ = time.strptime(str(end_date), "%Y-%m-%d")
+            end_timestamp = time.mktime(end_)
+            flist2=[]
+            for fi in files[:nfiles]:
+                try:
+                    t = os.stat( fi)
+                    c = t.st_ctime
+                    if start_timestamp <= c <= end_timestamp:
+                        flist2.append(fi)
+                except: pass
+            files = copy.deepcopy(flist2)
+
+
+            pass
+
         return files
 
     if npool ==  1:
