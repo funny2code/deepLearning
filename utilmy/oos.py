@@ -1164,7 +1164,7 @@ def glob_glob(dirin, exclude="", include_only="",
 
     def fun_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
+            ndays_past=-1, nmin_past=-1,  start_date='1971-01-01', end_date='2050-01-01',
             nfiles=99999999, verbose=0):
         files = glob.glob(dirin, recursive=True)
         files = sorted(files)
