@@ -2570,7 +2570,7 @@ utilmy/oos.py
 -------------------------functions----------------------
 aaa_bash_help()
 date_to_timezone(tdate, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
-glob_glob(dirin, exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
+glob_glob(dirin, exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, npool = 1)
 help()
 is_float(x)
 is_int(x)
@@ -4195,6 +4195,98 @@ test_spark_check(spark_session: SparkSession, config: dict)
 utilmy/stats/__init__.py
 
 
+utilmy/stats/bootstrap_stat/bootstrap_stat.py
+-------------------------functions----------------------
+_adjust_percentiles(alpha, a_hat, z0_hat)
+_bca_acceleration(jv)
+_influence_components(x, stat, order = 1, eps = 1e-3, num_threads = 1)
+_percentile(z, p, full_sort = True)
+_resampling_vector(n)
+abcnon_interval(x, stat, alpha = 0.05, eps = 0.001, influence_components = None, second_derivatives = None, return_influence_components = False, num_threads = 1, )
+bcanon_asl(dist, stat, x, theta_0 = 0, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, jv = None, two_sided = False, num_threads = 1, )
+bcanon_interval(dist, stat, x, alpha = 0.05, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, jv = None, num_threads = 1, )
+better_bootstrap_bias(x, stat, B = 400, return_samples = False, num_threads = 1)
+bias(dist, stat, t, B = 200, return_samples = False, theta_star = None, num_threads = 1)
+bias_corrected(x, stat, method = "better_bootstrap_bias", dist = None, t = None, B = None, return_samples = False, theta_star = None, jv = None, num_threads = 1, )
+bootstrap_asl(dist, stat, x, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, two_sided = False, num_threads = 1, )
+bootstrap_power(alt_dist, null_dist, stat, asl = bootstrap_asl, alpha = 0.05, size = None, P = 100, **kwargs, )
+bootstrap_samples(dist, stat, B, size = None, jackknife = False, num_threads = 1)
+calibrate_interval(dist, stat, x, theta_hat, alpha = 0.05, B = 1000, return_confidence_points = False, num_threads = 1, )
+infinitesimal_jackknife(x, stat, eps = 1e-3, influence_components = None, return_influence_components = False, num_threads = 1, )
+jackknife_values(x, stat, sample = None, num_threads = 1)
+loess(z0, z, y, alpha, sided = "both")
+percentile_asl(dist, stat, x, theta_0 = 0, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, two_sided = False, num_threads = 1, )
+percentile_interval(dist, stat, alpha = 0.05, B = 1000, size = None, return_samples = False, theta_star = None, num_threads = 1, )
+prediction_error_632(dist, data, train, predict, error, B = 200, apparent_error = None, use_632_plus = False, gamma = None, no_inf_err_rate = None, num_threads = 1, )
+prediction_error_optimism(dist, data, train, predict, error, B = 200, apparent_error = None, num_threads = 1, )
+prediction_interval(dist, x, mean = None, std = None, B = 1000, alpha = 0.05, t_star = None, return_t_star = False, num_threads = -1, )
+standard_error(dist, stat, robustness = None, B = 200, size = None, jackknife_after_bootstrap = False, return_samples = False, theta_star = None, num_threads = 1, if theta_star is None or jackknife_after_bootstrap)
+t_interval(dist, stat, theta_hat, stabilize_variance = False, se_hat = None, fast_std_err = None, alpha = 0.05, Binner = 25, Bouter = 1000, Bvar = 100, size = None, empirical_distribution = EmpiricalDistribution, return_samples = False, theta_star = None, se_star = None, z_star = None, num_threads = 1, )
+
+-------------------------methods----------------------
+EmpiricalDistribution.calculate_parameter()
+EmpiricalDistribution.sample(self, size = None, return_indices = False, reset_index = True)
+MultiSampleEmpiricalDistribution.calculate_parameter(self, t)
+MultiSampleEmpiricalDistribution.sample(self, size = None)
+
+
+utilmy/stats/bootstrap_stat/datasets.py
+-------------------------functions----------------------
+hormone_data()
+law_data(full = False)
+mouse_data(dataset)
+patch_data()
+rainfall_data()
+spatial_test_data(test = "both")
+
+
+
+utilmy/stats/bootstrap_stat/tests/__init__.py
+
+
+utilmy/stats/bootstrap_stat/tests/context.py
+
+
+utilmy/stats/bootstrap_stat/tests/test_bootstrap_stat.py
+-------------------------methods----------------------
+TestBias.test_better_bootstrap_bias(self)
+TestBias.test_bias(self)
+TestBias.test_bias_correction(self)
+TestBias.test_se_bias(self)
+TestBias.test_two_sample_mouse_data(self)
+TestConfidenceIntervals.test_bca(self)
+TestConfidenceIntervals.test_calibrate_interval(self)
+TestConfidenceIntervals.test_compare_intervals(self)
+TestConfidenceIntervals.test_importance_sampling(self)
+TestConfidenceIntervals.test_percentile_interval(self)
+TestConfidenceIntervals.test_percentile_interval_return_samples(self)
+TestConfidenceIntervals.test_t_interval(self)
+TestConfidenceIntervals.test_t_interval_fast(self)
+TestConfidenceIntervals.test_t_interval_law_data(self)
+TestConfidenceIntervals.test_t_interval_law_data_variance_adjusted(self)
+TestConfidenceIntervals.test_t_interval_robust(self)
+TestMisc.test_adjust_percentiles(self)
+TestMisc.test_jackknife_values_array(self)
+TestMisc.test_jackknife_values_dataframe(self)
+TestMisc.test_jackknife_values_series(self)
+TestMisc.test_loess(self)
+TestMisc.test_parametric_bootstrap(self)
+TestMisc.test_percentile(self)
+TestMisc.test_percentile_partial_sort(self)
+TestMisc.test_percentile_uneven(self)
+TestMisc.test_resampling_vector(self)
+TestPredictionError.test_bootstrap_prediction_error(self)
+TestPredictionIntervals.test_prediction_intervals(self)
+TestSignificance.test_achieved_significance_levels(self)
+TestSignificance.test_asl_and_power(self)
+TestSignificance.test_asl_variance(self)
+TestSignificance.test_combined_asl(self)
+TestStandardError.test_infinitesimal_jackknife(self)
+TestStandardError.test_jackknife_after_bootstrap(self)
+TestStandardError.test_standard_error(self)
+TestStandardError.test_standard_error_robust(self)
+
+
 utilmy/stats/example.py
 
 
@@ -5606,7 +5698,6 @@ get_loggers(mode = 'print', n_loggers = 2, verbose_level = None)
 get_verbosity(verbose:int = None)
 git_current_hash(mode = 'full')
 git_repo_root()
-glob_glob(dirin:Union[str, list] = "**/*.py", nfile = 1000, direxclude:Union[str, list] = "", exclude:Union[str, list] = "", recursive = True, silent = False, show = 0, **kw)
 help()
 help_create(modulename = 'utilmy.nnumpy', prefixs = None)
 help_get_codesource(func)
@@ -5726,6 +5817,7 @@ mlpd3_add_tooltip(fig, points, labels)
 pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {})
 pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str = None, binsNumber = None, binWidth = None, color:str = '#7CB5EC', title:str = "", xaxis_label:str =  "x-axis", yaxis_label:str = "y-axis", cfg:dict = {}, mode = 'd3', save_img = "", show = False, verbose = True, **kw)
 pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
+pd_plot_network_cytho(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
 pd_plot_scatter_get_data(df0:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, nmax: int = 20000, **kw)
 pd_plot_scatter_matplot(df:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, cfg: dict  =  {}, mode = 'd3', save_path: str = '', verbose = True, **kw)
 show(file_csv_parquet:str = "myfile.parquet", title = 'table', format: str = 'blue_light', dir_out = 'table.html', css_class = None, use_datatable = True, table_id = None, )

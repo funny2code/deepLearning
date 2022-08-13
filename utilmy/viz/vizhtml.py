@@ -97,7 +97,7 @@ def help():
 
 
       
-    
+ 
       
 def test_all():
     """  Test all functions in this module
@@ -1735,6 +1735,86 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
     head, body = draw_graph(networkx_graph, notebook=False, output_filename='graph.html',
                show_buttons=True, only_physics_buttons=False,html_code = True)
     return head, body
+
+
+
+
+
+
+
+
+def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
+                    colb: str='col_node2', coledge: str='col_edge',
+                    colweight: str="weight",html_code:bool = True):
+    """  Function to plot network using cythoscape
+    Docs::
+
+            df                :        dataframe with nodes and edges
+            cola='col_node1'  :        column name of node1
+            colb='col_node2'  :        column name of node2
+            coledge='col_edge':        column name of edge
+            colweight="weight":        column name of weight
+            html_code=True    :        if True, return html code
+
+            ['
+
+
+
+    """
+    from box import Box
+    args = Box({})
+
+    node_color  = "#6200EE"
+    label_color = "#03DAC6"
+    edge_color  = "#3700B3"
+
+
+    data = ""
+    for ii, node in df.iterrows():
+        data += f"""{{ data: {{ id:     '{node[cola]}' }} }},\n"""
+        data += f"""{{ data: {{ id:     '{node[cola]}->{node[colb]}', 
+                                source: '{node[cola]}', 
+                                target: '{node[colb]}' }} }},\n"""
+
+
+    head = """
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
+         <style>
+            #cy {{
+                width: 100%;
+                height: 90%;
+                position: absolute;
+                top: 10%;
+                left: 0px;
+            }}
+         </style>  
+    """
+
+    body =  f"""        
+        <div id=\"cy\"></div>
+        <script>
+            var cy = cytoscape({{
+    
+            container: document.getElementById('cy'),
+    
+            elements: [{data}],
+            style: [
+                {{\nselector: 'node',
+            style: {{label: 'data(id)',
+            'background-color': '{node_color}',
+            'color': '{label_color}'
+    
+            }}}},
+            {{
+            selector: 'edge',
+            style: {{'line-color': '{edge_color}'}}\n
+            }}
+            ]
+            }});
+        </script>
+        """
+    return head, body
+
 
 
 

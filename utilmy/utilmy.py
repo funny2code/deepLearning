@@ -288,47 +288,9 @@ def import_function(fun_name=None, module_name=None, fuzzy_match=False):
         raise Exception( msg )  
 
 
-def glob_glob(dirin:Union[str, list]="**/*.py", nfile=1000, direxclude:Union[str, list]="",  exclude:Union[str, list]="",  
-              recursive=True, silent=False, show=0, **kw):
-    """  List of files.
-       dirin:      **/*.py   any sub-directories or list of sub-directories
-       direxclude: **/*.py   any sub-directories or list of sub-directories
-
-    """
-    import glob
-    ### Inside
-    dirin = [dirin] if isinstance(dirin, str) else dirin
-    flist = []
-    for fi in dirin :
-       flist  =  flist + glob.glob(fi , recursive= recursive, **kw )
-    flist = list(set(flist))
+from utilmy.oos import glob_glob
 
 
-    ### Outside
-    direxclude = exclude if len(exclude) > 3 else direxclude  ### Alias only
-    direxclude = [direxclude] if isinstance(dirin, str) else direxclude
-    exclud = []
-    for fi in direxclude :
-       exclud =  exclud + glob.glob(fi , recursive= recursive, **kw )
-    exclud = list(set(exclud))
-
-    flist  = [fi for fi in flist if  fi not in exclud ]
-    flist  = sorted(flist)
-
-    #### Filter by modified time
-    import datetime 
-    def os_file_modified_time(filename):
-        t = os.path.getmtime(filename)
-        return  datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc)     
-    fdates = [ os_file_modified_time(fi)  for fi in flist ]
-
-
-    ####  Details
-    flist  = flist[:nfile]
-
-    if show>0 : log('Nfile: ', len(flist), str(flist)[:100])
-    if show>1 : log(flist)
-    return flist
 
 
 def sys_exit(msg="exited",  err_int=0):
@@ -442,7 +404,8 @@ def test_load_function_uri():
 
 
 
-def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d", add_days=0, add_hours=0,
+def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
+             add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
@@ -481,7 +444,11 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d", add_days
 
 
     now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours)
+    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours, minutes=add_mins,)
+
+
+    if add_months>0 :
+        pass
 
     if   returnval == 'datetime': return now_new ### datetime
     elif returnval == 'int':      return int(now_new.strftime(fmt))

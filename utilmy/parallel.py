@@ -76,6 +76,7 @@ def test_run_multithread2(thread_name, arg):
     print(f'End thread: {thread_name}')
     return arg
 
+
 def test_sum(x):
     return  x['0'] + x['1']
 
@@ -642,6 +643,11 @@ def multithread_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verb
         log('starts', i)
         job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
         if verbose: log(i, xi_list[i])
+
+    print('**1*:',job_list)
+    print('**2*:', len(job_list))
+    print('**3*:', job_list[1])
+    print('**4*:', job_list[1].get())
 
     res_list = []
     for i in range(len(job_list)):
