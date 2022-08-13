@@ -1164,7 +1164,7 @@ def glob_glob(dirin, exclude="", include_only="",
 
     def fun_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0):
         files = glob.glob(dirin, recursive=True)
         files = sorted(files)
@@ -1185,7 +1185,7 @@ def glob_glob(dirin, exclude="", include_only="",
         flist2=[]
         for fi in files[:nfiles]:
             try :
-                if os.path.getsize(fi)/1024/1024 < max_size_mb :   #set file size in Mb
+                if min_size_mb <= os.path.getsize(fi)/1024/1024 <= max_size_mb :   #set file size in Mb
                     flist2.append(fi)
             except : pass
         files = copy.deepcopy(flist2)
@@ -1214,6 +1214,20 @@ def glob_glob(dirin, exclude="", include_only="",
                 except : pass
             files = copy.deepcopy(flist2)
 
+        ####### filter files between start_date and end_date  ##################################################
+        if start_date and end_date:
+            start_timestamp = time.mktime(time.strptime(str(start_date), "%Y-%m-%d"))
+            end_timestamp = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
+            flist2=[]
+            for fi in files[:nfiles]:
+                try:
+                    t = os.stat( fi)
+                    c = t.st_ctime
+                    if start_timestamp <= c <= end_timestamp:
+                        flist2.append(fi)
+                except: pass
+            files = copy.deepcopy(flist2)
+
         return files
 
     if npool ==  1:
@@ -1224,11 +1238,9 @@ def glob_glob(dirin, exclude="", include_only="",
 
     else :
         from utilmy import parallel as par
-
         fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-
         res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
-        # res =sum(res) ### merge
+        res =sum(res) ### merge
 
 
 
