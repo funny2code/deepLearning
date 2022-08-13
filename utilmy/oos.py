@@ -1216,10 +1216,8 @@ def glob_glob(dirin, exclude="", include_only="",
 
         ####### filter files between start_date and end_date  ##################################################
         if start_date and end_date:
-            start_ = time.strptime(str(start_date), "%Y-%m-%d")
-            start_timestamp = time.mktime(start_)
-            end_ = time.strptime(str(end_date), "%Y-%m-%d")
-            end_timestamp = time.mktime(end_)
+            start_timestamp = time.mktime(time.strptime(str(start_date), "%Y-%m-%d"))
+            end_timestamp = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
             flist2=[]
             for fi in files[:nfiles]:
                 try:
@@ -1240,11 +1238,9 @@ def glob_glob(dirin, exclude="", include_only="",
 
     else :
         from utilmy import parallel as par
-
         fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-
         res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
-        # res =sum(res) ### merge
+        res =sum(res) ### merge
 
 
 
