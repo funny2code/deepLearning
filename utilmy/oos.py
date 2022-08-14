@@ -35,7 +35,8 @@ def test_all():
     from utilmy import pd_random
 
 
-    from utilmy.oos import os_makedirs, os_system, os_removedirs
+    test_globglob()
+
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
     os_makedirs('/tmp/one/two')
@@ -1255,8 +1256,8 @@ def glob_glob(dirin, exclude="", include_only="",
     else :
         from utilmy import parallel as par
         fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        res = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
-        res =sum(res) ### merge
+        res  = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
+        res  = sum(res) ### merge
 
 
 
