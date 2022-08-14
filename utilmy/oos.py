@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-MNAME= "utilmy.dates"
 """# 
 Doc::
 
-https://github.com/uqfoundation/pox/tree/master/pox
+    https://github.com/uqfoundation/pox/tree/master/pox
 
 
 """
@@ -11,7 +10,7 @@ import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as n
 
 
 #################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy import log, log2, date_now
 
 def help():
     """function help
