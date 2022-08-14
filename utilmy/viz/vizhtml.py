@@ -1773,6 +1773,16 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
 
             ['
 
+    test code:
+    
+    (like regular pd_plot_network, just call cyto instead)
+
+    doc.h1(" plot network test cyto ")
+    df = pd.DataFrame({ 'from':['A', 'B', 'C','A'], 'to':['D', 'A', 'E','C'], 'weight':[1, 2, 1,5]})
+    doc.pd_plot_network_cyto(df, cola='from', colb='to', coledge='col_edge')
+
+    doc.save('test5.html')
+    doc.open_browser()
 
 
     """
