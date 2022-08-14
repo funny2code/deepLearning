@@ -466,8 +466,6 @@ def is_float(x):
 
 
 ########################################################################################################
-
-
 class toFileSafe(object):
    def __init__(self,fpath):
       """ Thread Safe file writer
@@ -525,6 +523,7 @@ def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     # Convert to US/Pacific time zone
     now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
     return now_pacific.strftime(fmt)
+
 
 
 ##### OS, cofnfig ######################################################################################
@@ -704,102 +703,6 @@ def os_walk(path, pattern="*", dirlevel=50):
     matches['file'] = [ t for t in fnmatch.filter(matches['file'], pattern) ]
     return  matches
 
-
-def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir="./", pattern="*", exclude="", force=False, sleep=0.5, cmd_fallback="",
-                 verbose=True):  ###
-    """ Copy safe
-    """
-    import shutil, time, os, glob
-
-    flist = [] ; dirinj = dirin
-    for j in range(nlevel):
-        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
-        dirinj = dirinj + "/*/"
-        if len(ztmp) < 1 : break
-        flist  = flist + ztmp
-
-    flist2 = []
-    for x in exclude.split(","):
-        if len(x) <=1 : continue
-        for t in flist :
-            if  not x in t :
-                flist2.append(t)
-    flist = flist2
-
-    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
-    kk = 0 ; ntry = 0 ;i =0
-    for i in range(0, len(flist)) :
-        fi  = flist[i]
-        fi2 = fi.replace(dirin, dirout)
-
-        if not fi.isascii(): continue
-        if not os.path.isfile(fi) : continue
-
-        if (not os.path.isfile(fi2) )  or force :
-             kk = kk + 1
-             if kk > nfile   : return 1
-             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
-             if kk % 10 == 0  and verbose  : log(fi2)
-             os.makedirs(os.path.dirname(fi2), exist_ok=True)
-             try :
-                shutil.copy(fi, fi2)
-                ntry = 0
-                if verbose: log(fi2)
-             except Exception as e:
-                log(e)
-                time.sleep(10)
-                log(cmd_fallback)
-                os.system(cmd_fallback)
-                time.sleep(10)
-                i = i - 1
-                ntry = ntry + 1
-    log('Scanned', i, 'transfered', kk)
-
-### Alias
-os_copy = os_copy_safe
-
-
-def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
-                  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
-    """function os_merge_safe
-    Args:
-        dirin_list:
-        dirout:
-        nlevel:
-        nfile:
-        nrows:
-        cmd_fallback :
-        sleep:
-    Returns:
-
-    """
-    ### merge file in safe way
-    nrows = 10**8
-    flist = []
-    for fi in dirin_list :
-        flist = flist + glob.glob(fi)
-    log(flist); time.sleep(2)
-
-    os_makedirs(dirout)
-    fout = open(dirout,'a')
-    for fi in flist :
-        log(fi)
-        ii   = 0
-        fin  = open(fi,'r')
-        while True:
-            try :
-              ii = ii + 1
-              if ii % 100000 == 0 : time.sleep(sleep)
-              if ii > nrows : break
-              x = fin.readline()
-              if not x: break
-              fout.write(x.strip()+"\n")
-            except Exception as e:
-              log(e)
-              os.system(cmd_fallback)
-              time.sleep(10)
-              fout.write(x.strip()+"\n")
-        fin.close()
 
 
 
@@ -1231,10 +1134,10 @@ def glob_glob(dirin, exclude="", include_only="",
                 except : pass
             files = copy.deepcopy(flist2)
 
-        ####### filter files between start_date and end_date  ##################################################
+        ####### filter files between start_date and end_date  ####################
         if start_date and end_date:
             start_timestamp = time.mktime(time.strptime(str(start_date), "%Y-%m-%d"))
-            end_timestamp = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
+            end_timestamp   = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
             flist2=[]
             for fi in files[:nfiles]:
                 try:
@@ -1251,37 +1154,171 @@ def glob_glob(dirin, exclude="", include_only="",
         return fun_glob(dirin, exclude, include_only,
             min_size_mb, max_size_mb,
             ndays_past, nmin_past,  start_date, end_date,
-            nfiles, verbose)
+            nfiles, verbose, npool=1)
 
     else :
         from utilmy import parallel as par
+        input_fixed = {'exclude': exclude, 'include_only': include_only,
+                       'npool':1,
+                      }
         fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        res  = par.multithread_run(fun_glob, input_list=fdir, npool=npool)
+        res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
+                npool=npool)
         res  = sum(res) ### merge
+        return res
 
 
 
 
 
-def os_copy(dirfrom="folder/**/*.parquet", dirto="",  min_size_mb=0, max_size_mb=1,
-            exclude="", include="",
-            from_ndays=1000, start_date='1970-01-01', end_date='2050-01-01',
-            path_structure_only=False,
-            overwrite=False,
-            re_start=1,
-            nfiles=99999999,
+def os_copy(dirfrom="folder/**/*.parquet", dirto="",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
             dry=0
             ) :
     """  Advance copy with filter.
+    Docs::
+
+          mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
+          https://stackoverflow.com/questions/123198/how-to-copy-files
 
 
 
     """
-    import os, sys, time, glob, datetime as dt
+    import os, shutil
 
-    dry = True if dry ==True or dry==1 else False
-    fflist = glob_glob(dirfrom, exclude=exclude, include=include, nfiles=nfiles)
-    jj =0
+    dry   = True if dry ==True or dry==1 else False
+    flist = glob_glob(dirfrom, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, nmin_past=nmin_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
+    if mode =='file':
+        print ('Nfiles', len(flist))
+        jj = 0
+        for fi in flist :
+            try :
+                if not dry :
+                   shutil.copy(fi, dirto)
+                   jj = jj +1
+                else :
+                   print(fi)
+            except Exception as e :
+                print(fi, e)
+
+
+        if dry :  print('dry mode only')
+        else :    print('deleted', jj)
+
+    elif mode =='dir':
+         shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None,  ignore_dangling_symlinks=False, dirs_exist_ok=False)
+
+
+
+def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir="./", pattern="*", exclude="", force=False, sleep=0.5, cmd_fallback="",
+                 verbose=True):  ###
+    """ Copy safe, using callback command to re-connect network if broken
+    Docs::
+
+
+    """
+    import shutil, time, os, glob
+
+    flist = [] ; dirinj = dirin
+    for j in range(nlevel):
+        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
+        dirinj = dirinj + "/*/"
+        if len(ztmp) < 1 : break
+        flist  = flist + ztmp
+
+    flist2 = []
+    for x in exclude.split(","):
+        if len(x) <=1 : continue
+        for t in flist :
+            if  not x in t :
+                flist2.append(t)
+    flist = flist2
+
+    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
+    kk = 0 ; ntry = 0 ;i =0
+    for i in range(0, len(flist)) :
+        fi  = flist[i]
+        fi2 = fi.replace(dirin, dirout)
+
+        if not fi.isascii(): continue
+        if not os.path.isfile(fi) : continue
+
+        if (not os.path.isfile(fi2) )  or force :
+             kk = kk + 1
+             if kk > nfile   : return 1
+             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
+             if kk % 10 == 0  and verbose  : log(fi2)
+             os.makedirs(os.path.dirname(fi2), exist_ok=True)
+             try :
+                shutil.copy(fi, fi2)
+                ntry = 0
+                if verbose: log(fi2)
+             except Exception as e:
+                log(e)
+                time.sleep(10)
+                log(cmd_fallback)
+                os.system(cmd_fallback)
+                time.sleep(10)
+                i = i - 1
+                ntry = ntry + 1
+    log('Scanned', i, 'transfered', kk)
+
+### Alias
+#os_copy = os_copy_safe
+
+
+def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
+                  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
+    """function os_merge_safe
+    Args:
+        dirin_list:
+        dirout:
+        nlevel:
+        nfile:
+        nrows:
+        cmd_fallback :
+        sleep:
+    Returns:
+
+    """
+    ### merge file in safe way
+    nrows = 10**8
+    flist = []
+    for fi in dirin_list :
+        flist = flist + glob.glob(fi)
+    log(flist); time.sleep(2)
+
+    os_makedirs(dirout)
+    fout = open(dirout,'a')
+    for fi in flist :
+        log(fi)
+        ii   = 0
+        fin  = open(fi,'r')
+        while True:
+            try :
+              ii = ii + 1
+              if ii % 100000 == 0 : time.sleep(sleep)
+              if ii > nrows : break
+              x = fin.readline()
+              if not x: break
+              fout.write(x.strip()+"\n")
+            except Exception as e:
+              log(e)
+              os.system(cmd_fallback)
+              time.sleep(10)
+              fout.write(x.strip()+"\n")
+        fin.close()
 
 
 
@@ -1289,18 +1326,12 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",  min_size_mb=0, max_size_mb
 
 
 
-    if dry :  print('dry mode only')
-    else :    print('copied', jj)
-
-
-
-
-def os_remove_file(dirin="folder/**/*.parquet",
-            min_size_mb=0, max_size_mb=1,
-            exclude="", include_only="",
-            from_ndays=1000, start_date='1970-01-01', end_date='2050-01-01',
-            nfiles=99999999,
-            dry=0):
+def os_remove(dirin="folder/**/*.parquet",
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=1000, start_date='1970-01-01', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=0):
 
     """  Delete files bigger than some size
 
@@ -1311,9 +1342,9 @@ def os_remove_file(dirin="folder/**/*.parquet",
 
     flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
             min_size_mb= min_size_mb, max_size_mb= max_size_mb,
-            from_ndays=from_ndays, start_date=start_date, end_date=end_date,
-            nfiles=nfiles,
-    )
+            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
 
     print ('Nfiles', len(flist2))
     jj = 0
@@ -1331,49 +1362,8 @@ def os_remove_file(dirin="folder/**/*.parquet",
     else :    print('deleted', jj)
 
 
-def os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
-    """  Delete files older than ndays.
 
 
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry ==True or dry==1 else False
-
-    files = glob.glob(dirin, recursive=True)
-    files = sorted(files)
-    for exi in exclude.split(","):
-        if len(exi) > 0:
-           files = [  fi for fi in files if exi not in fi ]
-
-    now = time.time()
-    cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          t = os.stat( fi)
-          c = t.st_ctime
-          # delete file if older than 10 days
-          if c < cutoff:
-            flist2.append(fi)
-        except : pass
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
 
 
 def os_removedirs(path, verbose=False):
@@ -1586,4 +1576,51 @@ if __name__ == "__main__":
 
 
 
+
+
+
+
+def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
+    """  Delete files older than ndays.
+
+
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry ==True or dry==1 else False
+
+    files = glob.glob(dirin, recursive=True)
+    files = sorted(files)
+    for exi in exclude.split(","):
+        if len(exi) > 0:
+           files = [  fi for fi in files if exi not in fi ]
+
+    now = time.time()
+    cutoff = now - ( abs(ndays_past) * 86400)
+    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
+          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
+    flist2=[]
+    for fi in files[:nfiles]:
+        try :
+          t = os.stat( fi)
+          c = t.st_ctime
+          # delete file if older than 10 days
+          if c < cutoff:
+            flist2.append(fi)
+        except : pass
+
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi)
+        except Exception as e :
+            print(fi, e)
+
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
 
