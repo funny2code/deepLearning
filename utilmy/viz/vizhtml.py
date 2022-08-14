@@ -1785,21 +1785,30 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
 
 
     data = ""
+
+    node_ids = set()
+
+    for ii, edge in df.iterrows():
+        node_ids.add(edge[cola])
+        node_ids.add(edge[colb])
+
+    for node_id in node_ids:
+        data += f"""{{ data: {{ id:     '{node_id}' }} }},\n"""
+    
     for ii, node in df.iterrows():
-        data += f"""{{ data: {{ id:     '{node[cola]}' }} }},\n"""
         data += f"""{{ data: {{ id:     '{node[cola]}->{node[colb]}', 
                                 source: '{node[cola]}', 
                                 target: '{node[colb]}' }} }},\n"""
 
 
-    head = """
+    head = f"""
          <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
          <style>
             #cy {{
-                width: 100%;
-                height: 90%;
-                position: absolute;
-                top: 10%;
+                width: 70%;
+                height: 50%;
+                position: relative;
+                top: 10px;
                 left: 0px;
             }}
          </style>  
