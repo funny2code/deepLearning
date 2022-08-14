@@ -1815,8 +1815,8 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
          <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
          <style>
             #cy {{
-                width: 70%;
-                height: 50%;
+                width: 90%;
+                height: 80%;
                 position: relative;
                 top: 10px;
                 left: 0px;
