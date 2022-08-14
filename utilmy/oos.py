@@ -1061,21 +1061,20 @@ def glob_glob(dirin, exclude="", include_only="",
             nfiles=99999999, verbose=0, npool=1
     ):
     """ Advanced Glob filtering.
-    Docs:
+    Docs::
+        dirin:
+        exclude=""   :
+        include_only="" :
+        min_size_mb=0
+        max_size_mb=500000
+        ndays_past=3000
+        start_date='1970-01-01'
+        end_date='2050-01-01'
+        nfiles=99999999
+        verbose=0
+        npool=1 multithread not working
 
-            https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
-
-            dirin:
-            exclude=""   :
-            include_only="" :
-            min_size_mb=0
-            max_size_mb=500000
-            ndays_past=3000
-            start_date='1970-01-01'
-            end_date='2050-01-01'
-            nfiles=99999999
-            verbose=0
-            npool=1 multithread
+        https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
 
     """
     import glob, copy, datetime as dt, time
