@@ -313,7 +313,22 @@ def test5():
     pd_df = pd_random()
     log(os_sizeof(pd_df, set()))
 
+def test_globglob():
+    os_makedirs("folder/test/file1.txt")
+    os_makedirs("folder/test/tmp/1.txt")
+    os_makedirs("folder/test/tmp/myfile.txt")
+    os_makedirs("folder/test/tmp/record.txt")
+    os_makedirs("folder/test/tmp/part.parquet")
+    os_makedirs("folder/test/file2.txt")
+    os_makedirs("folder/test/file3.txt")
 
+    glob_glob(dirin="folder/**/*.txt")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    glob_glob(dirin="folder/**/*",nfiles=5)
+    glob_glob(dirin="folder/**/*",ndays_past=0,nmin_past=5,verbose=1)
+    glob_glob(dirin="folder/",npool=2)
+    glob_glob(dirin="folder/test/",npool=2)
 
 
 
@@ -1138,7 +1153,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 def glob_glob(dirin, exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-01', end_date='2050-01-01',
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
     ):
     """ Advanced Glob filtering.
@@ -1162,10 +1177,10 @@ def glob_glob(dirin, exclude="", include_only="",
     import glob, copy, datetime as dt, time
 
 
-    def fun_glob(dirin, exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0):
+    def fun_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb=min_size_mb, max_size_mb=max_size_mb,
+            ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
+            nfiles=nfiles, verbose=verbose):
         files = glob.glob(dirin, recursive=True)
         files = sorted(files)
 
@@ -1182,13 +1197,14 @@ def glob_glob(dirin, exclude="", include_only="",
             files = sorted(set(tmp_list))
 
         ####### size filtering  ##################################################
-        flist2=[]
-        for fi in files[:nfiles]:
-            try :
-                if min_size_mb <= os.path.getsize(fi)/1024/1024 <= max_size_mb :   #set file size in Mb
-                    flist2.append(fi)
-            except : pass
-        files = copy.deepcopy(flist2)
+        if min_size_mb != 0 or max_size_mb != 0:
+            flist2=[]
+            for fi in files[:nfiles]:
+                try :
+                    if min_size_mb <= os.path.getsize(fi)/1024/1024 <= max_size_mb :   #set file size in Mb
+                        flist2.append(fi)
+                except : pass
+            files = copy.deepcopy(flist2)
 
         #######  date filtering  ##################################################
         now    = time.time()
@@ -1428,6 +1444,8 @@ def os_makedirs(dir_or_file):
     """
     if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
         os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
+        f = open(dir_or_file,'w')
+        f.close()
     else :
         os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
 
