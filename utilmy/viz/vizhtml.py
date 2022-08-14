@@ -651,7 +651,22 @@ class htmlDoc(object):
 
         head, body = pd_plot_network(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
         self.html += "\n\n" + body
-        self.head += "\n\n" + head 
+        self.head += "\n\n" + head
+
+    def pd_plot_network_cyto(self, df:pd.DataFrame, cola:    str='col_node1', colweight:str="weight",
+                             colb: str='col_node2', coledge: str='col_edge'):
+        """  Add graph to html page
+        Docs::
+
+            df:        Panda dataframe
+            cola='col_node1'  :        cola from df.
+            colweight="weight":        weigth of edges.
+            colb='col_node2'  :        colb from df.
+            coledge='col_edge':        edge from df.
+        """ 
+        head, body = pd_plot_network_cyto(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
+        self.html += "\n\n" + body
+        self.head += "\n\n" + head
 
 
 
@@ -1743,10 +1758,10 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
 
 
 
-def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
+def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
                     colb: str='col_node2', coledge: str='col_edge',
                     colweight: str="weight",html_code:bool = True):
-    """  Function to plot network using cythoscape
+    """  Function to plot network using cytoscape
     Docs::
 
             df                :        dataframe with nodes and edges
@@ -1758,6 +1773,16 @@ def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
 
             ['
 
+    test code:
+    
+    (like regular pd_plot_network, just call cyto instead)
+
+    doc.h1(" plot network test cyto ")
+    df = pd.DataFrame({ 'from':['A', 'B', 'C','A'], 'to':['D', 'A', 'E','C'], 'weight':[1, 2, 1,5]})
+    doc.pd_plot_network_cyto(df, cola='from', colb='to', coledge='col_edge')
+
+    doc.save('test5.html')
+    doc.open_browser()
 
 
     """
@@ -1770,21 +1795,30 @@ def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
 
 
     data = ""
+
+    node_ids = set()
+
+    for ii, edge in df.iterrows():
+        node_ids.add(edge[cola])
+        node_ids.add(edge[colb])
+
+    for node_id in node_ids:
+        data += f"""{{ data: {{ id:     '{node_id}' }} }},\n"""
+    
     for ii, node in df.iterrows():
-        data += f"""{{ data: {{ id:     '{node[cola]}' }} }},\n"""
         data += f"""{{ data: {{ id:     '{node[cola]}->{node[colb]}', 
                                 source: '{node[cola]}', 
                                 target: '{node[colb]}' }} }},\n"""
 
 
-    head = """
+    head = f"""
          <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
          <style>
             #cy {{
-                width: 100%;
-                height: 90%;
-                position: absolute;
-                top: 10%;
+                width: 70%;
+                height: 50%;
+                position: relative;
+                top: 10px;
                 left: 0px;
             }}
          </style>  

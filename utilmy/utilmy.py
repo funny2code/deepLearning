@@ -403,7 +403,7 @@ def test_load_function_uri():
     log(myclass)
 
 
-
+### Generic Date function
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
@@ -455,8 +455,12 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
     elif returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
+### Generic Glob
+from utilmy.oos import  glob_glob
+
 
 from utilmy.util_download import google_download, download_google
+
 
 ###################################################################################################
 def pd_random(ncols=7, nrows=100):
