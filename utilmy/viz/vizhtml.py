@@ -651,7 +651,22 @@ class htmlDoc(object):
 
         head, body = pd_plot_network(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
         self.html += "\n\n" + body
-        self.head += "\n\n" + head 
+        self.head += "\n\n" + head
+
+    def pd_plot_network_cyto(self, df:pd.DataFrame, cola:    str='col_node1', colweight:str="weight",
+                             colb: str='col_node2', coledge: str='col_edge'):
+        """  Add graph to html page
+        Docs::
+
+            df:        Panda dataframe
+            cola='col_node1'  :        cola from df.
+            colweight="weight":        weigth of edges.
+            colb='col_node2'  :        colb from df.
+            coledge='col_edge':        edge from df.
+        """ 
+        head, body = pd_plot_network_cyto(df, cola=cola, colb=colb,colweight=colweight, coledge=coledge)
+        self.html += "\n\n" + body
+        self.head += "\n\n" + head
 
 
 
@@ -1743,10 +1758,10 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
 
 
 
-def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
+def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
                     colb: str='col_node2', coledge: str='col_edge',
                     colweight: str="weight",html_code:bool = True):
-    """  Function to plot network using cythoscape
+    """  Function to plot network using cytoscape
     Docs::
 
             df                :        dataframe with nodes and edges
