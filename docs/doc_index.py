@@ -2163,6 +2163,20 @@ Tokenizer.tokens(self)
 utilmy/graph.py
 
 
+utilmy/graph/__init__.py
+
+
+utilmy/graph/util_graph.py
+-------------------------functions----------------------
+dag_create_network(df: pd.DataFrame, cola, colb, colvertex = "")
+dag_load(dirin = "")
+dag_pagerank(net)
+dag_save(net, dirout)
+pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
+pd_plot_network_cytho(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
+
+
+
 utilmy/iio.py
 
 
@@ -2204,6 +2218,18 @@ test1()
 test2()
 test_all()
 test_diskcache()
+
+
+
+utilmy/multiglob.py
+-------------------------functions----------------------
+multi_glob(paths, n_pool = 3)
+
+
+
+utilmy/multiglobHelper.py
+-------------------------functions----------------------
+helper(path)
 
 
 
@@ -5691,7 +5717,7 @@ unzip(dirin, dirout)
 
 utilmy/utilmy.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
 direpo()
 find_fuzzy(word:str, wlist:list, threshold = 0.0)
 get_loggers(mode = 'print', n_loggers = 2, verbose_level = None)
