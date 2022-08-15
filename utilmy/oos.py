@@ -339,9 +339,6 @@ class dict_to_namespace(object):
     #### Dict to namespace
     def __init__(self, d):
         """ dict_to_namespace:__init__
-        Args:
-            d:
-        Returns:
 
         """
         self.__dict__ = d

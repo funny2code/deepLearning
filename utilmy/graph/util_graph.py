@@ -1,4 +1,4 @@
-""" Network
+""" Network DAG Processing
 
 Docs::
 
@@ -32,17 +32,67 @@ https://networkit.github.io/
 
 
 """
-import os, sys
+import os, glob, sys, math, time, json, functools, random, yaml, gc, copy, pandas as pd, numpy as np
+import datetime
+from box import Box
+from typing import Union
+import warnings ;warnings.filterwarnings("ignore")
+from warnings import simplefilter  ; simplefilter(action='ignore', category=FutureWarning)
+with warnings.catch_warnings():
+    pass
 
 
-from utilmy import (pd_read_file
+from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
 
-)
+
+#############################################################################################
+from utilmy import log, log2, os_module_name
+
+def help():
+    """function help        """
+    from utilmy import help_create
+    print( help_create(__file__) )
+
+
+
+#############################################################################################
+def test_all() -> None:
+    """ python  $utilmy/deeplearning/util_topk.py test_all         """
+    log(os_module_name(__file__))
+    test1()
+
+
+def test1():
+    pass
 
 
 ############################################################################################################################
-def dag_create_network(df: pd.DataFrame, cola, colb, colvertex=""):
-   pass
+def dag_create_network(df_or_file: Union[str,pd.DataFrame], cola, colb, colvertex=""):
+    """Convert a panadas dataframe into a NetworKit graph
+    Docs::
+                     df   :    dataframe[[ cola, colb, colvertex ]]
+        cola='col_node1'  :  column name of node1
+        colb='col_node2'  :  column name of node2
+        colvertex=""      :  weight
+
+    """
+    import networkit as nk, gc
+
+    if isinstance(df_or_file, str):
+        df = pd_read_file(df_or_file)
+    else :
+        df = df_or_file
+
+    #### not clear ?
+    arr = np.unique(df[[cola, colb]].values)
+    arr+= 1
+    graph = nk.Graph(max(arr), edgesIndexed=False)
+    del arr ; gc.collect()   ### save memory
+
+    df = df[[cola, colb]].values
+    for i in range(len(df)):
+        graph.addEdge( df[i, 0], df[i, 0])
+    return graph
 
 
 
@@ -60,6 +110,7 @@ def dag_save(net, dirout):
 
 def dag_load(dirin=""):
    pass
+
 
 
 
@@ -163,81 +214,10 @@ def pd_plot_network(df:pd.DataFrame, cola: str='col_node1',
 
 
 
-
-def pd_plot_network_cytho(df:pd.DataFrame, cola: str='col_node1',
-                    colb: str='col_node2', coledge: str='col_edge',
-                    colweight: str="weight",html_code:bool = True):
-    """  Function to plot network using cythoscape
-    Docs::
-
-            df                :        dataframe with nodes and edges
-            cola='col_node1'  :        column name of node1
-            colb='col_node2'  :        column name of node2
-            coledge='col_edge':        column name of edge
-            colweight="weight":        column name of weight
-            html_code=True    :        if True, return html code
-
-            ['
-
-
-
-    """
-    from box import Box
-    args = Box({})
-
-    node_color  = "#6200EE"
-    label_color = "#03DAC6"
-    edge_color  = "#3700B3"
-
-
-    data = ""
-    for ii, node in df.iterrows():
-        data += f"""{{ data: {{ id:     '{node[cola]}' }} }},\n"""
-        data += f"""{{ data: {{ id:     '{node[cola]}->{node[colb]}', 
-                                source: '{node[cola]}', 
-                                target: '{node[colb]}' }} }},\n"""
-
-
-    head = """
-         <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
-         <style>
-            #cy {{
-                width: 100%;
-                height: 90%;
-                position: absolute;
-                top: 10%;
-                left: 0px;
-            }}
-         </style>  
-    """
-
-    body =  f"""        
-        <div id=\"cy\"></div>
-        <script>
-            var cy = cytoscape({{
-    
-            container: document.getElementById('cy'),
-    
-            elements: [{data}],
-            style: [
-                {{\nselector: 'node',
-            style: {{label: 'data(id)',
-            'background-color': '{node_color}',
-            'color': '{label_color}'
-    
-            }}}},
-            {{
-            selector: 'edge',
-            style: {{'line-color': '{edge_color}'}}\n
-            }}
-            ]
-            }});
-        </script>
-        """
-    return head, body
-
-
-
+###############################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
 
 
 
