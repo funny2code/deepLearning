@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-MNAME= "utilmy.dates"
 """# 
 Doc::
 
-https://github.com/uqfoundation/pox/tree/master/pox
+    https://github.com/uqfoundation/pox/tree/master/pox
 
 
 """
@@ -335,14 +334,11 @@ def test_globglob():
 
 
 ########################################################################################################
-########################################################################################################
+###### Fundamental functions ###########################################################################
 class dict_to_namespace(object):
     #### Dict to namespace
     def __init__(self, d):
         """ dict_to_namespace:__init__
-        Args:
-            d:
-        Returns:
 
         """
         self.__dict__ = d
@@ -359,174 +355,394 @@ def to_dict(**kw):
   return kw
 
 
-def to_timeunix(datex="2018-01-16"):
-  """function to_timeunix
-  Args:
-      datex:
-  Returns:
-
-  """
-  if isinstance(datex, str)  :
-     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
-
-  if isinstance(datex, datetime)  :
-     return int(time.mktime( datex.timetuple()) * 1000)
 
 
-def to_datetime(x) :
-  """function to_datetime
-  Args:
-      x:
-  Returns:
+def glob_glob(dirin, exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0, npool=1
+    ):
+    """ Advanced Glob filtering.
+    Docs::
+        dirin:
+        exclude=""   :
+        include_only="" :
+        min_size_mb=0
+        max_size_mb=500000
+        ndays_past=3000
+        start_date='1970-01-01'
+        end_date='2050-01-01'
+        nfiles=99999999
+        verbose=0
+        npool=1 multithread not working
 
-  """
-  import pandas as pd
-  return pd.to_datetime( str(x) )
+        https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
+
+    """
+    import glob, copy, datetime as dt, time
 
 
-def np_list_intersection(l1, l2) :
-  """function np_list_intersection
-  Args:
-      l1:
-      l2:
-  Returns:
+    def fun_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb=min_size_mb, max_size_mb=max_size_mb,
+            ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
+            nfiles=nfiles, verbose=verbose):
+        files = glob.glob(dirin, recursive=True)
+        files = sorted(files)
 
-  """
-  return [x for x in l1 if x in l2]
+        ####### Exclude/Include  ##################################################
+        for xi in exclude.split(","):
+            if len(xi) > 0:
+                files = [  fi for fi in files if xi not in fi ]
+
+        if include_only:
+            tmp_list = [] # add multi files
+            for xi in include_only.split(","):
+                if len(xi) > 0:
+                    tmp_list += [  fi for fi in files if xi in fi ]
+            files = sorted(set(tmp_list))
+
+        ####### size filtering  ##################################################
+        if min_size_mb != 0 or max_size_mb != 0:
+            flist2=[]
+            for fi in files[:nfiles]:
+                try :
+                    if min_size_mb <= os.path.getsize(fi)/1024/1024 <= max_size_mb :   #set file size in Mb
+                        flist2.append(fi)
+                except : pass
+            files = copy.deepcopy(flist2)
+
+        #######  date filtering  ##################################################
+        now    = time.time()
+        cutoff = 0
+
+        if ndays_past > -1 :
+            cutoff = now - ( abs(ndays_past) * 86400)
+
+        if nmin_past > -1 :
+            cutoff = cutoff - ( abs(nmin_past) * 60  )
+
+        if cutoff > 0:
+            if verbose > 0 :
+                print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S"),
+                       ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d %H:%M:%S") )
+            flist2=[]
+            for fi in files[:nfiles]:
+                try :
+                    t = os.stat( fi)
+                    c = t.st_ctime
+                    if c < cutoff:             # delete file if older than 10 days
+                        flist2.append(fi)
+                except : pass
+            files = copy.deepcopy(flist2)
+
+        ####### filter files between start_date and end_date  ####################
+        if start_date and end_date:
+            start_timestamp = time.mktime(time.strptime(str(start_date), "%Y-%m-%d"))
+            end_timestamp   = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
+            flist2=[]
+            for fi in files[:nfiles]:
+                try:
+                    t = os.stat( fi)
+                    c = t.st_ctime
+                    if start_timestamp <= c <= end_timestamp:
+                        flist2.append(fi)
+                except: pass
+            files = copy.deepcopy(flist2)
+
+        return files
+
+    if npool ==  1:
+        return fun_glob(dirin, exclude, include_only,
+            min_size_mb, max_size_mb,
+            ndays_past, nmin_past,  start_date, end_date,
+            nfiles, verbose, npool=1)
+
+    else :
+        from utilmy import parallel as par
+        input_fixed = {'exclude': exclude, 'include_only': include_only,
+                       'npool':1,
+                      }
+        fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
+        res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
+                npool=npool)
+        res  = sum(res) ### merge
+        return res
 
 
-def np_add_remove(set_, to_remove, to_add):
-    """function np_add_remove
+
+
+
+#####################################################################################################
+##### File I-O ######################################################################################
+def os_copy(dirfrom="folder/**/*.parquet", dirto="",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
+            dry=0
+            ) :
+    """  Advance copy with filter.
+    Docs::
+
+          mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
+          https://stackoverflow.com/questions/123198/how-to-copy-files
+
+
+
+    """
+    import os, shutil
+
+    dry   = True if dry ==True or dry==1 else False
+    flist = glob_glob(dirfrom, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, nmin_past=nmin_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
+    if mode =='file':
+        print ('Nfiles', len(flist))
+        jj = 0
+        for fi in flist :
+            try :
+                if not dry :
+                   shutil.copy(fi, dirto)
+                   jj = jj +1
+                else :
+                   print(fi)
+            except Exception as e :
+                print(fi, e)
+
+
+        if dry :  print('dry mode only')
+        else :    print('deleted', jj)
+
+    elif mode =='dir':
+         shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None,  ignore_dangling_symlinks=False, dirs_exist_ok=False)
+
+
+
+def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir="./", pattern="*", exclude="", force=False, sleep=0.5, cmd_fallback="",
+                 verbose=True):  ###
+    """ Copy safe, using callback command to re-connect network if broken
+    Docs::
+
+
+    """
+    import shutil, time, os, glob
+
+    flist = [] ; dirinj = dirin
+    for j in range(nlevel):
+        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
+        dirinj = dirinj + "/*/"
+        if len(ztmp) < 1 : break
+        flist  = flist + ztmp
+
+    flist2 = []
+    for x in exclude.split(","):
+        if len(x) <=1 : continue
+        for t in flist :
+            if  not x in t :
+                flist2.append(t)
+    flist = flist2
+
+    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
+    kk = 0 ; ntry = 0 ;i =0
+    for i in range(0, len(flist)) :
+        fi  = flist[i]
+        fi2 = fi.replace(dirin, dirout)
+
+        if not fi.isascii(): continue
+        if not os.path.isfile(fi) : continue
+
+        if (not os.path.isfile(fi2) )  or force :
+             kk = kk + 1
+             if kk > nfile   : return 1
+             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
+             if kk % 10 == 0  and verbose  : log(fi2)
+             os.makedirs(os.path.dirname(fi2), exist_ok=True)
+             try :
+                shutil.copy(fi, fi2)
+                ntry = 0
+                if verbose: log(fi2)
+             except Exception as e:
+                log(e)
+                time.sleep(10)
+                log(cmd_fallback)
+                os.system(cmd_fallback)
+                time.sleep(10)
+                i = i - 1
+                ntry = ntry + 1
+    log('Scanned', i, 'transfered', kk)
+
+### Alias
+#os_copy = os_copy_safe
+
+
+def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
+                  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
+    """function os_merge_safe
     Args:
-        set_:
-        to_remove:
-        to_add:
+        dirin_list:
+        dirout:
+        nlevel:
+        nfile:
+        nrows:
+        cmd_fallback :
+        sleep:
     Returns:
 
     """
-    # a function that removes list of elements and adds an element from a set
-    result_temp = set_.copy()
-    for element in to_remove:
-        result_temp.remove(element)
-    result_temp.add(to_add)
-    return result_temp
+    ### merge file in safe way
+    nrows = 10**8
+    flist = []
+    for fi in dirin_list :
+        flist = flist + glob.glob(fi)
+    log(flist); time.sleep(2)
+
+    os_makedirs(dirout)
+    fout = open(dirout,'a')
+    for fi in flist :
+        log(fi)
+        ii   = 0
+        fin  = open(fi,'r')
+        while True:
+            try :
+              ii = ii + 1
+              if ii % 100000 == 0 : time.sleep(sleep)
+              if ii > nrows : break
+              x = fin.readline()
+              if not x: break
+              fout.write(x.strip()+"\n")
+            except Exception as e:
+              log(e)
+              os.system(cmd_fallback)
+              time.sleep(10)
+              fout.write(x.strip()+"\n")
+        fin.close()
 
 
-def to_float(x):
-    """function to_float
-    Args:
-        x:
-    Returns:
+
+def os_remove(dirin="folder/**/*.parquet",
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=1000, start_date='1970-01-01', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=0):
+
+    """  Delete files bigger than some size
 
     """
-    try :
-        return float(x)
-    except :
-        return float("NaN")
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry in {True, 1} else False
+
+    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
 
 
-def to_int(x):
-    """function to_int
-    Args:
-        x:
-    Returns:
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi)
+        except Exception as e :
+            print(fi, e)
 
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
+
+
+def os_removedirs(path, verbose=False):
+    """  issues with no empty Folder
+    # Delete everything reachable from the directory named in 'top',
+    # assuming there are no symbolic links.
+    # CAUTION:  This is dangerous!  For example, if top == '/', it could delete all your disk files.
     """
-    try :
-        return int(x)
-    except :
-        return float("NaN")
-
-
-def is_int(x):
-    """function is_int
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        int(x)
-        return True
-    except :
+    if len(path) < 3 :
+        print("cannot delete root folder")
         return False
 
-def is_float(x):
-    """function is_float
-    Args:
-        x:
-    Returns:
+    import os
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
+            try :
+              os.remove(os.path.join(root, name))
+              if verbose: log(name)
+            except Exception as e :
+              log('error', name, e)
 
-    """
+        for name in dirs:
+            try :
+              os.rmdir(os.path.join(root, name))
+              if verbose: log(name)
+            except  Exception as e:
+              log('error', name, e)
+
     try :
-        float(x)
-        return True
-    except :
-        return False
+      os.rmdir(path)
+    except: pass
+    return True
 
 
-########################################################################################################
-class toFileSafe(object):
-   def __init__(self,fpath):
-      """ Thread Safe file writer
-        tofile = toFileSafe('mylog.log)
-        tofile.w("msg")
-      """
-      import logging
-      logger = logging.getLogger('logsafe')
-      logger.setLevel(logging.INFO)
-      ch = logging.FileHandler(fpath)
-      ch.setFormatter(logging.Formatter('%(message)s'))
-      logger.addHandler(ch)
-      self.logger = logger
-
-   def write(self, msg):
-        """ toFileSafe:write
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def log(self, msg):
-        """ toFileSafe:log
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def w(self, msg):
-        """ toFileSafe:w
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-
-def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """function date_to_timezone
+def os_getcwd():
+    """function os_getcwd
     Args:
-        tdate:
-        fmt="%Y%m%d-%H:
-        timezone:
     Returns:
 
     """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Convert to US/Pacific time zone
-    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
-    return now_pacific.strftime(fmt)
+    ## This is for Windows Path normalized As Linux /
+    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
+    return  root
+
+
+def os_system(cmd, doprint=False):
+  """ get values
+       os_system( f"   ztmp ",  doprint=True)
+  """
+  import subprocess
+  try :
+    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
+    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
+    if doprint:
+      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
+      print(l)
+
+    return mout, merr
+  except Exception as e :
+    print( f"Error {cmd}, {e}")
+
+
+def os_makedirs(dir_or_file):
+    """function os_makedirs
+    Args:
+        dir_or_file:
+    Returns:
+
+    """
+    if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
+        os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
+        f = open(dir_or_file,'w')
+        f.close()
+    else :
+        os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
 
 
 
-##### OS, cofnfig ######################################################################################
+
+
+
+
+#######################################################################################################
+##### OS, config ######################################################################################
 def os_monkeypatch_help():
     """function os_monkeypatch_help
     Args:
@@ -702,7 +918,6 @@ def os_walk(path, pattern="*", dirlevel=50):
     ### Filter files
     matches['file'] = [ t for t in fnmatch.filter(matches['file'], pattern) ]
     return  matches
-
 
 
 
@@ -1055,390 +1270,175 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
-def glob_glob(dirin, exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0, npool=1
-    ):
-    """ Advanced Glob filtering.
-    Docs:
+########################################################################################################
+########################################################################################################
+def to_timeunix(datex="2018-01-16"):
+  """function to_timeunix
+  Args:
+      datex:
+  Returns:
 
-            https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
+  """
+  if isinstance(datex, str)  :
+     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
 
-            dirin:
-            exclude=""   :
-            include_only="" :
-            min_size_mb=0
-            max_size_mb=500000
-            ndays_past=3000
-            start_date='1970-01-01'
-            end_date='2050-01-01'
-            nfiles=99999999
-            verbose=0
-            npool=1 multithread
-
-    """
-    import glob, copy, datetime as dt, time
+  if isinstance(datex, datetime)  :
+     return int(time.mktime( datex.timetuple()) * 1000)
 
 
-    def fun_glob(dirin, exclude=exclude, include_only=include_only,
-            min_size_mb=min_size_mb, max_size_mb=max_size_mb,
-            ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
-            nfiles=nfiles, verbose=verbose):
-        files = glob.glob(dirin, recursive=True)
-        files = sorted(files)
+def to_datetime(x) :
+  """function to_datetime
+  Args:
+      x:
+  Returns:
 
-        ####### Exclude/Include  ##################################################
-        for xi in exclude.split(","):
-            if len(xi) > 0:
-                files = [  fi for fi in files if xi not in fi ]
-        
-        if include_only:
-            tmp_list = [] # add multi files
-            for xi in include_only.split(","):
-                if len(xi) > 0:
-                    tmp_list += [  fi for fi in files if xi in fi ]
-            files = sorted(set(tmp_list))
-
-        ####### size filtering  ##################################################
-        if min_size_mb != 0 or max_size_mb != 0:
-            flist2=[]
-            for fi in files[:nfiles]:
-                try :
-                    if min_size_mb <= os.path.getsize(fi)/1024/1024 <= max_size_mb :   #set file size in Mb
-                        flist2.append(fi)
-                except : pass
-            files = copy.deepcopy(flist2)
-
-        #######  date filtering  ##################################################
-        now    = time.time()
-        cutoff = 0
-
-        if ndays_past > -1 :
-            cutoff = now - ( abs(ndays_past) * 86400)
-
-        if nmin_past > -1 :
-            cutoff = cutoff - ( abs(nmin_past) * 60  )
-
-        if cutoff > 0:
-            if verbose > 0 :
-                print('now',  dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d %H:%M:%S"),
-                       ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d %H:%M:%S") )
-            flist2=[]
-            for fi in files[:nfiles]:
-                try :
-                    t = os.stat( fi)
-                    c = t.st_ctime
-                    if c < cutoff:             # delete file if older than 10 days
-                        flist2.append(fi)
-                except : pass
-            files = copy.deepcopy(flist2)
-
-        ####### filter files between start_date and end_date  ####################
-        if start_date and end_date:
-            start_timestamp = time.mktime(time.strptime(str(start_date), "%Y-%m-%d"))
-            end_timestamp   = time.mktime(time.strptime(str(end_date), "%Y-%m-%d"))
-            flist2=[]
-            for fi in files[:nfiles]:
-                try:
-                    t = os.stat( fi)
-                    c = t.st_ctime
-                    if start_timestamp <= c <= end_timestamp:
-                        flist2.append(fi)
-                except: pass
-            files = copy.deepcopy(flist2)
-
-        return files
-
-    if npool ==  1:
-        return fun_glob(dirin, exclude, include_only,
-            min_size_mb, max_size_mb,
-            ndays_past, nmin_past,  start_date, end_date,
-            nfiles, verbose, npool=1)
-
-    else :
-        from utilmy import parallel as par
-        input_fixed = {'exclude': exclude, 'include_only': include_only,
-                       'npool':1,
-                      }
-        fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
-                npool=npool)
-        res  = sum(res) ### merge
-        return res
+  """
+  import pandas as pd
+  return pd.to_datetime( str(x) )
 
 
+def np_list_intersection(l1, l2) :
+  """function np_list_intersection
+  Args:
+      l1:
+      l2:
+  Returns:
+
+  """
+  return [x for x in l1 if x in l2]
 
 
-
-def os_copy(dirfrom="folder/**/*.parquet", dirto="",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            ) :
-    """  Advance copy with filter.
-    Docs::
-
-          mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
-          https://stackoverflow.com/questions/123198/how-to-copy-files
-
-
-
-    """
-    import os, shutil
-
-    dry   = True if dry ==True or dry==1 else False
-    flist = glob_glob(dirfrom, exclude=exclude, include_only=include_only,
-            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
-            ndays_past=ndays_past, nmin_past=nmin_past, start_date=start_date, end_date=end_date,
-            nfiles=nfiles,)
-
-    if mode =='file':
-        print ('Nfiles', len(flist))
-        jj = 0
-        for fi in flist :
-            try :
-                if not dry :
-                   shutil.copy(fi, dirto)
-                   jj = jj +1
-                else :
-                   print(fi)
-            except Exception as e :
-                print(fi, e)
-
-
-        if dry :  print('dry mode only')
-        else :    print('deleted', jj)
-
-    elif mode =='dir':
-         shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None,  ignore_dangling_symlinks=False, dirs_exist_ok=False)
-
-
-
-def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir="./", pattern="*", exclude="", force=False, sleep=0.5, cmd_fallback="",
-                 verbose=True):  ###
-    """ Copy safe, using callback command to re-connect network if broken
-    Docs::
-
-
-    """
-    import shutil, time, os, glob
-
-    flist = [] ; dirinj = dirin
-    for j in range(nlevel):
-        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
-        dirinj = dirinj + "/*/"
-        if len(ztmp) < 1 : break
-        flist  = flist + ztmp
-
-    flist2 = []
-    for x in exclude.split(","):
-        if len(x) <=1 : continue
-        for t in flist :
-            if  not x in t :
-                flist2.append(t)
-    flist = flist2
-
-    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
-    kk = 0 ; ntry = 0 ;i =0
-    for i in range(0, len(flist)) :
-        fi  = flist[i]
-        fi2 = fi.replace(dirin, dirout)
-
-        if not fi.isascii(): continue
-        if not os.path.isfile(fi) : continue
-
-        if (not os.path.isfile(fi2) )  or force :
-             kk = kk + 1
-             if kk > nfile   : return 1
-             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
-             if kk % 10 == 0  and verbose  : log(fi2)
-             os.makedirs(os.path.dirname(fi2), exist_ok=True)
-             try :
-                shutil.copy(fi, fi2)
-                ntry = 0
-                if verbose: log(fi2)
-             except Exception as e:
-                log(e)
-                time.sleep(10)
-                log(cmd_fallback)
-                os.system(cmd_fallback)
-                time.sleep(10)
-                i = i - 1
-                ntry = ntry + 1
-    log('Scanned', i, 'transfered', kk)
-
-### Alias
-#os_copy = os_copy_safe
-
-
-def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
-                  cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
-    """function os_merge_safe
+def np_add_remove(set_, to_remove, to_add):
+    """function np_add_remove
     Args:
-        dirin_list:
-        dirout:
-        nlevel:
-        nfile:
-        nrows:
-        cmd_fallback :
-        sleep:
+        set_:
+        to_remove:
+        to_add:
     Returns:
 
     """
-    ### merge file in safe way
-    nrows = 10**8
-    flist = []
-    for fi in dirin_list :
-        flist = flist + glob.glob(fi)
-    log(flist); time.sleep(2)
-
-    os_makedirs(dirout)
-    fout = open(dirout,'a')
-    for fi in flist :
-        log(fi)
-        ii   = 0
-        fin  = open(fi,'r')
-        while True:
-            try :
-              ii = ii + 1
-              if ii % 100000 == 0 : time.sleep(sleep)
-              if ii > nrows : break
-              x = fin.readline()
-              if not x: break
-              fout.write(x.strip()+"\n")
-            except Exception as e:
-              log(e)
-              os.system(cmd_fallback)
-              time.sleep(10)
-              fout.write(x.strip()+"\n")
-        fin.close()
+    # a function that removes list of elements and adds an element from a set
+    result_temp = set_.copy()
+    for element in to_remove:
+        result_temp.remove(element)
+    result_temp.add(to_add)
+    return result_temp
 
 
-
-
-
-
-
-def os_remove(dirin="folder/**/*.parquet",
-              min_size_mb=0, max_size_mb=1,
-              exclude="", include_only="",
-              ndays_past=1000, start_date='1970-01-01', end_date='2050-01-01',
-              nfiles=99999999,
-              dry=0):
-
-    """  Delete files bigger than some size
+def to_float(x):
+    """function to_float
+    Args:
+        x:
+    Returns:
 
     """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry in {True, 1} else False
-
-    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
-            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
-            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
-            nfiles=nfiles,)
+    try :
+        return float(x)
+    except :
+        return float("NaN")
 
 
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
+def to_int(x):
+    """function to_int
+    Args:
+        x:
+    Returns:
 
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
-
-
-
-
-
-
-def os_removedirs(path, verbose=False):
-    """  issues with no empty Folder
-    # Delete everything reachable from the directory named in 'top',
-    # assuming there are no symbolic links.
-    # CAUTION:  This is dangerous!  For example, if top == '/', it could delete all your disk files.
     """
-    if len(path) < 3 :
-        print("cannot delete root folder")
+    try :
+        return int(x)
+    except :
+        return float("NaN")
+
+
+def is_int(x):
+    """function is_int
+    Args:
+        x:
+    Returns:
+
+    """
+    try :
+        int(x)
+        return True
+    except :
         return False
 
-    import os
-    for root, dirs, files in os.walk(path, topdown=False):
-        for name in files:
-            try :
-              os.remove(os.path.join(root, name))
-              if verbose: log(name)
-            except Exception as e :
-              log('error', name, e)
 
-        for name in dirs:
-            try :
-              os.rmdir(os.path.join(root, name))
-              if verbose: log(name)
-            except  Exception as e:
-              log('error', name, e)
+def is_float(x):
+    """function is_float
+    Args:
+        x:
+    Returns:
 
+    """
     try :
-      os.rmdir(path)
-    except: pass
-    return True
+        float(x)
+        return True
+    except :
+        return False
 
 
-def os_getcwd():
-    """function os_getcwd
+
+class toFileSafe(object):
+   def __init__(self,fpath):
+      """ Thread Safe file writer
+        tofile = toFileSafe('mylog.log)
+        tofile.w("msg")
+      """
+      import logging
+      logger = logging.getLogger('logsafe')
+      logger.setLevel(logging.INFO)
+      ch = logging.FileHandler(fpath)
+      ch.setFormatter(logging.Formatter('%(message)s'))
+      logger.addHandler(ch)
+      self.logger = logger
+
+   def write(self, msg):
+        """ toFileSafe:write
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+   def log(self, msg):
+        """ toFileSafe:log
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+   def w(self, msg):
+        """ toFileSafe:w
+        Args:
+            msg:
+        Returns:
+
+        """
+        self.logger.info( msg)
+
+
+def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
+    """function date_to_timezone
     Args:
+        tdate:
+        fmt="%Y%m%d-%H:
+        timezone:
     Returns:
 
     """
-    ## This is for Windows Path normalized As Linux /
-    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
-    return  root
+    # "%Y-%m-%d %H:%M:%S %Z%z"
+    from pytz import timezone as tzone
+    import datetime
+    # Convert to US/Pacific time zone
+    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
+    return now_pacific.strftime(fmt)
 
 
-def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
-  """
-  import subprocess
-  try :
-    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
-    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
-    if doprint:
-      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
-      print(l)
-
-    return mout, merr
-  except Exception as e :
-    print( f"Error {cmd}, {e}")
-
-
-def os_makedirs(dir_or_file):
-    """function os_makedirs
-    Args:
-        dir_or_file:
-    Returns:
-
-    """
-    if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
-        os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
-        f = open(dir_or_file,'w')
-        f.close()
-    else :
-        os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
 
 
 

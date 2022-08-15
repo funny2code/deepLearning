@@ -1764,26 +1764,20 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
     """  Function to plot network using cytoscape
     Docs::
 
-            df                :        dataframe with nodes and edges
-            cola='col_node1'  :        column name of node1
-            colb='col_node2'  :        column name of node2
-            coledge='col_edge':        column name of edge
-            colweight="weight":        column name of weight
-            html_code=True    :        if True, return html code
+        -- Like regular pd_plot_network, just call cyto instead)
+            doc.h1(" plot network")
+            df = pd.DataFrame({ 'from':['A', 'B', 'C','A'], 'to':['D', 'A', 'E','C'], 'weight':[1, 2, 1,5]})
+            doc.pd_plot_network_cyto(df, cola='from', colb='to', coledge='weight')
+            doc.save('test5.html')
+            doc.open_browser()
 
-            ['
 
-    test code:
-    
-    (like regular pd_plot_network, just call cyto instead)
-
-    doc.h1(" plot network test cyto ")
-    df = pd.DataFrame({ 'from':['A', 'B', 'C','A'], 'to':['D', 'A', 'E','C'], 'weight':[1, 2, 1,5]})
-    doc.pd_plot_network_cyto(df, cola='from', colb='to', coledge='col_edge')
-
-    doc.save('test5.html')
-    doc.open_browser()
-
+        df                :        dataframe['from', 'to', 'edge    ]
+        cola='col_node1'  :        column name of node1
+        colb='col_node2'  :        column name of node2
+        coledge='col_edge':        column name of edge
+        colweight="weight":        column name of weight
+        html_code=True    :        if True, return html code
 
     """
     from box import Box
@@ -1795,7 +1789,6 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
 
 
     data = ""
-
     node_ids = set()
 
     for ii, edge in df.iterrows():
@@ -1815,8 +1808,8 @@ def pd_plot_network_cyto(df:pd.DataFrame, cola: str='col_node1',
          <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js"></script></head>                
          <style>
             #cy {{
-                width: 70%;
-                height: 50%;
+                width: 90%;
+                height: 80%;
                 position: relative;
                 top: 10px;
                 left: 0px;
