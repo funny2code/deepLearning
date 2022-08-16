@@ -1,3 +1,21 @@
+"""  Leetcode HTML website
+Docs::
+
+    pip install fire
+
+	cd myfolder
+	python  leet_extract.py run --url  https://ttzztt.gitbooks.io/lc/content/design-tic-tac-toe.html
+	python  leet_extract.py render
+
+
+	#run(startURL) #<-- uncomment this to download html files
+	render() #<-- uncomment this to render markdown files
+
+
+    https://ttzztt.gitbooks.io/lc/content/design-tic-tac-toe.html
+
+
+"""
 import markdownify 
 import os
 from bs4 import BeautifulSoup
@@ -121,5 +139,10 @@ def render():
 	result.close()
 
 
-#run(startURL) #<-- uncomment this to download html files
-render() #<-- uncomment this to render markdown files
+
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+
+
