@@ -4,8 +4,8 @@ Docs::
     pip install fire
 
 	cd myfolder
-	python  leet_extract.py run --url  https://ttzztt.gitbooks.io/lc/content/design-tic-tac-toe.html
-	python  leet_extract.py render
+	python  cli_leetcode_extract.py  run --url  https://ttzztt.gitbooks.io/lc/content/design-tic-tac-toe.html
+	python  cli_leetcode_extract.py  render
 
 
 	#run(startURL) #<-- uncomment this to download html files
