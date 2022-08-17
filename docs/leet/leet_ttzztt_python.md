@@ -1,24 +1,17 @@
 ------------------------------------------------------------------------------------------------
-
-
- 200. Number of Islands (Amazon)
+## 200. Number of Islands
 ===================================
- [Leetcode] Number of Islands, Solution (
- 
- 水中的鱼
- 
- )
-
-
-
+ [Leetcode] Number of Islands, Solution 
+```
  Given a 2d grid map
  `'1'` 
  s (land) and
  `'0'` 
  s (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
- 
- 
- Code: with visited 2D record
+ ```
+
+
+Code: with visited 2D record
 ```python
 class Solution :
     m # rows
@@ -60,7 +53,7 @@ private:
 ```
 
 
- [Code]
+
 ```python
 class Solution :
     m # rows
@@ -121,44 +114,24 @@ private:
     
 
 
-```python
-
-
+```
 
 
 
 ------------------------------------------------------------------------------------------------
- 16.3 3Sum Closest
+## 16.3 3Sum Closest
 ===================
-
-
-
- Given an array S of n integers, find three integers in S such that the sum is closest to a given number, target. Return the sum of the three integers. You may assume that each input would have exactly one solution.
- 
-
-
-
+Given an array S of n integers, find three integers in S such that the sum is closest to a given number, target. Return the sum of the three integers. You may assume that each input would have exactly one solution.
 ```python
     For example, given array S = :-1 2 1 -4, and target = 1.
 
     The sum that is closest to the target is 2. (-1 + 2 + 1 = 2).
 
-```python
+```
 
-
- Thoughts:
+Thoughts:
+add a distance tracking variable and update its value after each two-sum search. Other than this, the implementation is based on standard
  
-
-
-
- add a distance tracking variable and update its value after each two-sum search. Other than this, the implementation is based on standard
- 
- 3sum
- 
- .
- 
-
-
 
 ```python
 class Solution :
@@ -183,9 +156,6 @@ public:
                     update(ans, distance, sum, target)
                     right --
                 
-            
-        
-
         return ans
     
 
@@ -242,7 +212,7 @@ public:
     
 
 
-```python
+```
 
 
 ```python
@@ -276,27 +246,17 @@ class Solution(object):
 
         return ans
 
-```python
-
+```
 
  I can also update them in the loop, as 水中的鱼's approach in this problem.
- 
+
+
 ------------------------------------------------------------------------------------------------
-
-
- 15. 3Sum
+## 15. 3Sum
 ============
  Given an array S of n integers, are there elements a,b,c in S such that a+b+c= 0? Find all unique triplets in the array which gives the sum of zero.
- 
-
-
-
  Note:
  The solution set must not contain duplicate triplets.
- 
-
-
-
 ```python
 For example, given array S = [-1, 0, 1, 2, -1, -4],
 
@@ -306,25 +266,9 @@ A solution set is:
   [-1, -1, 2]
 ]
 
-```python
-
-
- Follow up:
- 如果不sort能怎么做
- 
-
-
-
+```
  Thoughts:
- 
-
-
-
  a + b + c =0 <=> a + b = -c
- 
-
-
-
  Traverse each element : a target of two sum. Search direction should be consistent with the direction of traverse order(avoid duplicates).
  
 
@@ -364,11 +308,8 @@ class Solution :
     
 
 
-```python
-
-
+```
  FollowUp: without Sort
- 
  https:# leetcode.com/problems/3sum/discuss/110507/Golang-~n2+n-worst-case-no-sort-no-deduplication-O(n2)-beats-50
  
 
@@ -408,11 +349,7 @@ class Solution :
     
 
 
-```python
-
-
- Python
- 
+```
 
 
 
@@ -436,7 +373,7 @@ class Solution(object):
             and ((-i-j)>= j)
             and (m[(-i-j)] > 2 or m[(-i-j)] == 1 and (-i-j)!=j or m[(-i-j)] == 2 and ((-i-j)!=i or (-i-j)!=j))]
 
-```python
+```
 
 
  [code 2: two pointer]:
