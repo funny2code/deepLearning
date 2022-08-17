@@ -330,6 +330,19 @@ def test_globglob():
     glob_glob(dirin="folder/",npool=2)
     glob_glob(dirin="folder/test/",npool=2)
 
+    flist = ['folder/test/file.txt',
+        'folder/test/file1.txt',
+        'folder/test/file2.txt',
+        'folder/test/file3.txt',
+        'folder/test/tmp/1.txt',
+        'folder/test/tmp/myfile.txt',
+        'folder/test/tmp/record.txt']
+    glob_glob(dirin="", file_list=flist)
+    glob_glob(file_list=flist)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
+
 
 
 
@@ -357,14 +370,15 @@ def to_dict(**kw):
 
 
 
-def glob_glob(dirin, exclude="", include_only="",
+def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
     ):
     """ Advanced Glob filtering.
     Docs::
-        dirin:
+        dirin="": get the files in path dirin, works when file_list=[]
+        file_list=[]: if file_list works, dirin will not work
         exclude=""   :
         include_only="" :
         min_size_mb=0
@@ -374,7 +388,7 @@ def glob_glob(dirin, exclude="", include_only="",
         end_date='2050-01-01'
         nfiles=99999999
         verbose=0
-        npool=1 multithread not working
+        npool=1: multithread not working
 
         https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
 
@@ -382,12 +396,17 @@ def glob_glob(dirin, exclude="", include_only="",
     import glob, copy, datetime as dt, time
 
 
-    def fun_glob(dirin, exclude=exclude, include_only=include_only,
+    def fun_glob(dirin=dirin, file_list=file_list, exclude=exclude, include_only=include_only,
             min_size_mb=min_size_mb, max_size_mb=max_size_mb,
             ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
-            nfiles=nfiles, verbose=verbose):
-        files = glob.glob(dirin, recursive=True)
-        files = sorted(files)
+            nfiles=nfiles, verbose=verbose,npool=npool):
+        
+        if dirin and not file_list:
+            files = glob.glob(dirin, recursive=True)
+            files = sorted(files)
+        
+        if file_list:
+            files = file_list
 
         ####### Exclude/Include  ##################################################
         for xi in exclude.split(","):
@@ -452,17 +471,20 @@ def glob_glob(dirin, exclude="", include_only="",
         return files
 
     if npool ==  1:
-        return fun_glob(dirin, exclude, include_only,
+        return fun_glob(dirin, file_list, exclude, include_only,
             min_size_mb, max_size_mb,
             ndays_past, nmin_past,  start_date, end_date,
-            nfiles, verbose, npool=1)
+            nfiles, verbose,npool)
 
     else :
         from utilmy import parallel as par
         input_fixed = {'exclude': exclude, 'include_only': include_only,
                        'npool':1,
                       }
-        fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
+        if dirin and not file_list:
+            fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
+        if file_list:
+            fdir = file_list
         res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
                 npool=npool)
         res  = sum(res) ### merge
