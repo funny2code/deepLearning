@@ -378,7 +378,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     """ Advanced Glob filtering.
     Docs::
         dirin="": get the files in path dirin, works when file_list=[]
-        file_list=[]: 
+        file_list=[]: if file_list works, dirin will not work
         exclude=""   :
         include_only="" :
         min_size_mb=0
@@ -481,9 +481,9 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
         input_fixed = {'exclude': exclude, 'include_only': include_only,
                        'npool':1,
                       }
-        if dirin:
+        if dirin and not file_list:
             fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        else:
+        if file_list:
             fdir = file_list
         res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
                 npool=npool)
