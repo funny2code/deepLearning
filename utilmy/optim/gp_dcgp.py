@@ -175,8 +175,8 @@ def run4():
         return list2
 
 
-
     #################################################################################
+    ######  Genetic Algo ############################################################
     def get_random_solution():
         return expression(inputs = ni, 
                         outputs = no, 
@@ -277,3 +277,6 @@ def run4():
 
 
 run4()
+
+
+
