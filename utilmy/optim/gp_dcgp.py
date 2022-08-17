@@ -1,21 +1,45 @@
+"""
+
+1) Install
+   https://darioizzo.github.io/dcgp/installation.html#python
+
+
+   example :
+      https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+######## My Problem
+2)  list with scores (ie randomly generated)
+We use 1 formulae to merge  2 list --> merge_list with score
+   Ojective to maximize  correlation(merge_list,  True_ordered_list) 
+
+Goal is to find a formulae, which make merge_list as much sorted as possible
+
+
+
+
+
+"""
+
+
+from lib2to3.pygram import Symbols
+from dcgpy import expression_gdual_double as expression
+from dcgpy import kernel_set_gdual_double as kernel_set
+from pyaudi import gdual_double as gdual
+import random
+import math
+import numpy as np
+import scipy.stats
+from operator import itemgetter
+from copy import deepcopy
+import warnings
+
 
 def run4():
-
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
-    import random
-    import math
-    import numpy as np
-    import scipy.stats
-    from operator import itemgetter
-    from copy import deepcopy
-    import warnings
     warnings.filterwarnings("ignore")
 
 
-    # Problem definition
+    ######### Problem definition
     ks = kernel_set(["sum", "diff", "div", "mul"])
     print_after = 100
     print_best = True
@@ -31,30 +55,18 @@ def run4():
     f_trace = 'trace'
 
 
-    # Define expression symbols
+    ######### Define expression symbols
     symbols = []
     for i in range(ni):
         symbols.append(f"x{i}")
 
 
-    # Print
+    ######### Print
     print(ks)
     print(symbols)
 
 
-    def get_random_solution():
-        return expression(inputs = ni, 
-                        outputs = no, 
-                        rows = nr, 
-                        cols = nc, 
-                        levels_back = nc, 
-                        arity = a, 
-                        kernels = ks(), 
-                        n_eph = 0, 
-                        seed = int(random.random()*1000000)
-                        )
-
-
+    ######### Objective to Maximize
     def get_correlm(eqn):
         """  compare 2 lists lnew, ltrue and output correlation.
         Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
@@ -84,7 +96,8 @@ def run4():
         correlm = np.mean(correls)
         return -correlm  ### minimize correlation val
 
-    #### Example of rank_scores0
+
+    #### Example of rank_scores0 = Formulae(list_ score1, list_score2)
     def rank_score(eqn:str, rank1:list, rank2:list, adjust=1.0, kk=1.0)-> list:
         """     ### take 2 np.array and calculate one list of float (ie NEW scores for position)
     
@@ -104,6 +117,8 @@ def run4():
         scores_new =  eval(eqn)
         return scores_new
 
+
+    #### Merge 2 list using a FORMULAE
     def rank_merge_v5(ll1:list, ll2:list, eqn:str, kk= 1):
         """ Re-rank elements of list1 using ranking of list2
             20k dataframe : 6 sec ,  4sec if dict is pre-build
@@ -124,6 +139,8 @@ def run4():
         v = [ll1[i] for i in np.argsort(rank3)]
         return v  #### for later preprocess
 
+
+    #### Generate fake list to be merged.
     def rank_generate_fake(dict_full, list_overlap, nsize=100, ncorrect=20):
         """  Returns a list of random rankings of size nsize where ncorrect
             elements have correct ranks
@@ -159,12 +176,22 @@ def run4():
 
 
 
+    #################################################################################
+    def get_random_solution():
+        return expression(inputs = ni, 
+                        outputs = no, 
+                        rows = nr, 
+                        cols = nc, 
+                        levels_back = nc, 
+                        arity = a, 
+                        kernels = ks(), 
+                        n_eph = 0, 
+                        seed = int(random.random()*1000000)
+                        )
 
     # # 5 - Mutate the expression with 2 random mutations of active genes and print
     # ex.mutate_active(2)
     # print("Mutated expression:", ex(symbols)[0])
-
-
     def get_cost(ex):
         def normalize(val,Rmin,Rmax,Tmin,Tmax):
             return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
@@ -249,4 +276,4 @@ def run4():
 
 
 
-## That's it folks
+run4()
