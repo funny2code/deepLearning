@@ -38,6 +38,11 @@ from box import Box
 
 
 
+def log(*s):
+    print(*s, flush=True)
+
+
+
 class myProblem:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
@@ -211,7 +216,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     a             = 2  # Arity
     n_cuckoo_eggs = round(pa*n)
     n_replace     = round(pa*n)
-    f_trace       = 'trace'
+    log_file       = 'trace.py'
 
     
     ######### Define expression symbols
@@ -222,8 +227,8 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
     ######### Print
     if verbose:
-        print(ks)
-        print(symbols)
+        log(ks)
+        log(symbols)
 
 
     def get_random_solution():
@@ -263,7 +268,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
         # ex.mutate_active(2)
-        # print("Mutated expression:", ex(symbols)[0])        
+        # log("Mutated expression:", ex(symbols)[0])        
         global best_egg
         global k
         global dic_front
@@ -291,19 +296,19 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
             # Iterational printing
             if (k%print_after == 0):
                 
-                with open(f_trace,'a') as f:
+                with open(log_file,'a') as f:
                     for x in ls_trace:
                         f.write(str(round(x, 3))+'\n')
                 ls_trace = [] # dump and restart
                 
                 nest.sort(key = itemgetter(1)) # Rank nests and find current best
                 best_egg = deepcopy(nest[0])
-                print(f'\n#{k}', f'{best_egg[1]}')
+                log(f'\n#{k}', f'{best_egg[1]}')
 
                 if (print_best==True):
-                    print(best_egg[0](symbols)[0])
-                    #print(best_egg[0].simplify(symbols))
-                    print('\n')
+                    log(best_egg[0](symbols)[0])
+                    #log(best_egg[0].simplify(symbols))
+                    log('\n')
 
     search()
 
