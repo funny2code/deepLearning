@@ -9,8 +9,9 @@
  s (land) and
  `'0'` 
  s (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
- Code: with visited 2D record
-```
+
+Code: with visited 2D record
+```python
 class Solution :
     m # rows
     n # cols
@@ -40,8 +41,9 @@ private:
         merge0(grid, visited, x , y + 1)
         merge0(grid, visited, x , y - 1)
 ```
+
  [Code]
-```
+```python
 class Solution :
     m # rows
     n # cols
@@ -97,7 +99,7 @@ private:
  add a distance tracking variable and update its value after each two-sum search. Other than this, the implementation is based on standard
  3sum
  .
-```
+```python
 class Solution :
 public:
     threeSumClosest(vector<int>& A, target) :
@@ -123,7 +125,7 @@ public:
 ```
  Extension:
  I can also calculate the minimum distance two-sum distance for current target and keep track the corresponding 3sum value in my answer as the following:
-```
+```python
 class Solution :
 public:
     threeSumClosest(vector<int>& A, target) :
@@ -148,7 +150,7 @@ public:
         ans = distance > curDistance? sum + base : ans #  change 4: the candidate for new ans is "sum + base"
         distance =  distance > curDistance? curDistance : distance
 ```
-```
+```python
 class Solution(object):
     def threeSumClosest(self, A, target):
         """
@@ -198,7 +200,7 @@ A solution set is:
  /
  unordered_map) :
  https:# leetcode.com/problems/3sum/discuss/163934/Efficient-Java-Solution
-```
+```python
 class Solution :
     public List<List<Integer>> threeSum(int[] A) :
         Arrays.sort(A)
@@ -216,7 +218,7 @@ class Solution :
 ```
  FollowUp: without Sort
  https:# leetcode.com/problems/3sum/discuss/110507/Golang-~n2+n-worst-case-no-sort-no-deduplication-O(n2)-beats-50
-```
+```python
 class Solution :
     public List<List<Integer>> threeSum(int[] A) :
         if(A == null || A.length == 0) return new ArrayList<>()
@@ -240,8 +242,8 @@ class Solution :
                     res.add(Arrays.asList(i,j,k))
         return res
 ```
- Python
-```
+Python
+```python
 class Solution(object):
     def threeSum(self, A):
         """
@@ -260,7 +262,7 @@ class Solution(object):
 ```
  [code 2: two pointer]:
  O(n^2) without extra space (ordered_map)
-```
+```python
 class Solution :
     public List<List<Integer>> threeSum(int[] A) :
         Arrays.sort(A)
@@ -281,7 +283,7 @@ class Solution :
         return res
 ```
  Variation: Expand sum to be 0 as in general case
-```
+```python
 class Solution :
     vector<vector<int>>answer
 public:
@@ -350,7 +352,7 @@ A solution set is:
  3Sum
  is also adopted.
 3. When k > 2, I prefer using two pointers as the time complexities is no longer dominant by sorting (O(nlogn)).
-```
+```python
 public class Solution :
 public List<List<Integer>> fourSum(int[] num, target) :
     ArrayList<List<Integer>> ans = new ArrayList<>()
@@ -426,7 +428,7 @@ We could return these lists in any order, for example the answer [['Mary', '[ema
  the goal is to grouping emails whenever there is a connected path (common emails are analogous to shared nodes in the graph)
 2. similar idea can applies to DFS: to group accounts by traversing the connected graph
  Code: T: O(V + E) S: O(V + E)
-```
+```python
 class Solution :
     public List<List<String>> accountsMerge(List<List<String>> accounts) :
         #  initialize the union find & owner info
@@ -499,7 +501,7 @@ search("b..") ->true
  FB follow up: process "*"
  Thoughts:
 1. Trie Tree excercise
-```
+```python
 class WordDictionary :
     private TrieNode root 
     /** Initialize your data structure here. */
@@ -535,8 +537,8 @@ class TrieNode:
  * boolean param_2 = obj.search(word)
  */
 ```
- Python
-```
+Python
+```python
 class WordDictionary(object):
     def __init__(self):
         """
@@ -581,7 +583,7 @@ class TrieNode(object):
 # param_2 = obj.search(word)
 ```
  Python: length based dictionary: psudu- O(1) - O(n)-> for char level: O(len(char in table entry))
-```
+```python
 class WordDictionary(object):
     def __init__(self):
         self.word_dict = collections.defaultdict(list)
@@ -603,7 +605,7 @@ class WordDictionary(object):
         return False
 ```
  Python: best Trie Implementation: T: O(len(total words)) S: O(len(total words))
-```
+```python
 class WordDictionary(object):
     def __init__(self):
         """
@@ -671,7 +673,7 @@ Input: a = "1010", b = "1011"
 Output: "10101"
 ```
  Thoughts: Carry ripple adder
-```
+```python
 class Solution :
     #  carry ripple adder
     public String addBinary(String a, String b) :
@@ -687,7 +689,7 @@ class Solution :
         return sb.reverse().toString()
 ```
  Python:
-```
+```python
 class Solution(object):
     def addBinary(self, a, b):
         """
@@ -748,7 +750,7 @@ class Solution(object):
  convert the inputs to integer
  directly.
  Code:
-```
+```python
 class Solution(object):
     def addStrings(self, num1, num2):
         """
@@ -791,7 +793,8 @@ class Solution(object):
 1. Inc, Dec (key) O(1) -> Map(key, val)
 2. getMaxKey(), getMinKey() O(1): doubly LinkedList with head and tail bucketNode (each bucket contains key with the same count value)
  Code
-```
+ 
+```python
 class AllOne :
     private class BucketNode:
         val
@@ -943,7 +946,7 @@ Explanation: The number "-91283472332" is out of the range of a 32-bit signed in
 	2. update the value by val = 10 * val + (str[i] -'0')
 	3. return sign * base
  Code
-```
+```python
 class Solution :
 public:
     myAtoi(string str) :
@@ -970,7 +973,7 @@ public:
  This structure might apply to many other backtracking questions, but here I am just going to demonstrate Subsets, Permutations, and Combination Sum.
  Subsets :
  https:# leetcode.com/problems/subsets/
-```
+```python
 public List<List<Integer>> subsets(int[] A) :
     List<List<Integer>> list = new ArrayList<>()
     Arrays.sort(A)
@@ -985,7 +988,7 @@ private void backtrack(List<List<Integer>> list , List<Integer> tempList, [] A, 
 ```
  Subsets II (contains duplicates) :
  https:# leetcode.com/problems/subsets-ii/
-```
+```python
 public List<List<Integer>> subsetsWithDup(int[] A) :
     List<List<Integer>> list = new ArrayList<>()
     Arrays.sort(A)
@@ -1001,7 +1004,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, [] A, s
 ```
  Permutations :
  https:# leetcode.com/problems/permutations/
-```
+```python
 public List<List<Integer>> permute(int[] A) :
    List<List<Integer>> list = new ArrayList<>()
    #  Arrays.sort(A) #  not necessary
@@ -1019,7 +1022,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, [] A):
 ```
  Permutations II (contains duplicates) :
  https:# leetcode.com/problems/permutations-ii/
-```
+```python
 public List<List<Integer>> permuteUnique(int[] A) :
     List<List<Integer>> list = new ArrayList<>()
     Arrays.sort(A)
@@ -1039,7 +1042,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, [] A, b
 ```
  Combination Sum :
  https:# leetcode.com/problems/combination-sum/
-```
+```python
 public List<List<Integer>> combinationSum(int[] A, target) :
     List<List<Integer>> list = new ArrayList<>()
     Arrays.sort(A)
@@ -1056,7 +1059,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, [] A, r
 ```
  Combination Sum II (can't reuse same element) :
  https:# leetcode.com/problems/combination-sum-ii/
-```
+```python
 public List<List<Integer>> combinationSum2(int[] A, target) :
     List<List<Integer>> list = new ArrayList<>()
     Arrays.sort(A)
@@ -1074,7 +1077,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, [] A, r
 ```
  Palindrome Partitioning :
  https:# leetcode.com/problems/palindrome-partitioning/
-```
+```python
 public List<List<String>> partition(String s) :
    List<List<String>> list = new ArrayList<>()
    backtrack(list, new ArrayList<>(), s, 0)
@@ -1216,7 +1219,7 @@ Explanation:  In this case, no transaction is done, i.e. max profit = 0.
  Thoughts:
 1. Greedy buy today's stock if tomorrow it will increase its price
  Code
-```
+```python
 class Solution(object):
     def maxProfit(self, prices):
         """
@@ -1230,7 +1233,7 @@ class Solution(object):
         return profit
 ```
  Code: One line
-```
+```python
 class Solution(object):
     def maxProfit(self, prices):
         """
@@ -1275,7 +1278,7 @@ Explanation: In this case, no transaction is done, i.e. max profit = 0.
 3. Inspired from
  here
  Code: DP:
-```
+```python
 class Solution :
     public maxProfit(int[] prices) :
     #  these four variables represent your profit after executing corresponding transaction
@@ -1291,7 +1294,7 @@ class Solution :
         return secondSell #  secondSell will be the max profit after passing the prices
 ```
  Code: DP Optimization
-```
+```python
 class Solution(object):
     def maxProfit(self, prices):
         """
@@ -1330,7 +1333,7 @@ Output: 0
 In this case, no transaction is done, i.e. max profit = 0.
 ```
  Code
-```
+```python
 class Solution :
 public:
     maxProfit(vector<int>& prices) :
@@ -1504,7 +1507,7 @@ class BSTIterator(object):
  Note:
  Recursive solution is trivial, could you do it iteratively?
  Trivial Solution: According to the definition of Inorder (O(n) time and O(n) space, for the function call stack)
-```
+```python
 class Solution :
     vector<int> answer
 public:
@@ -1937,7 +1940,7 @@ public:
 1. Visit left subtree find the right the rightmost tree, add a cycle to the current node - left subtree - right most point
 2. Iteratively creating cycles to the left (left) , until we detect a cycle, process the answer for the left subtree using three pointers, then move to the right subtree root, repeat 2 (right).
 3. right subtree root and current node are included when cycle between right subtree - root, current node - and parent is detected ( reason why to add a dummy node as the root)
-```
+```python
 class Solution:
 public:
     void reverseNodes(TreeNode* start, TreeNode* end) :
@@ -2127,7 +2130,7 @@ class Solution :
         preorder_reverse(cur.left, result, curDepth + 1)
 ```
  Iterative: Using queue to have a BFS (expand from left to right):
-```
+```python
 class Solution :
     public List<Integer> rightSideView(TreeNode root) :
         List<Integer> result = new ArrayList()
@@ -2357,7 +2360,7 @@ public:
         return answer
 ```
  Code (Python)
-```
+```python
 class Solution(object):
     def zigzagLevelOrder(self, root):
         """
@@ -2519,7 +2522,7 @@ coins =  3*1*5     + 3*5*8   + 1*3*8   + 1*8*1   = 167
 3. propagating direction: from small sliding window to larger sliding window
 4. return dp[0][n-1] (from left = 0 to right n-1)
  Code T: O(n^3) & S: O(n^2)
-```
+```python
 class Solution :
     public maxCoins(int[] A) :
         #  first busing 0s
@@ -2537,7 +2540,7 @@ class Solution :
                                               )
         return dp[0][n-1]
 ```
-```
+```python
 class Solution :
 public:
     maxCoins(vector<int>& A) :
@@ -2556,7 +2559,7 @@ public:
                                               )
         return dp[0][n-1]
 ```
-```
+```python
 class Solution(object):
     def maxCoins(self, A):
         """
@@ -2574,7 +2577,7 @@ class Solution(object):
         return dp[0][n-1]
 ```
  A Divide & Conquer solution
-```
+```python
 class Solution :
     public maxCoins(int[] A) :
         #  first busing 0s
@@ -2642,7 +2645,7 @@ Explanation:
 3. 2 steps + 1 step
 ```
  Code
-```
+```python
 class Solution :
 public:
     climbStairs(n) :
@@ -2800,7 +2803,7 @@ Explanation: the amount of 3 cannot be made up just with coins of 2.
 Input: amount = 10, coins = [10] 
 Output: 1
 ```
-```
+```python
 class Solution :
     public change(amount, int[] coins) :
         int[][] dp = new int[coins.length+1][amount+1]
@@ -2857,7 +2860,7 @@ A solution set is:
 1. Only two lines changes than
  39. Combination Sum
  Code
-```
+```python
 class Solution :
     public List<List<Integer>> combinationSum2(int[] A, target) :
     List<List<Integer>> list = new ArrayList<>()
@@ -2925,7 +2928,7 @@ A solution set is:
 1. Backtracking: can select
  distinct number repeated times -> so each time for loop start at the passed-in index
  Code: T:O(N^2) S: O(N^2)
-```
+```python
 class Solution(object):
     def combinationSum(self, candidates, target):
         """
@@ -2951,7 +2954,7 @@ class Solution(object):
         return res
 ```
  Code: java with sorting
-```
+```python
 class Solution :
     public List<List<Integer>> combinationSum(int[] A, target) :
     List<List<Integer>> list = new ArrayList<>()
@@ -3025,7 +3028,7 @@ Explanation:
  Original Post
  )
  Code 1
-```
+```python
 class Solution:
     def consecutiveNumbersSum(self, N: int) -> int:
         if N == 1: 
@@ -3043,7 +3046,7 @@ class Solution:
         return res
 ```
  Code 2
-```
+```python
 class Solution :
 public:
     consecutiveNumbersSum(N) :
@@ -3257,7 +3260,7 @@ Explanation: Because [23, 2, 6, 4, 7] is an continuous subarray of size 5 and su
 	1. Query whether there is a index with value equal to modulo preSum and whether its distance from current i is > 1
 	2. Use end<modulo preSum: index> to record the modulo preSum value
 2. Use only set + add delay
-```
+```python
 class Solution(object):
     def checkSubarraySum(self, A, k):
         """
@@ -3277,7 +3280,7 @@ class Solution(object):
                 end[preS] = i 
         return False
 ```
-```
+```python
 class Solution :
 public:
     bool checkSubarraySum(vector<int>& A, k) :
@@ -3292,7 +3295,7 @@ public:
         return false
 ```
  Python
-```
+```python
 class Solution(object):
     def checkSubarraySum(self, A, k):
         """
@@ -3486,7 +3489,7 @@ Output: "1211"
 ```
  Thoughts:
 1. Two pointers: each time counting the number of continuous same number
-```
+```python
 class Solution(object):
     def countAndSay(self, n):
         """
@@ -3531,7 +3534,7 @@ To the right of 1 there is 0 smaller element.
 1. Failed to use template for positive entry... (attaching the code)
 2. d
  Code that I failed to implement (failed to handle properly the negative case):
-```
+```python
 class Solution :
     class SegmentTreeNode:
     public start , end, cnt
@@ -3616,7 +3619,7 @@ class Solution :
         return ret
 ```
  SegmentTree implementation:
-```
+```python
 class SegmentTreeNode(object):
     def __init__ (self, val , start, end):
         self.val = val
@@ -3669,7 +3672,7 @@ class Solution(object):
         return r[::-1]
 ```
  BinaryIndexedTree implementation:
-```
+```python
 class BinaryIndexedTree(object):
     def __init__(self, n):
         self.sums = [0] * (n + 1)
@@ -3693,7 +3696,7 @@ class Solution(object):
         return r[::-1]
 ```
  BinarySearchTree implementation:
-```
+```python
 class BSTNode(object):
     def __init__ (self, val):
         self.val = val 
@@ -3734,7 +3737,7 @@ class Solution(object):
             ][::-1]
 ```
  MergeSort implementation T: O(nlogn) S: O(n)
-```
+```python
 class Solution :
 protected:
     void merge(vector<int>& indices, first, last, 
@@ -3801,7 +3804,7 @@ public:
  for adding this problem and creating all test cases.
  Thoughts:
 1. f[i] = f[i/2] (right shift by 1) + f[i%2] with f[0] = 0 and f[1] =1
-```
+```python
 class Solution :
 public:
     vector<int> countBits(num) :
@@ -3861,7 +3864,7 @@ The 4th course cannot be taken now, since you will finish it on the 3300th day, 
  Rigorous proof
  here
  Code (Python):
-```
+```python
 class Solution(object):
     def scheduleCourse(self, courses):
         """
@@ -3968,7 +3971,7 @@ Note: "01100", "10011", "11001" will be accepted too.
         return false
 ```
  Code: Greedy T:O(k^n * k)
-```
+```python
 class Solution :
 public:
     string crackSafe(n, k) :
@@ -4053,7 +4056,7 @@ Explanation:
  1.BFS
  2.A* without heuristics (Dijkstra's Algorithm)
  Code (BFS)
-```
+```python
 class Solution :
     m, n
 public:
@@ -4116,7 +4119,7 @@ private :
         return -1
 ```
  Code (Dijkstra's Algorithm)
-```
+```python
 class Solution:
     def cutOffTree(self, forest):
         """
@@ -4186,7 +4189,7 @@ class Solution:
 		2. decode as current char and next char s[i ... i+1] + rest substring: s[i+2...end]
 		 (if we can both decode s[i...i+1] and s[i+2...end])
  Code Time: O(n), Space O(n^2)
-```
+```python
 class Solution :
 public:
     numDecodings(string s) :
@@ -4252,7 +4255,7 @@ circularQueue.Rear()  #  return 4
  Thoughts: Having two pointers , fast and slow and a size, capacity variables to track the current capacity status
 1. Init:
  slow = 0 fast = -1 size = 0
-```
+```python
 class MyCircularQueue :
     size, slow, fast, C
     data []
@@ -4422,7 +4425,7 @@ class MyCircularQueue :
  node to facilitate process of getting top 3 results.
  Code: T:O(l * mlogm) for each time, assume current input word is l, there are m keys in the node of cur.
  S: O(max(l)^2 * # of inputs)
-```
+```python
 class AutocompleteSystem :
     TrieNode root
     String prefix
@@ -4529,7 +4532,7 @@ toe.move(2, 1, 1) -> Returns 1 (player 1 wins)
  Thoughts:
 1. only need to record row, col, diagonal, antidiagonal: for each move, player1 add 1 and player 2 mimus 1
  Code: T: O(n)
-```
+```python
 class TicTacToe :
 public:
     /** Initialize your data structure here. */
@@ -4569,7 +4572,7 @@ private:
  */
 ```
  Similar idea in Java
-```
+```python
 public class TicTacToe :
 private int[] rows
 private int[] cols
@@ -4624,7 +4627,7 @@ Explanation:
 ![](assets/trav.png)
  Thoughts:
  Check boundary, if OOB then reset the proper initial point + switching the traverse direction
-```
+```python
 class Solution(object):
     def findDiagonalOrder(self, matrix):
         """
@@ -4723,7 +4726,7 @@ Output:-2
  Thoughts:
  Convert the definition of division to subtraction: iteratively shifting the divisor until it cannot be shifted to still be smaller or equal to the dividend. Subtract dividend from the subtractor and the shifted number to the current result. Repeat until the final dividend is the reminder (less than divisor)
  Code:
-```
+```python
 class Solution :
 public:
     divide(dividend, divisor) :
@@ -5282,7 +5285,7 @@ main()
 	2. else min(f[i-1][j-1] + 1 (for replacement), f[i-1][j] + 1 (for deletion of word1[i-1]), f[i][j-1] +1 (for insertion of word2[j-1] to word1[0,...i-1])
 4. Optimization: only maintaining a row/column of the original matrix to reduce space complexity to O(n)
  Code time complexity: O(n^2), space complexity: O(n^2)
-```
+```python
 class Solution :
 public:
     minDistance(string word1, string word2) :
@@ -5301,7 +5304,7 @@ public:
         return f[m][n]
 ```
  Code (with optimization) time complexity: O(n^2), space complexity: O(n)
-```
+```python
 class Solution : 
 public:
     minDistance(string word1, string word2) :
@@ -5408,7 +5411,7 @@ main(argc, char** argv) :
  The following solution doesn't have these problems. It produces short URLs like
  `http:# tinyurl.com/KtLa2U` 
  , using a random code of six digits or letters. If a long URL is already known, the existing short URL is used and no new entry is generated.
-```
+```python
 class Codec:
     alphabet = string.ascii_letters + '0123456789'
     def __init__ (self):
@@ -5478,7 +5481,7 @@ queries = [ ["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"] ].
 2. Union Find
 3. DFS
  Code: Building adj list: T: O(n^3), S:(n^2)
-```
+```python
 class Solution(object):
     def calcEquation(self, equations, values, queries):
         """
@@ -5501,7 +5504,7 @@ class Solution(object):
         return [q[a].get(b, -1.0) for a , b in queries]
 ```
  Code: DFS + Hash
-```
+```python
 class Solution :
 public:
     vector<double> calcEquation(vector<pair<string, string>> equations, vector<double>& values, vector<pair<string, string>> queries) :
@@ -5528,7 +5531,7 @@ private:
         return 0 #  did not find
 ```
  Code: Union Find
-```
+```python
 class Solution(object):
     def calcEquation(self, equations, values, queries):
         """
@@ -5639,7 +5642,7 @@ Output: []
 	3. if current level is 0, then expanding it as the first operator
 	4. otherwise: expanding by appending the ['+', '-', '*'] at the end
  Code
-```
+```python
 class Solution :
     public List<String> addOperators(String num, target) :
         List<String> ans = new ArrayList<>()
@@ -5753,7 +5756,7 @@ B = [50, 12, 32, 46, 28]
 1. (K,V) : (value, list of (index of B))
 2. get the value of A[i], retrieve the last element from the mapped list
  Code
-```
+```python
 class Solution :
     public int[] anagramMappings(int[] A, int[] B) :
         [] result = new [A.length]
@@ -5769,7 +5772,7 @@ class Solution :
  's
  post
  Use Sorting:
-```
+```python
 public int[] anagramMappings(int[] A, int[] B) :
     n = A.length
     for(i = 0 i < n i++) :
@@ -5786,7 +5789,7 @@ public int[] anagramMappings(int[] A, int[] B) :
  tyuan73
  's
  post
-```
+```python
 class Solution :
 public:
     vector<int> anagramMappings(vector<int>& A, vector<int>& B) :
@@ -5842,7 +5845,7 @@ class Solution :
 ```
  fastest
  Python
-```
+```python
 class Solution(object):
     def anagramMappings(self, A, B):
         """
@@ -5915,7 +5918,7 @@ findMedian() -> 2
 	 are data structures which seem to be tailor-made for this problem. They have all the nice features of a BST, but also let you find the k^:th ​​order element stored in the tree. They are a pain to implement and no standard interview would require you to code these up. But they are fun to use if they are already implemented in the language of your choice.
 	 5
 4. Code
-```
+```python
 class MedianFinder :
     /** initialize your data structure here. */
     private Queue<Long> left
@@ -5940,7 +5943,7 @@ class MedianFinder :
  */
 ```
  Java: reverse ordering
-```
+```python
 class MedianFinder :
     /** initialize your data structure here. */
     private Queue<Integer> l
@@ -5968,7 +5971,7 @@ class MedianFinder :
  */
 ```
  C++: max_heap
-```
+```python
 class MedianFinder :
     priority_queue<long> left, right#  max_heap
 public:
@@ -6280,7 +6283,7 @@ to the starting pixel.
 1. DFS with visited map
 2. DFS without visited map: only need to change the value at int[][]image.
  Code: DFS with visited map
-```
+```python
 class Solution :
     public static d [] = :0,1,0,-1,0
     public int[][] floodFill(int[][] image, sr, sc, newColor) :
@@ -6298,7 +6301,7 @@ class Solution :
             dfs(image,x,y,m,n,oldColor, newColor,visited)
 ```
  Code: DFS without visited map
-```
+```python
 class Solution :
     public static d [] = :0,1,0,-1,0
     public int[][] floodFill(int[][] image, sr, sc, newColor) :
@@ -6536,7 +6539,7 @@ public class Friends :
  .
 2. Time Complexity O(n * len(edges))-> since each time of exploring edges there might be at most n - 1 traversing to find the current node's root. Space Complexity: O(n)
  Code
-```
+```python
 class Solution :
 public:
     bool validTree(n, vector<pair<int, int>>& edges) :
@@ -6583,7 +6586,7 @@ public:
  Thoughts
 1. one looking ahead: not only considering whether to include or exclude this house, but also considering whether to include or exclude the previous house.
  Code ( a , b alternating updates)
-```
+```python
 class Solution :
 public:
     rob(vector<int>& A) :
@@ -6597,7 +6600,7 @@ public:
         return max(a,b)
 ```
  Code ()
-```
+```python
 class Solution :
 public:
     rob(vector<int>& A) :
@@ -6687,7 +6690,7 @@ trie.search("app")     #  returns true
 2. Go through each element and if current letter is not in current node's children set, it means there is currently no record.
 3. If found such letter, then check there is a word ending there by accessing the field "isWord".
  Code Java
-```
+```python
 class TrieNode:
     char val
     boolean isWord
@@ -6753,7 +6756,7 @@ Output:[[4, 6], [4, 7], [4, 6, 7], [4, 6, 7, 7], [6, 7], [6, 7, 7], [7,7], [4,7,
  Thoughts:
 1. dfs + use list to record tracking, use set to prevent redundance:
 2. Code: Java: Standard backtracking
-```
+```python
 class Solution :
     public List<List<Integer>> findSubsequences(int[] A) :
         List<List<Integer>>res = new ArrayList<>()
@@ -6771,7 +6774,7 @@ class Solution :
                 s.add(A[i])
 ```
  Code: C++: Standard backtracking with hash checking
-```
+```python
 class Solution :
 public:
     vector<vector<int>> findSubsequences(vector<int>& A) :
@@ -6791,7 +6794,7 @@ private:
                 set.insert(A[i])
 ```
  Using python itertools.combinations
-```
+```python
 class Solution(object):
     def findSubsequences(self, A):
         """
@@ -6884,7 +6887,7 @@ public:
         return suc
 ```
  Java
-```
+```python
 public TreeNode inorderSuccessor(TreeNode root, TreeNode p) :
     TreeNode succ = null
     while (root != null) :
@@ -6937,7 +6940,7 @@ collection.getRandom()
 	3. remove the last element from the data A.
 	4. check the set in val becomes empty, if it is, remove the set entry in map.
  Code: java
-```
+```python
 class RandomizedCollection :
     ArrayList<Integer> A
     HashMap<Integer, Set<Integer>> indices
@@ -7086,7 +7089,7 @@ Explanation:
 1. Most straightforward way is to enumerate all 1th, 10th, 100 th, 1000 th units expressions
 2. Iterative solution:
  Code: Enumerate
-```
+```python
 class Solution(object):
     def intToRoman(self, num):
         """
@@ -7101,7 +7104,7 @@ class Solution(object):
         return M[num/1000] + C[(num%1000)/100] + X[(num%100)/10] + I[num%10]
 ```
  Code: Enumerate
-```
+```python
 class Solution :
     public String intToRoman(num) :
         String[] romanPieces=:"","I","II","III","IV","V","VI","VII","VIII","IX",
@@ -7112,7 +7115,7 @@ class Solution :
         +romanPieces[(num/10)%10+10]+romanPieces[num%10]
 ```
  Code: Enumerate
-```
+```python
 class Solution(object):
      def intToRoman(self, num):
         values = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ]
@@ -7124,7 +7127,7 @@ class Solution(object):
         return res
 ```
  Code: Iterative:
-```
+```python
 class Solution :
     public String intToRoman(num) :
         int[] weights=:1000,900,500,400,100,90,50,40,10,9,5,4,1
@@ -7185,7 +7188,7 @@ Output: [4,9]
 	1. Time: O(max(m,n)log(max(m,n)) Space: O(m + n)
  Code:
  Hashtable implementaion Time: O(m + n) Space: O(m + n)
-```
+```python
 class Solution :
 public:
     vector<int> intersect(vector<int>& nums1, vector<int>& nums2) :
@@ -7205,7 +7208,7 @@ public:
  Code:
  Sort + Two Pointers:
  Time: O(max(m + n, mlogm, nlogn)) Space: O(m + n)
-```
+```python
 class Solution :
 public:
     vector<int> intersect(vector<int>& nums1, vector<int>& nums2) :
@@ -7328,7 +7331,7 @@ We cannot find a way to divide the set of nodes into two independent subsets.
  for an undirected graph, each edge will appear twice. Once in the adjacency list of either end of the edge. So, the overall complexity will be
  O(V) + O (2E) ~ O(V + E)
  .)
-```
+```python
 class Solution :
     public boolean isBipartite(int[][] graph) :
         n = graph.length
@@ -7348,7 +7351,7 @@ class Solution :
         return true
 ```
  Code: BFS T:(V+E) S:O(V)
-```
+```python
 class Solution :
     public boolean isBipartite(int[][] graph) :
         # BFS
@@ -7389,13 +7392,9 @@ Explanation: The perimeter is the 16 yellow stripes in the image below:
 1. loop over the matrix and count the number of islands
 2. if the current dot is an island, count if it has any left(right) neighbour or up(down) neighbour
 3. the result is islands * 4 - neighbours * 2
-```
+```python
 class Solution(object):
     def islandPerimeter(self, grid):
-        """
- :type grid: List[List[int]]
- :rtype: int
- """
         count = repeat = 0
         for i in range(len(grid)):
             for j in range(len(grid[i])):
@@ -7446,7 +7445,7 @@ class Solution(object):
  only
  possible way for rectangle starting from larger index is due to its larger height value.
  Code time complexity: O(n), space complexity: O(n)
-```
+```python
 class Solution :
 public:
     largestRectangleArea(vector<int>& heights) :
@@ -7638,7 +7637,7 @@ public:
 2. state transition: sum[i][j] = matrix[i-1][j-1] + sum[i][j-1] + sum[i - 1][j] - sum[i-1][j-1]
 3. to get window sum value, we reverse the calculation from step 2 with window size parameter k: window_sum = sum[i][j] - sum[i][j-k] - sum[i-k][j] + sum[i-k][j-k]
  Code:
-```
+```python
 public class Solution :
     /**
  * @param matrix an integer array of n * m matrix
@@ -7708,7 +7707,7 @@ Explanation:
  m[k] == m[k-1] + m[k+1] m[]
  keep expanding the boundary by looking up neighbor value and update the boundary point records
  Code O(n)
-```
+```python
 class Solution :
 public:
     longestConsecutive(vector<int>& A) :
@@ -7764,7 +7763,7 @@ Explanation: The longest increasing path is [3, 4, 5, 6]. Moving diagonally is n
  post
  )
  Code: DFS + Memoization: T:O(mn) S:O(mn)
-```
+```python
 class Solution :
     public longestIncreasingPath(int[][] matrix) :
         if (matrix == null || matrix.length == 0|| matrix[0].length == 0) return 0
@@ -7786,7 +7785,7 @@ class Solution :
         return cnt
 ```
  Code: Python
-```
+```python
 class Solution(object):
     def longestIncreasingPath(self, matrix):
         """
@@ -7808,7 +7807,7 @@ class Solution(object):
         return max(dfs(i,j) for j in range (n) for i in range(m))
 ```
  Code: Topological Sort O(mn * h), where h is the height of the order: (TLE)
-```
+```python
 class Solution(object):
     def longestIncreasingPath(self, matrix):
         """
@@ -7880,7 +7879,7 @@ class Solution(object):
 record the tail table by keeping updating current value to correct position into the tail table 
 through binary search
 ```
-```
+```python
 class Solution :
     public lengthOfLIS(int[] A) :
     int[] tails = new int[A.length]
@@ -7902,7 +7901,7 @@ class Solution :
  by
  jopiko123
  :
-```
+```python
 public class Solution :
     public lengthOfLIS(int[] A) :            
         int[] dp = new int[A.length]
@@ -7921,7 +7920,7 @@ public class Solution :
  dtccwl
  , inspired by
  GeeksforGeeks
-```
+```python
 class Solution :
 public:
     lengthOfLIS(vector<int>& A) :
@@ -7952,14 +7951,14 @@ One longest palindrome that can be built is "dccaccd", whose length is 7.
 1. Total len - number of odds +
  1 (indicator of whether odds > 0)
  Code: Python
-```
+```python
 class Solution(object):
     def longestPalindrome(self, s):
         odds = sum(v & 1 for v in collections.Counter(s).values())
         return len(s) - odds + bool(odds)
 ```
  Code: Python with counting even number (slower)
-```
+```python
 class Solution(object):
     def longestPalindrome(self, s):
         even = sum(v & ~1 for v in collections.Counter(s).values())
@@ -8007,7 +8006,7 @@ Output:
  ---right - left - 1" and number from left and right (inclusive) is "right - left + 1"---
  Code
  (O (n^2) DP)
-```
+```python
 class Solution :
 public:
     string longestPalindrome(string s) :
@@ -8023,7 +8022,7 @@ public:
 ```
  Code
  (O (n^2) without extra space)
-```
+```python
 class Solution :
 public:
     string longestPalindrome(string s) :
@@ -8040,7 +8039,7 @@ public:
         return s.substr(left+1, right - left - 1)
 ```
  Code (O(n)) with Manacher's algorithm
-```
+```python
 class Solution(object):
     def longestPalindrome(self, s):
         """
@@ -8079,7 +8078,7 @@ class Solution(object):
  T is "ece" which its length is 3.
  Thoughts
  count: count # of distinct characters
-```
+```python
 class Solution :
 public:
     lengthOfLongestSubstringTwoDistinct(string s) :
@@ -8098,7 +8097,7 @@ public:
         return len
 ```
  template
-```
+```python
 class Solution :
 public:
     lengthOfLongestSubstringTwoDistinct(string s) :
@@ -8151,7 +8150,7 @@ cache.get(3)       #  returns 3
 cache.get(4)       #  returns 4
 ```
 * O(1) -> HashMap + Maintaining the state for each put and get
-```
+```python
 class LRUCache :
 public:
     struct cache:
@@ -8233,7 +8232,7 @@ public:
 4. recursive state : f[i][j] = min(f[i-1][j], f[i][j-1], f[i-1][j-1]) for (1<= i <= matrix.size() 1<=j<=matrix[0].size()).
 5. further optimization
  Code Time Complexity O(row * col), Space Complexity O(row * col)
-```
+```python
 class Solution :
 public:
     maximalSquare(vector<vector<char>>& matrix) :
@@ -8293,7 +8292,7 @@ Explanation: The subarray [-1, 2] sums to 1 and is the longest.
  Thoughts:
 1. Have a prefix sum record
 2. Use hashtable to record the smallest index for the same sum
-```
+```python
 class Solution(object):
     def maxSubArrayLen(self, A, k):
         """
@@ -8337,7 +8336,7 @@ minStack.getMin()   -->Returns -2.
  Linkedlist style to record the head info,
  record min history by iteratively comparing the min of the current value and history min
  Code (Python)
-```
+```python
 class MinStack(object):
     def __init__(self):
         """
@@ -8402,7 +8401,7 @@ class Node(object):
    15   7
 ```
  return its minimum depth = 2.
-```
+```python
 class Solution :
     public minDepth(TreeNode root) :
         if (root == null) return 0
@@ -8435,7 +8434,7 @@ class Solution :
 2. Count: # character current sliding window needs (does not have)
 3. Very similar to
  438. Find All Anagrams in a String
-```
+```python
 class Solution :
 public:
     string minWindow(string s, string t) :
@@ -8466,7 +8465,7 @@ public:
  Template:
  https:# leetcode.com/problems/minimum-window-substring/discuss/26808/Here-is-a-10-line-template-that-can-solve-most-'substring'-problems
  Java Implementation: T: O(|S|), S:O(1)
-```
+```python
 class Solution :
     public String minWindow(String s, String t) :
         [] map = new [128]
@@ -8530,7 +8529,7 @@ def minWindow(self, s, t):
 ```
  Java:
  https:# leetcode.com/problems/minimum-window-substring/discuss/26805/Accepted-O(n)-solution
-```
+```python
 class Solution :
 public:
     string minWindow(string S, string T) :
@@ -8751,7 +8750,7 @@ Output: 0
  Original Post
  )
  Code: T: O(n) -> O(1)
-```
+```python
 class Solution :
 public:
     unordered_map <int, int> f
@@ -8769,7 +8768,7 @@ public:
         if (x != y) f[x] = y, islands--
 ```
  Code: T:O(n) -> O(1): Path Compression + Union by rank
-```
+```python
 class Solution(object):
     def removeStones(self, stones):
         """
@@ -8807,7 +8806,7 @@ class Solution(object):
         return len(stones) - len(cc)
 ```
  Code: DFS: discard points for the same island
-```
+```python
 class Solution:
     def removeStones(self, stones):
         def dfs(i, j):
@@ -8844,7 +8843,7 @@ m.next(5) = (10 + 3 + 5) / 3
 1. with deque: trival
 2. without deque: use ( i + 1) % as circular array
  Code: with deque
-```
+```python
 class MovingAverage(object):
     def __init__(self, size):
         """
@@ -8864,7 +8863,7 @@ class MovingAverage(object):
 # param_1 = obj.next(val)
 ```
  Code: without deque
-```
+```python
 class MovingAverage(object):
     def __init__(self, size):
         """
@@ -8942,7 +8941,7 @@ Output: "56088"
  `num1[i] * num2[j]` will be placed at indices `[i + j`, `i + j + 1]` 
 ```
 ![](assets/mul.png)
-```
+```python
 class Solution :
     public String multiply(String num1, String num2) :
         m = num1.length(), n = num2.length()
@@ -8997,7 +8996,7 @@ Explanation:
 	1. Having 3 boolean vectors, col, diag, anti-diag to mark where there is a queen on the same column, same diagnal, or same anti-diagnal. for col, the level set is col for diagnal: the level set is col - row + n for antidiagnal: the level set is row + col.
 	2. for each row, expanding the cols and check where there is a queen in col, diag, and anti-diag, then recursively call the backtracking until the row reaches the end or did get in depth due to the disqualification of the results.
  Code:
-```
+```python
 class Solution :
     count = 0
     public totalNQueens(n) :
@@ -9070,7 +9069,7 @@ Explanation: There exist two distinct solutions to the 4-queens puzzle as shown 
 2. Optimization:
  Merge all arrays into one: only need one boo array flag for size 5*n - 1:n for col 2n -1 for col + row -> diag 2n - 1 for n - 1 - row + row for anti_diag.
  Code: T: O(n^2) S: O(n)
-```
+```python
 class Solution :
 public:
     vector<vector<string>> solveNQueens(n) :
@@ -9094,7 +9093,7 @@ private:
                 flag_col[col] = flag_45[row + col] = flag_135[n - 1 - row + col] = 1
 ```
  Code: merged T: O(n^2) S: O(n)
-```
+```python
 class Solution :
 public:
     vector<vector<string>> solveNQueens(n) :
@@ -9228,7 +9227,7 @@ class Solution :
 3. Very similar to
  261.Graph Valid Tree
  Code:
-```
+```python
 class Solution :
 public:
     countComponents(n, vector<pair<int, int>>& edges) :
@@ -9249,7 +9248,7 @@ public:
         return v
 ```
  Code (Java):
-```
+```python
 class Solution :
 public:
     countComponents(n, vector<pair<int, int>>& edges) :
@@ -9332,7 +9331,7 @@ public:
 1. Distinct islands: island 2d coordinates sets are distinct
  based off its offset
  Code: Java
-```
+```python
 class Solution :
     private static final d [] = :0,1,0,-1,0
     public numDistinctIslands(int[][] grid):
@@ -9353,7 +9352,7 @@ class Solution :
         return true
 ```
  Code: C++
-```
+```python
 class Solution :
 public:
     numDistinctIslands(vector<vector<int>>& grid) :
@@ -9455,7 +9454,7 @@ Output:
 		2. if rank a < rank b: then parent[a] = b
 		3. else make parent either way and just increase the rank of the parent one
  Code:
-```
+```python
 class Solution(object):
     def numIslands2(self, m, n, positions):
         """
@@ -9540,7 +9539,7 @@ Explanation:
 3. O(n) with
  Manacher’s algorithm
  Code:
-```
+```python
 class Solution :
 public:
     countSubstrings(string s) :
@@ -9583,7 +9582,7 @@ center 4: 3 5
 center 4.5: 4 5
 ```
  Code: Manacher's Algorithm: O(n) !
-```
+```python
 class Solution(object):
     def countSubstrings(self, S):
         def manachers(S):
@@ -9707,7 +9706,7 @@ We can reach the end from starting indexes 1, 2, and 4.
  T:O(n^2)
 2. Sort + Stack to eliminate double for loop: keep stack monotonic decreasing as frogs jump to index monotonic increasing.
  Code DP:
-```
+```python
 class Solution(object):
     def oddEvenJumps(self, A):
         """
@@ -9740,7 +9739,7 @@ class Solution(object):
         return ans
 ```
  Code DP with stack optimization: T: O(nlogn)
-```
+```python
 class Solution:
     def oddEvenJumps(self, A: List[int]) -> int:
         n = len(A)
@@ -9852,7 +9851,7 @@ Explanation: The palindromes are ["battab","tabbat"]
 	3. cover list (list of word index in which the word contains the current trie suffix and MAY also contain palindrome on its left part itself.
 2. Search each word w1 matching suffix by traversing down the trie tree. If there is a stop node before the leaf node of the Trie tree (TrieNode that represents a word w2 in reverse order and that word is not the wording being searched itself (w2 != w1)) and also the rest part of w1 (len(l2) > len(w1)) is also a palindrome, then an concatenation of w1 + w2 is an answer. Else if at the leaf node of the Trie, then adding in every index element in terminal nodes' cover list such that the concatenation of w2 + w1 are also answers. Thus, we find all the solutions.
  Code: T: O(max(n * k^2, n^2) S:O(n^2 * k)
-```
+```python
 class Solution :
     public List<List<Integer>> palindromePairs(String[] words) :
         List<List<Integer>>res = new ArrayList<>()
@@ -10120,7 +10119,7 @@ Explanation:
 	1. Each node a number
 	2. An edge between i and j exists if from node i to j, there is only one perfect number away.
  Code 1:
-```
+```python
 class Solution :
 public:
     numSquares(n) :
@@ -10132,7 +10131,7 @@ public:
         return sq[n]
 ```
  Code 2:
-```
+```python
 class Solution :
 public:
     numSquares(n) :
@@ -10147,7 +10146,7 @@ public:
         return sq[n]
 ```
  Code 3: Lagrange's Four Square Theorem
-```
+```python
 class Solution :
 private: 
     is_square (n):
@@ -10169,7 +10168,7 @@ public:
         return 3
 ```
  Code 4: BFS: O(n*E)
-```
+```python
 class Solution :
 public:
     numSquares(n) :
@@ -10240,7 +10239,7 @@ Output:
  loop / recursion?
  Thoughts
  because 3 is a prime number. Detection of power of 3 can be converted to whether 3^19 = 1162261467 (largest power of 3 you can get for value in a 32 bit machine) can divide the number n.
-```
+```python
 class Solution(object):
     def isPowerOfThree(self, n):
         """
@@ -10281,7 +10280,7 @@ Output: [24,12,8,6]
  does not
  count as extra space for the purpose of space complexity analysis.)
  Code: with extra space:
-```
+```python
 class Solution(object):
     def productExceptSelf(self, A):
         """
@@ -10300,7 +10299,7 @@ class Solution(object):
         return [m[k] for k in sorted(m.keys())]
 ```
  Code: without extra space:
-```
+```python
 class Solution :
     public int[] productExceptSelf(int[] A) :
         n = A.length
@@ -10318,7 +10317,7 @@ class Solution :
         return res
 ```
  Code: actually index is the key: so we do not need the extra dictionary
-```
+```python
 class Solution(object):
     def productExceptSelf(self, A):
         """
@@ -10366,7 +10365,7 @@ Output:
 1. Sort the h in descending order and k in ascending order.
 2. Traverse the sorted list and insert the current person into kth position of new list.
  Code T: O(n^2) S:O(n)
-```
+```python
 class Solution(object):
     def reconstructQueue(self, people):
         """
@@ -10380,7 +10379,7 @@ class Solution(object):
         return result
 ```
  more explicit way: first group the height, then sort in each group, then insert into the final list:
-```
+```python
 class Solution(object):
     def reconstructQueue(self, people):
         """
@@ -10444,7 +10443,7 @@ sumRegion(1, 2, 2, 4) -> 12
 3. When calculating the query: res = dp[row2 + 1][col2 + 1] - dp[row2 + 1][col1] - dp[row1][col2 + 1] + dp[row1][col1]
 4. In Python: Initialize 2D list needs to be initialized as [[0] * m] for _ in range(n)) instead of [[0] * m]*n] since this would create n identical lists with the same reference.
  Code
-```
+```python
 class NumMatrix(object):
     def __init__(self, matrix):
         """
@@ -10507,7 +10506,7 @@ sumRegion(2, 1, 4, 3) -
  of its responsible children
  Sum in the tree expresses the sum from matrix[i -1][j -1] to [0][0] so a solution performed using the submatrix sum: that is sum(row2 + 1, col + 1) - sum(row1, col2 + 1) - sum(row2 + 1, col1) + sum(row1, col1)
  Code: T: O(log(mn)) = O(log(m) +
-```
+```python
 class NumMatrix :
     [][] tree, A
     m , n
@@ -10753,7 +10752,7 @@ isMatch("aab", "c*a*b") → true
 		1. 1) "x*" repeats 0 time and matches empty: f[i][j - 2]
 		2. 2) "x*" repeats >= 1 times and matches "x*x": s[i - 1] == x && f[i - 1][j]
  Code T: O(n) S: O(n^2)
-```
+```python
 class Solution :
 public:
     bool isMatch(string s, string p) :
@@ -10768,7 +10767,7 @@ public:
             && isMatch(s.substr(1), p.substr(1))
 ```
  Code DP T: O(n^2)
-```
+```python
 class Solution :
 public:
     bool isMatch(string s, string p) :
@@ -10817,7 +10816,7 @@ Output:
 	 top letter has remaining appearance after (as checked by indexing the letter frequency array), pop the letter out and mark it as
 	 not visited
  Code 1: O(n)
-```
+```python
 class Solution :
     public String removeDuplicateLetters(String s) :
         [] cnt = new [26]
@@ -10830,7 +10829,7 @@ class Solution :
         return s.length() == 0 ? "": s.charAt(pos) + removeDuplicateLetters(s.substring(pos + 1).replaceAll("" + s.charAt(pos), ""))
 ```
  Code 2 : O(n)
-```
+```python
 class Solution :
     public String removeDuplicateLetters(String s) :
         [] res = new int[26]
@@ -10889,7 +10888,7 @@ Output: [""]
  Facebook Variation: any solution that results in minimum removal of parentheses
  Thoughts
  : 楼主用了一个3-pass的方法: 先从头到尾找close比open多的，移掉 从尾到头找open比close多的，移掉 然后最后一遍build
-```
+```python
 class Solution:
     def removeInvalidParentheses(self, s):
         cnt = 0
@@ -10925,7 +10924,7 @@ print(s1.removeInvalidParentheses("(()))"))
  Thoughts:
 1. Expanding the set and test whether each combination is valid, once there is answer in the set , then return (we want the minimum edition)
  Code: Python
-```
+```python
 class Solution:
     def removeInvalidParentheses(self, s):
         def isvalid(s):
@@ -10972,7 +10971,7 @@ Output: ""
 2. Sort
 3. Greedy + Sort (Optimized): sort the arr according to frequency, then insert the top half frequent into even position and bottom half, less frequent one into odd position. Final answer is return if the last two element is not the same (meaning
  Code: Sort
-```
+```python
 class Solution :
 public:
     string reorganizeString(string S) :
@@ -10996,7 +10995,7 @@ public:
         return ans
 ```
  Greedy + Sort:
-```
+```python
 class Solution(object):
     def reorganizeString(self, S):
         """
@@ -11009,7 +11008,7 @@ class Solution(object):
         return ''.join(a) * (a[-1:] != a[-2:-1])
 ```
  PriorityQueue:
-```
+```python
 class Solution :
 public:
     string reorganizeString(string S) :
@@ -11048,7 +11047,7 @@ solution.pick(3)
 #  pick(1) should return 0. Since in the array only A[0] is equal to 1.
 solution.pick(1)
 ```
-```
+```python
 class Solution :
     vector<int> A
 public:
@@ -11070,7 +11069,7 @@ public:
  * param_1 = obj.pick(target)
  */
 ```
-```
+```python
 class Solution :
     int[] A
     Random rand
@@ -11118,7 +11117,7 @@ Output: 21
 	2. reverse abs value: sign * x [::-1]
 	3. s * r* (r < 2 ^31)
 2. Not use string: Standard way of detecting overflow
-```
+```python
 class Solution(object):
     def reverse(self, x):
         """
@@ -11131,7 +11130,7 @@ class Solution(object):
         r = int(`s*x`[::-1])
         return s * r * (r < 2 ** 31)
 ```
-```
+```python
 class Solution :
     public reverse(x):
         result = 0
@@ -11231,7 +11230,7 @@ Output: 3
 	 , while the rest is the standard merging algorithm.
 4. Reference
  Code : BST (LTE) since O(n^2) for data like [1,2,3....]
-```
+```python
 class Solution(object):
     def reversePairs(self, A):
         """
@@ -11271,7 +11270,7 @@ class BSTNode(object):
         self.left = self.right = None
 ```
  Code : BIT T: O(nlogn)
-```
+```python
 class Solution(object):
     def reversePairs(self, A):
         """
@@ -11306,7 +11305,7 @@ class Solution(object):
         return ans
 ```
  Code: Merge-Sort T: O(nlogn)
-```
+```python
 class Solution :
     public reversePairs(int[] A) :
         return reversePairsHelper(A, 0, A.length - 1)
@@ -11386,7 +11385,7 @@ in-place
  [Code1:
  Figure out the correct corresponding index and i,j range in the for loop
  ]
-```
+```python
 class Solution :
     n
 public:
@@ -11839,7 +11838,7 @@ Window position                Max
 1. O(nlogk): Maintain a max heap of k elements
 2. O(n): Have a deque to keep track of current window maximum
  Code: Heap
-```
+```python
 public class Solution :
     public int[] maxSlidingWindow(int[] A, k) :
         len = A.length
@@ -11856,7 +11855,7 @@ public class Solution :
         return result
 ```
  Code
-```
+```python
 class Solution :
 public:
     vector<int> maxSlidingWindow(vector<int>& A, k) :
@@ -11876,7 +11875,7 @@ public:
      return windowMax
 ```
  Python
-```
+```python
 class Solution(object):
     def maxSlidingWindow(self, A, k):
         d = collections.deque()
@@ -11925,7 +11924,7 @@ Output: [-23,-5,1,7]
 1. Identify & utilize the convexity & concavity of the quadratic function based on a value
 2. Use to pointers to select two candidate A[left] and A[right]
  Code O(n)
-```
+```python
 class Solution(object):
     def sortTransformedArray(self, A, a, b, c):
         """
@@ -11960,7 +11959,7 @@ class Solution(object):
         return ans
 ```
  Java
-```
+```python
 class Solution :
     public int[] sortTransformedArray(int[] A, a, b, c) :
         if(A == null || A.length == 0) return null
@@ -12025,7 +12024,7 @@ AB = | -1 0 3 | x | 0 0 0 | = | -7 0 3 |
  here
  )
  Code:
-```
+```python
 class Solution :
     public int[][] multiply(int[][] A, int[][] B) :
         m = A.length, n = A[0].length, nB = B[0].length
@@ -12049,7 +12048,7 @@ class Solution :
         return res
 ```
  Code: improvements: Definition of matrix multiplication: No extra space required
-```
+```python
 class Solution :
     public int[][] multiply(int[][] A, int[][] B) :
         m = A.length, n = A[0].length, nB = B[0].length
@@ -12082,7 +12081,7 @@ Output: ["11","69","88","96"]
 1. Recursion: T(n) = append each string with ("1", "1") ("6","9") ("9","6") ("8","8") if not at the out-most recursion also add ("0","0") from returned element from T(n - 2) Base case: (n =0 => [''] n = 1=>['0', '1', '8'])
 2. Without Recursion: reverse the order with for loop
  Code: Recursion
-```
+```python
 class Solution(object):
     def findStrobogrammatic(self, n):
         """
@@ -12106,7 +12105,7 @@ class Solution(object):
         return helper(n, n)
 ```
  Code: Without Recursion
-```
+```python
 class Solution(object):
     def findStrobogrammatic(self, n):
         """
@@ -12149,7 +12148,7 @@ Output: true
 Input:  "962"
 Output: false
 ```
-```
+```python
 class Solution :
     #  ask if 00 is a valid strobogrammatic number! Here is true!
     public boolean isStrobogrammatic(String num) :
@@ -12158,7 +12157,7 @@ class Solution :
                 return false
         return true
 ```
-```
+```python
 class Solution(object):
     def isStrobogrammatic(self, num):
         """
@@ -12199,7 +12198,7 @@ Output: 2
 2. Find subarray #: record preSum , # if occurence with that preSum val
 3. Initialization: (0, 1)
  Code
-```
+```python
 class Solution :
     public subarraySum(int[] A, k) :
         sum = 0, result = 0
@@ -12214,7 +12213,7 @@ class Solution :
        return result 
 ```
  Python
-```
+```python
 class Solution(object):
     def subarraySum(self, A, k):
         """
@@ -12244,7 +12243,7 @@ class Solution(object):
  Generalization: substring search problem Template:
 * 76. Mininum Window Substring
 * 159. Longest Substring with At Most Two Distinct Characters
-```
+```python
 class Solution :
 public:
     T minWindow(string s, string t) :
@@ -12270,7 +12269,7 @@ public:
 ```
  Original Java Code from the
  LeetCode Forum harrychaoyanghe
-```
+```python
 public class Solution :
     public List<Integer> slidingWindowTemplateByHarryChaoyangHe(String s, String t) :
         # init a collection or value to save the result according the question.
@@ -12487,7 +12486,7 @@ T is "aa" which its length is 2.
 2. every iteration compare (i - low + 1) with max value (returned value in the end)
 	1. when d is over k, delete the least value entry, set low = min(d.values()) + 1
  Code:
-```
+```python
 class Solution(object):
     def lengthOfLongestSubstringKDistinct(self, s, k):
         """
@@ -12535,7 +12534,7 @@ class Solution(object):
 1. Recursively: each call needs to check the current two nodes value and need to recursively call two pairs: (left.left, right.right) and (left.right, right.left).
 2. Iteratively: Same logic Using stack, each time check the and push the corresponding pairs of child node into the stack
  Code: Recursive
-```
+```python
 public boolean isSymmetric(TreeNode root) :
     return root==null || isSymmetricHelp(root.left, root.right)
 private boolean isSymmetricHelp(TreeNode left, TreeNode right):
@@ -12604,7 +12603,7 @@ Explanation:
 2. create k chunks, then fill less frequent chars into the gaps into each chunk
 3. compare the length of the task vs (number of chunks) * (least length of each chunk) + last chunks size = ( k -1 ) * (n + 1) + (# of most frequent chars)
  Code:
-```
+```python
 class Solution :
 public:
     leastInterval(vector<char>& tasks, n) :
@@ -12621,7 +12620,7 @@ public:
         return max(tasks_len, (count[25] - 1)*(n + 1) + 25 - i)
 ```
  Code: C+
-```
+```python
 class Solution :
 public:
     leastInterval(vector<char>& tasks, n) :
@@ -12821,7 +12820,7 @@ find(6) -> false
  algorithms that are Find-favored algorithms (
  TLE
  )
-```
+```python
 public class TwoSum :
         Set<Integer> sum
         Set<Integer> num
@@ -12842,7 +12841,7 @@ public class TwoSum :
             return sum.contains(value)
 ```
  Code: algorithms that are Add-favored algorithms (Add: O(1), Find: (O(n))
-```
+```python
 class TwoSum :
     Map<Integer, Integer> map
     /** Initialize your data structure here. */
@@ -12889,7 +12888,7 @@ return [0, 1].
 ```
  Thoughts:
  map key-value pair of component of the sum
-```
+```python
 class Solution :
 public:
     vector<int> twoSum(vector<int>& A, target) :
@@ -12945,7 +12944,7 @@ Output: false
 2. Compare the char count in the map
 3. Follow-up: Method 1 would still work
  Code: Sort
-```
+```python
 class Solution(object):
     def isAnagram(self, s, t):
         """
@@ -12956,7 +12955,7 @@ class Solution(object):
         return sorted(s) == sorted(t)
 ```
  Code: Counting Map (elements in s and t needs to be hashable)
-```
+```python
 class Solution(object):
     def isAnagram(self, s, t):
         """
@@ -13015,7 +13014,7 @@ Output: True
 2. "two counter": min_op_left: how many open "(" if regarding all * to be ")" max_op_left: how many open "(" if regarding all * to be "("
 	1. key idea: max_op_left should always be >= 0 in order to be considered legal, otherwise it will have unbalanced ")" and the parenthesis will never be balanced by further appending any char after it.
  Code: unordered DP with memoization Time: O(n^3) Space: O(n^2), Top-Down
-```
+```python
 class Solution :
 public:
     bool checkValidString(string s) :
@@ -13039,7 +13038,7 @@ private:
         return f[start][end] = 0
 ```
  Code: Ordered DP with memoization Time: O(n^3) Space: O(n^2), Bottom Up
-```
+```python
 class Solution :
 public:
     bool checkValidString(const string& s) :
@@ -13064,7 +13063,7 @@ public:
         return dp[0][l - 1]
 ```
  Code Counting Time: O(n), Space: O(1)
-```
+```python
 class Solution :
 public:
     bool checkValidString(string s) :
@@ -13076,7 +13075,7 @@ public:
             min_open_left = max(0, min_open_left) #  we cannot use previous "*" to fullfill later '(": reset the min_open_left
         return min_open_left == 0
 ```
-```
+```python
 class Solution :
 public:
     bool checkValidString(string s) :
@@ -13089,7 +13088,7 @@ public:
         return min_open_left == 0
 ```
  Python
-```
+```python
 class Solution(object):
     def checkValidString(self, s):
         """
@@ -13237,7 +13236,7 @@ class Solution :
      return root.val
 ```
  Binary Tree Inorder Traversal
-```
+```python
 public List<Integer> inorderTraversal(TreeNode root) :
     List<Integer> list = new ArrayList<>()
     if(root == null) return list
@@ -13266,7 +13265,7 @@ public List<Integer> inorderTraversal(TreeNode root) :
 1. keep track of prev val in order to compare whether there is a new right branch
 2. keep track of lower bound value of parent node for branching to the right
  Code: space complexity of O(n)
-```
+```python
 class Solution :
 public:
     bool verifyPreorder(vector<int>& preorder) :
@@ -13282,7 +13281,7 @@ public:
         return true
 ```
  Code: space complexity of O(n) Python
-```
+```python
 class Solution(object):
     def verifyPreorder(self, preorder):
         """
@@ -13300,7 +13299,7 @@ class Solution(object):
         return True
 ```
  Code: Use two stack (Java)
-```
+```python
 class Solution :
     public boolean verifyPreorder(int[] preorder) :
         Stack<Integer> stack = new Stack<>()
@@ -13314,7 +13313,7 @@ class Solution :
         return true
 ```
  Code: space complexity of O(1): MUST USE POINTER!
-```
+```python
 class Solution :
 public:
     bool verifyPreorder(vector<int>& preorder) :
@@ -13369,7 +13368,7 @@ INF  -1 INF  -1
  Thoughts:
 1. BFS and fill the empty rooms with current distance
  Code: T: O(mn) S:O(mn)
-```
+```python
 class Solution :
     public void wallsAndGates(int[][] rooms) :
         if(rooms.length == 0|| rooms[0].length == 0) return
@@ -13475,7 +13474,7 @@ matchedIdx("juliadntdas","a*nt") → 4
 2. DFS
  Code : my TLE solution based on
  139
-```
+```python
 class Solution :  
 public:
     vector<string> wordBreak(string s, vector<string>& wordDict) :
@@ -13495,7 +13494,7 @@ public:
         return m[n]
 ```
  Code: DFS + map table, TC:O(n^2) for worse , O(n) for best , SC:O(n^2) for worse, O(1) for best (k: num of words in the dictionary)
-```
+```python
 class Solution :
     unordered_map <string, vector<string>> m
     vector<string> combine(string w, vector<string> prev):
@@ -13519,7 +13518,7 @@ public:
         return ans
 ```
  Code (Java) TC: O(k^2) for worse, O(n) for best, SC:O(k^2) for worse, O(1) for best (k: num of words in the dictionary)
-```
+```python
 class Solution :
     public List<String> wordBreak(String s, List<String> wordDict) :
         return DFS(s, wordDict, new HashMap<String, List<String>>())
@@ -13566,7 +13565,7 @@ class Solution :
 1. f[i]: weather a there is a valid sequence ends at i.
 2. f[i] is true only when there is a j from 0 to i -1 such that f[j] and dictionary contains (s.substr (j, i - j))
  Code: Time: O(n^2) (or O(n^3) depending on "contains" implementation) Space: O(n)
-```
+```python
 class Solution :
 public:
     bool wordBreak(string s, vector<string>& wordDict) :
@@ -13633,7 +13632,7 @@ Explanation: The endWord "cog" is not in wordList, therefore no possible transfo
 	1. Shortest transformation: BFS to find the shortest path between start and end
 	2. Find all the transformation: DFS with backtracking to find all the answer
  Code: T:O(L^3*l) ? (L as wordList length, l as word length). S:O(L^3*l)?
-```
+```python
 class Solution(object):
     def findLadders(self, beginWord, endWord, wordList):
         """
@@ -13661,7 +13660,7 @@ class Solution(object):
         return res
 ```
  Code: BFS + DFS
-```
+```python
 class Solution :
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) :
         HashSet<String> dict = new HashSet<>(wordList)
@@ -13769,7 +13768,7 @@ Explanation: The endWord "cog" is not in wordList, therefore no possible transfo
 		3. Removing entries in S from T vs Creating new entries from S if it is not in T.
 	2. C++
  Code
-```
+```python
 class Solution(object):
     def ladderLength(self, beginWord, endWord, wordList):
         """
@@ -13805,7 +13804,7 @@ class Solution(object):
                 q.append([candidate, q_item[1] + 1])
         return 0
 ```
-```
+```python
 class Solution(object):
     def ladderLength(self, beginWord, endWord, wordList):
         """
@@ -13841,7 +13840,7 @@ class Solution(object):
         return 0
 ```
  Code: Python Optimization
-```
+```python
 class Solution:
     # @param :string beginWord
     # @param :string endWord
@@ -13917,7 +13916,7 @@ class Solution:
  , we point
  `phead` 
  to the smaller set to reduce the running time.
-```
+```python
 class Solution :
 public:
     ladderLength(string beginWord, string endWord, vector<string>& wordList) :
@@ -14005,7 +14004,7 @@ Output: ["eat","oath"]
 		1. O(wl) recursive call
 		2. O(l * wl) In the worst case when all words start with different characters, the trie has l * wl nodes. Also, since each word is stored in a leaf node, all the leaf nodes require l * wl memory (can be augmented by only store a boolean, but need to further discuss how to add found results in res), but the number of nodes stored in the tree is still l * wl
  Code:
-```
+```python
 class Solution :
     public List<String> findWords(char[][] board, String[] words) :
         List<String> res = new ArrayList<>()
@@ -14062,7 +14061,7 @@ Given word = "ABCB", return false.
  Thoughts:
 1. Backtracking
  Code
-```
+```python
 class Solution :
     public boolean exist(char[][] board, String word) :
         char[] w = word.toCharArray()
@@ -14112,7 +14111,7 @@ Input:
 Output: [1,4,8,2,5,9,3,6,7].
 ```
  Code: Python Generator
-```
+```python
 class ZigzagIterator(object):
     def __init__(self, v1, v2):
         """
@@ -14138,7 +14137,7 @@ class ZigzagIterator(object):
 # while i.hasNext(): v.append(i.next())
 ```
  Code: Java k vectors
-```
+```python
 public class ZigzagIterator :
     LinkedList<Iterator> queue
     public ZigzagIterator(List<Integer> v1, List<Integer> v2) :
@@ -14161,7 +14160,7 @@ public class ZigzagIterator :
  */
 ```
  C++ Iterator < start: end> pairs
-```
+```python
 class ZigzagIterator :
 public:
     ZigzagIterator(vector<int>& v1, vector<int>& v2) :
@@ -14198,7 +14197,7 @@ Output: 49
 ```
  Thoughts:
 1. Two pointer: the shorter height need to move since the rest solution is guaranteed less optimal
-```
+```python
 class Solution(object):
     def maxArea(self, height):
         """
@@ -14215,7 +14214,7 @@ class Solution(object):
                 right -= 1
         return res
 ```
-```
+```python
 class Solution(object):
     def maxArea(self, height):
         """
@@ -14246,7 +14245,7 @@ Output:
  Thoughts:
 1. mark the value indexed by current value as negative
 2. add all index whose number is not negative (since originally 1 ≤ a[i] ≤n(n= size of array)
-```
+```python
 class Solution(object):
     def findDisappearedNumbers(self, A):
         """
@@ -14264,7 +14263,7 @@ class Solution(object):
                 res.append(i + 1)
         return res
 ```
-```
+```python
 class Solution(object):
     def findDisappearedNumbers(self, A):
         """
@@ -14320,7 +14319,7 @@ Friend requests are made 110 -> 100, 120 -> 110, 120 -> 100.
 1. 0.5 A + 7 < B <= A : so A >= 15 the three condition is redundant
  Code:
  O(n + r * r), r: age range
-```
+```python
 class Solution :
 public:
     numFriendRequests(vector<int>& ages) :
@@ -14333,7 +14332,7 @@ public:
 ```
  Code:
  O(n + m), r: age range
-```
+```python
 class Solution :
 public:
     numFriendRequests(vector<int>& ages) :
@@ -14387,7 +14386,7 @@ Output:
 1. In place algorithm: each time encode the board element 2bit state code [next state, current state] and transition by shifting the board element after encoding.
 2. d
  Code
-```
+```python
 class Solution(object):
     def gameOfLife(self, board):
         """
@@ -14417,7 +14416,7 @@ class Solution(object):
                 board[i][j] >>= 1
 ```
  Code ( infinite case)
-```
+```python
 class Solution(object):
     def gameOfLife(self, board):
         """
@@ -14625,7 +14624,7 @@ Output:
 1. construct a reverse index array: days[x] = i + 1 => the blooming day for place "x + 1" .
 2. Find the subarray days[left, left + 1, ..., left + k - 1, right] which satisfies for and left + 1<= i <=left + k-1: days[left] < days[i] && days[right] < days[i] => result is max(days[left], day[right]).
  Code Time Complexity: O(n), Space Complexity O(n)
-```
+```python
 class Solution :
 public:
     kEmptySlots(vector<int>& flowers, k) :
@@ -14666,7 +14665,7 @@ The median is (2 + 3)/2 = 2.5
  Thoughts:
  use binary search to find the best partition i and j in nums1 and nums2 such that nums1[i] > A 2[j -1] && nums2[j] > nums1[i -1]. Also j = (m + n +1 )/ 2 - j (for n as the "longer" array length and m as the "shorter" array length, m >= n) to guarantee that i + j is the median position for odd number total length and left input of computing median for even total length.
  Code Time Complexity: O(min(m,n)), Space Complexity: O(1)
-```
+```python
 class Solution :
 public:
     double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) :
@@ -14808,7 +14807,7 @@ class Solution(object):
  Thoughts:
  Having an pointer to keep track of non-zeros and replace the original value in the array then pad the rest of space with 0
  Code
-```
+```python
 class Solution :
 public:
     void moveZeroes(vector<int>& A) :
@@ -14856,7 +14855,7 @@ Given A = [0,0,1,1,1,2,2,3,3,4],
 Your function should return length = 5, with the first five elements of A being modified to 0, 1, 2, 3, and  respectively.
 It doesn't matter what values are set beyond the returned length.
 ```
-```
+```python
 class Solution :
     public removeDuplicates(int[] A) :
         if(A == null || A.length == 0) return 0
@@ -14906,7 +14905,7 @@ Output:
 1. having four markers: rowBegin, rowEnd, colBegin, colEnd,
 2. go right -> incre rowBegin go down -> decre colEnd go left -> check(rowBegin <= rowEnd), decre rowEnd go up ->check(colBegin <= colEnd), incre colBegin
  Code Java
-```
+```python
 class Solution :
     public List<Integer> spiralOrder(int[][] matrix) :
         List<Integer> res = new LinkedList<Integer>()
@@ -14934,7 +14933,7 @@ class Solution :
             colBegin++
         return res
 ```
-```
+```python
 class Solution(object):
     def spiralOrder(self, matrix):
         """
@@ -14996,7 +14995,7 @@ Explanation:
 2. check the A[i] with original if it is not equal (i was updated -> add string "a" + "->" + "A[i]")
  else (i was not updated ->only add string "a").
  Code
-```
+```python
 class Solution(object):
     def summaryRanges(self, A):
         """
@@ -15036,7 +15035,7 @@ class Solution(object):
  和BackPack I基本一致。依然是以背包空间为限制条件，所不同的是dp[j]取的是价值较大值，而非体积较大值。所以只要把dp[j-A[i]]+A[i]换成dp[j-A[i]]+V[i]就可以了。
  Solution
 ----------
-```
+```python
 public class Solution :
     public backPackII(m, int[] A, V[]) :
         int[] dp = new int[m+1]
@@ -15096,7 +15095,7 @@ public class Solution :
  Code T:
  2614 ms
  O(m * n) S: O(m)
-```
+```python
 class Solution:
     """
  @param m: An integer m denotes the size of a backpack
@@ -15118,7 +15117,7 @@ class Solution:
  Code T: O(m * n)
  6288 ms
   S: O(m * n)
-```
+```python
 class Solution:
     """
  @param m: An integer m denotes the size of a backpack
@@ -15145,7 +15144,7 @@ class Solution:
  Code T: O(m * n)
  2397 ms
  S: O(m)
-```
+```python
 public class Solution :
     public backPack(m, int[] A) :
         int[] dp = new int[m+1]
@@ -15164,7 +15163,7 @@ public class Solution :
  Example
 ---------
  Given 4 items with size [2, 3, 5, 7] and value [1, 5, 2, 4], and a backpack with size 10. The maximum value is 15.
-```
+```python
 public class Solution :
     public backPackIII(int[] A, int[] V, m) :
         int[] dp = new int[m+1]
@@ -15193,7 +15192,7 @@ return 2
 ```
  Solution
 ----------
-```
+```python
 public class Solution :
     public backPackIV(int[] A, target) :
         int[] dp = new int[target+1]
@@ -15220,7 +15219,7 @@ return 2
 ```
  Solution
 ----------
-```
+```python
 public class Solution :
     public backPackV(int[] A, target) :
         int[] dp = new int[target+1]
@@ -15252,7 +15251,7 @@ return 6
 ```
  Solution
 ----------
-```
+```python
 public class Solution :
     public backPackVI(int[] A, target) :
         int[] dp = new int[target+1]
@@ -15310,7 +15309,7 @@ public class Solution :
  `dp[i][j-coins[i]]` 
  , then we can optimize the space by only using one-dimension array.
  Code: 2D DP: O(K * N), S: O(K * N)
-```
+```python
 class Solution :
     public change(amount, int[] coins) :
         int[][] dp = new int[coins.length+1][amount+1]
@@ -15322,7 +15321,7 @@ class Solution :
         return dp[coins.length][amount]
 ```
  Code: 1D DP: O(K * N), S: O(N)
-```
+```python
 class Solution :
     public change(amount, int[] coins) :
         if(amount < 0) return 0
@@ -15356,7 +15355,7 @@ Output:false
 ```
  Thoughts:
  Power of 2 means only one bit of n is '1', so use the trick n& (n-1)==0 to judge whether that is the case
-```
+```python
 class Solution(object):
     def isPowerOfTwo(self, n):
         """
@@ -15394,7 +15393,7 @@ Output: 1
  ^ tricks: Use ^to
  remove even exactly same numbers and save the odd, or save the distinct bits and remove the same. Sum of Two Integers Use^and&to add two integers
  Code
-```
+```python
 class Solution :
 public:
     getSum(a, b) :
@@ -15441,7 +15440,7 @@ The first 3 bits are all one's and the 4th bit is 0 means it is a 3-bytes charac
 The next byte is a continuation byte which starts with 10 and that's correct.
 But the second continuation byte does not start with 10, so it is invalid.
 ```
-```
+```python
 class Solution :
 public:
     bool validUtf8(vector<int>& data) :
@@ -15457,7 +15456,7 @@ public:
                 count--
         return count == 0
 ```
-```
+```python
 class Solution(object):
     def validUtf8(self, data):
         """
@@ -15496,7 +15495,7 @@ class Solution(object):
  **Thoughts:
 1. **Use conditional binary search to find the first and last occurrence of the target number. Then the length is right - left + 1
  Code
-```
+```python
 class Solution:
     def number_of_occurance(self, arr, k):
         def first(arr, k):
@@ -15565,7 +15564,7 @@ Output: [-1,-1]
 3. Divide and Conquer with early breaks
  a variety of ways to solve the problem
  Code: Solution 1: T O(logn)
-```
+```python
 class Solution(object):
     def searchRange(self, A, target):
         """
@@ -15589,7 +15588,7 @@ class Solution(object):
         return [l, r - 1]
 ```
  Code: Solution 2: T O(logn)
-```
+```python
 class Solution(object):
     def searchRange(self, A, target):
         def search(n):
@@ -15607,7 +15606,7 @@ class Solution(object):
         return [lo, search(target+1)-1] if  lo < len(A) and A[lo] == target else [-1, -1] # in is to present index out of bounds. e.g: input = [] [2,2] 3
 ```
  C++
-```
+```python
 class Solution :
 public:
     vector<int> searchRange(vector<int>& A, target) :
@@ -15636,7 +15635,7 @@ public:
         return ret 
 ```
  Python
-```
+```python
 class Solution(object):
     def searchRange(self, A, target):
         """
@@ -15726,7 +15725,7 @@ Output:
  Code:
  Binary -searching for the first index i
  T: O(log(n-k))
-```
+```python
 class Solution :
     public List<Integer> findClosestElements(int[] arr, k, x) :
         i = 0, j = arr.length - k
@@ -15743,7 +15742,7 @@ class Solution :
         #  return Arrays.stream(Arrays.copyOfRange(arr, i, i + k)).boxed().collect(Collectors.toList()) 
 ```
  Python: T: O(log(n-k))
-```
+```python
 class Solution(object):
     def findClosestElements(self, arr, k, x):
         """
@@ -15803,7 +15802,7 @@ Output: 0
  Thoughts:
 1. Handle duplicates: if (A[mid] == A[right], then A[mid] maintains the value and right can only reduce one.
  Code
-```
+```python
 class Solution(object):
     def findMin(self, A):
         """
@@ -15848,7 +15847,7 @@ Output:0
 	 A[right]:
 	2. 2nd method: To compare with A[left] and at the end compare the found result with start and end value (since this method would "assume there is a pivot")
  Code1:
-```
+```python
 class Solution :
     public findMin(int[] A) :
         left = 0, right = A.length - 1
@@ -15861,7 +15860,7 @@ class Solution :
         return A[left]
 ```
  Code2:
-```
+```python
 class Solution :
    # binary search
     public findMin(int[] A):
@@ -15911,7 +15910,7 @@ Explanation:
  Thoughts:
 1. Using binary search to compare two midpoints, the larger one being the new searching boundary
  Code: Iterative
-```
+```python
 class Solution :
 public:
     findPeakElement(vector<int>& A) :
@@ -15926,7 +15925,7 @@ public:
         return low
 ```
  Code: Recursive:
-```
+```python
 class Solution :
 public:
     findPeakElement(vector<int>& A) :
@@ -16017,7 +16016,7 @@ return 13.
 	3. hi = mid
 	4. return lo(or hi) in the end
  Code: Heap T: O(k*logn) S: O(n)
-```
+```python
 class Solution(object):
     def kthSmallest(self, matrix, k):
         """
@@ -16045,7 +16044,7 @@ class Element(object):
             return self.val == other.val
 ```
  Code: Binary Search: T:O(n*log(max - min))S: O(1)
-```
+```python
 class Solution :
     public kthSmallest(int[][] matrix, k) :
         if (matrix == null || matrix.length == 0 || matrix[0].length == 0) return 0
@@ -16094,7 +16093,7 @@ class Solution :
  Thoughts:
 1. Binary Search on the length by testing the resulted cutting pieces
  Code: T: Nlog(max(L[i])), S: O(1)
-```
+```python
 public class Solution :
     /**
  * @param L: Given n pieces of wood with length L[i]
@@ -16152,7 +16151,7 @@ Output: [1,2,2,3,5,6]
  Thoughts:
 1. To fill the nums1 in place, should fill the array backwards: start with the last on both arrays and fill the larger one between A[i] and A[j]
 2. Code
-```
+```python
 class Solution :
 public:
     void merge(vector<int>& nums1, m, vector<int>& nums2, n) :
@@ -16161,7 +16160,7 @@ public:
             nums1[tar--] = i >= 0 && nums1[i] > nums2[j] ? nums1[i--] : nums2[j--]
 ```
  Alternate version:
-```
+```python
 class Solution :
     public void merge(int[] nums1, m, int[] nums2, n) :
         i = m - 1, j = n - 1, merge = m + n - 1
@@ -16201,7 +16200,7 @@ Explanation: the subarray [4,3] has the minimal length under the problem constra
 1. O(n): Having a left and right pointer, Scan through the array, if record the sum if arr[i...j] >=s, then compare min with current sum, then try to move left pointer up, then compare with min again.
 2. O(nlogn) Binary Search:
  Code: O(n):
-```
+```python
 class Solution :
     public minSubArrayLen(s, int[] A) :
         if(A == null || A.length == 0 ) return 0
@@ -16214,7 +16213,7 @@ class Solution :
         return min == Integer.MAX_VALUE ? 0 : min
 ```
  Code: Another C++
-```
+```python
 public class Solution :
     public minSubArrayLen(s, int[] A) :
         i = 0, j = 0, sum = 0, min = Integer.MAX_VALUE
@@ -16226,7 +16225,7 @@ public class Solution :
         return min == Integer.MAX_VALUE ? 0 : min
 ```
  Python
-```
+```python
 class Solution(object):
     def minSubArrayLen(self, s, A):
         """
@@ -16244,7 +16243,7 @@ class Solution(object):
 ```
  Code: O(nlogn)
  - search if a window of size k that satisfies the condition
-```
+```python
 public class Solution :
     public minSubArrayLen(s, int[] A) :
         i = 1, j = A.length, min = 0
@@ -16264,7 +16263,7 @@ public class Solution :
         return false
 ```
  Python
-```
+```python
 class Solution(object):
     def minSubArrayLen(self, s, A):
         """
@@ -16338,7 +16337,7 @@ Explanation:
 	1. if the exponent == INT_MIN change it to INT_MAX,
 		1. if x is negative, change x to -x before finally inverse it
  Sequential Search: T: O(n)
-```
+```python
 class Solution :
     public findPeakElement(int[] A) :
              for(i = 1 i < A.length i ++)
@@ -16348,7 +16347,7 @@ class Solution :
                         return i-1
             return A.length-1
 ```
-```
+```python
 class Solution :
     public double myPow(double x, n) :
         if(n == 0) return 1
@@ -16396,7 +16395,7 @@ class Solution :
  If current number is smaller than target, increase the row number, if it is larger than the target number, decrease the column number, otherwise return False.
  Code
  O(mlogn):
-```
+```python
 class Solution(object):
     def searchMatrix(self, matrix, target):
         """
@@ -16426,7 +16425,7 @@ class Solution(object):
 ```
  Code
  O(m + n):
-```
+```python
 class Solution(object):
     def searchMatrix(self, matrix, target):
         """
@@ -16486,7 +16485,7 @@ Output: false
 1. only change is to consider case where both num[i] == num[j] == num[mid]: (i.e [3,1,2,3,3,3]), we should both update i and j by 1.
 2. Selecting the pivot: then compare the mid value with the pivot to decide which side is monotuous
  Code: T:(O(n) ~ O(logn))
-```
+```python
 class Solution :
 public:
     bool search(vector<int>& A, target) :
@@ -16512,7 +16511,7 @@ public:
         return false
 ```
  Python: Pivot
-```
+```python
 class Solution(object):
      def search(self, A, target):
         # the most annoying case is duplicate pivoting value in the array!!!
@@ -16584,7 +16583,7 @@ Output: -1
 1. Binary search, find the continuous parts by comparing A[i] with A[mid],
 2. Doing binary search inside: if it does not work, return -1
  Code:
-```
+```python
 class Solution :
 public:
     search(vector<int>& A, target) :
@@ -16608,7 +16607,7 @@ public:
         return -1 
 ```
  Code: Java
-```
+```python
 public search(int[] A, target) :
     return binarySearch(A,0,A.length-1,target)
 private binarySearch(int[] A, left, right, target):
@@ -16627,7 +16626,7 @@ private binarySearch(int[] A, left, right, target):
             return binarySearch(A,left,mid-1,target)
 ```
  Code: C++
-```
+```python
 class Solution :
 public:
     search(vector<int>& A, ele) :
@@ -16695,7 +16694,7 @@ Output: 3
   https:# leetcode.com/problems/shortest-subarray-with-sum-at-least-k/discuss/144291/Java-TreeMap.submap-Solution
   https:# leetcode.com/problems/shortest-subarray-with-sum-at-least-k/discuss/143828/Java-binary-search-O(NlogN\
  Code: Deque. O(n)
-```
+```python
 class Solution :
 public:
     shortestSubarray(vector<int>& A, K) :
@@ -16714,7 +16713,7 @@ public:
         return res == N + 1? -1: res
 ```
  Code: Python
-```
+```python
 class Solution:
     def shortestSubarray(self, A, K):
         """
@@ -16737,7 +16736,7 @@ class Solution:
         return res if res != len(A)+1 else -1
 ```
  Code: Java
-```
+```python
 class Solution :
     public shortestSubarray(int[] A, K) :
         N = A.length, res = N + 1
@@ -16754,7 +16753,7 @@ class Solution :
         return res == N + 1? -1: res
 ```
  Code: Segment Tree:
-```
+```python
 class Solution :
     struct node:
         s,e
@@ -16820,7 +16819,7 @@ public:
         return minLen == Integer.MAX_VALUE ? -1 : minLen
 ```
  Code: Java Binary Search
-```
+```python
 class Solution :
     public shortestSubarray(int[] A, K) :
         N = A.length
@@ -16887,7 +16886,7 @@ where the largest sum among the two subarrays is only 18.
  Code:
  Binary search through ranges of values.
  T: O(nlogn)
-```
+```python
 class Solution :
 public:
     splitArray(vector<int>& A, m) :
@@ -16914,7 +16913,7 @@ public:
         return true
 ```
  Code: DP T: O(n^2m)
-```
+```python
 class Solution(object):
     def splitArray(self, A, m):
         """
@@ -16944,7 +16943,7 @@ class Solution(object):
         return dp[n - 1][m]
 ```
  Code: DP T: O(nm), S: O(n)
-```
+```python
 class Solution(object):
     def splitArray(self, A, m):
         '''
@@ -17134,7 +17133,7 @@ Explanation: All possible pairs are returned from the sequence: [1,3],[2,3]
 3. Thus, use priority queue to maintain the order of the sums. In order to add duplicates, first offer k sums with nums1[i] + nums2[0] for i = 0,...k.
 ![](../assets/k pair smallest.png)
  Code: T:O(klogk) S: O(k)
-```
+```python
 class Solution :
     public List<int[]> kSmallestPairs(int[] nums1, int[] nums2, k) :
         List<[]> res = new ArrayList<>()
@@ -17177,14 +17176,14 @@ Output:
 2. use min heap: O(N lg K) running time + O(K) memory
 3. selection algorithm (partition method): O(NlogN) best case / O(N^2) worst case running time + O(1) memory
 4. Code 1. Naive:
-```
+```python
 public findKthLargest(int[] A, k) :
         final N = A.length
         Arrays.sort(A)
         return A[N - k]
 ```
  Code 2. Min Heap:
-```
+```python
 public findKthLargest(int[] A, k) :
     final PriorityQueue<Integer> pq = new PriorityQueue<>()
     for(val : A) :
@@ -17194,7 +17193,7 @@ public findKthLargest(int[] A, k) :
     return pq.peek()
 ```
  Code 2.1 Min Heap C++ (implementation: multiset)
-```
+```python
 class Solution :
 public:
     findKthLargest(vector<int>& A, k) :
@@ -17205,7 +17204,7 @@ public:
         return *min_heap.begin()
 ```
  Code 2.2 Min Heap: Python
-```
+```python
 class Solution(object):
     def findKthLargest(self, A, k):
         """
@@ -17221,7 +17220,7 @@ class Solution(object):
         return heapq.heappop(pq)
 ```
  Code 2.3 Max Heap: C++
-```
+```python
 class Solution :
 public:
     findKthLargest(vector<int>& A, k) :
@@ -17231,7 +17230,7 @@ public:
         return pq.top()
 ```
  Code 2.3 Max Heap C++ (implementation: max_heapify)
-```
+```python
 class Solution :
 public:
     findKthLargest(vector<int>& A, k) :
@@ -17261,7 +17260,7 @@ private:
             max_heapify(A, i)
 ```
  Code 3. Partition, QuickSelect:
-```
+```python
 class Solution :
     public findKthLargest(int[] A, k) :
         k = A.length - k #  we are finding N - k th smallest
@@ -17292,7 +17291,7 @@ class Solution :
         A[j] = tmp
         return j
 ```
-```
+```python
 class Solution :
     public findKthLargest(int[] A, k) :
         k = A.length - k #  we are finding N - k + 1 th smallest: [N - (k - 1)] - 1
@@ -17326,7 +17325,7 @@ class Solution :
         return j
 ```
  Python:
-```
+```python
 class Solution(object):
     def findKthLargest(self, A, k):
         """
@@ -17599,7 +17598,7 @@ class Solution:
         return skyline
 ```
  Fastest Python Solution:
-```
+```python
 class Solution(object):
     def getSkyline(self, buildings):
         """
@@ -17637,7 +17636,7 @@ class Solution(object):
         return arr
 ```
  Code from Java: using segments with Priority Queue to solve the problem:
-```
+```python
 class Solution :
     public List<int[]> getSkyline(int[][] buildings) :
         List<int[]> heights = new ArrayList<>()
@@ -17719,7 +17718,7 @@ Explanation:
         # return [w for w, v in sorted(collections.Counter(words).items(), key = lambda x: (-x[1], x[0])) [:k]]
 ```
  Code: Heap
-```
+```python
 class Solution(object):
     def topKFrequent(self, words, k):
         """
@@ -17748,7 +17747,7 @@ class Element(object):
         return self.count == other.count and self.word == other.word
 ```
  Code: Heap Java:
-```
+```python
 class Solution :
     public List<String> topKFrequent(String[] words, k) :
         List<String> res = new LinkedList<>() #  add front from min heap
@@ -17770,7 +17769,7 @@ class Solution :
         return res
 ```
  Code: Heap C++
-```
+```python
 class Solution :
 public:
     vector<string> topKFrequent(vector<string>& words, k) :
@@ -17852,7 +17851,7 @@ Explanation:
 previous vec made the clockwise turn, at which we should get rid of the last value as it is not a eligible vertex.
 3. build the upper hull: repeat the step 2 with reversely traversing the vector.
 ```
-```
+```python
 class Solution :
 public:
     orientation(Point &p, Point &q, Point &r) :
@@ -17886,7 +17885,7 @@ public:
  ,
  2
  .
-```
+```python
 class Solution :
 public:
     vector<Point> outerTrees(vector<Point>& points) :
@@ -18066,7 +18065,7 @@ public:
 ```
  Code Javis's Algorithm
  (Java)
-```
+```python
 public class Solution :
     public List<Point> outerTrees(Point[] points) :
         Set<Point> result = new HashSet<>()
@@ -18177,7 +18176,7 @@ Window position                Median
  Thoughts:
  Keep the window elements in a multiset and keep an iterator pointing to the middle value (to “index” k/2, to be precise).
  Code
-```
+```python
 class Solution :
 public:
     vector<double> medianSlidingWindow(vector<int>& A, k) :
@@ -18916,7 +18915,7 @@ public:
             return l2
 ```
  Code: (Less intuitive way, Java)
-```
+```python
 public class Solution :
     public ListNode mergeTwoLists(ListNode l1, ListNode l2) :
         if (l1 == null) return l2
@@ -18961,7 +18960,7 @@ After removing the second node from the end, the linked list becomes 1->2->3->5.
  's
  post
  Code: Value-Shifting
-```
+```python
 class Solution:
     def removeNthFromEnd(self, head, n):
         def index(node):
@@ -19140,7 +19139,7 @@ public:
         return pre
 ```
  Code 4
-```
+```python
 class Solution :
 public:
     ListNode* reverseList(ListNode* head) :
@@ -19413,7 +19412,7 @@ Skill 1 is released in the 1st second, in the 2nd second and the 3rd second ente
 Skill 2 is released in the 2nd second, in the 3rd second and the 4th second enters the cooling time, and the 5th second releases the second time.
 ```
  Similar to 621. Task Scheduler + Akuna/Drone Delivery
-```
+```python
 class Solution:
     """
  @param arr: The release order
@@ -19508,7 +19507,7 @@ We made 5 calls to master.guess and one of them was the secret, so we pass the t
 	1. for each word, record number of 0 matches
 	2. find the word with least 0 matches, breaking ties using one with larger index
  Code: Random(80% success rate) O(N)
-```
+```python
 class Solution(object):
     def findSecretWord(self, wordlist, master):
         """
@@ -19628,7 +19627,7 @@ public:
  :
  Code
  : Recursive: T: O(n^2) S:O(n)
-```
+```python
 class Solution :
     public calculate(String s) :
         l1 = 0, o1 = 1
@@ -19658,7 +19657,7 @@ class Solution :
 ```
  Code: Iterative:
  T: O(n) S: O(n)
-```
+```python
 class Solution :
     public calculate(String s) :
         l1 = 0, o1 = 1
@@ -19736,7 +19735,7 @@ Output: 5
 1. With stack: using a stack to keep track of numbers and do the operation based on operators.
 2. Without stack: only add current operand to the accumulative sum when encountered '+' or '-' since '*' and '/' has prioirty
  Code: with a stack
-```
+```python
 class Solution :
     public calculate(String s) :
         if(s == null || s.length() ==0) return 0
@@ -19764,7 +19763,7 @@ class Solution :
         return ans
 ```
  Code: without a stack
-```
+```python
 class Solution :
 public:
     calculate(string s) :
@@ -19922,7 +19921,7 @@ public:
  In this section, I will lay out the general structure of the algorithm using pseudo-codes. From section
  `I` 
  , we know there are at most five different types of structs contained in the expression: number, variable, subexpression, level one operators, level two operators. We will check each of them and proceed accordingly.
-```
+```python
 public calculate(String s) :
     l1 = 0, o1 = 1 #  Initialization of level one
     l2 = 1, o2 = 1 #  Initialization of level two
@@ -19968,7 +19967,7 @@ public calculate(String s) :
  time,
  `O(n)` 
  space
-```
+```python
 public basicCalculatorIII(String s) :
     l1 = 0, o1 = 1
     l2 = 1, o2 = 1
@@ -20000,7 +19999,7 @@ public basicCalculatorIII(String s) :
  time,
  `O(n)` 
  space
-```
+```python
 public basicCalculatorIII(String s) :
     l1 = 0, o1 = 1
     l2 = 1, o2 = 1
@@ -20340,7 +20339,7 @@ So function 0 totally execute 2 + 1 = 3 units of time, and function 1 totally ex
 	 1
 	 - prev_time since the questions records the end of the time for "end"
  Code:
-```
+```python
 class Solution(object):
     def exclusiveTime(self, n, logs):
         """
@@ -20365,7 +20364,7 @@ class Solution(object):
         return funcs
 ```
  Code: use stack to record time (slow)
-```
+```python
 class Solution(object):
     def exclusiveTime(self, n, logs):
         """
@@ -20386,7 +20385,7 @@ class Solution(object):
         return funcs
 ```
  Code: Augmented solution for new stack class design
-```
+```python
 class Solution(object):
     def exclusiveTime(self, n, logs):
         """
@@ -20499,7 +20498,7 @@ dir
  .
  Thoughts:
  record the length of current explored folder in the stack and max length if it is has a file extension
-```
+```python
 class Solution :
     public lengthLongestPath(String input) :
         Deque<Integer> stack = new ArrayDeque<>()
@@ -20517,7 +20516,7 @@ class Solution :
         return maxLen
 ```
  using Array (DP):
-```
+```python
 class Solution :
         public lengthLongestPath(String input) :
         String[] paths = input.split("\n")
@@ -20561,7 +20560,7 @@ stack.top() ->5
  Thoughts:
  use a auxiliary map to record the index entry, and map can sort the order internally
  Code Write O(logn), read O(1):
-```
+```python
 class MaxStack :
 public:
     /** initialize your data structure here. */
@@ -20692,7 +20691,7 @@ class Solution(object):
                 return False
         return True
 ```
-```
+```python
 class Solution(object):
     def canAttendMeetings(self, intervals):
         """
@@ -20731,7 +20730,7 @@ First, iterate the array counting number of 0's, 1's, and 2's, then overwrite ar
  post
  )
  Code: Counting Sort:
-```
+```python
 class Solution(object):
     def sortColors(self, A):
         """
@@ -20747,7 +20746,7 @@ class Solution(object):
                 i+= 1
 ```
  Code: Partition: one pass
-```
+```python
 class Solution(object):
     def sortColors(self, A):
         """
@@ -20784,7 +20783,7 @@ Output: One possible answer is [3,5,1,6,2,4]
 1. Naive: traverse through the element (sort each two element (from [i, i + 2) according to alternative order (ascending vs decending)
 2. Window of 2: always ranking A[i-1] and num[i] with the alternating order: when i is odd, then A[i-1] should be <= A[i] when i is even (Excepet 0), A[i-1] should be >= A[i]
  Code
-```
+```python
 class Solution(object):
     def wiggleSort(self, A):
         """
@@ -20795,7 +20794,7 @@ class Solution(object):
             A[i: i+ 2] = sorted(A[i: i + 2], reverse = i%2)
 ```
  Code
-```
+```python
 class Solution(object):
     def wiggleSort(self, A):
         """
@@ -20826,7 +20825,7 @@ class Solution(object):
  Thoughts:
  Since two negative numbers multiply could result in positive, here we need to have two arrays, dmax, dmin to keep track of max product and min product so far
  Code
-```
+```python
 class Solution :
 public:
     maxProduct(vector<int>& A) :
@@ -20842,7 +20841,7 @@ public:
             maxP = maxP > dmax? maxP: dmax
         return maxP
 ```
-```
+```python
 class Solution :
     public maxProduct(int[] A) :
         if(A == null && A.length == 0) return 0
@@ -20884,7 +20883,7 @@ class Solution :
 	1. dp[i] = max(dp[i-1], A[i] + dp[i-1])
 	2. have a variable to record max dp[i] so far
  Code (DP) Time Complexity O(n), Space Complexity O(n)
-```
+```python
 class Solution :
 public:
     maxSubArray(vector<int>& A) :
@@ -20923,7 +20922,7 @@ public:
         return v.m
 ```
  Code (Greedy) Time Complexity: O(n), Space Complexity: O(1)
-```
+```python
 class Solution :
 public:
     maxSubArray(A[], n) :
@@ -20990,7 +20989,7 @@ Explanation: The order is invalid, so return "".
 	4. 2: Visited
 3. Topological Sort:
  Code: BFS
-```
+```python
 class Solution :
     public String alienOrder(String[] words) :
         Map <Character, Set<Character>> map = new HashMap<Character, Set<Character>>()
@@ -21034,7 +21033,7 @@ class Solution :
         return res
 ```
  Code: DFS
-```
+```python
 class Solution :
     private final N = 26
     public String alienOrder(String[] words) :
@@ -21157,7 +21156,7 @@ class Solution :
  except here a vector of order number is expected to be returned
 2. BFS (Kahn's Algorithm) vs DFS
  Code (BFS) Time: O(n^2)
-```
+```python
 class Solution :
 public:
     vector<int> findOrder(numCourses, vector<pair<int, int>>& prerequisites) :
@@ -21183,7 +21182,7 @@ public:
         return ans
 ```
  Code (DFS + pruning) Time: O(n)
-```
+```python
 class Solution :
     num = 0
     vector<int> ans
@@ -21253,7 +21252,7 @@ private:
  Kahn's algorithm
  vs DFS)
  Code (Kahn's algorithm)
-```
+```python
 class Solution :
 public:
 bool canFinish(numCourses, vector<pair<int, int>>& prerequisites) :
@@ -21276,7 +21275,7 @@ bool canFinish(numCourses, vector<pair<int, int>>& prerequisites) :
         return true
 ```
  Code (DFS)
-```
+```python
 class Solution :
 public:
     bool canFinish(numCourses, vector<pair<int, int>>& prerequisites) :
