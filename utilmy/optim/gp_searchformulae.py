@@ -317,8 +317,15 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
 ###################################################################################################
 def run1():
+
     myproblem1 = myProblem()
 
+
+
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from dcgpy import kernel_set_gdual_double as kernel_set
+    from pyaudi import gdual_double as gdual
 
     p               = Box({})
     p.nvars_in      = 2  ### nb of variables
