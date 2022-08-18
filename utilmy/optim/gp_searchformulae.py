@@ -204,12 +204,12 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     p = Box(pars_dict)
 
 
-    nvars_in      = 2  ### nb of variables
-    nvars_out     = 1
+    nvars_in      = p.nvars_in  ### nb of variables
+    nvars_out     = p.nvars_out
 
-    ks            = kernel_set(["sum", "diff", "div", "mul"])
-    print_after   = 100
-    print_best    = True
+    operator_list = p.ks
+    print_after   = p.print_after
+    print_best    = p.print_best
     n             = 20  ## Population (Suggested: 10~20)
     pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     kmax          = 100000  ## Max iterations
@@ -218,6 +218,21 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     n_cuckoo_eggs = round(pa*n)
     n_replace     = round(pa*n)
     log_file       = 'trace.py'
+
+    # nvars_in      = 2  ### nb of variables
+    # nvars_out     = 1
+    #
+    # ks            = kernel_set(["sum", "diff", "div", "mul"])
+    # print_after   = 100
+    # print_best    = True
+    # n             = 20  ## Population (Suggested: 10~20)
+    # pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    # kmax          = 100000  ## Max iterations
+    # nc,nr         = 10,1  ## Graph columns x rows
+    # a             = 2  # Arity
+    # n_cuckoo_eggs = round(pa*n)
+    # n_replace     = round(pa*n)
+    # log_file       = 'trace.py'
 
     
     ######### Define expression symbols
@@ -228,7 +243,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
     ######### Print
     if verbose:
-        log(ks)
+        log(operator_list)
         log(symbols)
 
 
@@ -239,7 +254,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
                             cols        = nc,
                             levels_back = nc,
                             arity       = a,
-                            kernels     = ks(),
+                            kernels     = operator_list(),
                             n_eph       = 0,
                             seed        = int(random.random()*1000000) )
 
