@@ -121,6 +121,8 @@ class myProblem:
     
     def rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str):
         """ ## Merge 2 list using a FORMULAE
+        Docs::
+        
             Re-rank elements of list1 using ranking of list2
             20k dataframe : 6 sec ,  4sec if dict is pre-build
             Fastest possible in python
@@ -143,9 +145,9 @@ class myProblem:
 
     #### Generate fake list to be merged.
     def rank_generate_fake(self,dict_full, list_overlap, nsize=100, ncorrect=20):
-        """  Returns a list of random rankings of size nsize where ncorrect
-            elements have correct ranks
-            Keyword arguments:
+        """  Returns a list of random rankings of size nsize where ncorrect elements have correct ranks
+        Docs::
+
             dict_full    : a dictionary of 1000 objects and their ranks
             list_overlap : list items common to all lists
             nsize        : the total number of elements to be ranked
