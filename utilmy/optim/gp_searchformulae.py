@@ -210,13 +210,15 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     operator_list = p.ks
     print_after   = p.print_after
     print_best    = p.print_best
-    n             = 20  ## Population (Suggested: 10~20)
+    pop_size      = 20  ## Population (Suggested: 10~20)
+    max_iter      = 100000  ## Max iterations
+
+    
     pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    kmax          = 100000  ## Max iterations
     nc,nr         = 10,1  ## Graph columns x rows
     a             = 2  # Arity
-    n_cuckoo_eggs = round(pa*n)
-    n_replace     = round(pa*n)
+    n_cuckoo_eggs = round(pa*pop_size)
+    n_replace     = round(pa*pop_size)
     log_file       = 'trace.py'
 
     # nvars_in      = 2  ### nb of variables
@@ -272,7 +274,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         
         # Initialize the nest
         nest = []
-        for i in range(n):
+        for i in range(pop_size):
             ex = get_random_solution()
             cost = myproblem.get_cost(ex)
             nest.append((ex, cost))
@@ -290,10 +292,10 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         global dic_front
         ls_trace = []
         # Main Loop
-        for k in range(kmax+1):
+        for k in range(max_iter + 1):
             # Lay cuckoo eggs
             for i in range(n_cuckoo_eggs):
-                idx         = random.randint(0,n-1)
+                idx         = random.randint(0,pop_size-1)
                 egg         = deepcopy(nest[idx]) # Pick an egg at random from the nest
                 cuckoo      = egg[0].mutate_active(var_choice(var_levy))
                 cost_cuckoo = myproblem.get_cost(cuckoo)
@@ -307,7 +309,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
                     
             for i in range(n_replace):
                 ex = get_random_solution()
-                nest[(n-1)-(i)] = (ex, myproblem.get_cost(ex))
+                nest[(pop_size-1)-(i)] = (ex, myproblem.get_cost(ex))
 
             # Iterational printing
             if (k%print_after == 0):
