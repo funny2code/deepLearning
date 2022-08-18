@@ -16,6 +16,15 @@ We use 1 formulae to merge  2 list --> merge_list with score
 Goal is to find a formulae, which make merge_list as much sorted as possible
 
 
+#### Explanation
+1. We are working with search algorithm(cuckoo search algorithm here here)
+2. We get an expression using get_random_solution function which will be used for fitting our symbolic functions.
+3. We need to find the cost for this expression so we use get_correlm function to get correlation score for 2 mutated genes of the current expression
+4. The correlation has to be found for 2 fake generated gene using rank_generate_fake function which gets new rank for items
+5. We use rank_merge_v5 function which basically takes 2 list, merge them by evaluating the expression generated using rank_score function.
+6. We get the new ranks (rank3) and send it to step 4 for correlation study and giving cost value
+7. Then process is repeated for some variations of the genes as per Cuckoo algorithm search pattern from Step 1.
+
 
 
 
