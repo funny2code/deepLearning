@@ -22,10 +22,6 @@ Goal is to find a formulae, which make merge_list as much sorted as possible
 """
 
 
-from lib2to3.pygram import Symbols
-from dcgpy import expression_gdual_double as expression
-from dcgpy import kernel_set_gdual_double as kernel_set
-from pyaudi import gdual_double as gdual
 import random
 import math
 import numpy as np
@@ -194,6 +190,11 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
        myproblem.calc_cost()
 
     """
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from dcgpy import kernel_set_gdual_double as kernel_set
+    from pyaudi import gdual_double as gdual
+
     from box import Box
     ######### Problem definition and Cost calculation
     #myproblem = myProblem()
