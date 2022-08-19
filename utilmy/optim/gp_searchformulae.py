@@ -4,19 +4,14 @@ Docs::
     Install
        https://darioizzo.github.io/dcgp/installation.html#python
 
-
-       example :
-          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+       https://darioizzo.github.io/dcgp/notebooks/real_world1.html
 
 
     -- Test Problem
-    2)  list with scores (ie randomly generated)
-    We use 1 formulae to merge  2 list --> merge_list with score
-       Ojective to maximize  correlation(merge_list,  True_ordered_list)
-
-    Goal is to find a formulae, which make merge_list as much sorted as possible
+    2) Goal is to find a formulae, which make merge_list as much sorted as possible
     Example :
         myproblem1 = myProblem()
+        ## myproblem1.get_cost(formuale_str, symbols  )
 
         from lib2to3.pygram import Symbols
         from dcgpy import expression_gdual_double as expression
@@ -43,6 +38,18 @@ Docs::
 
         #### Run Search
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+
+
+        #### Parallel version   ------------------------------------
+        for i in range(npool):
+            p2         = copy.deepcopy(p)
+            p2.f_trace = f'trace_{i}.log'
+            input_list.append(p2)
+
+        #### parallel Runs
+        multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                      input_list=input_list,
+                      npool=3)
 
 """
 import random, math, numpy as np, warnings, copy
@@ -71,20 +78,20 @@ def test1():
     from pyaudi import gdual_double as gdual
 
     p               = Box({})
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-
-    p.ks            = ["sum", "diff", "div", "mul"]
+    p.log_file      = 'trace.log'
     p.print_after   = 100
     p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.ks            = ["sum", "diff", "div", "mul"]
+
     p.n             = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     p.kmax          = 100000  ## Max iterations
     p.nc,nr         = 10,1  ## Graph columns x rows
     p.arity         = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.log_file      = 'trace.log'
     p.seed          = 43
 
 
@@ -105,6 +112,8 @@ def test2():
     myproblem1 = myProblem()
 
     p               = Box({})
+    p.log_file      = 'trace.log'
+
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
 
@@ -117,9 +126,6 @@ def test2():
     p.kmax          = 100000  ## Max iterations
     p.nc,nr         = 10,1  ## Graph columns x rows
     p.arity         = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.log_file      = 'trace.log'
 
     npool= 2
     input_list = []
