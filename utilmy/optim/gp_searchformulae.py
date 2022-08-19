@@ -48,7 +48,7 @@ Docs::
 
 """
 
-import random, math, numpy as np, warnings
+import random, math, numpy as np, warnings, copy
 import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
@@ -77,7 +77,7 @@ def test1():
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
 
-    p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+    p.ks            = ["sum", "diff", "div", "mul"]
     p.print_after   = 100
     p.print_best    = True
     p.n             = 20  ## Population (Suggested: 10~20)
@@ -96,6 +96,44 @@ def test1():
 
 
 
+def test2():
+
+    from utilmy.parallel import multiproc_run
+
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from dcgpy import kernel_set_gdual_double as kernel_set
+    from pyaudi import gdual_double as gdual
+
+    myproblem1 = myProblem()
+
+    p               = Box({})
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+
+    p.ks            = ["sum", "diff", "div", "mul", "log"]
+    p.print_after   = 100
+    p.print_best    = True
+    p.n             = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.a             = 2  # Arity
+    p.n_cuckoo_eggs = round(p.pa * p.n)
+    p.n_replace     = round(p.pa * p.n)
+    p.f_trace       = 'trace.log'
+
+    npool= 2
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(p)
+        p2.f_trace = f'trace_{i}.log'
+        input_list.append(p2)
+
+    ### parallel Runs
+    multiproc_run(search_formuale_algo1, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                  input_list=input_list,
+                  npool=3)
 
 
 
@@ -104,6 +142,14 @@ def test1():
 class myProblem:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+            Goal is to find a formulae, which make merge_list as much sorted as possible
 
         """
         self.n_sample  = n_sample
@@ -291,7 +337,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = p.ks
+    operator_list = kernel_set(p.ks)
 
     ### Log
     print_after   = p.print_after
@@ -307,9 +353,6 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     arity         = p.a   #2  # Arity
     n_cuckoo_eggs = round(p.pa*p.pop_size)
     n_replace     = round(p.pa*p.pop_size)
-
-
-
 
 
     ######### Define expression symbols  #######################
@@ -402,43 +445,6 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
                     log('\n')
 
     search()
-
-
-
-###################################################################################################
-def run1():
-
-    myproblem1 = myProblem()
-
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
-
-    p               = Box({})
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-
-    p.ks            = kernel_set(["sum", "diff", "div", "mul", "log"])
-    p.print_after   = 100
-    p.print_best    = True
-    p.n             = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
-    p.a             = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.f_trace       = 'trace'
-
-
-    #### Run Search
-    search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
-
-
-
-
-
 
 
 
