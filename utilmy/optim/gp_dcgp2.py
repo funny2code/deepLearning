@@ -16,15 +16,6 @@ We use 1 formulae to merge  2 list --> merge_list with score
 Goal is to find a formulae, which make merge_list as much sorted as possible
 
 
-#### Explanation
-1. We are working with search algorithm(cuckoo search algorithm here here)
-2. We get an expression using get_random_solution function which will be used for fitting our symbolic functions.
-3. We need to find the cost for this expression so we use get_correlm function to get correlation score for 2 mutated genes of the current expression
-4. The correlation has to be found for 2 fake generated gene using rank_generate_fake function which gets new rank for items
-5. We use rank_merge_v5 function which basically takes 2 list, merge them by evaluating the expression generated using rank_score function.
-6. We get the new ranks (rank3) and send it to step 4 for correlation study and giving cost value
-7. Then process is repeated for some variations of the genes as per Cuckoo algorithm search pattern from Step 1.
-
 
 
 
@@ -42,12 +33,150 @@ import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
 import warnings
+warnings.filterwarnings("ignore")
 
 
-def run4():
-    warnings.filterwarnings("ignore")
+class gp_dcgp2:
+
+    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
+        """
+            Computes the cost for the expression 
+        """
+        self.n_sample = n_sample
+        self.kk = kk
+        self.nsize = nsize
+        self.ncorrect1 = ncorrect1
+        self.ncorrect2 = ncorrect2
+        self.adjust = adjust
+        
+
+    ######### Objective to Maximize
+    def get_correlm(self,eqn:str):
+        """  compare 2 lists lnew, ltrue and output correlation.
+        Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+        
+        """
+        ##### True list
+        ltrue = [ str(i)  for i in range(0, 100) ]   
+
+        #### Create noisy list 
+        ltrue_rank = {i:x for i,x in enumerate(ltrue)}
+        list_overlap =  ltrue[:70]  #### Common elements
+        
+        
+        correls = []
+        for i in range(self.n_sample):
+            ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
+            ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+
+            #### Merge them using rank_score
+            lnew = rank_merge_v5(ll1, ll2, eqn = eqn)
+            lnew = lnew[:100]
+            # log(lnew) 
+
+            ### Eval with True Rank
+            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
+
+        correlm = np.mean(correls)
+        return -correlm  ### minimize correlation val
+
+    # # 5 - Mutate the expression with 2 random mutations of active genes and print
+    # ex.mutate_active(2)
+    # print("Mutated expression:", ex(symbols)[0])
+
+    def get_cost(self,ex:str):
+        def normalize(val,Rmin,Rmax,Tmin,Tmax):
+            return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
+
+        def denormalize(val,Rmin,Rmax,Tmin,Tmax):
+            return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
+
+        try:
+            correlm = self.get_correlm(ex(symbols)[0])
+        except:
+            correlm = 1.0
+
+        return(correlm)
+
+    #### Example of rank_scores0 = Formulae(list_ score1, list_score2)
+    def rank_score(self,eqn:str, rank1:list, rank2:list)-> list:
+        """     ### take 2 np.array and calculate one list of float (ie NEW scores for position)
+    
+        list of items:  a,b,c,d, ...
+        item      a,b,c,d,e
+        rank1 :   1,2,3,4 ,,n     (  a: 1,  b:2, ..)
+        rank2 :   5,7,2,1 ,,n     (  a: 5,  b:6, ..)
+        
+        scores_new :   a: -7.999,  b:-2.2323   
+        (item has new scores)
+        
+        """
+
+        x0 = 1/(self.kk + rank1)
+        x1 = 1/(self.kk + rank2*self.adjust)
+
+        scores_new =  eval(eqn)
+        return scores_new
 
 
+    #### Merge 2 list using a FORMULAE
+    def rank_merge_v5(self,ll1:list, ll2:list, eqn:str):
+        """ Re-rank elements of list1 using ranking of list2
+            20k dataframe : 6 sec ,  4sec if dict is pre-build
+            Fastest possible in python
+        """
+        if len(ll2) < 1: return ll1
+        n1, n2 = len(ll1), len(ll2)
+
+        if not isinstance(ll2, dict) :
+            ll2 = {x:i for i,x in enumerate( ll2 )  }  ### Most costly op, 50% time.
+
+        adjust, mrank = (1.0 * n1) / n2, n2
+        rank2 = np.array([ll2.get(sid, mrank) for sid in ll1])
+        rank1 = np.arange(n1)
+        rank3 = self.rank_score(eqn, rank1, rank2) ### Score   
+
+        #### re-rank  based on NEW Scores.
+        v = [ll1[i] for i in np.argsort(rank3)]
+        return v  #### for later preprocess
+
+
+    #### Generate fake list to be merged.
+    def rank_generate_fake(self,dict_full, list_overlap, nsize=100, ncorrect=20):
+        """  Returns a list of random rankings of size nsize where ncorrect
+            elements have correct ranks
+            Keyword arguments:
+            dict_full    : a dictionary of 1000 objects and their ranks
+            list_overlap : list items common to all lists
+            nsize        : the total number of elements to be ranked
+            ncorrect     : the number of correctly ranked objects
+        """
+        # first randomly sample nsize - len(list_overlap) elements from dict_full
+        # of those, ncorrect of them must be correctly ranked
+        random_vals = []
+        while len(random_vals) <= nsize - len(list_overlap):
+            rand = random.sample(list(dict_full), 1)
+            if (rand not in random_vals and rand not in list_overlap):
+                random_vals.append(rand[0])
+
+        # next create list as aggregate of random_vals and list_overlap
+        list2 = random_vals + list_overlap
+        
+        # shuffle nsize - ncorrect elements from list2 
+        copy = list2[0:nsize - ncorrect]
+        random.shuffle(copy)
+        list2[0:nsize - ncorrect] = copy
+
+        # ensure there are ncorrect elements in correct places
+        if ncorrect == 0: 
+            return list2
+        rands = random.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
+        for r in rands:
+            list2[r] = list(dict_full)[r]
+        return list2
+
+    
+def run4(verbose=False):
     ######### Problem definition
     ks = kernel_set(["sum", "diff", "div", "mul"])
     print_after = 100
@@ -63,7 +192,7 @@ def run4():
     n_replace = round(pa*n)
     f_trace = 'trace'
 
-
+    
     ######### Define expression symbols
     symbols = []
     for i in range(ni):
@@ -71,150 +200,24 @@ def run4():
 
 
     ######### Print
-    print(ks)
-    print(symbols)
+    if verbose:
+        print(ks)
+        print(symbols)
 
+    #Call the gp_dcgp class to compute cost
+    gp_dcgp = gp_dcgp2() 
 
-    ######### Objective to Maximize
-    def get_correlm(eqn):
-        """  compare 2 lists lnew, ltrue and output correlation.
-        Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
-        
-        """
-        ##### True list
-        ltrue = [ str(i)  for i in range(0, 100) ]   
-
-        #### Create noisy list 
-        ltrue_rank = {i:x for i,x in enumerate(ltrue)}
-        list_overlap =  ltrue[:70]  #### Common elements
-        
-        nsample=5
-        correls = []
-        for i in range(nsample):
-            ll1  = rank_generate_fake(ltrue_rank, list_overlap, nsize=100, ncorrect=40)
-            ll2  = rank_generate_fake(ltrue_rank, list_overlap, nsize=100, ncorrect=50)
-
-            #### Merge them using rank_score
-            lnew = rank_merge_v5(ll1, ll2, kk= 1, eqn = eqn)
-            lnew = lnew[:100]
-            # log(lnew) 
-
-            ### Eval with True Rank
-            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
-
-        correlm = np.mean(correls)
-        return -correlm  ### minimize correlation val
-
-
-    #### Example of rank_scores0 = Formulae(list_ score1, list_score2)
-    def rank_score(eqn:str, rank1:list, rank2:list, adjust=1.0, kk=1.0)-> list:
-        """     ### take 2 np.array and calculate one list of float (ie NEW scores for position)
-    
-        list of items:  a,b,c,d, ...
-        item      a,b,c,d,e
-        rank1 :   1,2,3,4 ,,n     (  a: 1,  b:2, ..)
-        rank2 :   5,7,2,1 ,,n     (  a: 5,  b:6, ..)
-        
-        scores_new :   a: -7.999,  b:-2.2323   
-        (item has new scores)
-        
-        """
-
-        x0 = 1/(kk + rank1)
-        x1 = 1/(kk + rank2*adjust)
-
-        scores_new =  eval(eqn)
-        return scores_new
-
-
-    #### Merge 2 list using a FORMULAE
-    def rank_merge_v5(ll1:list, ll2:list, eqn:str, kk= 1):
-        """ Re-rank elements of list1 using ranking of list2
-            20k dataframe : 6 sec ,  4sec if dict is pre-build
-            Fastest possible in python
-        """
-        if len(ll2) < 1: return ll1
-        n1, n2 = len(ll1), len(ll2)
-
-        if not isinstance(ll2, dict) :
-            ll2 = {x:i for i,x in enumerate( ll2 )  }  ### Most costly op, 50% time.
-
-        adjust, mrank = (1.0 * n1) / n2, n2
-        rank2 = np.array([ll2.get(sid, mrank) for sid in ll1])
-        rank1 = np.arange(n1)
-        rank3 = rank_score(eqn, rank1, rank2, adjust=1.0, kk=1.0) ### Score   
-
-        #### re-rank  based on NEW Scores.
-        v = [ll1[i] for i in np.argsort(rank3)]
-        return v  #### for later preprocess
-
-
-    #### Generate fake list to be merged.
-    def rank_generate_fake(dict_full, list_overlap, nsize=100, ncorrect=20):
-        """  Returns a list of random rankings of size nsize where ncorrect
-            elements have correct ranks
-            Keyword arguments:
-            dict_full    : a dictionary of 1000 objects and their ranks
-            list_overlap : list items common to all lists
-            nsize        : the total number of elements to be ranked
-            ncorrect     : the number of correctly ranked objects
-        """
-        # first randomly sample nsize - len(list_overlap) elements from dict_full
-        # of those, ncorrect of them must be correctly ranked
-        random_vals = []
-        while len(random_vals) <= nsize - len(list_overlap):
-        rand = random.sample(list(dict_full), 1)
-        if (rand not in random_vals and rand not in list_overlap):
-            random_vals.append(rand[0])
-
-        # next create list as aggregate of random_vals and list_overlap
-        list2 = random_vals + list_overlap
-        
-        # shuffle nsize - ncorrect elements from list2 
-        copy = list2[0:nsize - ncorrect]
-        random.shuffle(copy)
-        list2[0:nsize - ncorrect] = copy
-
-        # ensure there are ncorrect elements in correct places
-        if ncorrect == 0: 
-        return list2
-        rands = random.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
-        for r in rands:
-        list2[r] = list(dict_full)[r]
-        return list2
-
-
-    #################################################################################
-    ######  Genetic Algo ############################################################
     def get_random_solution():
-        return expression(inputs = ni, 
-                        outputs = no, 
-                        rows = nr, 
-                        cols = nc, 
-                        levels_back = nc, 
-                        arity = a, 
-                        kernels = ks(), 
-                        n_eph = 0, 
-                        seed = int(random.random()*1000000)
-                        )
-
-    # # 5 - Mutate the expression with 2 random mutations of active genes and print
-    # ex.mutate_active(2)
-    # print("Mutated expression:", ex(symbols)[0])
-    def get_cost(ex):
-        def normalize(val,Rmin,Rmax,Tmin,Tmax):
-            return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
-
-        def denormalize(val,Rmin,Rmax,Tmin,Tmax):
-            return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
-
-        try:
-            correlm = get_correlm(ex(symbols)[0])
-        except:
-            correlm = 1.0
-
-        return(correlm)
-
+            return expression(inputs = ni, 
+                            outputs = no, 
+                            rows = nr, 
+                            cols = nc, 
+                            levels_back = nc, 
+                            arity = a, 
+                            kernels = ks(), 
+                            n_eph = 0, 
+                            seed = int(random.random()*1000000)
+                            )
 
     def search():
         def levyFlight(u):
@@ -232,9 +235,9 @@ def run4():
         nest = []
         for i in range(n):
             ex = get_random_solution()
-            cost = get_cost(ex)
+            cost = gp_dcgp.get_cost(ex)
             nest.append((ex, cost))
-    
+
 
         # Sort nest
         nest.sort(key = itemgetter(1))
@@ -250,7 +253,7 @@ def run4():
                 idx = random.randint(0,n-1)
                 egg = deepcopy(nest[idx]) # Pick an egg at random from the nest
                 cuckoo = egg[0].mutate_active(var_choice(var_levy))
-                cost_cuckoo = get_cost(cuckoo)
+                cost_cuckoo = gp_dcgp.get_cost(cuckoo)
                 if (cost_cuckoo <= egg[1]): # Check if the cuckoo egg is better
                     nest[idx] = (cuckoo,cost_cuckoo)
 
@@ -261,7 +264,7 @@ def run4():
                     
             for i in range(n_replace):
                 ex = get_random_solution()
-                nest[(n-1)-(i)] = (ex,get_cost(ex))
+                nest[(n-1)-(i)] = (ex,gp_dcgp.get_cost(ex))
 
             # Iterational printing
             if (k%print_after == 0):
@@ -283,9 +286,6 @@ def run4():
 
     search()
 
-
-
-run4()
-
+run4(verbose=True)
 
 
