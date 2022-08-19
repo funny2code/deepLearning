@@ -1,8 +1,6 @@
 """ Search Formulae using GP
 Docs::
 
-
-
     1) Install
        https://darioizzo.github.io/dcgp/installation.html#python
 
@@ -343,6 +341,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         def randF():
             return (random.uniform(0.0001,0.9999))
 
+        ########### Init  ##########################################################
         var_levy = []
         for i in range(1000):    
             var_levy.append(round(levyFlight(randF())))
@@ -362,9 +361,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
         # ex.mutate_active(2)
         # log("Mutated expression:", ex(symbols)[0])        
-        global best_egg
-        global k
-        global dic_front
+        global best_egg, k, dic_front
         ls_trace = []
 
         ########### Main Loop  ####################################################
@@ -413,8 +410,6 @@ def run1():
 
     myproblem1 = myProblem()
 
-
-
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
     from dcgpy import kernel_set_gdual_double as kernel_set
@@ -424,7 +419,7 @@ def run1():
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
 
-    p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+    p.ks            = kernel_set(["sum", "diff", "div", "mul", "log"])
     p.print_after   = 100
     p.print_best    = True
     p.n             = 20  ## Population (Suggested: 10~20)
