@@ -314,7 +314,7 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
-        conda install  dcgpy 
+        conda install  dcgpy
 
         myproblem1 = myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
@@ -433,7 +433,7 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
                 idx         = random.randint(0,pop_size-1)
                 egg         = deepcopy(nest[idx]) # Pick an egg at random from the nest
                 cuckoo      = egg[0].mutate_active(var_choice(var_levy))
-                cost_cuckoo = myproblem.get_cost(cuckoo)
+                cost_cuckoo = myproblem.get_cost(expr=cuckoo, symbols=symbols)
                 if (cost_cuckoo <= egg[1]): # Check if the cuckoo egg is better
                     nest[idx] = (cuckoo,cost_cuckoo)
 
@@ -444,7 +444,7 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
                     
             for i in range(n_replace):
                 expr = get_random_solution()
-                nest[(pop_size-1)-(i)] = (expr, myproblem.get_cost(expr, symbols))
+                nest[(pop_size-1)-(i)] = (expr, myproblem.get_cost(expr=expr, symbols=symbols))
 
             # Iterational printing
             if (k%print_after == 0):
