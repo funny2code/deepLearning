@@ -17,37 +17,36 @@ Docs::
     Goal is to find a formulae, which make merge_list as much sorted as possible
 
 
-    Example :
-    myproblem1 = myProblem()
+        Example :
+        myproblem1 = myProblem()
 
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
+        from lib2to3.pygram import Symbols
+        from dcgpy import expression_gdual_double as expression
+        from dcgpy import kernel_set_gdual_double as kernel_set
+        from pyaudi import gdual_double as gdual
 
-    p               = Box({})
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
+        p               = Box({})
+        p.nvars_in      = 2  ### nb of variables
+        p.nvars_out     = 1
 
-    p.ks            = kernel_set(["sum", "diff", "div", "mul"])
-    p.print_after   = 100
-    p.print_best    = True
-    p.n             = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
-    p.a             = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.f_trace       = 'trace'
-    p.seed          = 43
+        p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+        p.print_after   = 100
+        p.print_best    = True
+        p.n             = 20  ## Population (Suggested: 10~20)
+        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+        p.kmax          = 100000  ## Max iterations
+        p.nc,nr         = 10,1  ## Graph columns x rows
+        p.a             = 2  # Arity
+        p.n_cuckoo_eggs = round(p.pa * p.n)
+        p.n_replace     = round(p.pa * p.n)
+        p.f_trace       = 'trace'
+        p.seed          = 43
 
 
-    #### Run Search
-    search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+        #### Run Search
+        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 """
-
 import random, math, numpy as np, warnings, copy
 import scipy.stats
 from operator import itemgetter
@@ -162,7 +161,7 @@ class myProblem:
 
 
 
-    def get_cost(self, expr:str, symbols):
+    def get_cost(self, expr:None, symbols):
         """     ######### Objective to Maximize
 
 
@@ -341,12 +340,12 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     operator_list = kernel_set(p.ks)
 
     ### Log
-    print_after   = p.print_after
-    print_best    = p.print_best
-    pop_size      = p.pop_size #20  ## Population (Suggested: 10~20)
-    max_iter      = p.max_iter #100000  ## Max iterations
-    seed          = p.seed
-    log_file      = p.log_file # 'trace.py'
+    print_after   = p.get('print_after', 20)
+    print_best    = p.get('print_best', True)
+    pop_size      = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
+    max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
+    seed          = p.get('seed', 43)
+    log_file      = p.get('log_file', 'log.log') # 'trace.py'
 
     ### search
     pa            = p.pa # 0.3  ## Parasitic Probability (Suggested: 0.3)
