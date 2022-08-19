@@ -11,6 +11,8 @@ Docs::
        DSO
            https://github.com/brendenpetersen/deep-symbolic-optimization
 
+           https://iclr.cc/virtual/2021/poster/2578
+
 
     -- Test Problem
     2) Goal is to find a formulae, which make merge_list as much sorted as possible
@@ -312,23 +314,30 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
+        conda install  dcgpy 
 
-        myproblem.calc_cost()
+        myproblem1 = myProblem()
+        ## myproblem1.get_cost(formuale_str, symbols  )
 
-        nvars_in      = 2  ### nb of variables
-        nvars_out     = 1
+        p               = Box({})
+        p.log_file      = 'trace.log'
 
-        ks            = kernel_set(["sum", "diff", "div", "mul"])
-        print_after   = 100
-        print_best    = True
-        n             = 20  ## Population (Suggested: 10~20)
-        pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-        kmax          = 100000  ## Max iterations
-        nc,nr         = 10,1  ## Graph columns x rows
-        a             = 2  # Arity
-        n_cuckoo_eggs = round(pa*n)
-        n_replace     = round(pa*n)
-        log_file       = 'trace.py'
+        p.nvars_in      = 2  ### nb of variables
+        p.nvars_out     = 1
+
+        p.ks            = ["sum", "diff", "div", "mul", "log"]
+        p.print_after   = 100
+        p.print_best    = True
+        p.n             = 20   ## Population (Suggested: 10~20)
+        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+
+        p.kmax          = 100000  ## Max iterations
+        p.nc,nr         = 10,1  ## Graph columns x rows
+        p.arity         = 2  # Arity
+
+
+        #### Run Search
+        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
     """
