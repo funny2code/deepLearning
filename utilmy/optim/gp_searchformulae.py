@@ -1,24 +1,22 @@
 """ Search Formulae using GP
 Docs::
 
-    1) Install
-       https://darioizzo.github.io/dcgp/installation.html#python
+    Install
 
+       DCGP
+          https://darioizzo.github.io/dcgp/installation.html#python
 
-       example :
           https://darioizzo.github.io/dcgp/notebooks/real_world1.html
 
-
-    ---- My Problem
-    2)  list with scores (ie randomly generated)
-    We use 1 formulae to merge  2 list --> merge_list with score
-       Ojective to maximize  correlation(merge_list,  True_ordered_list)
-
-    Goal is to find a formulae, which make merge_list as much sorted as possible
+       DSO
+           https://github.com/brendenpetersen/deep-symbolic-optimization
 
 
-        Example :
+    -- Test Problem
+    2) Goal is to find a formulae, which make merge_list as much sorted as possible
+    Example :
         myproblem1 = myProblem()
+        ## myproblem1.get_cost(formuale_str, symbols  )
 
         from lib2to3.pygram import Symbols
         from dcgpy import expression_gdual_double as expression
@@ -45,6 +43,18 @@ Docs::
 
         #### Run Search
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+
+
+        #### Parallel version   ------------------------------------
+        for i in range(npool):
+            p2         = copy.deepcopy(p)
+            p2.f_trace = f'trace_{i}.log'
+            input_list.append(p2)
+
+        #### parallel Runs
+        multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                      input_list=input_list,
+                      npool=3)
 
 """
 import random, math, numpy as np, warnings, copy
@@ -73,25 +83,25 @@ def test1():
     from pyaudi import gdual_double as gdual
 
     p               = Box({})
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-
-    p.ks            = ["sum", "diff", "div", "mul"]
+    p.log_file      = 'trace.log'
     p.print_after   = 100
     p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.ks            = ["sum", "diff", "div", "mul"]
+
     p.n             = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     p.kmax          = 100000  ## Max iterations
     p.nc,nr         = 10,1  ## Graph columns x rows
-    p.a             = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.log_file      = 'trace'
+    p.arity         = 2  # Arity
     p.seed          = 43
 
 
     #### Run Search
-    search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+    search_formuale_dcgpy(myproblem1, pars_dict=p, verbose=True)
 
 
 
@@ -107,6 +117,8 @@ def test2():
     myproblem1 = myProblem()
 
     p               = Box({})
+    p.log_file      = 'trace.log'
+
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
 
@@ -118,10 +130,7 @@ def test2():
 
     p.kmax          = 100000  ## Max iterations
     p.nc,nr         = 10,1  ## Graph columns x rows
-    p.a             = 2  # Arity
-    p.n_cuckoo_eggs = round(p.pa * p.n)
-    p.n_replace     = round(p.pa * p.n)
-    p.log_file      = 'trace.log'
+    p.arity         = 2  # Arity
 
     npool= 2
     input_list = []
@@ -131,7 +140,7 @@ def test2():
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(search_formuale_algo1, input_fixed={"myproblem": myproblem1, 'verbose':False},
+    multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
                   npool=3)
 
@@ -143,6 +152,8 @@ class myProblem:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
         Docs::
+
+            myProblem.get_cost(   )
 
             ---- My Problem
             2)  list with scores (ie randomly generated)
@@ -181,8 +192,8 @@ class myProblem:
 
 
     def get_correlm(self, formulae_str:str):
-        """  compare 2 lists lnew, ltrue and output correlation.
-        Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+        """  Compare 2 lists lnew, ltrue and output correlation.
+             Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
         
         """
         ##### True list
@@ -297,7 +308,7 @@ class myProblem:
 
 
 ###################################################################################################
-def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -337,7 +348,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.ks)
+    operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -348,9 +359,9 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     log_file      = p.get('log_file', 'log.log') # 'trace.py'
 
     ### search
-    pa            = p.pa # 0.3  ## Parasitic Probability (Suggested: 0.3)
+    pa            = p.get( 'pa', 0.3)  # 0.3  ## Parasitic Probability (Suggested: 0.3)
     nc,nr         = p.nc, p.nr # 10,1  ## Graph columns x rows
-    arity         = p.a   #2  # Arity
+    arity         = p.get( 'arity', 2)   #2  # Arity
     n_cuckoo_eggs = round(p.pa*p.pop_size)
     n_replace     = round(p.pa*p.pop_size)
 
@@ -403,7 +414,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
         # ex.mutate_active(2)   log("Mutated expression:", ex(symbols)[0])
-        global best_egg, k, dic_front
+        # global best_egg, k, dic_front
         ls_trace = []
 
         ########### Main Loop  ####################################################
