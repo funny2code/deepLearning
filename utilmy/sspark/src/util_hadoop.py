@@ -143,6 +143,26 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
+def glob_filter(flist, path_pattern):
+    """  Filter flist  by path pattern
+
+    """
+    plist = path_pattern.split("*")
+
+    flist2 =[]
+    for fi in flist :
+       flag= True
+       for pi in plist :
+          if  pi not in fi:
+             flag= False
+             break
+       if flag :
+          flist2.append(fi)
+
+    return flist2
+
+    
+
 def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file=''):
     """
         flag=-R
