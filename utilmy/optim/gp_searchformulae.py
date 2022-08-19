@@ -58,6 +58,10 @@ Docs::
                       input_list=input_list,
                       npool=3)
 
+
+
+
+
 """
 import random, math, numpy as np, warnings, copy
 import scipy.stats
@@ -338,6 +342,26 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
         #### Run Search
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+
+
+        -- Add constraints in the functional space
+
+        https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
+
+        ### . So that we make sure the function actually passes through the points (-1,0) and (1,0).
+        def pc_fun(x, g):
+            alpha = - 0.5 * (g([-1])[0]+g([1])[0])
+            beta = 0.5 * (g([-1])[0]-g([1])[0])
+            return [g(x)[0]+alpha+x[0]*beta]
+
+        for loop in range(10):
+            ex.mutate_random(20)
+            for i,it in enumerate(x):
+                y[i] = ex([it])[0]
+            plt.plot(x,y)
+        plt.ylim([-1,1])
+        plt.grid("on")
+
 
 
     """
