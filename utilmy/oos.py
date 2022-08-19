@@ -204,7 +204,6 @@ def test_all():
     #os_system_test()
 
 
-
 def test0():
     """function test0
     Args:
@@ -232,6 +231,7 @@ def test0():
     res = os_system( f" ls . ",  doprint=False)
     assert os_platform_os() == sys.platform
 
+
 def test1():
     """function test1
     Args:
@@ -244,6 +244,7 @@ def test1():
     is_float(float_)
     to_float(int_)
     to_int(float_)
+
 
 def test2():
     """function test2
@@ -274,6 +275,7 @@ def test2():
     log(res)
     '''
 
+
 def test4():
     """function test4
     Args:
@@ -297,6 +299,7 @@ def test4():
     os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
     os_file_check("./testdata/tmp/test/file_test.txt")
 
+
 def test5():
     """function test5
     Args:
@@ -312,6 +315,7 @@ def test5():
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
     pd_df = pd_random()
     log(os_sizeof(pd_df, set()))
+
 
 def test_globglob():
     os_makedirs("folder/test/file1.txt")
