@@ -87,7 +87,7 @@ def test1():
     p.a             = 2  # Arity
     p.n_cuckoo_eggs = round(p.pa * p.n)
     p.n_replace     = round(p.pa * p.n)
-    p.f_trace       = 'trace'
+    p.log_file      = 'trace'
     p.seed          = 43
 
 
@@ -116,12 +116,13 @@ def test2():
     p.print_best    = True
     p.n             = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+
     p.kmax          = 100000  ## Max iterations
     p.nc,nr         = 10,1  ## Graph columns x rows
     p.a             = 2  # Arity
     p.n_cuckoo_eggs = round(p.pa * p.n)
     p.n_replace     = round(p.pa * p.n)
-    p.f_trace       = 'trace.log'
+    p.log_file      = 'trace.log'
 
     npool= 2
     input_list = []
@@ -402,8 +403,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
 
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
-        # ex.mutate_active(2)
-        # log("Mutated expression:", ex(symbols)[0])        
+        # ex.mutate_active(2)   log("Mutated expression:", ex(symbols)[0])
         global best_egg, k, dic_front
         ls_trace = []
 
