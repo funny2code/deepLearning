@@ -2,9 +2,14 @@
 Docs::
 
     Install
-       https://darioizzo.github.io/dcgp/installation.html#python
 
-       https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+       DCGP
+          https://darioizzo.github.io/dcgp/installation.html#python
+
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+       DSO
+           https://github.com/brendenpetersen/deep-symbolic-optimization
 
 
     -- Test Problem
@@ -409,7 +414,7 @@ def search_formuale_dcgpy(myproblem=None, pars_dict:dict=None, verbose=False, ):
 
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
         # ex.mutate_active(2)   log("Mutated expression:", ex(symbols)[0])
-        global best_egg, k, dic_front
+        # global best_egg, k, dic_front
         ls_trace = []
 
         ########### Main Loop  ####################################################
