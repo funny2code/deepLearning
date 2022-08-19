@@ -1,44 +1,108 @@
+""" Search Formulae using GP
+Docs::
+
+
+
+    1) Install
+       https://darioizzo.github.io/dcgp/installation.html#python
+
+
+       example :
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+    ---- My Problem
+    2)  list with scores (ie randomly generated)
+    We use 1 formulae to merge  2 list --> merge_list with score
+       Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+    Goal is to find a formulae, which make merge_list as much sorted as possible
+
+
+    Example :
+    myproblem1 = myProblem()
+
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from dcgpy import kernel_set_gdual_double as kernel_set
+    from pyaudi import gdual_double as gdual
+
+    p               = Box({})
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+
+    p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+    p.print_after   = 100
+    p.print_best    = True
+    p.n             = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.a             = 2  # Arity
+    p.n_cuckoo_eggs = round(p.pa * p.n)
+    p.n_replace     = round(p.pa * p.n)
+    p.f_trace       = 'trace'
+    p.seed          = 43
+
+
+    #### Run Search
+    search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+
 """
 
-1) Install
-   https://darioizzo.github.io/dcgp/installation.html#python
-
-
-   example :
-      https://darioizzo.github.io/dcgp/notebooks/real_world1.html
-
-
-######## My Problem
-2)  list with scores (ie randomly generated)
-We use 1 formulae to merge  2 list --> merge_list with score
-   Ojective to maximize  correlation(merge_list,  True_ordered_list) 
-
-Goal is to find a formulae, which make merge_list as much sorted as possible
-
-
-
-
-
-"""
-
-
-import random
-import math
-import numpy as np
+import random, math, numpy as np, warnings
 import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
-import warnings
 warnings.filterwarnings("ignore")
 from box import Box
 
 
-
+####################################################################################################
 def log(*s):
     print(*s, flush=True)
 
 
+def test_all():
+    test1()
 
+
+def test1():
+    myproblem1 = myProblem()
+
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from dcgpy import kernel_set_gdual_double as kernel_set
+    from pyaudi import gdual_double as gdual
+
+    p               = Box({})
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+
+    p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+    p.print_after   = 100
+    p.print_best    = True
+    p.n             = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.a             = 2  # Arity
+    p.n_cuckoo_eggs = round(p.pa * p.n)
+    p.n_replace     = round(p.pa * p.n)
+    p.f_trace       = 'trace'
+    p.seed          = 43
+
+
+    #### Run Search
+    search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+
+
+
+
+
+
+
+####################################################################################################
 class myProblem:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
@@ -50,9 +114,28 @@ class myProblem:
         self.ncorrect1 = ncorrect1
         self.ncorrect2 = ncorrect2
         self.adjust    = adjust
-        
 
-    ######### Objective to Maximize
+
+
+    def get_cost(self, expr:str, symbols):
+        """     ######### Objective to Maximize
+
+
+        """
+        # def normalize(val,Rmin,Rmax,Tmin,Tmax):
+        #     return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
+
+        # def denormalize(val,Rmin,Rmax,Tmin,Tmax):
+        #     return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
+
+        try:
+            correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        except:
+            correlm = 1.0
+
+        return(correlm)
+
+
     def get_correlm(self, formulae_str:str):
         """  compare 2 lists lnew, ltrue and output correlation.
         Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
@@ -83,32 +166,18 @@ class myProblem:
         return -correlm  ### minimize correlation val
 
 
-    def get_cost(self, ex:str):
-        # def normalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
-
-        # def denormalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
-
-        try:
-            correlm = self.get_correlm( formulae_str=ex(symbols)[0])
-        except:
-            correlm = 1.0
-
-        return(correlm)
-
-    
     def rank_score(self, fornulae_str:str, rank1:list, rank2:list)-> list:
         """  ## Example of rank_scores0 = Formulae(list_ score1, list_score2)
              ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
+        Docs::
     
-        list of items:  a,b,c,d, ...
-        item      a,b,c,d,e
-        rank1 :   1,2,3,4 ,,n     (  a: 1,  b:2, ..)
-        rank2 :   5,7,2,1 ,,n     (  a: 5,  b:6, ..)
-        
-        scores_new :   a: -7.999,  b:-2.2323   
-        (item has new scores)
+            list of items:  a,b,c,d, ...
+            item      a,b,c,d,e
+            rank1 :   1,2,3,4 ,,n     (  a: 1,  b:2, ..)
+            rank2 :   5,7,2,1 ,,n     (  a: 5,  b:6, ..)
+
+            scores_new :   a: -7.999,  b:-2.2323
+            (item has new scores)
         
         """
 
@@ -186,8 +255,26 @@ class myProblem:
 ###################################################################################################
 def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
+    Docs::
 
-       myproblem.calc_cost()
+
+        myproblem.calc_cost()
+
+        nvars_in      = 2  ### nb of variables
+        nvars_out     = 1
+
+        ks            = kernel_set(["sum", "diff", "div", "mul"])
+        print_after   = 100
+        print_best    = True
+        n             = 20  ## Population (Suggested: 10~20)
+        pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+        kmax          = 100000  ## Max iterations
+        nc,nr         = 10,1  ## Graph columns x rows
+        a             = 2  # Arity
+        n_cuckoo_eggs = round(pa*n)
+        n_replace     = round(pa*n)
+        log_file       = 'trace.py'
+
 
     """
     from lib2to3.pygram import Symbols
@@ -203,47 +290,36 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     #### Formulae GP Search params   #################
     p = Box(pars_dict)
 
-
+    ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-
     operator_list = p.ks
+
+    ### Log
     print_after   = p.print_after
     print_best    = p.print_best
-    pop_size      = 20  ## Population (Suggested: 10~20)
-    max_iter      = 100000  ## Max iterations
+    pop_size      = p.pop_size #20  ## Population (Suggested: 10~20)
+    max_iter      = p.max_iter #100000  ## Max iterations
+    seed          = p.seed
+    log_file      = p.log_file # 'trace.py'
 
-    
-    pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    nc,nr         = 10,1  ## Graph columns x rows
-    a             = 2  # Arity
-    n_cuckoo_eggs = round(pa*pop_size)
-    n_replace     = round(pa*pop_size)
-    log_file       = 'trace.py'
+    ### search
+    pa            = p.pa # 0.3  ## Parasitic Probability (Suggested: 0.3)
+    nc,nr         = p.nc, p.nr # 10,1  ## Graph columns x rows
+    arity         = p.a   #2  # Arity
+    n_cuckoo_eggs = round(p.pa*p.pop_size)
+    n_replace     = round(p.pa*p.pop_size)
 
-    # nvars_in      = 2  ### nb of variables
-    # nvars_out     = 1
-    #
-    # ks            = kernel_set(["sum", "diff", "div", "mul"])
-    # print_after   = 100
-    # print_best    = True
-    # n             = 20  ## Population (Suggested: 10~20)
-    # pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    # kmax          = 100000  ## Max iterations
-    # nc,nr         = 10,1  ## Graph columns x rows
-    # a             = 2  # Arity
-    # n_cuckoo_eggs = round(pa*n)
-    # n_replace     = round(pa*n)
-    # log_file       = 'trace.py'
 
-    
-    ######### Define expression symbols
+
+
+
+    ######### Define expression symbols  #######################
     symbols = []
     for i in range(nvars_in):
         symbols.append(f"x{i}")
 
-
-    ######### Print
+    ######### Check   ##########################################
     if verbose:
         log(operator_list)
         log(symbols)
@@ -255,10 +331,10 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
                             rows        = nr,
                             cols        = nc,
                             levels_back = nc,
-                            arity       = a,
+                            arity       = arity,
                             kernels     = operator_list(),
                             n_eph       = 0,
-                            seed        = int(random.random()*1000000) )
+                            seed        = seed )
 
     def search():
         def levyFlight(u):
@@ -275,10 +351,9 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         # Initialize the nest
         nest = []
         for i in range(pop_size):
-            ex = get_random_solution()
-            cost = myproblem.get_cost(ex)
-            nest.append((ex, cost))
-
+            expr = get_random_solution()
+            cost = myproblem.get_cost(expr=expr, symbols=symbols)
+            nest.append((expr, cost))
 
         # Sort nest
         nest.sort(key = itemgetter(1))
@@ -291,7 +366,8 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
         global k
         global dic_front
         ls_trace = []
-        # Main Loop
+
+        ########### Main Loop  ####################################################
         for k in range(max_iter + 1):
             # Lay cuckoo eggs
             for i in range(n_cuckoo_eggs):
@@ -308,8 +384,8 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
             ls_trace.append(nest[0][1])
                     
             for i in range(n_replace):
-                ex = get_random_solution()
-                nest[(pop_size-1)-(i)] = (ex, myproblem.get_cost(ex))
+                expr = get_random_solution()
+                nest[(pop_size-1)-(i)] = (expr, myproblem.get_cost(expr, symbols))
 
             # Iterational printing
             if (k%print_after == 0):
@@ -323,7 +399,7 @@ def search_formuale_algo1(myproblem=None, pars_dict:dict=None, verbose=False, ):
                 best_egg = deepcopy(nest[0])
                 log(f'\n#{k}', f'{best_egg[1]}')
 
-                if (print_best==True):
+                if print_best :
                     log(best_egg[0](symbols)[0])
                     #log(best_egg[0].simplify(symbols))
                     log('\n')
