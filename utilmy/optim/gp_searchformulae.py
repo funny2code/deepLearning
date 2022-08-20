@@ -94,7 +94,7 @@ def test_pars_values():
 
     p               = Box({})
     p.log_file      = 'trace.log'
-    p.print_after   = 100
+    p.print_after   = 5
     p.print_best    = True
 
 
@@ -102,6 +102,7 @@ def test_pars_values():
     p.nvars_out     = 1
     p.ks            = ["sum", "diff", "div", "mul"]
 
+    p.max_iter      = 10
     p.pop_size      = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     p.kmax          = 100000  ## Max iterations
