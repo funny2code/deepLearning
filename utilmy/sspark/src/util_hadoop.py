@@ -161,7 +161,7 @@ def glob_filter(flist, path_pattern):
 
     return flist2
 
-    
+
 
 def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file=''):
     """
