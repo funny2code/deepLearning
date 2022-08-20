@@ -449,10 +449,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                             seed        = seed )
 
     def search():
-        """function search
-        Search for best possible solution using Cuckoo Search Algorithm
-
-
+        """Search for best possible Formulae using Cuckoo Search Algorithm
         """
         def levyFlight(u):
             return (math.pow(u,-1.0/3.0)) # Golden ratio = 1.62
