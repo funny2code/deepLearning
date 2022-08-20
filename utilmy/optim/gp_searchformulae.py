@@ -132,6 +132,7 @@ def test2():
     """Test of search_formuale_dcgpy_v1_parallel
     """
     myproblem1,p = test_pars_values()
+
     search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
 
 
