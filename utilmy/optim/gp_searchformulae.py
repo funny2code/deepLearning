@@ -96,7 +96,6 @@ def test1():
 
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
     from pyaudi import gdual_double as gdual
 
     p               = Box({})
