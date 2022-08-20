@@ -1,17 +1,37 @@
 """ Search Formulae using GP
 Docs::
 
-    Install
+    Install  DCGP
 
-       DCGP
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
           https://darioizzo.github.io/dcgp/installation.html#python
 
           https://darioizzo.github.io/dcgp/notebooks/real_world1.html
 
-       DSO
+
+    Install  DSO
            https://github.com/brendenpetersen/deep-symbolic-optimization
 
            https://iclr.cc/virtual/2021/poster/2578
+
+
+
+    Install  Operon
+
+
+
+    cd utilmy/optim/
+
+    python gp_searchformulae.py  test1
+
+
 
 
     -- Test Problem
@@ -89,10 +109,10 @@ def test1():
     p.nvars_out     = 1
     p.ks            = ["sum", "diff", "div", "mul"]
 
-    p.n             = 20  ## Population (Suggested: 10~20)
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
     p.arity         = 2  # Arity
     p.seed          = 43
 
@@ -374,7 +394,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     """
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
+    from dcgpy import kernel_set_gdual_double
     from pyaudi import gdual_double as gdual
 
     from box import Box
@@ -388,7 +408,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+    operator_list = kernel_set_gdual_double(p.get("ks", ["sum", "diff", "div", "mul"] ))
 
     ### Log
     print_after   = p.get('print_after', 20)

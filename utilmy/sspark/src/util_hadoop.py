@@ -184,9 +184,14 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file='
                 ['/path/to/file.txt']
 
     """
-    from subprocess import Popen, PIPE
-    import subprocess, re, globre
-    
+    import subprocess
+
+    if "*" in path :
+       root = path.split("*")[0]
+       root = "/".join( root.split("/")[:-1] )
+    else :
+       root = path
+
     if use_regex:
         files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
         # flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
@@ -196,7 +201,7 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file='
         if match_file:
             return glob_filter(files, match_file)
 
-    process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
+    process = subprocess.Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout= subprocess.PIPE, stderr=subprocess.PIPE)
     std_out, std_err = process.communicate()
 
     if filename_only:
