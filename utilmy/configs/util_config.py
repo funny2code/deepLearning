@@ -81,18 +81,23 @@ def test_example():
 def config_load(
         config_path:    str  = None,
         to_dataclass:   bool = True,
+        config_field_name :  str  = None,
 
+        environ_path_default: str = "config_path_default",
         path_default:   str  = None,
         config_default: dict = None,
         save_default:   bool = False,
-        config_field_name :  str  = None,
     
         verbose=0
 ) -> dict:
-    """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties
+    """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties INTO a dict
     Doc::
+       
+       to_dataclass : True, can access the dict as dot   mydict.field 
+       verbose :  2 print the config
+       config_field_name:  Extract sub-field name from the dict
     
-        Load Config file into a dict
+       -- Priority steps
         1) load config_path
         2) If not, load in USER/.myconfig/.config.yaml
         3) If not, create default save in USER/.myconfig/.config.yaml
@@ -109,10 +114,10 @@ def config_load(
     
 
     #########Default value setup ###########################################
-    path_default = (
-        pathlib.Path.home() / ".myconfig" if path_default is None else path_default
-    )
-    config_path_default = path_default / "config.yaml"
+    if path_default is None:
+        config_path_default = os.environ.get(environ_path_default, str(pathlib.Path.home()) + "/.myconfig/config.yaml"  ) 
+        path_default = os.path.parent(config_path_default)
+
     if config_default is None:
         config_default = {"field1": "", "field2": {}}
 
@@ -145,7 +150,7 @@ def config_load(
             import json
             cfg = json.loads(config_path.read_text())
 
-        elif config_path.suffix in [".properties", ".ini"]:
+        elif config_path.suffix in {".properties", ".ini"}:
             from configparser import SafeConfigParser
             cfg = SafeConfigParser()
             cfg.read(str(config_path))
