@@ -87,13 +87,10 @@ def test_all():
     test1()
 
 
-def test1():
-    """Test search_formuale_dcgpy_v1 is running 
-    """
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from pyaudi import gdual_double as gdual
+def test_pars_values():
+    """ return test params
 
+    """
     myproblem1 = myProblem()
 
     p               = Box({})
@@ -113,6 +110,18 @@ def test1():
     p.arity         = 2  # Arity
     p.seed          = 43
 
+    return myproblem1, p
+
+
+def test1():
+    """Test search_formuale_dcgpy_v1
+    """
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from pyaudi import gdual_double as gdual
+
+
+    myproblem1,p = test_pars_values()
 
     #### Run Search
     search_formuale_dcgpy_v1(myproblem1, pars_dict=p, verbose=True)
@@ -120,57 +129,20 @@ def test1():
 
 
 def test2():
-    """Test parralel run of search_formuale_dcgpy_v1_parallel
+    """Test of search_formuale_dcgpy_v1_parallel
     """
-    from utilmy.parallel import multiproc_run
-
-    myproblem1 = myProblem()
-
-    p               = Box({})
-    p.log_file      = 'trace.log'
-    p.print_after   = 100
-    p.print_best    = True
-
-
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-    p.ks            = ["sum", "diff", "div", "mul"]
-
-    p.pop_size      = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc, p.nr       = 10,1  ## Graph columns x rows
-    p.arity         = 2  # Arity
-    p.seed          = 43
-
+    myproblem1,p = test_pars_values()
     search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
 
 
 
 
 def test3():
-    """Test parralel run of search_formuale_dcgpy_v1, in customize version.
+    """Test parralel run of search_formuale_dcgpy_v1, in customize parallle version.
     """
     from utilmy.parallel import multiproc_run
 
-    myproblem1 = myProblem()
-
-    p               = Box({})
-    p.log_file      = 'trace.log'
-    p.print_after   = 100
-    p.print_best    = True
-
-
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-    p.ks            = ["sum", "diff", "div", "mul"]
-
-    p.pop_size      = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc, p.nr       = 10,1  ## Graph columns x rows
-    p.arity         = 2  # Arity
-    p.seed          = 43
+    myproblem1,p = test_pars_values()
 
     npool= 3
     input_list = []
@@ -370,7 +342,6 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     Docs::
 
         -- Install  DCGP
-
           conda create -n dcgp  python==3.8.1
           source activate dcgp
           conda install   -y  -c conda-forge dcgp-python  scipy
