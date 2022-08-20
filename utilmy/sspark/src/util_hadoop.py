@@ -143,6 +143,26 @@ def hadoop_print_config(dirout=None):
 
 
 ###############################################################################################################
+def glob_filter(flist, path_pattern):
+    """  Filter flist  by path pattern
+
+    """
+    plist = path_pattern.split("*")
+
+    flist2 =[]
+    for fi in flist :
+       flag= True
+       for pi in plist :
+          if  pi not in fi:
+             flag= False
+             break
+       if flag :
+          flist2.append(fi)
+
+    return flist2
+
+
+
 def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file=''):
     """
         flag=-R
@@ -164,17 +184,24 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file='
                 ['/path/to/file.txt']
 
     """
-    from subprocess import Popen, PIPE
-    import subprocess, re, globre
-    
+    import subprocess
+
+    if "*" in path :
+       root = path.split("*")[0]
+       root = "/".join( root.split("/")[:-1] )
+    else :
+       root = path
+
     if use_regex:
         files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
-        flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
+        # flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
+        # if match_file:
+        #     return [fn for fn in flist_full_address if globre.match(match_file, fn)]
+        # return flist_full_address
         if match_file:
-            return [fn for fn in flist_full_address if globre.match(match_file, fn)]
-        return flist_full_address
+            return glob_filter(files, match_file)
 
-    process = Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout=PIPE, stderr=PIPE)
+    process = subprocess.Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout= subprocess.PIPE, stderr=subprocess.PIPE)
     std_out, std_err = process.communicate()
 
     if filename_only:
@@ -653,86 +680,97 @@ def pd_read_csv_hdfs(dirlist=None, dirlevel=1, ignore_index=True,  cols=None, ve
 
 
 
-def pd_read_json_hdfs(dirlist=None, ignore_index=True,  cols=None, verbose=False, nfile=10000, nrows=-1, 
-                        concat_sort=False, n_pool=1,   drop_duplicates=None, col_filter=None,  col_filter_val=None,
-                        dtype=None, compression='gzip', encoding='utf-8',  on_bad_lines='skip', dirlevel=1,
-                        **kw):
-        """  Read file in parallel from HDFS : very Fast using pyarrwo
-        Docs::
+def pd_read_json_hdfs(dirlist=None, ignore_index=True,  cols=None, verbose=False, nfile=10000, nrows=-1,
+                      concat_sort=False, n_pool=1,   drop_duplicates=None, col_filter=None,  col_filter_val=None,
+                      dtype=None, compression='gzip', encoding='utf-8', sep=',', header=None, on_bad_lines='skip', dirlevel=1,
+                     **kw):
+      """  Read file in parallel from HDFS : very Fast
+      Docs::
+      
+          dir_list: list of pattern, or sep by ";"
+         return:
+      
+      pip install python-snappy   ### hadoop snappy compressed
+      from snappy.hadoop_snappy import StreamDecompressor
+      
+      """
+      import gc, pandas as pd  
+      def log(*s, **kw):
+          print(*s, flush=True, **kw)
 
-                :param dir_list: list of pattern, or sep by ";"
-                :return:
-        """
-        import glob, gc,  pandas as pd, os, copy
-        import pyarrow as pa, gc,  pyarrow.csv as pq
-        def log(*s, **kw):
-            log(*s, flush=True, **kw)
+      log( "pd_read_file_hdfs" )
+      hdfs = pa.hdfs.connect()
 
-        hdfs = pa.hdfs.connect()
-
-        def pd_reader_obj(fi, cols=None, **kw):
-            try :
+      def pd_reader_obj(fi, cols=None, **kw):
+          try :
+            if ".snappy" in fi:
+                from snappy.hadoop_snappy import StreamDecompressor
+                from io import BytesIO
+                with hdfs.open(fi) as fi2:
+                    bio = BytesIO(StreamDecompressor().decompress(fi2.read()))
+                    dfi = pd.read_json(bio, lines=True, compression='infer')
+            else :                                    
                 with hdfs.open(fi) as fi2:
                     dfi = pd.read_json(fi2,lines=True,compression= compression)
 
 
-                if col_filter is not None : dfi = dfi[ dfi[col_filter] == col_filter_val ]
-                if cols is not None :       dfi = dfi[cols]
-                if nrows > 0        :       dfi = dfi.iloc[:nrows,:]
-                if drop_duplicates is not None  : dfi = dfi.drop_duplicates(drop_duplicates)
+            if col_filter is not None : dfi = dfi[ dfi[col_filter] == col_filter_val ]
+            if cols is not None :       dfi = dfi[cols]
+            if nrows > 0        :       dfi = dfi.iloc[:nrows,:]
+            if drop_duplicates is not None  : dfi = dfi.drop_duplicates(drop_duplicates)
 
-                return dfi
-            except Exception as e:
-                log( e)
-                return None
+            return dfi
+          except Exception as e:
+            log( e)
+            return None
 
-        #### File  ################################
-        dirlist   = dirlist.split(";") if isinstance(dirlist, str)  else dirlist
+      #### File  ################################
+      dirlist   = dirlist.split(";") if isinstance(dirlist, str)  else dirlist
 
-        flist = dirlist
-        for i in range(0, dirlevel):
-            flist2 = []
-            for fi in flist[:] :
-                log(fi)
-                flist2 = flist2 + hdfs.ls(fi)
-            flist = copy.deepcopy(flist2)
-            if len(flist) > nfile  : break
+      flist = dirlist
+      for i in range(0, dirlevel):
+        flist2 = []
+        for fi in flist[:] :
+          log(fi)
+          flist2 = flist2 + hdfs.ls(fi)
+        flist = copy.deepcopy(flist2)
+        if len(flist) > nfile  : break
 
-        flist = [ fi for fi in flist if "." in fi.split("/")[-1] ]  ### only .csv.gz files
-        flist = sorted(list(set(flist)))
-        flist = flist[:nfile] if nfile>0 else flist
-        n_file    = len(flist)
-        log('Nfile', n_file)
-        if verbose: log(flist)
-        # return flist
+      flist = [ fi for fi in flist if "." in fi.split("/")[-1] ]  ### only .csv.gz files
+      flist = sorted(list(set(flist)))
+      flist = flist[:nfile] if nfile>0 else flist
+      n_file    = len(flist)
+      log('Nfile', n_file)
+      if verbose: log(flist)
 
-        #### Pool count  ##########################
-        from multiprocessing.pool import ThreadPool
-        if n_pool < 1 :  n_pool = 1
-        if n_file <= 0:  return pd.DataFrame()
-        elif n_file <= 2:
-            m_job  = n_file
-            n_pool = 1
-        else  :
-            m_job  = 1 + n_file // n_pool  if n_file >= 3 else 1
-        if verbose : log(n_file,  n_file // n_pool )
 
-        pool   = ThreadPool(processes=n_pool)
-        dfall  = pd.DataFrame()
-        for j in range(0, m_job ) :
-            if verbose : log("Pool", j, end=",")
-            job_list = []
-            for i in range(n_pool):
-                if n_pool*j + i >= n_file  : break
-                filei         = flist[n_pool*j + i]
+      #### Pool count  ##########################
+      from multiprocessing.pool import ThreadPool
+      if n_pool < 1 :  n_pool = 1
+      if n_file <= 0:  return pd.DataFrame()
+      elif n_file <= 2:
+        m_job  = n_file
+        n_pool = 1
+      else  :
+        m_job  = 1 + n_file // n_pool  if n_file >= 3 else 1
+      if verbose : log(n_file,  n_file // n_pool )
 
-                ### TODO : use with kewyword arguments
-                job_list.append( pool.apply_async(pd_reader_obj, (filei, )))
-                if (j+100) % 100 == 0 : log(j, filei)
+      pool   = ThreadPool(processes=n_pool)
+      dfall  = pd.DataFrame()
+      for j in range(0, m_job ) :
+          if verbose : print("Pool", j, end=",")
+          job_list = []
+          for i in range(n_pool):
+             if n_pool*j + i >= n_file  : break
+             filei         = flist[n_pool*j + i]
 
-            for i in range(n_pool):
-                if i >= len(job_list): break
-                dfi   = job_list[ i].get()
+             ### TODO : use with kewyword arguments
+             job_list.append( pool.apply_async(pd_reader_obj, (filei, )))
+             if (j+100) % 100 == 0 : log(j, filei)
+
+          for i in range(n_pool):
+            if i >= len(job_list): break
+            dfi   = job_list[ i].get()
 
             if dfi is None : continue
 
@@ -746,9 +784,10 @@ def pd_read_json_hdfs(dirlist=None, ignore_index=True,  cols=None, verbose=False
             #log("Len", n_pool*j + i, len(dfall))
             del dfi; gc.collect()
 
-        pool.terminate() ; pool.join()  ; pool = None
-        if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
-        return dfall
+      pool.terminate() ; pool.join()  ; pool = None
+      if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
+      return dfall
+
 
 
 
