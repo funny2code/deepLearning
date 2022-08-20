@@ -17,9 +17,11 @@ Docs::
     -- Test Problem
     2) Goal is to find a formulae, which make merge_list as much sorted as possible
     Example :
+        ## 1) Define Problem Class with get_cost methods
         myproblem1 = myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
+        ## 2) Param Search
         from lib2to3.pygram import Symbols
         from dcgpy import expression_gdual_double as expression
         from dcgpy import kernel_set_gdual_double as kernel_set
@@ -29,12 +31,12 @@ Docs::
         p.nvars_in      = 2  ### nb of variables
         p.nvars_out     = 1
 
-        p.ks            = kernel_set(["sum", "diff", "div", "mul"])
+        p.ks            = ["sum", "diff", "div", "mul"]
         p.print_after   = 100
         p.print_best    = True
-        p.n             = 20  ## Population (Suggested: 10~20)
+        p.pop_size      = 20  ## Population (Suggested: 10~20)
         p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-        p.kmax          = 100000  ## Max iterations
+        p.max_iter      = 100000  ## Max iterations
         p.nc,nr         = 10,1  ## Graph columns x rows
         p.a             = 2  # Arity
         p.n_cuckoo_eggs = round(p.pa * p.n)
@@ -43,7 +45,7 @@ Docs::
         p.seed          = 43
 
 
-        #### Run Search
+        ## 3) Run Search
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
@@ -206,13 +208,11 @@ class myProblem:
 
 
     def get_cost(self, expr:None, symbols):
-        """     ######### Objective to Maximize
-        Maximizes the cost of the given expression    
-            Docs::
+        """ Cost Calculation, Objective to Maximize   
+        Docs::
 
             expr            : Expression whose cost has to be maximized
             symbols         : Symbols
-
 
         """
         # def normalize(val,Rmin,Rmax,Tmin,Tmax):
@@ -232,6 +232,7 @@ class myProblem:
     def get_correlm(self, formulae_str:str):
         """  Compare 2 lists lnew, ltrue and output correlation.
              Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+
         Docs: 
             formulae_str            : Formulae String 
         
@@ -448,7 +449,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def get_random_solution():
-        """Generate Random Expression
+        """Generate Random Formulae Expression
 
         """
         return expression(inputs = nvars_in,
