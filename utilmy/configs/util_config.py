@@ -86,7 +86,9 @@ def config_load(
         config_default: dict = None,
         save_default:   bool = False,
         config_field_name :  str  = None,
-) -> Union[dict, Box]:
+    
+        verbose=0
+) -> dict:
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties
     Doc::
     
@@ -103,7 +105,8 @@ def config_load(
             save_default:   save default config on disk
         Returns: dict config
     """
-    import json, yaml, pathlib
+    import json,  pathlib
+    
 
     #########Default value setup ###########################################
     path_default = (
@@ -123,17 +126,20 @@ def config_load(
     ######### Load Config ##################################################
     try:
         log("Config: Loading ", config_path)
-        if config_path.suffix == ".yaml":
+        if config_path.suffix in {".yaml", ".yml"}  :
             import yaml
             #Load the yaml config file
             with open(config_path, "r") as yamlfile:
                 config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)
-
-            dd = {}
-            for x in config_data :
-                for key,val in x.items():
-                   dd[key] = val
-            cfg = Box(dd)
+                 
+            if isinstance(config_data, dict ):            
+                cfg = config_data
+            else :    
+                dd = {}
+                for x in config_data :
+                    for key,val in x.items():
+                       dd[key] = val
+                cfg = dd
             
         elif config_path.suffix == ".json":
             import json
@@ -150,12 +156,16 @@ def config_load(
         else:
             raise Exception(f"not supported file {config_path}")
 
-        if to_dataclass:  ### myconfig.val  , myconfig.val2
-            return Box(cfg)
-
         if config_field_name in cfg :
-            return cfg[config_field_name]
-
+            cfg = cfg[config_field_name]
+            
+            
+        if verbose >=2 :
+            print(cfg)
+            
+        if to_dataclass:  ### myconfig.val  , myconfig.val2
+            from box import Box 
+            return Box(cfg)        
         return cfg
 
     except Exception as e:
@@ -170,8 +180,9 @@ def config_load(
         with open(config_path_default, mode="w") as fp:
             yaml.dump(config_default, fp)
 
-
     return config_default
+
+
 
 
 def config_isvalid_yamlschema(config_dict: dict, schema_path: str = 'config_val.yaml', silent: bool = False) -> bool:
