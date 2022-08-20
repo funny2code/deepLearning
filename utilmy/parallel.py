@@ -656,6 +656,7 @@ def multithread_run(fun_async, input_list: list, n_pool=5, start_delay=0.1, verb
 
 def multiproc_tochunk(flist:list, npool=2 ):
     """ Create chunk of a list for mutlti-processing.
+        1 processor = 1 chunk  --> list of arg values.
     Doc::
 
        returns list of list

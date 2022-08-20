@@ -120,14 +120,9 @@ def test1():
 
 
 def test2():
-    """Test parralel run of search_formuale_dcgpy_v2
+    """Test parralel run of search_formuale_dcgpy_v1_parallel
     """
     from utilmy.parallel import multiproc_run
-
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
 
     myproblem1 = myProblem()
 
@@ -148,17 +143,48 @@ def test2():
     p.arity         = 2  # Arity
     p.seed          = 43
 
-    npool= 2
+    search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
+
+
+def test3():
+    """Test parralel run of search_formuale_dcgpy_v1, in customize version.
+    """
+    from utilmy.parallel import multiproc_run
+
+    myproblem1 = myProblem()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 100
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.ks            = ["sum", "diff", "div", "mul"]
+
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
+    p.arity         = 2  # Arity
+    p.seed          = 43
+
+    npool= 3
     input_list = []
     for i in range(npool):
         p2 = copy.deepcopy(p)
-        p2.f_trace = f'trace_{i}.log'
+        p2['log_file'] = f'trace_{i}.log'
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(search_formuale_dcgpy_v1, input_fixed={"myproblem": myproblem1, 'verbose':False},
+    multiproc_run(search_formuale_dcgpy_v2,
+                  input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
-                  npool=3)
+                  npool=npool)
+
 
 
 
@@ -408,6 +434,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     #### Formulae GP Search params   #################
+    log(pars_dict)
     p = Box(pars_dict)
 
     ### Problem
@@ -528,10 +555,48 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
 
+def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
+    """Parallel run of search_formuale_dcgpy_v1
+    Docs::
+
+        npool: 2 : Number of parallel runs
+    """
+    from utilmy.parallel import multiproc_run
+
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(pars_dict)
+
+        fsplit = p2['log_file'].split("/")
+        fsplit[-1] = f'trace_{i}.log'
+        fi         = "/".join(fsplit)
+        p2['log_file'] = fi
+        input_list.append(p2)
+
+
+    ### parallel Run
+    multiproc_run(search_formuale_dcgpy_v2,
+                  input_fixed={"myproblem": myproblem, 'verbose':False},
+                  input_list=input_list,
+                  npool=npool)
+
+
+
+def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False, ):
+    """ Wrapper for parallel version, :
+    Docs::
+
+        1st argument should the list of parameters: inverse order
+        pars_dict is a list --> pars_dict[0]: actual dict
+
+
+    """
+    search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+
 
 
 ###################################################################################################
-def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
