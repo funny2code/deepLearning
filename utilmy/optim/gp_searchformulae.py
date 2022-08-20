@@ -17,33 +17,17 @@ Docs::
     -- Test Problem
     2) Goal is to find a formulae, which make merge_list as much sorted as possible
     Example :
+        ## 1) Define Problem Class with get_cost methods
         myproblem1 = myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
-        from lib2to3.pygram import Symbols
-        from dcgpy import expression_gdual_double as expression
-        from dcgpy import kernel_set_gdual_double as kernel_set
-        from pyaudi import gdual_double as gdual
-
+        ## 2) Param Search
         p               = Box({})
-        p.nvars_in      = 2  ### nb of variables
-        p.nvars_out     = 1
-
-        p.ks            = kernel_set(["sum", "diff", "div", "mul"])
-        p.print_after   = 100
-        p.print_best    = True
-        p.n             = 20  ## Population (Suggested: 10~20)
-        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-        p.kmax          = 100000  ## Max iterations
-        p.nc,nr         = 10,1  ## Graph columns x rows
-        p.a             = 2  # Arity
-        p.n_cuckoo_eggs = round(p.pa * p.n)
-        p.n_replace     = round(p.pa * p.n)
-        p.f_trace       = 'trace'
-        p.seed          = 43
+        ...
 
 
-        #### Run Search
+        ## 3) Run Search
+        from utilmy.optim.gp_formulaesearch import search_formuale_algo1
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
@@ -54,6 +38,7 @@ Docs::
             input_list.append(p2)
 
         #### parallel Runs
+        from utilmy.parallel import multiproc_run
         multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
                       input_list=input_list,
                       npool=3)
@@ -73,14 +58,20 @@ from box import Box
 
 ####################################################################################################
 def log(*s):
+    """Log/Print
+    """
     print(*s, flush=True)
 
 
 def test_all():
+    """function test_all
+    """
     test1()
 
 
 def test1():
+    """Test search_formuale_dcgpy_v1 is running 
+    """
     myproblem1 = myProblem()
 
     from lib2to3.pygram import Symbols
@@ -112,7 +103,8 @@ def test1():
 
 
 def test2():
-
+    """Test parralel run of search_formuale_dcgpy_v2
+    """
     from utilmy.parallel import multiproc_run
 
     from lib2to3.pygram import Symbols
@@ -159,6 +151,12 @@ class myProblem:
         """  Define the problem and cost calculation using formulae_str
         Docs::
 
+            n_sample        : Number of Samples list to be generated, default = 5
+            kk              : Change the fake generated list rank , default = 1.0
+            ncorrect1       : the number of correctly ranked objects for first list , default = 40
+            ncorrect2       : the number of correctly ranked objects for second list , default = 50
+            adjust 
+
             myProblem.get_cost(   )
 
             ---- My Problem
@@ -179,8 +177,11 @@ class myProblem:
 
 
     def get_cost(self, expr:None, symbols):
-        """     ######### Objective to Maximize
+        """ Cost Calculation, Objective to Maximize   
+        Docs::
 
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
 
         """
         # def normalize(val,Rmin,Rmax,Tmin,Tmax):
@@ -200,6 +201,9 @@ class myProblem:
     def get_correlm(self, formulae_str:str):
         """  Compare 2 lists lnew, ltrue and output correlation.
              Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+
+        Docs: 
+            formulae_str            : Formulae String 
         
         """
         ##### True list
@@ -253,7 +257,10 @@ class myProblem:
     def rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str):
         """ ## Merge 2 list using a FORMULAE
         Docs::
-        
+
+        l1              : 1st generated list
+        l2:             : 2nd generated list
+        formulae_str    : string
             Re-rank elements of list1 using ranking of list2
             20k dataframe : 6 sec ,  4sec if dict is pre-build
             Fastest possible in python
@@ -411,7 +418,10 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def get_random_solution():
-            return expression(inputs = nvars_in,
+        """Generate Random Formulae Expression
+
+        """
+        return expression(inputs = nvars_in,
                             outputs     = nvars_out,
                             rows        = nr,
                             cols        = nc,
@@ -422,6 +432,8 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                             seed        = seed )
 
     def search():
+        """Search for best possible Formulae using Cuckoo Search Algorithm
+        """
         def levyFlight(u):
             return (math.pow(u,-1.0/3.0)) # Golden ratio = 1.62
 
@@ -500,6 +512,25 @@ def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False,
 
         conda install  dcgpy
 
+        nvars_in      = p.nvars_in  ### nb of variables
+        nvars_out     = p.nvars_out
+        operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+
+        ### Log
+        print_after   = p.get('print_after', 20)
+        print_best    = p.get('print_best', True)
+        pop_size      = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
+        max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
+        seed          = p.get('seed', 43)
+        log_file      = p.get('log_file', 'log.log') # 'trace.py'
+
+        ### search
+        pa            = p.get( 'pa', 0.3)  # 0.3  ## Parasitic Probability (Suggested: 0.3)
+        nc,nr         = p.nc, p.nr # 10,1  ## Graph columns x rows
+        arity         = p.get( 'arity', 2)   #2  # Arity
+        n_cuckoo_eggs = round(p.pa*p.pop_size)
+        n_replace     = round(p.pa*p.pop_size)
+
         -- Add constraints in the functional space
 
         https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
@@ -552,7 +583,11 @@ def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def get_random_solution():
-            return expression(inputs = nvars_in,
+        """Generate Random Expression
+
+        """
+
+        return expression(inputs = nvars_in,
                             outputs     = nvars_out,
                             rows        = nr,
                             cols        = nc,
@@ -582,6 +617,18 @@ def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def run_experiment(max_gen, offsprings, dCGP,  theta, omega, c, screen_output=False):
+        """Run the Experiment
+
+        Docs::
+            max_gen         : Number of Maximum Generations
+            offsprings      : Number of offsprings
+            dCGP            : dCGP object
+            theta           : Parameter for get_cost Function
+            omega           : Parameter for get_cost Function 
+            c               : Parameter for get_cost Function 
+            screen_output   : Boolean Value whether to display output on screen
+
+        """
         chromosome = [1] * offsprings
         fitness = [1] *offsprings
         best_chromosome = dCGP.get()
@@ -609,6 +656,11 @@ def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def search():
+        """function search
+        Search for best possible solution using Genetic Algorithm
+
+
+        """
         # We run nexp experiments to accumulate statistic for the ERT
         nexp = 100
         offsprings = 10
