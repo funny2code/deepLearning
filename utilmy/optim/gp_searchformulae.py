@@ -27,14 +27,12 @@ Docs::
 
 
 
-    cd utilmy/optim/
-
-    python gp_searchformulae.py  test1
-
-
 
 
     -- Test Problem
+       cd utilmy/optim/
+       python gp_searchformulae.py  test1
+
     2) Goal is to find a formulae, which make merge_list as much sorted as possible
     Example :
         ## 1) Define Problem Class with get_cost methods
@@ -92,11 +90,11 @@ def test_all():
 def test1():
     """Test search_formuale_dcgpy_v1 is running 
     """
-    myproblem1 = myProblem()
-
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
     from pyaudi import gdual_double as gdual
+
+    myproblem1 = myProblem()
 
     p               = Box({})
     p.log_file      = 'trace.log'
@@ -135,19 +133,20 @@ def test2():
 
     p               = Box({})
     p.log_file      = 'trace.log'
+    p.print_after   = 100
+    p.print_best    = True
+
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
+    p.ks            = ["sum", "diff", "div", "mul"]
 
-    p.ks            = ["sum", "diff", "div", "mul", "log"]
-    p.print_after   = 100
-    p.print_best    = True
-    p.n             = 20  ## Population (Suggested: 10~20)
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-
     p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
     p.arity         = 2  # Arity
+    p.seed          = 43
 
     npool= 2
     input_list = []
@@ -344,34 +343,41 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     """ Search Optimal Formulae
     Docs::
 
-        conda install  dcgpy
+        -- Install  DCGP
+
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
 
         myproblem1 = myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
         p               = Box({})
         p.log_file      = 'trace.log'
+        p.print_after   = 100
+        p.print_best    = True
+
 
         p.nvars_in      = 2  ### nb of variables
         p.nvars_out     = 1
+        p.ks            = ["sum", "diff", "div", "mul"]
 
-        p.ks            = ["sum", "diff", "div", "mul", "log"]
-        p.print_after   = 100
-        p.print_best    = True
-        p.n             = 20   ## Population (Suggested: 10~20)
+        p.pop_size      = 20  ## Population (Suggested: 10~20)
         p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-
         p.kmax          = 100000  ## Max iterations
-        p.nc,nr         = 10,1  ## Graph columns x rows
+        p.nc, p.nr       = 10,1  ## Graph columns x rows
         p.arity         = 2  # Arity
-
+        p.seed          = 43
 
         #### Run Search
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
         -- Add constraints in the functional space
-
         https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
 
         ### . So that we make sure the function actually passes through the points (-1,0) and (1,0).
