@@ -89,7 +89,6 @@ def test_all():
 
 def test_pars_values():
     """ return test params
-
     """
     myproblem1 = myProblem()
 
@@ -350,7 +349,10 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
           python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
 
 
-        myproblem1 = myProblem()
+
+        from utilmy.optim import gp_searchformulae as gp
+
+        myproblem1 = gp.myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
         p               = Box({})
@@ -371,7 +373,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
         p.seed          = 43
 
         #### Run Search
-        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+        gp.search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
         -- Add constraints in the functional space
@@ -530,7 +532,15 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
     """Parallel run of search_formuale_dcgpy_v1
     Docs::
 
+        from utilmy.optim import gp_searchformulae as gp
+        myproblem1,p = gp.test_pars_values()
+        gp.search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
         npool: 2 : Number of parallel runs
+
+
+
     """
     from utilmy.parallel import multiproc_run
 
