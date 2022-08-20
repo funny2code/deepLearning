@@ -22,30 +22,12 @@ Docs::
         ## myproblem1.get_cost(formuale_str, symbols  )
 
         ## 2) Param Search
-        from lib2to3.pygram import Symbols
-        from dcgpy import expression_gdual_double as expression
-        from dcgpy import kernel_set_gdual_double as kernel_set
-        from pyaudi import gdual_double as gdual
-
         p               = Box({})
-        p.nvars_in      = 2  ### nb of variables
-        p.nvars_out     = 1
-
-        p.ks            = ["sum", "diff", "div", "mul"]
-        p.print_after   = 100
-        p.print_best    = True
-        p.pop_size      = 20  ## Population (Suggested: 10~20)
-        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-        p.max_iter      = 100000  ## Max iterations
-        p.nc,nr         = 10,1  ## Graph columns x rows
-        p.a             = 2  # Arity
-        p.n_cuckoo_eggs = round(p.pa * p.n)
-        p.n_replace     = round(p.pa * p.n)
-        p.f_trace       = 'trace'
-        p.seed          = 43
+        ...
 
 
         ## 3) Run Search
+        from utilmy.optim.gp_formulaesearch import search_formuale_algo1
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
@@ -56,6 +38,7 @@ Docs::
             input_list.append(p2)
 
         #### parallel Runs
+        from utilmy.parallel import multiproc_run
         multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
                       input_list=input_list,
                       npool=3)
