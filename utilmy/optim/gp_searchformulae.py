@@ -75,28 +75,19 @@ from box import Box
 
 ####################################################################################################
 def log(*s):
-    """function log 
-    Docs::
-        s : Accept the args to print them
-
+    """Log/Print
     """
     print(*s, flush=True)
 
 
 def test_all():
     """function test_all
-
-        test1()
-
     """
     test1()
 
 
 def test1():
-    """function test1
-    Test search_formuale_dcgpy_v1 is running or not
-
-
+    """Test search_formuale_dcgpy_v1 is running 
     """
     myproblem1 = myProblem()
 
@@ -129,13 +120,8 @@ def test1():
 
 
 def test2():
-    """function test2 
-    Test parralel run of search_formuale_dcgpy_v1 
-
-    
-
+    """Test parralel run of search_formuale_dcgpy_v2
     """
-
     from utilmy.parallel import multiproc_run
 
     from lib2to3.pygram import Symbols
