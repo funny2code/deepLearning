@@ -1,49 +1,51 @@
 """ Search Formulae using GP
 Docs::
 
-    Install
+    Install  DCGP
 
-       DCGP
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
           https://darioizzo.github.io/dcgp/installation.html#python
 
           https://darioizzo.github.io/dcgp/notebooks/real_world1.html
 
-       DSO
+
+    Install  DSO
            https://github.com/brendenpetersen/deep-symbolic-optimization
 
            https://iclr.cc/virtual/2021/poster/2578
 
 
+
+    Install  Operon
+
+
+
+
+
     -- Test Problem
+       cd utilmy/optim/
+       python gp_searchformulae.py  test1
+
     2) Goal is to find a formulae, which make merge_list as much sorted as possible
     Example :
+        ## 1) Define Problem Class with get_cost methods
         myproblem1 = myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
-        from lib2to3.pygram import Symbols
-        from dcgpy import expression_gdual_double as expression
-        from dcgpy import kernel_set_gdual_double as kernel_set
-        from pyaudi import gdual_double as gdual
-
+        ## 2) Param Search
         p               = Box({})
-        p.nvars_in      = 2  ### nb of variables
-        p.nvars_out     = 1
-
-        p.ks            = kernel_set(["sum", "diff", "div", "mul"])
-        p.print_after   = 100
-        p.print_best    = True
-        p.n             = 20  ## Population (Suggested: 10~20)
-        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-        p.kmax          = 100000  ## Max iterations
-        p.nc,nr         = 10,1  ## Graph columns x rows
-        p.a             = 2  # Arity
-        p.n_cuckoo_eggs = round(p.pa * p.n)
-        p.n_replace     = round(p.pa * p.n)
-        p.f_trace       = 'trace'
-        p.seed          = 43
+        ...
 
 
-        #### Run Search
+        ## 3) Run Search
+        from utilmy.optim.gp_formulaesearch import search_formuale_algo1
         search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
@@ -54,6 +56,7 @@ Docs::
             input_list.append(p2)
 
         #### parallel Runs
+        from utilmy.parallel import multiproc_run
         multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
                       input_list=input_list,
                       npool=3)
@@ -73,39 +76,25 @@ from box import Box
 
 ####################################################################################################
 def log(*s):
-    """function log 
-    Docs::
-        s : Accept the args to print them
-
+    """Log/Print
     """
     print(*s, flush=True)
 
 
 def test_all():
     """function test_all
-
-        test1()
-
     """
     test1()
 
 
-def test1():
-    """function test1
-    Test search_formuale_dcgpy_v1 is running or not
-
-
+def test_pars_values():
+    """ return test params
     """
     myproblem1 = myProblem()
 
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
-
     p               = Box({})
     p.log_file      = 'trace.log'
-    p.print_after   = 100
+    p.print_after   = 5
     p.print_best    = True
 
 
@@ -113,13 +102,26 @@ def test1():
     p.nvars_out     = 1
     p.ks            = ["sum", "diff", "div", "mul"]
 
-    p.n             = 20  ## Population (Suggested: 10~20)
+    p.max_iter      = 10
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
     p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
     p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
     p.arity         = 2  # Arity
     p.seed          = 43
 
+    return myproblem1, p
+
+
+def test1():
+    """Test search_formuale_dcgpy_v1
+    """
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from pyaudi import gdual_double as gdual
+
+
+    myproblem1,p = test_pars_values()
 
     #### Run Search
     search_formuale_dcgpy_v1(myproblem1, pars_dict=p, verbose=True)
@@ -127,49 +129,35 @@ def test1():
 
 
 def test2():
-    """function test2 
-    Test parralel run of search_formuale_dcgpy_v1 
-
-    
-
+    """Test of search_formuale_dcgpy_v1_parallel
     """
+    myproblem1,p = test_pars_values()
 
+    search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
+
+
+def test3():
+    """Test parralel run of search_formuale_dcgpy_v1, in customize parallle version.
+    """
     from utilmy.parallel import multiproc_run
 
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
+    myproblem1,p = test_pars_values()
 
-    myproblem1 = myProblem()
-
-    p               = Box({})
-    p.log_file      = 'trace.log'
-
-    p.nvars_in      = 2  ### nb of variables
-    p.nvars_out     = 1
-
-    p.ks            = ["sum", "diff", "div", "mul", "log"]
-    p.print_after   = 100
-    p.print_best    = True
-    p.n             = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-
-    p.kmax          = 100000  ## Max iterations
-    p.nc,nr         = 10,1  ## Graph columns x rows
-    p.arity         = 2  # Arity
-
-    npool= 2
+    npool= 3
     input_list = []
     for i in range(npool):
         p2 = copy.deepcopy(p)
-        p2.f_trace = f'trace_{i}.log'
+        p2['log_file'] = f'trace_{i}.log'
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(search_formuale_dcgpy_v1, input_fixed={"myproblem": myproblem1, 'verbose':False},
+    multiproc_run(search_formuale_dcgpy_v2,
+                  input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
-                  npool=3)
+                  npool=npool)
+
 
 
 
@@ -206,13 +194,11 @@ class myProblem:
 
 
     def get_cost(self, expr:None, symbols):
-        """     ######### Objective to Maximize
-        Maximizes the cost of the given expression    
-            Docs::
+        """ Cost Calculation, Objective to Maximize   
+        Docs::
 
             expr            : Expression whose cost has to be maximized
             symbols         : Symbols
-
 
         """
         # def normalize(val,Rmin,Rmax,Tmin,Tmax):
@@ -232,6 +218,7 @@ class myProblem:
     def get_correlm(self, formulae_str:str):
         """  Compare 2 lists lnew, ltrue and output correlation.
              Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+
         Docs: 
             formulae_str            : Formulae String 
         
@@ -355,34 +342,43 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     """ Search Optimal Formulae
     Docs::
 
-        conda install  dcgpy
+        -- Install  DCGP
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire
 
-        myproblem1 = myProblem()
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
+
+        from utilmy.optim import gp_searchformulae as gp
+
+        myproblem1 = gp.myProblem()
         ## myproblem1.get_cost(formuale_str, symbols  )
 
         p               = Box({})
         p.log_file      = 'trace.log'
+        p.print_after   = 100
+        p.print_best    = True
+
 
         p.nvars_in      = 2  ### nb of variables
         p.nvars_out     = 1
+        p.ks            = ["sum", "diff", "div", "mul"]
 
-        p.ks            = ["sum", "diff", "div", "mul", "log"]
-        p.print_after   = 100
-        p.print_best    = True
-        p.n             = 20   ## Population (Suggested: 10~20)
+        p.pop_size      = 20  ## Population (Suggested: 10~20)
         p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-
         p.kmax          = 100000  ## Max iterations
-        p.nc,nr         = 10,1  ## Graph columns x rows
+        p.nc, p.nr       = 10,1  ## Graph columns x rows
         p.arity         = 2  # Arity
-
+        p.seed          = 43
 
         #### Run Search
-        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+        gp.search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
         -- Add constraints in the functional space
-
         https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
 
         ### . So that we make sure the function actually passes through the points (-1,0) and (1,0).
@@ -404,7 +400,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     """
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
+    from dcgpy import kernel_set_gdual_double
     from pyaudi import gdual_double as gdual
 
     from box import Box
@@ -413,12 +409,13 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     #### Formulae GP Search params   #################
+    log(pars_dict)
     p = Box(pars_dict)
 
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+    operator_list = kernel_set_gdual_double(p.get("ks", ["sum", "diff", "div", "mul"] ))
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -448,7 +445,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def get_random_solution():
-        """Generate Random Expression
+        """Generate Random Formulae Expression
 
         """
         return expression(inputs = nvars_in,
@@ -462,10 +459,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                             seed        = seed )
 
     def search():
-        """function search
-        Search for best possible solution using Cuckoo Search Algorithm
-
-
+        """Search for best possible Formulae using Cuckoo Search Algorithm
         """
         def levyFlight(u):
             return (math.pow(u,-1.0/3.0)) # Golden ratio = 1.62
@@ -536,10 +530,138 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
 
+def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
+    """Parallel run of search_formuale_dcgpy_v1
+    Docs::
+
+        from utilmy.optim import gp_searchformulae as gp
+        myproblem1,p = gp.test_pars_values()
+        gp.search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
+        npool: 2 : Number of parallel runs
+
+
+
+    """
+    from utilmy.parallel import multiproc_run
+
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(pars_dict)
+
+        fsplit = p2['log_file'].split("/")
+        fsplit[-1] = f'trace_{i}.log'
+        fi         = "/".join(fsplit)
+        p2['log_file'] = fi
+        input_list.append(p2)
+
+
+    ### parallel Run
+    multiproc_run(search_formuale_dcgpy_v2,
+                  input_fixed={"myproblem": myproblem, 'verbose':False},
+                  input_list=input_list,
+                  npool=npool)
+
+
+
+def search_formuale_dcgpy_v1_island(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
+    """Parallel run of search_formuale_dcgpy_v1
+    Docs::
+
+       using islanc
+       https://darioizzo.github.io/dcgp/notebooks/evo_in_parallel.html?highlight=island
+
+
+
+
+
+    """
+    from utilmy.parallel import multiproc_run
+    # Some necessary imports.
+    import dcgpy
+    import pygmo as pg
+    import numpy as np
+    # Sympy is nice to have for basic symbolic manipulation.
+    from sympy import init_printing
+    from sympy.parsing.sympy_parser import init_printing
+    init_printing()
+    # Fundamental for plotting.
+    from matplotlib import pyplot as plt
+
+    # Here we define our problem and solution strategy. In this case a simple Evolutionary Strategy acting on
+    # a CGP with no added constants.
+    X, Y = dcgpy.generate_chwirut2()
+    ss = dcgpy.kernel_set_double(["sum", "diff", "mul", "pdiv"])
+    udp = dcgpy.symbolic_regression(points = X, labels = Y, kernels=ss())
+    uda  = dcgpy.es4cgp(gen = 10000, max_mut = 2)
+
+
+    # We then construct our archipelago of *n*=64 islands containin 4 indivisuals each.
+    prob = pg.problem(udp)
+    algo = pg.algorithm(uda)
+    archi = pg.archipelago(algo = algo, prob = prob, pop_size = 4, n=64)
+
+    # Note how in the log above the island is *busy* indicating that the evolution is running. Note also that the
+    # island is, in this case, of type *thread island* indicating that its evolution is running on a separate thread
+    # We can also stop the interactive session and wait for the evolution to finish
+    archi.wait_check()
+
+
+    # Let us inspect the results
+    fs = archi.get_champions_f()
+    xs = archi.get_champions_x()
+    plt.plot(fs, '.')
+    plt.xlabel('thread (island id)')
+    _ = plt.ylabel('loss')
+
+
+    b_idx = np.argmin(fs)
+    best_x = archi.get_champions_x()[b_idx]
+
+    parse_expr(udp.prettier(best_x))
+
+
+
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(pars_dict)
+
+        fsplit = p2['log_file'].split("/")
+        fsplit[-1] = f'trace_{i}.log'
+        fi         = "/".join(fsplit)
+        p2['log_file'] = fi
+        input_list.append(p2)
+
+
+    ### parallel Run
+    multiproc_run(search_formuale_dcgpy_v2,
+                  input_fixed={"myproblem": myproblem, 'verbose':False},
+                  input_list=input_list,
+                  npool=npool)
+
+
+
+
+
+
+
+
+def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False, ):
+    """ Wrapper for parallel version, :
+    Docs::
+
+        1st argument should the list of parameters: inverse order
+        pars_dict is a list --> pars_dict[0]: actual dict
+
+
+    """
+    search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+
 
 
 ###################################################################################################
-def search_formuale_dcgpy_v2(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
