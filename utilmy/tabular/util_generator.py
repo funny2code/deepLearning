@@ -22,24 +22,6 @@ from utilmy import log, log2
 verbosity= 5
 
 
-####################################################################################################
-global model, session
-def init(*kw, **kwargs):
-    """function init.
-    Doc::
-    """
-    global model, session
-    model = Model(*kw, **kwargs)
-    session = None
-
-def reset():
-    """function reset.
-    Doc::
-    """
-    global model, session
-    model, session = None, None
-
-
 ######## Custom Model ################################################################################
 sys.path.append( os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/")
 
@@ -65,6 +47,28 @@ sys.modules['sklearn.externals.six'] = six
 from imblearn.over_sampling import SMOTE
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.under_sampling import NearMiss
+
+
+
+
+####################################################################################################
+global model, session
+def init(*kw, **kwargs):
+    """function init.
+    Doc::
+    """
+    global model, session
+    model = Model(*kw, **kwargs)
+    session = None
+
+def reset():
+    """function reset.
+    Doc::
+    """
+    global model, session
+    model, session = None, None
+
+
 
 
 ####################################################################################################
