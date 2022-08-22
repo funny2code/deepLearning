@@ -275,7 +275,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(eval(data_pars=data_pars, compute_pars=compute_pars))
+    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
 
     log('Saving model..')
     save(path= root + '/model_dir/')
@@ -333,7 +333,7 @@ def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def eval(data_pars=None, compute_pars=None, out_pars=None, **kw):
+def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
     """ Return metrics of the model when fitted.
     """
     global model, session
