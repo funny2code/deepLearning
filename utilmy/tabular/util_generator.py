@@ -88,12 +88,7 @@ MODEL_LIST      = {'TVAE'           : TVAE,
 ##################################################################################################################
 ###################### test ######################################################################################
 def test():
-    """function test.
-    Doc::
-            
-            Args:
-            Returns:
-                
+    """function test.      
     """
     from sklearn.datasets import make_classification
     from sklearn.model_selection import train_test_split
@@ -198,12 +193,6 @@ def test():
 
 def test2(n_sample = 1000):
     """function test2.
-    Doc::
-            
-            Args:
-                n_sample :   
-            Returns:
-                
     """
     #df, colnum, colcat, coly = test_dataset_classi_fake(nrows= n_sample)
     #X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = train_test_split2(df, coly)
@@ -270,16 +259,9 @@ def test2(n_sample = 1000):
     test_helper(m['model_pars'], m['data_pars'], m['compute_pars'])
 
 
-def test_helper(model_pars, data_pars, compute_pars):
-    """function test_helper.
-    Doc::
-            
-            Args:
-                model_pars:   
-                data_pars:   
-                compute_pars:   
-            Returns:
-                
+def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
+    """function RUN the model test_helper.
+    Doc::                
     """
     global model, session
     root  = "ztmp/"
@@ -336,9 +318,7 @@ class Model(object):
 
 
 def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw):
-    """.
-    Doc::
-            
+    """            
     """
     global model, session
     session = None  # Session type for compute
@@ -354,10 +334,7 @@ def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw
 
 
 def eval(data_pars=None, compute_pars=None, out_pars=None, **kw):
-    """.
-    Doc::
-            
-               Return metrics of the model when fitted.
+    """ Return metrics of the model when fitted.
     """
     global model, session
     from sdv.evaluation import evaluate
@@ -391,7 +368,6 @@ def transform(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
             compute_pars:
             out_pars:
             kw:
-            :return:
     """
     global model, session
     name = model.model_pars['model_class']
@@ -523,6 +499,19 @@ def load_info(path=""):
 
 
 ############# Dataset ##############################################################################
+def get_dataset_load(df_or_path):
+   """ Load the data into dataframe
+
+   """
+   if isinstance(df_or_path, pd.DataFrame):
+      return df_or_path
+
+   elif isinstance(df_or_path, str):
+      from utilmy import pd_read_file
+      df = pd_read_file(df_or_path)
+      return df
+
+
 def get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split=False):
     """  Split into Tuples = (df1, df2, df3) to feed model, (ie Keras).
     Doc::
@@ -568,24 +557,23 @@ def get_dataset(data_pars=None, task_type="train", **kw):
 
         if task_type == "predict":
             d = data_pars[task_type]
-            Xtrain       = d["X"]
+            Xtrain       = get_dataset_load( d["X"] )
             Xtuple_train = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split)
             return Xtuple_train
 
         if task_type == "eval":
             d = data_pars[task_type]
-            Xtrain, ytrain  = d["X"], d["y"]
+            Xtrain, ytrain  = get_dataset_load( d["X"]), get_dataset_load( d["y"] )
             Xtuple_train    = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split)
             return Xtuple_train, ytrain
 
         if task_type == "train":
             d = data_pars[task_type]
-            Xtrain, ytrain, Xtest, ytest  = d["Xtrain"], d["ytrain"], d["Xtest"], d["ytest"]
+            Xtrain, ytrain, Xtest, ytest  = get_dataset_load( d["Xtrain"]), get_dataset_load( d["ytrain"]),  get_dataset_load( d["Xtest"]), get_dataset_load( d["ytest"] )
 
             ### dict  colgroup ---> list of df
-            Xtuple_train = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split)
-            Xtuple_test  = get_dataset_tuple(Xtest, cols_type_received, cols_ref, split)
-
+            Xtuple_train = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split )
+            Xtuple_test  = get_dataset_tuple(Xtest,  cols_type_received, cols_ref, split )
             log2("Xtuple_train", Xtuple_train)
 
             return Xtuple_train, ytrain, Xtuple_test, ytest
