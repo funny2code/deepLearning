@@ -111,36 +111,33 @@ def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: st
 
     # Create cmd to list all objects with default pagination
     cmd = ["aws", "s3api", "list-objects-v2", "--bucket", bucket_name, "--output", "json",
-               "--query", "{Contents: Contents[]." + sfield + "  ,NextToken: "
+           "--query", "{Contents: Contents[]." + sfield + "  ,NextToken: "
                           "NextToken}"]
 
     # If pagination is not required, add flag
-    if not recursive:
-        cmd.append("--no-paginate")
+    if not recursive:  cmd.append("--no-paginate")
     else:
         # Note : max_items_per_api_call * 1000 is the limit of files that this function can process
         cmd.extend(["--max-items", str(max_items_per_api_call)])
 
     # If only specific path is needed to be listed, add it
-    if path:
-        cmd.extend(["--prefix", path])
+    if path:          cmd.extend(["--prefix", path])
 
     # If any extra params were passed, add them here
-    if extra_params:
-        cmd.extend(extra_params)
+    if extra_params:  cmd.extend(extra_params)
 
 
-    # run cmd and return files data
     files_data = s3_get_filelist_cmd(cmd)
 
     if 'tuple' in return_format:
       flist = []
       for xi in files_data :
-        xlist = []
-        if "Name" in xi:          xlist.append( xi['Name'] )
-        if "LastModified" in xi:  xlist.append( xi['LastModified'] )
-        if "Output" in xi:        xlist.append( xi['Output'] )
-        flist.append( xlist )
+        xlist = tuple()
+        if xi.get("Name", None):          xlist += (xi['Name'],) 
+        if xi.get("LastModified", None):  xlist += (xi['LastModified'],)
+        if xi.get("Output", None):        xlist += (xi['Output'],)
+        flist.append(xlist)
+
       return flist
     else :  
       return files_data
