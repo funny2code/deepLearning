@@ -39,10 +39,10 @@ def s3_get_filelist_cmd(parent_cmd: list) -> list:
     """ # The real logic of making the api call
 
     """
+    import json
     from subprocess import PIPE, Popen
-    # Create a list that we will use to store data
-    files_list = []
 
+    files_list = []
     # Run the cmd that we were passed and store the output
     proc = Popen(parent_cmd, stdout=PIPE, stderr=PIPE)
     out, err = proc.communicate()
@@ -88,9 +88,15 @@ def s3_split_path(s3_path):
 
 
 def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: str = 1000,
-            fields = "name,date,size" 
+            fields = "name,date,size",
+            return_format='tuple',
             extra_params: list = None) -> list:
     """  Glob files on S3 using AWS CLI
+
+    Docs::
+
+        https://bobbyhadz.com/blog/aws-cli-list-all-files-in-bucket
+
 
 
     """        
@@ -148,8 +154,8 @@ def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: st
 
 ############################################################################################################
 if __name__ == '__main__':
-    import fire; fire.Fire()
-    ### python parallel.py test1
+    import fire
+    fire.Fire()
 
 
 
