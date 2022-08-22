@@ -19,52 +19,15 @@ import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as 
 
 ####################################################################################################
 from utilmy import global_verbosity, os_makedirs, pd_read_file
+from utilmy import log, log2
 verbosity= 5
 
-def log(*s):
-    """function log.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    print(*s, flush=True)
-
-def log2(*s):
-    """function log2.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 2 : print(*s, flush=True)
-
-def log3(*s):
-    """function log3.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 3 : print(*s, flush=True)
 
 ####################################################################################################
 global model, session
 def init(*kw, **kwargs):
     """function init.
     Doc::
-            
-            Args:
-                *kw:   
-                **kwargs:   
-            Returns:
-                
     """
     global model, session
     model = Model(*kw, **kwargs)
@@ -73,10 +36,6 @@ def init(*kw, **kwargs):
 def reset():
     """function reset.
     Doc::
-            
-            Args:
-            Returns:
-                
     """
     global model, session
     model, session = None, None
@@ -123,6 +82,234 @@ MODEL_LIST      = {'TVAE'           : TVAE,
                     'SMOTETomek'    : SMOTETomek, 
                     'NearMiss'      : NearMiss
                     }
+
+
+
+
+
+
+##################################################################################################################
+###################### test ######################################################################################
+def test():
+    """function test.
+    Doc::
+            
+            Args:
+            Returns:
+                
+    """
+    from sklearn.datasets import make_classification
+    from sklearn.model_selection import train_test_split
+
+    X, y = make_classification(n_features=10, n_redundant=0, n_informative=2,
+                               random_state=1, n_clusters_per_class=1)
+    X = pd.DataFrame( X, columns = [ 'col_' +str(i) for i in range(X.shape[1])] )
+    y = pd.DataFrame( y, columns = ['coly'] )
+
+    X['colid'] = np.arange(0, len(X))
+    X_train, X_test, y_train, y_test    = train_test_split(X, y)
+    X_train, X_valid, y_train, y_valid  = train_test_split(X_train, y_train, random_state=2021, stratify=y_train)
+
+    #####
+    colid  = 'colid'
+    colnum = [ 'col_0', 'col_3', 'col_4', 'coly']
+    colcat = [ 'col_1', 'col_7', 'col_8', 'col_9']
+
+    cols_input_type_1 = {
+        'colnum' : colnum,
+        'colcat' : colcat
+    }
+
+    colg_input = {
+      'cols_wide_input':   ['colnum', 'colcat' ],
+      'cols_deep_input':   ['colnum', 'colcat' ],
+    }
+
+    cols_model_type2= {}
+    for colg, colist in colg_input.items() :
+        cols_model_type2[colg] = []
+        for colg_i in colist :
+          cols_model_type2[colg].extend( [i for i in cols_input_type_1[colg_i] if i not in y.columns ]   )
+    
+    ###############################################################################
+    n_sample = 100
+    data_pars = {'n_sample': n_sample,
+                  'cols_input_type' : cols_input_type_1,
+
+                  'cols_model_group': ['colnum',
+                                       'colcat',
+                                       # 'colcross_pair'
+                                       ],
+
+                  'cols_model_type2' : cols_model_type2
+
+
+        ### Filter data rows   #######################3############################
+        , 'filter_pars': {'ymax': 2, 'ymin': -1}
+                  }
+
+    data_pars['train'] ={'Xtrain': X_train,  'ytrain': y_train,
+                         'Xtest': X_test,  'ytest': y_test}
+    data_pars['eval'] =  {'X': X_valid,
+                          'y': y_valid}
+    data_pars['predict'] = {'X': X_valid}
+
+    compute_pars = { 'compute_pars' : { 
+                   } }
+
+    #####################################################################
+    models = {
+        'CTGAN': {'model_class': 'CTGAN',
+                  'model_pars': {
+                      ## CTGAN
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'batch_size' :100,
+                     'generator_dim' : (256, 256, 256),
+                     'discriminator_dim' : (256, 256, 256)
+                },
+                },
+        'TVAE': {'model_class': 'TVAE',
+                  'model_pars': { 
+                      ## TVAE
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'batch_size' :100,
+                },
+                },
+        'PAR': {'model_class': 'PAR',
+                  'model_pars': {
+                     ## PAR
+                     'epochs': 1,
+                     'entity_columns': [colid],
+                     'context_columns': None,
+                     'sequence_index': None
+                },
+                },
+        'SMOTE': {'model_class': 'SMOTE',
+                  'model_pars': {
+                     ## SMOTE
+                },
+                }
+    }
+    log("######## running Models test ##################")
+    for model_name, model_pars in models.items():
+        log(f"test --> {model_name}")
+        test_helper(model_pars, data_pars, compute_pars)
+
+
+
+def test2(n_sample = 1000):
+    """function test2.
+    Doc::
+            
+            Args:
+                n_sample :   
+            Returns:
+                
+    """
+    #df, colnum, colcat, coly = test_dataset_classi_fake(nrows= n_sample)
+    #X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = train_test_split2(df, coly)
+
+    from adatasets import test_data_classifier_fake, pd_train_test_split2
+    df, d = test_data_classifier_fake(n_sample)
+    colnum, colcat, coly = d['colnum'], d['colcat'], d['coly']
+    X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = pd_train_test_split2(df, coly)
+
+    #### Matching Big dict  ##################################################
+    def post_process_fun(y): return int(y)
+    def pre_process_fun(y):  return int(y)
+
+    m = {'model_pars': {
+        'model_class':  "model_sampler.py::XXXXXX"
+        ,'model_pars' : {}
+        , 'post_process_fun' : post_process_fun   ### After prediction  ##########################################
+        , 'pre_process_pars' : {'y_norm_fun' :  pre_process_fun ,  ### Before training  ##########################
+
+        ### Pipeline for data processing ##############################
+        'pipe_list': [  #### coly target prorcessing
+            {'uri': 'source/prepro.py::pd_coly',                 'pars': {}, 'cols_family': 'coly',       'cols_out': 'coly',           'type': 'coly'         },
+            {'uri': 'source/prepro.py::pd_colnum_bin',           'pars': {}, 'cols_family': 'colnum',     'cols_out': 'colnum_bin',     'type': ''             },
+            {'uri': 'source/prepro.py::pd_colcat_bin',           'pars': {}, 'cols_family': 'colcat',     'cols_out': 'colcat_bin',     'type': ''             },
+        ],
+        }
+        },
+
+    'compute_pars': { 'metric_list': ['accuracy_score','average_precision_score'],
+                      'compute_pars' : {'epochs': 1 },
+                    },
+
+    'data_pars': { 'n_sample' : n_sample,
+        'download_pars' : None,
+        'cols_input_type' : {
+            'colcat' : colcat,
+            'colnum' : colnum,
+            'coly'  :  coly,
+        },
+        ### family of columns for MODEL  #########################################################
+        'cols_model_group': [ 'colnum_bin',   'colcat_bin',  ],
+
+        ### Added continuous & sparse features groups ###
+        'cols_model_type2': {
+            'colcontinuous':   colnum ,
+            'colsparse' :      colcat,
+        }
+
+        ### Filter data rows   ##################################################################
+        ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 }
+
+
+        ##### Data Flow ##############################################
+        ,'train':   {'Xtrain': X_train,  'ytrain': y_train, 'Xtest':  X_valid,  'ytest':  y_valid}
+        ,'eval':    {'X': X_valid,  'y': y_valid}
+        ,'predict': {}
+
+        ,'task_type' : 'train', 'data_type': 'ram'
+
+        }
+    }
+
+    ###  Tester #########################################################
+    test_helper(m['model_pars'], m['data_pars'], m['compute_pars'])
+
+
+def test_helper(model_pars, data_pars, compute_pars):
+    """function test_helper.
+    Doc::
+            
+            Args:
+                model_pars:   
+                data_pars:   
+                compute_pars:   
+            Returns:
+                
+    """
+    global model, session
+    root  = "ztmp/"
+    model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
+
+    log('\n\nTraining the model')
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
+
+    log('Predict data..')
+    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    log(f'Xnew', Xnew)
+
+    log('Evaluating the model..')
+    log(eval(data_pars=data_pars, compute_pars=compute_pars))
+
+    log('Saving model..')
+    save(path= root + '/model_dir/')
+
+    log('Load model..')
+    model, session = load_model(path= root + "/model_dir/")
+    log(model)
+
+
+
+
+
+
 
 
 ############### Model #########################################################################
@@ -413,229 +600,12 @@ def get_dataset(data_pars=None, task_type="train", **kw):
 
 
 
-##################################################################################################################
-###################### test ######################################################################################
-def test():
-    """function test.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    from sklearn.datasets import make_classification
-    from sklearn.model_selection import train_test_split
-
-    X, y = make_classification(n_features=10, n_redundant=0, n_informative=2,
-                               random_state=1, n_clusters_per_class=1)
-    X = pd.DataFrame( X, columns = [ 'col_' +str(i) for i in range(X.shape[1])] )
-    y = pd.DataFrame( y, columns = ['coly'] )
-
-    X['colid'] = np.arange(0, len(X))
-    X_train, X_test, y_train, y_test    = train_test_split(X, y)
-    X_train, X_valid, y_train, y_valid  = train_test_split(X_train, y_train, random_state=2021, stratify=y_train)
-
-    #####
-    colid  = 'colid'
-    colnum = [ 'col_0', 'col_3', 'col_4', 'coly']
-    colcat = [ 'col_1', 'col_7', 'col_8', 'col_9']
-
-    cols_input_type_1 = {
-        'colnum' : colnum,
-        'colcat' : colcat
-    }
-
-    colg_input = {
-      'cols_wide_input':   ['colnum', 'colcat' ],
-      'cols_deep_input':   ['colnum', 'colcat' ],
-    }
-
-    cols_model_type2= {}
-    for colg, colist in colg_input.items() :
-        cols_model_type2[colg] = []
-        for colg_i in colist :
-          cols_model_type2[colg].extend( [i for i in cols_input_type_1[colg_i] if i not in y.columns ]   )
-    
-    ###############################################################################
-    n_sample = 100
-    data_pars = {'n_sample': n_sample,
-                  'cols_input_type' : cols_input_type_1,
-
-                  'cols_model_group': ['colnum',
-                                       'colcat',
-                                       # 'colcross_pair'
-                                       ],
-
-                  'cols_model_type2' : cols_model_type2
-
-
-        ### Filter data rows   #######################3############################
-        , 'filter_pars': {'ymax': 2, 'ymin': -1}
-                  }
-
-    data_pars['train'] ={'Xtrain': X_train,  'ytrain': y_train,
-                         'Xtest': X_test,  'ytest': y_test}
-    data_pars['eval'] =  {'X': X_valid,
-                          'y': y_valid}
-    data_pars['predict'] = {'X': X_valid}
-
-    compute_pars = { 'compute_pars' : { 
-                   } }
-
-    #####################################################################
-    models = {
-        'CTGAN': {'model_class': 'CTGAN',
-                  'model_pars': {
-                      ## CTGAN
-                     'primary_key': colid,
-                     'epochs': 1,
-                     'batch_size' :100,
-                     'generator_dim' : (256, 256, 256),
-                     'discriminator_dim' : (256, 256, 256)
-                },
-                },
-        'TVAE': {'model_class': 'TVAE',
-                  'model_pars': { 
-                      ## TVAE
-                     'primary_key': colid,
-                     'epochs': 1,
-                     'batch_size' :100,
-                },
-                },
-        'PAR': {'model_class': 'PAR',
-                  'model_pars': {
-                     ## PAR
-                     'epochs': 1,
-                     'entity_columns': [colid],
-                     'context_columns': None,
-                     'sequence_index': None
-                },
-                },
-        'SMOTE': {'model_class': 'SMOTE',
-                  'model_pars': {
-                     ## SMOTE
-                },
-                }
-    }
-    log("######## running Models test ##################")
-    for model_name, model_pars in models.items():
-        log(f"test --> {model_name}")
-        test_helper(model_pars, data_pars, compute_pars)
-
-
-
-def test2(n_sample = 1000):
-    """function test2.
-    Doc::
-            
-            Args:
-                n_sample :   
-            Returns:
-                
-    """
-    #df, colnum, colcat, coly = test_dataset_classi_fake(nrows= n_sample)
-    #X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = train_test_split2(df, coly)
-
-    from adatasets import test_data_classifier_fake, pd_train_test_split2
-    df, d = test_data_classifier_fake(n_sample)
-    colnum, colcat, coly = d['colnum'], d['colcat'], d['coly']
-    X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = pd_train_test_split2(df, coly)
-
-    #### Matching Big dict  ##################################################
-    def post_process_fun(y): return int(y)
-    def pre_process_fun(y):  return int(y)
-
-    m = {'model_pars': {
-        'model_class':  "model_sampler.py::XXXXXX"
-        ,'model_pars' : {}
-        , 'post_process_fun' : post_process_fun   ### After prediction  ##########################################
-        , 'pre_process_pars' : {'y_norm_fun' :  pre_process_fun ,  ### Before training  ##########################
-
-        ### Pipeline for data processing ##############################
-        'pipe_list': [  #### coly target prorcessing
-            {'uri': 'source/prepro.py::pd_coly',                 'pars': {}, 'cols_family': 'coly',       'cols_out': 'coly',           'type': 'coly'         },
-            {'uri': 'source/prepro.py::pd_colnum_bin',           'pars': {}, 'cols_family': 'colnum',     'cols_out': 'colnum_bin',     'type': ''             },
-            {'uri': 'source/prepro.py::pd_colcat_bin',           'pars': {}, 'cols_family': 'colcat',     'cols_out': 'colcat_bin',     'type': ''             },
-        ],
-        }
-        },
-
-    'compute_pars': { 'metric_list': ['accuracy_score','average_precision_score'],
-                      'compute_pars' : {'epochs': 1 },
-                    },
-
-    'data_pars': { 'n_sample' : n_sample,
-        'download_pars' : None,
-        'cols_input_type' : {
-            'colcat' : colcat,
-            'colnum' : colnum,
-            'coly'  :  coly,
-        },
-        ### family of columns for MODEL  #########################################################
-        'cols_model_group': [ 'colnum_bin',   'colcat_bin',  ],
-
-        ### Added continuous & sparse features groups ###
-        'cols_model_type2': {
-            'colcontinuous':   colnum ,
-            'colsparse' :      colcat,
-        }
-
-        ### Filter data rows   ##################################################################
-        ,'filter_pars': { 'ymax' : 2 ,'ymin' : -1 }
-
-
-        ##### Data Flow ##############################################
-        ,'train':   {'Xtrain': X_train,  'ytrain': y_train, 'Xtest':  X_valid,  'ytest':  y_valid}
-        ,'eval':    {'X': X_valid,  'y': y_valid}
-        ,'predict': {}
-
-        ,'task_type' : 'train', 'data_type': 'ram'
-
-        }
-    }
-
-    ###  Tester #########################################################
-    test_helper(m['model_pars'], m['data_pars'], m['compute_pars'])
-
-
-def test_helper(model_pars, data_pars, compute_pars):
-    """function test_helper.
-    Doc::
-            
-            Args:
-                model_pars:   
-                data_pars:   
-                compute_pars:   
-            Returns:
-                
-    """
-    global model, session
-    root  = "ztmp/"
-    model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
-
-    log('\n\nTraining the model')
-    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
-
-    log('Predict data..')
-    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
-    log(f'Xnew', Xnew)
-
-    log('Evaluating the model..')
-    log(eval(data_pars=data_pars, compute_pars=compute_pars))
-
-    log('Saving model..')
-    save(path= root + '/model_dir/')
-
-    log('Load model..')
-    model, session = load_model(path= root + "/model_dir/")
-    log(model)
-
 
 if __name__ == "__main__":
-    from pyinstrument import Profiler;  profiler = Profiler() ; profiler.start()
+    #from pyinstrument import Profiler;  profiler = Profiler() ; profiler.start()
     import fire
     fire.Fire()
-    profiler.stop() ; print(profiler.output_text(unicode=True, color=True))
+    #profiler.stop() ; print(profiler.output_text(unicode=True, color=True))
 
 
     
