@@ -37,7 +37,7 @@ try:
     if ctgan.__version__ != '0.3.1.dev0':
         raise Exception('ctgan outdated, ctgan.__version__ != '0.3.1.dev0')
 except:
-    print("pip install sdv ctgan==0.3.1.dev0")
+    print("pip install sdv ctgan==0.3.1.dev0   scikit-learn ")
     1/0 
 
 
