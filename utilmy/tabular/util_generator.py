@@ -53,13 +53,11 @@ try:
     import ctgan
     
     if ctgan.__version__ != '0.3.1.dev0':
-        raise Exception('ctgan outdated, updating...')
+        raise Exception('ctgan outdated, ctgan.__version__ != '0.3.1.dev0')
 except:
-    os.system("pip install sdv")
-    os.system('pip install ctgan==0.3.1.dev0')
-    from sdv.tabular import TVAE, CTGAN
-    from sdv.timeseries import PAR
-    from sdv.evaluation import evaluate  
+    print("pip install sdv ctgan==0.3.1.dev0")
+    1/0 
+
 
 ### IMBLEARN
 import six
