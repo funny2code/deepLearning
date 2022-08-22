@@ -1,7 +1,7 @@
 absl-py==1.2.0
 alembic==1.8.1
 arrow==1.2.2
-asttokens==2.0.7
+asttokens==2.0.8
 astunparse==1.6.3
 attrs==22.1.0
 autopage==0.5.1
@@ -13,7 +13,7 @@ bootstrapped==0.0.2
 cachetools==5.2.0
 catalogue==2.0.8
 certifi==2022.6.15
-charset-normalizer==2.1.0
+charset-normalizer==2.1.1
 cheap-repr==0.5.1
 class-resolver==0.3.10
 click==8.1.3
@@ -47,12 +47,12 @@ Fiona==1.8.21
 fire==0.4.0
 flake8==5.0.4
 flatbuffers==2.0
-fonttools==4.34.4
+fonttools==4.36.0
 future==0.18.2
 gast==0.4.0
 gensim==4.1.2
 geopandas==0.10.2
-google-auth==2.10.0
+google-auth==2.11.0
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 greenlet==1.1.2
@@ -95,7 +95,7 @@ MarkupSafe==2.1.1
 marshmallow==3.17.0
 marshmallow-enum==1.5.1
 matplotlib==3.5.3
-matplotlib-inline==0.1.3
+matplotlib-inline==0.1.6
 mccabe==0.7.0
 missingno==0.5.1
 mlxtend==0.20.0
@@ -107,7 +107,7 @@ mpmath==1.2.1
 multimethod==1.8
 multipledispatch==0.6.0
 munch==2.5.0
-murmurhash==1.0.7
+murmurhash==1.0.8
 mypy-extensions==0.4.3
 networkx==2.6.3
 nltk==3.6.3
@@ -134,8 +134,8 @@ pickleshare==0.7.5
 Pillow==9.2.0
 pluggy==1.0.0
 pmlb==1.0.1.post3
-polars==0.14.0
-preshed==3.0.6
+polars==0.14.2
+preshed==3.0.7
 pretty-html-table==0.9.16
 prettytable==3.3.0
 prompt-toolkit==3.0.30
@@ -150,7 +150,7 @@ pyasn1-modules==0.2.8
 pycodestyle==2.9.1
 pydantic==1.9.2
 pyflakes==2.5.0
-Pygments==2.12.0
+Pygments==2.13.0
 pyinstrument==4.2.0
 pykeen==1.8.1
 PyMeeus==0.5.11
@@ -170,7 +170,7 @@ pytz-deprecation-shim==0.1.0.post0
 pyvis==0.2.1
 PyWavelets==1.3.0
 PyYAML==6.0
-rapidfuzz==2.4.3
+rapidfuzz==2.6.0
 rebound-cli==2.1.0
 regex==2022.3.2
 requests==2.28.1
@@ -184,14 +184,14 @@ scipy==1.7.3
 seaborn==0.11.2
 sentence-transformers==2.1.0
 sentencepiece==0.1.97
-Shapely==1.8.2
+Shapely==1.8.4
 six==1.16.0
 sklearn==0.0
 smart-open==5.2.1
 snoop==0.4.1
 soupsieve==2.3.2.post1
 spacy==3.4.1
-spacy-legacy==3.0.9
+spacy-legacy==3.0.10
 spacy-loggers==1.0.3
 SQLAlchemy==1.4.40
 srsly==2.4.4
@@ -219,14 +219,14 @@ tqdm==4.64.0
 traitlets==5.3.0
 transformers==4.21.1
 typer==0.4.2
-typing-inspect==0.7.1
+typing-inspect==0.8.0
 typing_extensions==4.1.1
 tzdata==2022.2
 tzlocal==4.2
 umap-learn==0.5.3
 urllib3==1.26.11
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@21f68fc8b90ff644354baebf08e438dc1853eb8d#egg=utilmy
+-e git+https://github.com/arita37/myutil@53ca59766a79c9253964de4ce0d071152f4936e9#egg=utilmy
 visions==0.7.4
 wasabi==0.10.1
 wcwidth==0.2.5

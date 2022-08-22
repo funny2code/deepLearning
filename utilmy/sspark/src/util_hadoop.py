@@ -170,21 +170,8 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file='
             1) can search for specific files using star *
             2) downloading files with specific patterns
 
-        
-        the use of globre:
-            Example:
-            if match_file is 'path/to/*.txt'
-            names = [
-            '/path/to/file.txt',
-            '/path/to/config.ini',
-            '/path/to/subdir/base.ini',
-            ]
-            txt_names = [name for name in names if globre.match('/path/to/*.txt', name)]
-            out:
-                ['/path/to/file.txt']
-
     """
-    import subprocess
+    import subprocess,re
 
     if "*" in path :
        root = path.split("*")[0]
@@ -193,15 +180,13 @@ def hdfs_ls(path, flag="-h ", filename_only=False, use_regex=False, match_file='
        root = path
 
     if use_regex:
-        files = str(subprocess.check_output('hdfs dfs -ls -R ' + path, shell=True))
-        # flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
-        # if match_file:
-        #     return [fn for fn in flist_full_address if globre.match(match_file, fn)]
-        # return flist_full_address
+        files = str(subprocess.check_output('hdfs dfs -ls -R ' + root, shell=True))
+        flist_full_address = [re.search(' (/.+)', i).group(1) for i in str(files).split("\\n") if re.search(' (/.+)', i)]
         if match_file:
             return glob_filter(files, match_file)
+        return flist_full_address 
 
-    process = subprocess.Popen(f"hdfs dfs -ls {flag} '{path}'", shell=True, stdout= subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(f"hdfs dfs -ls {flag} '{root}'", shell=True, stdout= subprocess.PIPE, stderr=subprocess.PIPE)
     std_out, std_err = process.communicate()
 
     if filename_only:
