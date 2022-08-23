@@ -10,6 +10,7 @@ Docs::
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
+from typing import Union, IO
 
 ######################################################################################
 from utilmy.utilmy import log, log2
@@ -74,7 +75,7 @@ def s3_get_filelist_cmd(parent_cmd: list) -> list:
             recursive_cmd.extend(["--starting-token", output["NextToken"]])
 
             # Run the cmd and add the result to files list
-            files_list.extend(get_files(recursive_cmd))
+            files_list.extend(s3_get_filelist_cmd(recursive_cmd))
     else:
         print("Oh No. An Error Occurred!")
         raise Exception(err.decode("utf8"))
@@ -108,6 +109,7 @@ def glob_s3(path: str, recursive: bool = True, max_items_per_api_call: str = 100
     bucket_name, path = s3_split_path(path)
 
     #### {Name: Key, LastModified: LastModified, Size: Size}
+    sfield= ""
     if 'name' in fields : sfield += "{Name: Key,"
     if 'date' in fields : sfield += "LastModified: LastModified,"
     if 'size' in fields : sfield += "Size: Size,"   
