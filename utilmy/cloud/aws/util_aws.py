@@ -4,12 +4,13 @@ Docs::
 
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
 
-    
+
 
 
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
+from typing import Union, IO
 
 ######################################################################################
 from utilmy.utilmy import log, log2
@@ -74,7 +75,7 @@ def s3_get_filelist_cmd(parent_cmd: list) -> list:
             recursive_cmd.extend(["--starting-token", output["NextToken"]])
 
             # Run the cmd and add the result to files list
-            files_list.extend(get_files(recursive_cmd))
+            files_list.extend(s3_get_filelist_cmd(recursive_cmd))
     else:
         print("Oh No. An Error Occurred!")
         raise Exception(err.decode("utf8"))
@@ -92,7 +93,7 @@ def s3_split_path(s3_path):
 
 
 
-def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: str = 1000,
+def glob_s3(path: str, recursive: bool = True, max_items_per_api_call: str = 1000,
             fields = "name,date,size",
             return_format='tuple',
             extra_params: list = None) -> list:
@@ -108,6 +109,7 @@ def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: st
     bucket_name, path = s3_split_path(path)
 
     #### {Name: Key, LastModified: LastModified, Size: Size}
+    sfield= ""
     if 'name' in fields : sfield += "{Name: Key,"
     if 'date' in fields : sfield += "LastModified: LastModified,"
     if 'size' in fields : sfield += "Size: Size,"   
@@ -149,7 +151,7 @@ def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: st
 
 
 
-def s3_load_file(s3_path: str = None, 
+def s3_load_file(s3_path: str, 
                  extra_params: list = None, 
                  return_stream: bool = False, 
                  is_binary: bool = False) -> Union[str, IO, bytes]:
