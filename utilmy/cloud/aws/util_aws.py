@@ -4,7 +4,7 @@ Docs::
 
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
 
-    
+
 
 
 
@@ -92,7 +92,7 @@ def s3_split_path(s3_path):
 
 
 
-def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: str = 1000,
+def glob_s3(path: str, recursive: bool = True, max_items_per_api_call: str = 1000,
             fields = "name,date,size",
             return_format='tuple',
             extra_params: list = None) -> list:
@@ -149,7 +149,7 @@ def glob_s3(path: str = None, recursive: bool = True, max_items_per_api_call: st
 
 
 
-def s3_load_file(s3_path: str = None, 
+def s3_load_file(s3_path: str, 
                  extra_params: list = None, 
                  return_stream: bool = False, 
                  is_binary: bool = False) -> Union[str, IO, bytes]:
