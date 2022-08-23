@@ -1,126 +1,127 @@
 # -*- coding: utf-8 -*-
-"""
----------AWS utilities--------------------------------------------------------
-Usage:
-AWS is class that defines all the configuration like access key or secret or pem key,
-which can be used  both by ec2, s3, rds connections. At this point, it has been used for
-ec2 and s3 connections.
-AWS object can be populated from a file containing a json object
-Eg: Use pem file to make ssh connection
-    import socket, paramiko
-    from util_aws import AWS
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(hostname, 22)
-    transport = paramiko.Transport(self.sock)
-    transport.start_client()
-    pemfile = AWS().v['AWS_KEYPEM'] # Get the private key pem file
-    privatekey = paramiko.RSAKey.from_private_key_file(pemfile)
-    transport.auth_publickey(username, privatekey)
+"""---------AWS utilities--------------------------------------------------------
+Docs::
 
-Eg: Get the keypair stored in the AWS for running a command using SSH
-    identity = AWS().ec2_keypair_get()  # Get the key pair
-    cmdstr = "df -k | grep swap"
-    swapspace = ssh_cmdrun(ipadress, identity, cmdstr)
+    Usage:
+    AWS is class that defines all the configuration like access key or secret or pem key,
+    which can be used  both by ec2, s3, rds connections. At this point, it has been used for
+    ec2 and s3 connections.
+    AWS object can be populated from a file containing a json object
+    Eg: Use pem file to make ssh connection
+        import socket, paramiko
+        from util_aws import AWS
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(hostname, 22)
+        transport = paramiko.Transport(self.sock)
+        transport.start_client()
+        pemfile = AWS().v['AWS_KEYPEM'] # Get the private key pem file
+        privatekey = paramiko.RSAKey.from_private_key_file(pemfile)
+        transport.auth_publickey(username, privatekey)
 
-Eg: Get the access and secret key for accessing AWS
-    access, secret = AWS().aws_accesskey_get()
-    conn = boto.connect_s3(access, secret)
-    bucket = conn.get_bucket(bucket_name)
+    Eg: Get the keypair stored in the AWS for running a command using SSH
+        identity = AWS().ec2_keypair_get()  # Get the key pair
+        cmdstr = "df -k | grep swap"
+        swapspace = ssh_cmdrun(ipadress, identity, cmdstr)
 
-Eg: Create a conn for us-east-2
-    east2-conn = AWS().aws_conn_create(region='us-east-2')
+    Eg: Get the access and secret key for accessing AWS
+        access, secret = AWS().aws_accesskey_get()
+        conn = boto.connect_s3(access, secret)
+        bucket = conn.get_bucket(bucket_name)
 
-Eg: Create windows conn for us-east-1
-    east1-win-conn = AWS().aws_conn_create_windows(aws_region='us-east-1')
+    Eg: Create a conn for us-east-2
+        east2-conn = AWS().aws_conn_create(region='us-east-2')
 
-Utility methods:
-ssh_cmdrun(): Runs a specific command using ssh library called paramiko and pem key file.
-  ipaddress = '12.30.24.21'
-  identity = AWS().ec2_keypair_get()
-  cmdstr = "ls -lrt"
-  reverselisting = ssh_cmdrun(ipadress, identity, cmdstr)
+    Eg: Create windows conn for us-east-1
+        east1-win-conn = AWS().aws_conn_create_windows(aws_region='us-east-1')
 
-For a instance type, fetch ram, cpu usage as an array for spot requests only
-  ec2_instance_getallstate_cli('t2.small')
+    Utility methods:
+    ssh_cmdrun(): Runs a specific command using ssh library called paramiko and pem key file.
+      ipaddress = '12.30.24.21'
+      identity = AWS().ec2_keypair_get()
+      cmdstr = "ls -lrt"
+      reverselisting = ssh_cmdrun(ipadress, identity, cmdstr)
 
-Each instance usage details
-  spot_requestid = '<spot request id>'
-  ipaddr = '12.30.15.25'
-  cpuusage, usageram, totalram = ec2_instance_usage(spot_requestid, ipaddr)
+    For a instance type, fetch ram, cpu usage as an array for spot requests only
+      ec2_instance_getallstate_cli('t2.small')
 
-Build a template for a spot request and store in default location(/tmp/ec_spot_config)
-  ec2_config_build_template_cli('t2.medium')
+    Each instance usage details
+      spot_requestid = '<spot request id>'
+      ipaddr = '12.30.15.25'
+      cpuusage, usageram, totalram = ec2_instance_usage(spot_requestid, ipaddr)
 
-
-Request spot instance.
-  instance = 't3.small'
-  spot_price = 0.59
-  region = 'us-east-1'
-  ec2_spot_start_cli(instance, spot_price, region)
-
-Current list of spot instances.
-  spot_list = ec2_spot_instance_list()
+    Build a template for a spot request and store in default location(/tmp/ec_spot_config)
+      ec2_config_build_template_cli('t2.medium')
 
 
-Stop the spot instance based on the instanceid
-  spot_request_id = '<Req Id>'
-  ec2_instance_stop(spot_request_id)
+    Request spot instance.
+      instance = 't3.small'
+      spot_price = 0.59
+      region = 'us-east-1'
+      ec2_spot_start_cli(instance, spot_price, region)
 
-For a given instance type, run a shell script to make a http call
-and grep the price for the same.
-  instance_type = 't3.medium'
-  ec2_get_spot_price(instance_type)
-
-
+    Current list of spot instances.
+      spot_list = ec2_spot_instance_list()
 
 
-TODO :
-  All in one file util_aws.py  : Top priority
- - Remove Dependance from util.py
- 
- - Create/check  /USER/.aws/ folder to put all the HARD CODE values. 
-    .ssh : for SSH keys.
+    Stop the spot instance based on the instanceid
+      spot_request_id = '<Req Id>'
+      ec2_instance_stop(spot_request_id)
 
- - AWS: the default values should be in a default file, not in code
-        This default json file should be in the same directory as this file.
-
- - boto.config.get in lines 148 and 149 are not working, they need to be fixed.
- - Have imports at the top unless dependencies issues are to be resolved.
- 
- Short name is better - AWS.v is not good descriptive name for a instance variable, could be
-   AWS.constant_values or AWS.global_values.
-
- - Lines 206-212, optimize as EC2Connection(access, key, region=r), if it fails then check
-    if it is a valid region. Anyway as of now 16 valid regions are there and they can be
-    statically checked, why fetch them?
-
- - Dont see a difference between a  windows and a non-windows EC2 connection.
-
- - ssh_cmdrun, ssh_put  methods to be moved to a separate file, can be used by other files,
-    which do not require other AWS functionality. Platform check for Windows machine and
-    return a False. Also adapt it to run a list of commands as it saves making connection
-    multiple times. In lines 366-388, 2 commands are run on the same host and the connections
-    are made twice.
- - os.system does not return output, os.popen does return.  For all aws ec2 commands, it is
-    json output, so always good to capture it.
- - aws_ec2_get_instanceid, this will need pagination support, an account may have more than
-    one page of instances.
- - aws_ec2_allocate_elastic_ip and aws_ec2_allocate_eip are same code set, need a merge. Multiple
-    times defined (Lines 535 and 746)
+    For a given instance type, run a shell script to make a http call
+    and grep the price for the same.
+      instance_type = 't3.medium'
+      ec2_get_spot_price(instance_type)
 
 
 
-NG - json.load(<filename>) is notorius to fail, so have a json_utils.py and have a
-        try-catch block with fallback of returning a empty dict.  
 
-NG - Have all these constants in a separate file constants.py and import
-   only required constants like
-   from constants import AWS_ACCESS_LOCAL
-   This way we bring structure to the code and anybody can update and maintain it.
+    TODO :
+      All in one file util_aws.py  : Top priority
+     - Remove Dependance from util.py
+     
+     - Create/check  /USER/.aws/ folder to put all the HARD CODE values. 
+        .ssh : for SSH keys.
 
-NG -  Keep CLI and boto version separate.separate
-      aws_ec2_spot_start and aws_ec2_spot_start_cli are same, one uses boto and the other aws ec2.
-     the code should switch between these two calls based on configuration ( global or individual calls)
+     - AWS: the default values should be in a default file, not in code
+            This default json file should be in the same directory as this file.
+
+     - boto.config.get in lines 148 and 149 are not working, they need to be fixed.
+     - Have imports at the top unless dependencies issues are to be resolved.
+     
+     Short name is better - AWS.v is not good descriptive name for a instance variable, could be
+       AWS.constant_values or AWS.global_values.
+
+     - Lines 206-212, optimize as EC2Connection(access, key, region=r), if it fails then check
+        if it is a valid region. Anyway as of now 16 valid regions are there and they can be
+        statically checked, why fetch them?
+
+     - Dont see a difference between a  windows and a non-windows EC2 connection.
+
+     - ssh_cmdrun, ssh_put  methods to be moved to a separate file, can be used by other files,
+        which do not require other AWS functionality. Platform check for Windows machine and
+        return a False. Also adapt it to run a list of commands as it saves making connection
+        multiple times. In lines 366-388, 2 commands are run on the same host and the connections
+        are made twice.
+     - os.system does not return output, os.popen does return.  For all aws ec2 commands, it is
+        json output, so always good to capture it.
+     - aws_ec2_get_instanceid, this will need pagination support, an account may have more than
+        one page of instances.
+     - aws_ec2_allocate_elastic_ip and aws_ec2_allocate_eip are same code set, need a merge. Multiple
+        times defined (Lines 535 and 746)
+
+
+
+    NG - json.load(<filename>) is notorius to fail, so have a json_utils.py and have a
+            try-catch block with fallback of returning a empty dict.  
+
+    NG - Have all these constants in a separate file constants.py and import
+       only required constants like
+       from constants import AWS_ACCESS_LOCAL
+       This way we bring structure to the code and anybody can update and maintain it.
+
+    NG -  Keep CLI and boto version separate.separate
+          aws_ec2_spot_start and aws_ec2_spot_start_cli are same, one uses boto and the other aws ec2.
+         the code should switch between these two calls based on configuration ( global or individual calls)
  -
 """
 
