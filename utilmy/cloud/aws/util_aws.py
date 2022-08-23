@@ -42,7 +42,8 @@ def test1():
 
 ####################################################################################
 def s3_get_filelist_cmd(parent_cmd: list) -> list:
-    """ # The real logic of making the api call
+    """ AWS CLI S3 Call by subprocess and get list of  results:
+        list of (name, date, size)
 
     """
     import json
@@ -86,6 +87,8 @@ def s3_get_filelist_cmd(parent_cmd: list) -> list:
 
 
 def s3_split_path(s3_path):
+    """ path -->  bucket, key
+    """
     path_parts=s3_path.replace("s3://","").split("/")
     bucket=path_parts.pop(0)
     key="/".join(path_parts)
@@ -93,13 +96,20 @@ def s3_split_path(s3_path):
 
 
 
-def glob_s3(path: str, recursive: bool = True, max_items_per_api_call: str = 1000,
+def glob_s3(path: str, recursive: bool = True,
+            max_items_per_api_call: str = 1000,
             fields = "name,date,size",
             return_format='tuple',
             extra_params: list = None) -> list:
     """  Glob files on S3 using AWS CLI
 
     Docs::
+
+        path: str, recursive: bool = True,
+        max_items_per_api_call: str = 1000,
+        fields = "name,date,size"
+        return_format='tuple'
+        extra_params: list = None
 
         https://bobbyhadz.com/blog/aws-cli-list-all-files-in-bucket
 
@@ -155,7 +165,7 @@ def s3_load_file(s3_path: str,
                  extra_params: list = None, 
                  return_stream: bool = False, 
                  is_binary: bool = False) -> Union[str, IO, bytes]:
-    """ Load file in memory using AWS CLI
+    """ Load file in memory using AWS CLI  --> subprocess --> stdout --> python
     Docs::
 
           file_data = get_data(s3_path="", extra_params=[])
