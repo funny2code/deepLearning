@@ -106,7 +106,7 @@ def test_pars_values():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.ks            = ["sum", "diff", "div", "mul"]
+    p.operators     = ["sum", "diff", "div", "mul"]
 
     p.max_iter      = 10
     p.pop_size      = 20  ## Population (Suggested: 10~20)
@@ -370,7 +370,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
         p.nvars_in      = 2  ### nb of variables
         p.nvars_out     = 1
-        p.ks            = ["sum", "diff", "div", "mul"]
+        p.operators            = ["sum", "diff", "div", "mul"]
 
         p.pop_size      = 20  ## Population (Suggested: 10~20)
         p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
@@ -420,7 +420,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set_gdual_double(p.get("ks", ["sum", "diff", "div", "mul"] ))
+    operator_list = kernel_set_gdual_double(p.get("operators", ["sum", "diff", "div", "mul"] ))
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -671,7 +671,7 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
 
         nvars_in      = p.nvars_in  ### nb of variables
         nvars_out     = p.nvars_out
-        operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+        operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
 
         ### Log
         print_after   = p.get('print_after', 20)
@@ -710,7 +710,7 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+    operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
 
     ### Log
     print_after   = p.get('print_after', 20)
