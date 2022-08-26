@@ -72,6 +72,7 @@ Docs::
 
 
 """
+import os
 import random, math, numpy as np, warnings, copy
 import scipy.stats
 from operator import itemgetter
@@ -474,10 +475,10 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
         ########### Init  ##########################################################
         var_levy = []
-        for i in range(1000):    
+        for i in range(1000):
             var_levy.append(round(levyFlight(randF())))
         var_choice = random.choice
-        
+
         # Initialize the nest
         nest = []
         for i in range(pop_size):
@@ -509,21 +510,22 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
             # Store ratioA for trace
             ls_trace.append(nest[0][1])
-                    
+
             for i in range(n_replace):
                 expr = get_random_solution()
                 nest[(pop_size-1)-(i)] = (expr, myproblem.get_cost(expr=expr, symbols=symbols))
 
             # Iterational printing
             if (k%print_after == 0):
-                
+
                 with open(log_file,'a') as f:
                     for x in ls_trace:
                         f.write(str(round(x, 3))+'\n')
                 ls_trace = [] # dump and restart
-                
+
                 nest.sort(key = itemgetter(1)) # Rank nests and find current best
-                best_egg = deepcopy(nest[0])
+                best_egg  = deepcopy(nest[0])
+                best_cost = deepcopy(nest[1])
                 log(f'\n#{k}', f'{best_egg[1]}')
 
                 if print_best :
@@ -531,8 +533,11 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                     #log(best_egg[0].simplify(symbols))
                     log('\n')
 
-    search()
+        expr = str(best_egg[0](symbols)[0])
+        return best_cost, expr
 
+    x =search()
+    return x
 
 
 def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
@@ -659,6 +664,105 @@ def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False
 
     """
     search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+
+
+
+
+
+def test5():
+    """Test search_formuale_dcgpy_v1
+
+File "gp_searchformulae2.py", line 1166, in <module>
+    fire.Fire()
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 466, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "gp_searchformulae2.py", line 520, in test5
+    search_island_meta(myproblem1, ddict_ref=p,
+  File "gp_searchformulae2.py", line 569, in search_island_meta
+    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
+
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 575, in _archi_init
+    self.push_back(**kwargs)
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 615, in _archi_push_back
+    self._push_back(island(**kwargs))
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 348, in _island_init
+    pop = population(prob=kwargs.pop('prob'),
+  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 291, in _population_init
+    __original_population_init(self, prob, size, seed)
+RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode for details)
+
+    """
+    from lib2to3.pygram import Symbols
+    from dcgpy import expression_gdual_double as expression
+    from pyaudi import gdual_double as gdual
+
+
+    myproblem1,p = test_pars_values()
+
+    #### Run Search
+    search_island_meta(myproblem1, ddict_ref=p
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [1.0 ] ]
+                       ,pop_size=4
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
+
+
+
+### Feature engineerin for ML --> formulae
+## PYGMO , DCGPY
+def search_island_meta(myproblem1, ddict_ref
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [1.0 ] ]
+                       ,pop_size=4
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      ):
+    """
+       https://esa.github.io/pygmo2/tutorials/coding_udi.html
+
+
+    """
+    os.makedirs(dir_log, exist_ok=True)
+
+    class meta_problem(object):
+        def fitness(self,X)
+            # ddict = {  'pa': X[0] }
+            ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
+
+            ddict = {**ddict_ref, **ddict}
+            (cost, expr) =  search_formuale_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
+            # with open(dir_log + "/log.txt", mode='a') as fp:
+            #    ss = str(cost) + "," + str(expr)
+            #    fp.write(ss)
+
+            return cost
+
+        def get_bounds(self):
+            return hyper_par_bounds
+            #return ([0.0]*len(X),[1.0]*len(X))
+
+    import pygmo as pg
+
+    prob  = pg.problem( meta_problem() )
+    algo  = pg.de(10)  ### Differentail DE
+    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
+
+    archi.evolve()
+    archi.wait_check()
+
+    ##### Let us inspect the results
+    fs = archi.get_champions_f()
+    xs = archi.get_champions_x()
+    print(fs, xs)
+
+
 
 
 
