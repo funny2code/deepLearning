@@ -576,85 +576,6 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
 
-def search_formuale_dcgpy_v1_island(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
-    """Parallel run of search_formuale_dcgpy_v1
-    Docs::
-
-       TODO
-
-       using island
-       https://darioizzo.github.io/dcgp/notebooks/evo_in_parallel.html?highlight=island
-
-
-
-
-
-    """
-    from utilmy.parallel import multiproc_run
-    # Some necessary imports.
-    import dcgpy
-    import pygmo as pg
-    import numpy as np
-    # Sympy is nice to have for basic symbolic manipulation.
-    from sympy import init_printing
-    from sympy.parsing.sympy_parser import init_printing
-    init_printing()
-    # Fundamental for plotting.
-    from matplotlib import pyplot as plt
-
-    # Here we define our problem and solution strategy. In this case a simple Evolutionary Strategy acting on
-    # a CGP with no added constants.
-    X, Y = dcgpy.generate_chwirut2()
-    ss = dcgpy.kernel_set_double(["sum", "diff", "mul", "pdiv"])
-    udp = dcgpy.symbolic_regression(points = X, labels = Y, kernels=ss())
-    uda  = dcgpy.es4cgp(gen = 10000, max_mut = 2)
-
-
-    # We then construct our archipelago of *n*=64 islands containin 4 indivisuals each.
-    prob = pg.problem(udp)
-    algo = pg.algorithm(uda)
-    archi = pg.archipelago(algo = algo, prob = prob, pop_size = 4, n=64)
-
-    # Note how in the log above the island is *busy* indicating that the evolution is running. Note also that the
-    # island is, in this case, of type *thread island* indicating that its evolution is running on a separate thread
-    # We can also stop the interactive session and wait for the evolution to finish
-    archi.wait_check()
-
-
-    # Let us inspect the results
-    fs = archi.get_champions_f()
-    xs = archi.get_champions_x()
-    plt.plot(fs, '.')
-    plt.xlabel('thread (island id)')
-    _ = plt.ylabel('loss')
-
-
-    b_idx = np.argmin(fs)
-    best_x = archi.get_champions_x()[b_idx]
-
-    parse_expr(udp.prettier(best_x))
-
-
-
-    input_list = []
-    for i in range(npool):
-        p2 = copy.deepcopy(pars_dict)
-
-        fsplit = p2['log_file'].split("/")
-        fsplit[-1] = f'trace_{i}.log'
-        fi         = "/".join(fsplit)
-        p2['log_file'] = fi
-        input_list.append(p2)
-
-
-    ### parallel Run
-    multiproc_run(search_formuale_dcgpy_v2,
-                  input_fixed={"myproblem": myproblem, 'verbose':False},
-                  input_list=input_list,
-                  npool=npool)
-
-
-
 def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False, ):
     """ Wrapper for parallel version, :
     Docs::
@@ -668,8 +589,8 @@ def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False
 
 
 
-
-
+###############################################################################################
+###############################################################################################
 def test5():
     """Test search_island_meta
 
@@ -731,9 +652,13 @@ def search_island_meta(myproblem1, ddict_ref
 
             ddict = {**ddict_ref, **ddict}
             (cost, expr) =  search_formuale_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
-            # with open(dir_log + "/log.txt", mode='a') as fp:
-            #    ss = str(cost) + "," + str(expr)
+
+            ss = str(cost) + "," + str(expr)
+            #try :
+            #  with open(dir_log + "/log.txt", mode='a') as fp:
             #    fp.write(ss)
+            #except :
+            #    print(ss)
 
             return [cost]   #### Put it as a list
 
