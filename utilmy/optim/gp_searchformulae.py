@@ -671,37 +671,10 @@ def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False
 
 
 def test5():
-    """Test search_formuale_dcgpy_v1
+    """Test search_island_meta
 
-File "gp_searchformulae2.py", line 1166, in <module>
-    fire.Fire()
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 141, in Fire
-    component_trace = _Fire(component, args, parsed_flag_args, context, name)
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 466, in _Fire
-    component, remaining_args = _CallAndUpdateTrace(
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
-    component = fn(*varargs, **kwargs)
-  File "gp_searchformulae2.py", line 520, in test5
-    search_island_meta(myproblem1, ddict_ref=p,
-  File "gp_searchformulae2.py", line 569, in search_island_meta
-    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
-
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 575, in _archi_init
-    self.push_back(**kwargs)
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 615, in _archi_push_back
-    self._push_back(island(**kwargs))
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 348, in _island_init
-    pop = population(prob=kwargs.pop('prob'),
-  File "/home/saurabh/miniconda3/envs/dcgp2/lib/python3.8/site-packages/pygmo/__init__.py", line 291, in _population_init
-    __original_population_init(self, prob, size, seed)
-RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode for details)
 
     """
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from pyaudi import gdual_double as gdual
-
-
     myproblem1,p = test_pars_values()
 
     #### Run Search
@@ -721,11 +694,30 @@ RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode 
 def search_island_meta(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
-                       ,pop_size=10
-                       ,n_island=5
+                       ,pop_size=2
+                       ,n_island=2
+                       ,n_step=1
+                       ,max_time_sec=100
                        ,dir_log="./logs/"
                       ):
-    """
+    """ Use PYGMO Island model for mutiple parallel Search of solution
+    Docs::
+
+
+      from utilmy.optim import gp_searchformulae as gp
+      myproblem1,p = gp.test_pars_values()
+
+      #### Run Search
+      gp.search_island_meta(myproblem1, ddict_ref=p
+                       ,hyper_par_list   = [ 'pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
+
+       https://esa.github.io/pygmo2/archipelago.html
        https://esa.github.io/pygmo2/tutorials/coding_udi.html
 
 
@@ -743,20 +735,30 @@ def search_island_meta(myproblem1, ddict_ref
             #    ss = str(cost) + "," + str(expr)
             #    fp.write(ss)
 
-            return [cost]
+            return [cost]   #### Put it as a list
 
         def get_bounds(self):
             return hyper_par_bounds
             #return ([0.0]*len(X),[1.0]*len(X))
 
-    import pygmo as pg
+    import pygmo as pg, time
 
     prob  = pg.problem( meta_problem() )
     algo  = pg.de(10)  ### Differentail DE
     archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
 
-    archi.evolve()
-    archi.wait_check()
+    archi.evolve(n_step)
+
+    t0 = time.time()
+    isok= True
+    while isok :
+        # https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
+        status = archi.status()
+        isok   = True if status not in 'idle' else False
+        if time.time()-t0 > max_time_sec :  isok=False
+        time.sleep(30)
+    # archi.wait_check()
+
 
     ##### Let us inspect the results
     fs = archi.get_champions_f()
