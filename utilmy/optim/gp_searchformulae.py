@@ -707,9 +707,9 @@ RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode 
     #### Run Search
     search_island_meta(myproblem1, ddict_ref=p
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
-                       ,hyper_par_bounds = [ [0], [1.0 ] ]
-                       ,pop_size=10
-                       ,n_island=5
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
                        ,dir_log="./logs/"
                       )
 
