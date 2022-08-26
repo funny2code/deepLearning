@@ -525,7 +525,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
                 nest.sort(key = itemgetter(1)) # Rank nests and find current best
                 best_egg  = deepcopy(nest[0])
-                best_cost = deepcopy(nest[1])
+                #best_cost = deepcopy(nest[1])
                 log(f'\n#{k}', f'{best_egg[1]}')
 
                 if print_best :
@@ -534,6 +534,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                     log('\n')
 
         expr = str(best_egg[0](symbols)[0])
+        best_cost = best_egg[1]
         return best_cost, expr
 
     x =search()
@@ -707,8 +708,8 @@ RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode 
     search_island_meta(myproblem1, ddict_ref=p
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
-                       ,pop_size=4
-                       ,n_island=2
+                       ,pop_size=10
+                       ,n_island=5
                        ,dir_log="./logs/"
                       )
 
@@ -720,8 +721,8 @@ RuntimeError: Unable to cast Python instance to C++ type (compile in debug mode 
 def search_island_meta(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
-                       ,pop_size=4
-                       ,n_island=2
+                       ,pop_size=10
+                       ,n_island=5
                        ,dir_log="./logs/"
                       ):
     """
@@ -732,7 +733,7 @@ def search_island_meta(myproblem1, ddict_ref
     os.makedirs(dir_log, exist_ok=True)
 
     class meta_problem(object):
-        def fitness(self,X)
+        def fitness(self,X):
             # ddict = {  'pa': X[0] }
             ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
 
@@ -742,7 +743,7 @@ def search_island_meta(myproblem1, ddict_ref
             #    ss = str(cost) + "," + str(expr)
             #    fp.write(ss)
 
-            return cost
+            return [cost]
 
         def get_bounds(self):
             return hyper_par_bounds
