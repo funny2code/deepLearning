@@ -91,7 +91,7 @@ utilmy/configs/util_config.py
 -------------------------functions----------------------
 config_isvalid_pydantic(config_dict: dict, pydanctic_schema: str  =  'config_py.yaml', silent: bool  =  False)
 config_isvalid_yamlschema(config_dict: dict, schema_path: str  =  'config_val.yaml', silent: bool  =  False)
-config_load(config_path:    str   =  None, to_dataclass:   bool  =  True, path_default:   str   =  None, config_default: dict  =  None, save_default:   bool  =  False, config_field_name :  str   =  None, )
+config_load(config_path:    str   =  None, to_dataclass:   bool  =  True, config_field_name :  str   =  None, environ_path_default: str  =  "config_path_default", path_default:   str   =  None, config_default: dict  =  None, save_default:   bool  =  False, verbose = 0)
 convert_dict_to_pydantic(config_dict: dict, schema_name: str)
 convert_yaml_to_box(yaml_path: str)
 global_verbosity(cur_path, path_relative = "/../../config.json", default = 5, key = 'verbosity', )
@@ -2163,6 +2163,22 @@ Tokenizer.tokens(self)
 utilmy/graph.py
 
 
+utilmy/graph/__init__.py
+
+
+utilmy/graph/util_graph.py
+-------------------------functions----------------------
+dag_create_network(df_or_file: Union[str, pd.DataFrame], cola, colb, colvertex = "")
+dag_load(dirin = "")
+dag_pagerank(net)
+dag_save(net, dirout)
+help()
+pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
+test1()
+test_all()
+
+
+
 utilmy/iio.py
 
 
@@ -2566,95 +2582,30 @@ fixedDict.__setitem__(self, key, value)
 fixedDict._check_size_limit(self)
 
 
-utilmy/oos.py
--------------------------functions----------------------
-aaa_bash_help()
-date_to_timezone(tdate, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
-glob_glob(dirin, exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
-help()
-is_float(x)
-is_int(x)
-log10(*s, nmax = 60)
-log5(*s)
-log_trace(msg = "", dump_path = "", globs = None)
-np_add_remove(set_, to_remove, to_add)
-np_list_intersection(l1, l2)
-os_clean_memory(varlist, globx)
-os_copy(dirfrom = "folder/**/*.parquet", dirto = "", min_size_mb = 0, max_size_mb = 1, exclude = "", include = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', path_structure_only = False, overwrite = False, re_start = 1, nfiles = 99999999, dry = 0)
-os_copy_safe(dirin:str = None, dirout:str = None, nlevel = 5, nfile = 5000, logdir = "./", pattern = "*", exclude = "", force = False, sleep = 0.5, cmd_fallback = "", verbose = Trueimport shutil, time, os, globflist = [] ; dirinj = dirinnlevel) =  [] ; dirinj = dirinnlevel):)
-os_cpu()
-os_file_check(fp)
-os_file_date_modified(dirin, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
-os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel = 1)
-os_get_function_name()
-os_getcwd()
-os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
-os_makedirs(dir_or_file)
-os_memory()
-os_merge_safe(dirin_list = None, dirout = None, nlevel = 5, nfile = 5000, nrows = 10**8, cmd_fallback  =  "umount /mydrive/  && mount /mydrive/  ", sleep = 0.3)
-os_monkeypatch_help()
-os_path_size(path  =  '.')
-os_path_split(fpath:str = "")
-os_platform_ip()
-os_platform_os()
-os_process_list()
-os_remove_file(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", from_ndays = 1000, start_date = '1970-01-01', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
-os_remove_file_past(dirin = "folder/**/*.parquet", ndays_past = 20, nfiles = 1000000, exclude = "", dry = 1)
-os_removedirs(path, verbose = False)
-os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
-os_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
-os_sleep_cpu(cpu_min = 30, sleep = 10, interval = 5, msg =  "", verbose = True)
-os_system(cmd, doprint = False)
-os_system_list(ll, logfile = None, sleep_sec = 10)
-os_to_file(txt = "", filename = "ztmp.txt", mode = 'a')
-os_variable_check(ll, globs = None, do_terminate = True)
-os_variable_exist(x, globs, msg = "")
-os_variable_init(ll, globs)
-os_wait_processes(nhours = 7)
-os_walk(path, pattern = "*", dirlevel = 50)
-print_everywhere()
-profiler_start()
-profiler_stop()
-test0()
-test1()
-test2()
-test4()
-test5()
-test_all()
-to_datetime(x)
-to_dict(**kw)
-to_float(x)
-to_int(x)
-to_timeunix(datex = "2018-01-16")
-z_os_search_fast(fname, texts = None, mode = "regex/str")
-
--------------------------methods----------------------
-dict_to_namespace.__init__(self, d)
-toFileSafe.__init__(self, fpath)
-toFileSafe.log(self, msg)
-toFileSafe.w(self, msg)
-toFileSafe.write(self, msg)
-
-
 utilmy/optim/__init__.py
 
 
-utilmy/optim/gp.py
+utilmy/optim/gp_searchformulae.py
 -------------------------functions----------------------
-run()
+log(*s)
+search_formuale_dcgpy_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
+search_formuale_dcgpy_v1_island(myproblem = None, pars_dict:dict = None, verbose = False, npool = 2)
+search_formuale_dcgpy_v1_parallel(myproblem = None, pars_dict:dict = None, verbose = False, npool = 2)
+search_formuale_dcgpy_v2(pars_dict:dict = None, myproblem = None, verbose = False, )
+search_formuale_dcgpy_v3(myproblem = None, pars_dict:dict = None, verbose = False, )
+test1()
+test2()
+test3()
+test_all()
+test_pars_values()
 
-
-
-utilmy/optim/gp_dcgp.py
--------------------------functions----------------------
-run4()
-
-
-
-utilmy/optim/gp_formulae.py
--------------------------functions----------------------
-run1()
-
+-------------------------methods----------------------
+myProblem.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
+myProblem.get_correlm(self, formulae_str:str)
+myProblem.get_cost(self, expr:None, symbols)
+myProblem.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
+myProblem.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/optim/util_hyper.py
@@ -2677,8 +2628,43 @@ test_use_operon()
 
 
 
+utilmy/optim/zold/__init__.py
+
+
+utilmy/optim/zold/gp.py
+-------------------------functions----------------------
+run()
+
+
+
+utilmy/optim/zold/gp_dcgp.py
+-------------------------functions----------------------
+run4()
+
+
+
+utilmy/optim/zold/gp_dcgp2.py
+-------------------------functions----------------------
+run4(verbose = False)
+
+-------------------------methods----------------------
+gp_dcgp2.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
+gp_dcgp2.get_correlm(self, eqn:str)
+gp_dcgp2.get_cost(self, ex:str)
+gp_dcgp2.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+gp_dcgp2.rank_merge_v5(self, ll1:list, ll2:list, eqn:str)
+gp_dcgp2.rank_score(self, eqn:str, rank1:list, rank2:list)
+
+
+utilmy/optim/zold/gp_formulae.py
+-------------------------functions----------------------
+run1()
+
+
+
 utilmy/parallel.py
 -------------------------functions----------------------
+glob_parallel(paths, n_pool = 3)
 help()
 multiproc_run(fun_async, input_list: list, n_pool = 5, start_delay = 0.1, input_fixed:dict = None, npool = None, verbose = True, **kw)
 multiproc_tochunk(flist:list, npool = 2)
@@ -3980,6 +3966,7 @@ run(spark:SparkSession, config_name: str = 'config.yaml')
 utilmy/sspark/src/util_hadoop.py
 -------------------------functions----------------------
 date_format(datestr:str = "", fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", returnval = 'str,int,datetime')
+glob_filter(flist, path_pattern)
 hadoop_print_config(dirout = None)
 hdfs_copy_fromlocal(local_dir, hdfs_dir, overwrite = False)
 hdfs_copy_tolocal(hdfs_dir, local_dir)
@@ -4014,7 +4001,7 @@ os_system(cmd, doprint = False)
 parquet_to_hive_parquet(dirin = None, table = None, dirout = None)
 parquet_to_hive_parquet2(dirin, dirout = "/ztmp_hive_parquet/", nfile = 1, verbose = False)
 pd_read_csv_hdfs(dirlist = None, dirlevel=1, ignore_index=True,  cols=None, verbose=False, nfile=10000, nrows=-1, concat_sort=False, n_pool=1,drop_duplicates=None, col_filter=None,  col_filter_val=None, dtype=None,compression='gzip', encoding='utf-8', sep=',', header=None, on_bad_lines='skip',**kw)
-pd_read_json_hdfs(dirlist = None, ignore_index = True, cols = None, verbose = False, nfile = 10000, nrows = -1, concat_sort = False, n_pool = 1, drop_duplicates = None, col_filter = None, col_filter_val = None, dtype = None, compression = 'gzip', encoding = 'utf-8', on_bad_lines = 'skip', dirlevel = 1, **kw)
+pd_read_json_hdfs(dirlist = None, ignore_index=True,  cols=None, verbose=False, nfile=10000, nrows=-1,concat_sort=False, n_pool=1,   drop_duplicates=None, col_filter=None,  col_filter_val=None,dtype=None, compression='gzip', encoding='utf-8', sep=',', header=None, on_bad_lines='skip', dirlevel=1,**kw)
 pd_read_parquet_hdfs(dirlist = None, ignore_index = True, cols = None, verbose = False, nrows = -1, concat_sort = True, n_pool = 1, drop_duplicates = None, col_filter = None, col_filter_val = None, dtype = None, **kw)
 pd_read_parquet_schema(uri: str)
 pd_write_parquet_hdfs(df, hdfs_dir=  'hdfs =   'hdfs:///user/pppp/clean_v01.parquet/', cols = None, n_rows = 1000, partition_cols = None, overwrite = True, verbose = 1, )
@@ -4193,6 +4180,98 @@ test_spark_check(spark_session: SparkSession, config: dict)
 
 
 utilmy/stats/__init__.py
+
+
+utilmy/stats/bootstrap_stat/bootstrap_stat.py
+-------------------------functions----------------------
+_adjust_percentiles(alpha, a_hat, z0_hat)
+_bca_acceleration(jv)
+_influence_components(x, stat, order = 1, eps = 1e-3, num_threads = 1)
+_percentile(z, p, full_sort = True)
+_resampling_vector(n)
+abcnon_interval(x, stat, alpha = 0.05, eps = 0.001, influence_components = None, second_derivatives = None, return_influence_components = False, num_threads = 1, )
+bcanon_asl(dist, stat, x, theta_0 = 0, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, jv = None, two_sided = False, num_threads = 1, )
+bcanon_interval(dist, stat, x, alpha = 0.05, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, jv = None, num_threads = 1, )
+better_bootstrap_bias(x, stat, B = 400, return_samples = False, num_threads = 1)
+bias(dist, stat, t, B = 200, return_samples = False, theta_star = None, num_threads = 1)
+bias_corrected(x, stat, method = "better_bootstrap_bias", dist = None, t = None, B = None, return_samples = False, theta_star = None, jv = None, num_threads = 1, )
+bootstrap_asl(dist, stat, x, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, two_sided = False, num_threads = 1, )
+bootstrap_power(alt_dist, null_dist, stat, asl = bootstrap_asl, alpha = 0.05, size = None, P = 100, **kwargs, )
+bootstrap_samples(dist, stat, B, size = None, jackknife = False, num_threads = 1)
+calibrate_interval(dist, stat, x, theta_hat, alpha = 0.05, B = 1000, return_confidence_points = False, num_threads = 1, )
+infinitesimal_jackknife(x, stat, eps = 1e-3, influence_components = None, return_influence_components = False, num_threads = 1, )
+jackknife_values(x, stat, sample = None, num_threads = 1)
+loess(z0, z, y, alpha, sided = "both")
+percentile_asl(dist, stat, x, theta_0 = 0, B = 1000, size = None, return_samples = False, theta_star = None, theta_hat = None, two_sided = False, num_threads = 1, )
+percentile_interval(dist, stat, alpha = 0.05, B = 1000, size = None, return_samples = False, theta_star = None, num_threads = 1, )
+prediction_error_632(dist, data, train, predict, error, B = 200, apparent_error = None, use_632_plus = False, gamma = None, no_inf_err_rate = None, num_threads = 1, )
+prediction_error_optimism(dist, data, train, predict, error, B = 200, apparent_error = None, num_threads = 1, )
+prediction_interval(dist, x, mean = None, std = None, B = 1000, alpha = 0.05, t_star = None, return_t_star = False, num_threads = -1, )
+standard_error(dist, stat, robustness = None, B = 200, size = None, jackknife_after_bootstrap = False, return_samples = False, theta_star = None, num_threads = 1, if theta_star is None or jackknife_after_bootstrap)
+t_interval(dist, stat, theta_hat, stabilize_variance = False, se_hat = None, fast_std_err = None, alpha = 0.05, Binner = 25, Bouter = 1000, Bvar = 100, size = None, empirical_distribution = EmpiricalDistribution, return_samples = False, theta_star = None, se_star = None, z_star = None, num_threads = 1, )
+
+-------------------------methods----------------------
+EmpiricalDistribution.calculate_parameter()
+EmpiricalDistribution.sample(self, size = None, return_indices = False, reset_index = True)
+MultiSampleEmpiricalDistribution.calculate_parameter(self, t)
+MultiSampleEmpiricalDistribution.sample(self, size = None)
+
+
+utilmy/stats/bootstrap_stat/datasets.py
+-------------------------functions----------------------
+hormone_data()
+law_data(full = False)
+mouse_data(dataset)
+patch_data()
+rainfall_data()
+spatial_test_data(test = "both")
+
+
+
+utilmy/stats/bootstrap_stat/tests/__init__.py
+
+
+utilmy/stats/bootstrap_stat/tests/context.py
+
+
+utilmy/stats/bootstrap_stat/tests/test_bootstrap_stat.py
+-------------------------methods----------------------
+TestBias.test_better_bootstrap_bias(self)
+TestBias.test_bias(self)
+TestBias.test_bias_correction(self)
+TestBias.test_se_bias(self)
+TestBias.test_two_sample_mouse_data(self)
+TestConfidenceIntervals.test_bca(self)
+TestConfidenceIntervals.test_calibrate_interval(self)
+TestConfidenceIntervals.test_compare_intervals(self)
+TestConfidenceIntervals.test_importance_sampling(self)
+TestConfidenceIntervals.test_percentile_interval(self)
+TestConfidenceIntervals.test_percentile_interval_return_samples(self)
+TestConfidenceIntervals.test_t_interval(self)
+TestConfidenceIntervals.test_t_interval_fast(self)
+TestConfidenceIntervals.test_t_interval_law_data(self)
+TestConfidenceIntervals.test_t_interval_law_data_variance_adjusted(self)
+TestConfidenceIntervals.test_t_interval_robust(self)
+TestMisc.test_adjust_percentiles(self)
+TestMisc.test_jackknife_values_array(self)
+TestMisc.test_jackknife_values_dataframe(self)
+TestMisc.test_jackknife_values_series(self)
+TestMisc.test_loess(self)
+TestMisc.test_parametric_bootstrap(self)
+TestMisc.test_percentile(self)
+TestMisc.test_percentile_partial_sort(self)
+TestMisc.test_percentile_uneven(self)
+TestMisc.test_resampling_vector(self)
+TestPredictionError.test_bootstrap_prediction_error(self)
+TestPredictionIntervals.test_prediction_intervals(self)
+TestSignificance.test_achieved_significance_levels(self)
+TestSignificance.test_asl_and_power(self)
+TestSignificance.test_asl_variance(self)
+TestSignificance.test_combined_asl(self)
+TestStandardError.test_infinitesimal_jackknife(self)
+TestStandardError.test_jackknife_after_bootstrap(self)
+TestStandardError.test_standard_error(self)
+TestStandardError.test_standard_error_robust(self)
 
 
 utilmy/stats/example.py
@@ -5599,14 +5678,13 @@ unzip(dirin, dirout)
 
 utilmy/utilmy.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
 direpo()
 find_fuzzy(word:str, wlist:list, threshold = 0.0)
 get_loggers(mode = 'print', n_loggers = 2, verbose_level = None)
 get_verbosity(verbose:int = None)
 git_current_hash(mode = 'full')
 git_repo_root()
-glob_glob(dirin:Union[str, list] = "**/*.py", nfile = 1000, direxclude:Union[str, list] = "", exclude:Union[str, list] = "", recursive = True, silent = False, show = 0, **kw)
 help()
 help_create(modulename = 'utilmy.nnumpy', prefixs = None)
 help_get_codesource(func)
@@ -5726,6 +5804,7 @@ mlpd3_add_tooltip(fig, points, labels)
 pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {})
 pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str = None, binsNumber = None, binWidth = None, color:str = '#7CB5EC', title:str = "", xaxis_label:str =  "x-axis", yaxis_label:str = "y-axis", cfg:dict = {}, mode = 'd3', save_img = "", show = False, verbose = True, **kw)
 pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
+pd_plot_network_cyto(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
 pd_plot_scatter_get_data(df0:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, nmax: int = 20000, **kw)
 pd_plot_scatter_matplot(df:pd.DataFrame, colx: str = None, coly: str = None, collabel: str = None, colclass1: str = None, colclass2: str = None, cfg: dict  =  {}, mode = 'd3', save_path: str = '', verbose = True, **kw)
 show(file_csv_parquet:str = "myfile.parquet", title = 'table', format: str = 'blue_light', dir_out = 'table.html', css_class = None, use_datatable = True, table_id = None, )
@@ -5750,6 +5829,7 @@ htmlDoc.images_dir(self, dir_input = "*.png", title: str = "", verbose:bool  = F
 htmlDoc.open_browser(self)
 htmlDoc.p(self, x, css: str = '')
 htmlDoc.pd_plot_network(self, df:pd.DataFrame, cola:    str = 'col_node1', colweight:str = "weight", colb: str = 'col_node2', coledge: str = 'col_edge')
+htmlDoc.pd_plot_network_cyto(self, df:pd.DataFrame, cola:    str = 'col_node1', colweight:str = "weight", colb: str = 'col_node2', coledge: str = 'col_edge')
 htmlDoc.plot_density(self, df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {}, mode: str  =  'd3', **kw)
 htmlDoc.plot_histogram(self, df:pd.DataFrame, col, title: str = '', xlabel: str = None, ylabel: str = None, figsize: tuple = None, colormap:str  =  'RdYlBu', nsample = 10000, binWidth = None, color:str = '#7CB5EC', nbin = 10, q5 = 0.005, q95 = 0.95, cfg: dict  =  {}, mode: str = 'matplot', save_img = "", **kw)
 htmlDoc.plot_parallel(self, df: pd.DataFrame, col = [], title: str  = [], 460, 460), color: str  =  '#69b3a2', cfg: dict  =  {}, mode: str  =  'd3', **kw)
@@ -5793,6 +5873,18 @@ utilmy/webscraper/cli_github_search.py
 get_arguments()
 main()
 search_github(args, start_time)
+
+
+
+utilmy/webscraper/cli_leetcode_extract.py
+-------------------------functions----------------------
+clearNewLines(raw_html)
+clearScript(raw_html)
+downloadHtml(soup: BeautifulSoup)
+getAllHtml(soup: BeautifulSoup)
+getFirstHtml(url)
+render()
+run(url)
 
 
 
