@@ -723,8 +723,10 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
     isok= True
     while isok :
         # https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
-        status = archi.status()
-        isok   = True if status not in 'idle' else False
+        #status = archi.status()
+        #isok   = True if status not in 'idle' else False
+        status = archi.status
+        isok   = True if status!=pg.evolve_status.idle else False
         if time.time()-t0 > max_time_sec :  isok=False
         time.sleep(30)
     # archi.wait_check()
