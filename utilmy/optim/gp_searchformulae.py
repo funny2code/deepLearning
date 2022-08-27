@@ -339,7 +339,7 @@ class myProblem:
 
 
 
-class myProblem:
+class myProblem2:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
         Docs::
