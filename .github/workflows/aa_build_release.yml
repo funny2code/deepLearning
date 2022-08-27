@@ -214,3 +214,59 @@ jobs:
         python run_pipy.py
         python setup.py sdist bdist_wheel
         twine upload dist/*  --username ${{ secrets.PYPI_USERNAME }}     --password ${{ secrets.PYPI_PASSWORD }}  --skip-existing   --repository-url https://upload.pypi.org/legacy/  --verbose
+
+
+
+
+ 
+  ############################################## 
+  create-pull-request:
+    needs : [build] # List of dependent Jobs
+    if: success()   # check if all previous (needs) dependent jobs were successfull  then only execute
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get BASE_BRANCH
+        shell: bash
+        run: |
+          # If you want to figure it out dynamically
+          echo "BASE_BRANCH=$( echo 'main')" >> $GITHUB_ENV
+          
+      - name: Create and Merge Pull Request
+        id: create_pr
+        uses: actions/github-script@v6
+        env:
+          BASE_BRANCH: ${{ env.BASE_BRANCH }}
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const {BASE_BRANCH} = process.env;
+            const result = await github.rest.pulls.create({
+              title: `Auto Merging ${{ github.ref_name }} into ${ BASE_BRANCH }`,
+              owner,
+              repo,
+              head: '${{ github.ref_name }}',
+              base: `${BASE_BRANCH}`,
+              body: [
+                'PR is auto-generated after sucessfull process.,',
+                'Uses : [actions/github-script](https://github.com/actions/github-script).'
+              ].join('\n')
+            });
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: result.data.number,
+              labels: ['Auto-PR']
+            });
+            await github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number: result.data.number
+            });
+            return result.data.number;
+
