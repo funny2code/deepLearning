@@ -6,7 +6,7 @@ Docs::
           conda create -n dcgp  python==3.8.1
           source activate dcgp
           conda install   -y  -c conda-forge dcgp-python  scipy
-          pip install python-box fire
+          pip install python-box fire utilmy
 
           python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
 
@@ -31,52 +31,50 @@ Docs::
 
 
 
-
+    Docs:
+        https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
 
 
 
     -- Test Problem
-       cd utilmy/optim/
-       python gp_searchformulae.py  test1
+        cd $utilmy/optim/
+        python gp_searchformulae.py  test1
 
-    2) Goal is to find a formulae, which make merge_list as much sorted as possible
-    Example :
-        ## 1) Define Problem Class with get_cost methods
-        myproblem1 = myProblem()
-        ## myproblem1.get_cost(formuale_str, symbols  )
+        2) Goal is to find a formulae, which make merge_list as much sorted as possible
+        Example :
+            ## 1) Define Problem Class with get_cost methods
+            myproblem1 = myProblem()
+            ## myproblem1.get_cost(formuale_str, symbols  )
 
-        ## 2) Param Search
-        p               = Box({})
-        ...
-
-
-        ## 3) Run Search
-        from utilmy.optim.gp_formulaesearch import search_formuale_algo1
-        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+            ## 2) Param Search
+            p               = Box({})
+            ...
 
 
-        #### Parallel version   ------------------------------------
-        for i in range(npool):
-            p2         = copy.deepcopy(p)
-            p2.f_trace = f'trace_{i}.log'
-            input_list.append(p2)
-
-        #### parallel Runs
-        from utilmy.parallel import multiproc_run
-        multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
-                      input_list=input_list,
-                      npool=3)
+            ## 3) Run Search
+            from utilmy.optim.gp_formulaesearch import search_formuale_algo1
+            search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
+            #### Parallel version   ------------------------------------
+            for i in range(npool):
+                p2         = copy.deepcopy(p)
+                p2.f_trace = f'trace_{i}.log'
+                input_list.append(p2)
+
+            #### parallel Runs
+            from utilmy.parallel import multiproc_run
+            multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                          input_list=input_list,
+                          npool=3)
 
 
 
 """
-import random, math, numpy as np, warnings, copy
+import os, random, math, numpy as np, warnings, copy
 import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
-warnings.filterwarnings("ignore")
 from box import Box
 
 
@@ -106,7 +104,7 @@ def test_pars_values():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.ks            = ["sum", "diff", "div", "mul"]
+    p.operators     = ["sum", "diff", "div", "mul"]
 
     p.max_iter      = 10
     p.pop_size      = 20  ## Population (Suggested: 10~20)
@@ -159,7 +157,7 @@ def test3():
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(search_formuale_dcgpy_v2,
+    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
@@ -207,12 +205,6 @@ class myProblem:
             symbols         : Symbols
 
         """
-        # def normalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
-
-        # def denormalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
-
         try:
             correlm = self.get_correlm(formulae_str=expr(symbols)[0])
         except:
@@ -340,6 +332,68 @@ class myProblem:
 
 
 
+class myProblem2:
+    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+        self.n_sample  = 1
+        self.kk        = kk
+        self.nsize     = nsize
+
+
+
+    def get_cost(self, expr:None, symbols):
+        """ Cost Calculation, Objective to Maximize
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        formulae_str=expr(symbols)[0]
+
+        metrics = []
+        for i in range(self.n_sample):
+            ####
+            lnew, ltrue = self.rank_score(formulae_str= formulae_str)
+            # log(lnew)
+
+            ### Eval with MSE
+            metrics.append( np.mean( (ltrue -  lnew)**2 )  )
+            # metrics.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
+
+        cost = -np.mean(metrics)
+        return cost  ### minimize cost
+
+
+    def rank_score(self, fornulae_str:str):
+        """  ## Example of rank_scores0
+             ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
+        Docs::
+
+             Check with True Formulae.
+        """
+
+        x0 = np.random.random(20)
+        x1 = np.random.random(20)
+
+        scores_true =  np.sin(x1)*x0 + x0+x1  #### True Formulae to find
+
+        scores_new  =  eval(fornulae_str)
+        return scores_new, scores_true
+
+
+
 
 
 ###################################################################################################
@@ -370,7 +424,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
         p.nvars_in      = 2  ### nb of variables
         p.nvars_out     = 1
-        p.ks            = ["sum", "diff", "div", "mul"]
+        p.operators            = ["sum", "diff", "div", "mul"]
 
         p.pop_size      = 20  ## Population (Suggested: 10~20)
         p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
@@ -420,7 +474,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set_gdual_double(p.get("ks", ["sum", "diff", "div", "mul"] ))
+    operator_list = kernel_set_gdual_double(p.get("operators", ["sum", "diff", "div", "mul"] ))
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -474,10 +528,10 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
         ########### Init  ##########################################################
         var_levy = []
-        for i in range(1000):    
+        for i in range(1000):
             var_levy.append(round(levyFlight(randF())))
         var_choice = random.choice
-        
+
         # Initialize the nest
         nest = []
         for i in range(pop_size):
@@ -509,21 +563,22 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
 
             # Store ratioA for trace
             ls_trace.append(nest[0][1])
-                    
+
             for i in range(n_replace):
                 expr = get_random_solution()
                 nest[(pop_size-1)-(i)] = (expr, myproblem.get_cost(expr=expr, symbols=symbols))
 
             # Iterational printing
             if (k%print_after == 0):
-                
+
                 with open(log_file,'a') as f:
                     for x in ls_trace:
                         f.write(str(round(x, 3))+'\n')
                 ls_trace = [] # dump and restart
-                
+
                 nest.sort(key = itemgetter(1)) # Rank nests and find current best
-                best_egg = deepcopy(nest[0])
+                best_egg  = deepcopy(nest[0])
+                #best_cost = deepcopy(nest[1])
                 log(f'\n#{k}', f'{best_egg[1]}')
 
                 if print_best :
@@ -531,8 +586,12 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                     #log(best_egg[0].simplify(symbols))
                     log('\n')
 
-    search()
+        expr = str(best_egg[0](symbols)[0])
+        best_cost = best_egg[1]
+        return best_cost, expr
 
+    x =search()
+    return x
 
 
 def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
@@ -545,9 +604,6 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
         npool: 2 : Number of parallel runs
-
-
-
     """
     from utilmy.parallel import multiproc_run
 
@@ -563,107 +619,128 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
     ### parallel Run
-    multiproc_run(search_formuale_dcgpy_v2,
+    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
 
 
 
-def search_formuale_dcgpy_v1_island(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
-    """Parallel run of search_formuale_dcgpy_v1
-    Docs::
-
-       TODO
-
-       using island
-       https://darioizzo.github.io/dcgp/notebooks/evo_in_parallel.html?highlight=island
-
-
-
-
-
-    """
-    from utilmy.parallel import multiproc_run
-    # Some necessary imports.
-    import dcgpy
-    import pygmo as pg
-    import numpy as np
-    # Sympy is nice to have for basic symbolic manipulation.
-    from sympy import init_printing
-    from sympy.parsing.sympy_parser import init_printing
-    init_printing()
-    # Fundamental for plotting.
-    from matplotlib import pyplot as plt
-
-    # Here we define our problem and solution strategy. In this case a simple Evolutionary Strategy acting on
-    # a CGP with no added constants.
-    X, Y = dcgpy.generate_chwirut2()
-    ss = dcgpy.kernel_set_double(["sum", "diff", "mul", "pdiv"])
-    udp = dcgpy.symbolic_regression(points = X, labels = Y, kernels=ss())
-    uda  = dcgpy.es4cgp(gen = 10000, max_mut = 2)
-
-
-    # We then construct our archipelago of *n*=64 islands containin 4 indivisuals each.
-    prob = pg.problem(udp)
-    algo = pg.algorithm(uda)
-    archi = pg.archipelago(algo = algo, prob = prob, pop_size = 4, n=64)
-
-    # Note how in the log above the island is *busy* indicating that the evolution is running. Note also that the
-    # island is, in this case, of type *thread island* indicating that its evolution is running on a separate thread
-    # We can also stop the interactive session and wait for the evolution to finish
-    archi.wait_check()
-
-
-    # Let us inspect the results
-    fs = archi.get_champions_f()
-    xs = archi.get_champions_x()
-    plt.plot(fs, '.')
-    plt.xlabel('thread (island id)')
-    _ = plt.ylabel('loss')
-
-
-    b_idx = np.argmin(fs)
-    best_x = archi.get_champions_x()[b_idx]
-
-    parse_expr(udp.prettier(best_x))
-
-
-
-    input_list = []
-    for i in range(npool):
-        p2 = copy.deepcopy(pars_dict)
-
-        fsplit = p2['log_file'].split("/")
-        fsplit[-1] = f'trace_{i}.log'
-        fi         = "/".join(fsplit)
-        p2['log_file'] = fi
-        input_list.append(p2)
-
-
-    ### parallel Run
-    multiproc_run(search_formuale_dcgpy_v2,
-                  input_fixed={"myproblem": myproblem, 'verbose':False},
-                  input_list=input_list,
-                  npool=npool)
-
-
-
-def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False, ):
+def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verbose=False, ):
     """ Wrapper for parallel version, :
     Docs::
 
         1st argument should the list of parameters: inverse order
         pars_dict is a list --> pars_dict[0]: actual dict
-
-
     """
     search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
 
 
 
+###############################################################################################
+###############################################################################################
+def test5():
+    """Test search_island_meta
+    """
+    myproblem1,p = test_pars_values()
+
+    #### Run Search
+    search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
+
+
+
+### Feature engineerin for ML --> formulae
+## PYGMO , DCGPY
+def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [1.0 ] ]
+                       ,pop_size=2
+                       ,n_island=2
+                       ,n_step=1
+                       ,max_time_sec=100
+                       ,dir_log="./logs/"
+                      ):
+    """ Use PYGMO Island model for mutiple parallel Search of solution
+    Docs::
+
+
+      from utilmy.optim import gp_searchformulae as gp
+      myproblem1,p = gp.test_pars_values()
+
+      #### Run Search
+      gp.search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+                       ,hyper_par_list   = [ 'pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
+       https://esa.github.io/pygmo2/archipelago.html
+       https://esa.github.io/pygmo2/tutorials/coding_udi.html
+
+
+    """
+    os.makedirs(dir_log, exist_ok=True)
+
+    class meta_problem(object):
+        def fitness(self,X):
+            # ddict = {  'pa': X[0] }
+            ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
+
+            ddict = {**ddict_ref, **ddict}
+            (cost, expr) =  search_formuale_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
+
+            ss = str(cost) + "," + str(expr)
+            #try :
+            #  with open(dir_log + "/log.txt", mode='a') as fp:
+            #    fp.write(ss)
+            #except :
+            #    print(ss)
+
+            return [cost]   #### Put it as a list
+
+        def get_bounds(self):
+            return hyper_par_bounds
+            #return ([0.0]*len(X),[1.0]*len(X))
+
+    import pygmo as pg, time
+
+    prob  = pg.problem( meta_problem() )
+    algo  = pg.de(10)  ### Differentail DE
+    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
+
+    archi.evolve(n_step)
+
+    t0 = time.time()
+    isok= True
+    while isok :
+        # https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
+        status = archi.status()
+        isok   = True if status not in 'idle' else False
+        if time.time()-t0 > max_time_sec :  isok=False
+        time.sleep(30)
+    # archi.wait_check()
+
+
+    ##### Let us inspect the results
+    fs = archi.get_champions_f()
+    xs = archi.get_champions_x()
+    print(fs, xs)
+
+
+
+
+
 ###################################################################################################
-def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -671,7 +748,7 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
 
         nvars_in      = p.nvars_in  ### nb of variables
         nvars_out     = p.nvars_out
-        operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+        operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
 
         ### Log
         print_after   = p.get('print_after', 20)
@@ -710,7 +787,7 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.ks, ["sum", "diff", "div", "mul"] )
+    operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -740,10 +817,6 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
 
 
     def get_random_solution():
-        """Generate Random Expression
-
-        """
-
         return expression(inputs = nvars_in,
                             outputs     = nvars_out,
                             rows        = nr,
@@ -775,7 +848,6 @@ def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False,
 
     def run_experiment(max_gen, offsprings, dCGP,  theta, omega, c, screen_output=False):
         """Run the Experiment
-
         Docs::
             max_gen         : Number of Maximum Generations
             offsprings      : Number of offsprings
@@ -844,7 +916,12 @@ def search_formuale_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False
     """ Search Optimal Formulae
     Docs::
 
-        -- Install  DCGP
+        -- Install  OPERON
+        https://github.com/heal-research/pyoperon
+
+        https://github.com/heal-research/pyoperon/blob/main/example/operon-bindings.py
+
+        https://github.com/heal-research/pyoperon/blob/cpp20/example/operon-bindings.py
 
 
 
