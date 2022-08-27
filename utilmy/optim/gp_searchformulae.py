@@ -6,7 +6,7 @@ Docs::
           conda create -n dcgp  python==3.8.1
           source activate dcgp
           conda install   -y  -c conda-forge dcgp-python  scipy
-          pip install python-box fire
+          pip install python-box fire utilmy
 
           python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
 
@@ -72,12 +72,10 @@ Docs::
 
 
 """
-import os
-import random, math, numpy as np, warnings, copy
+import os, random, math, numpy as np, warnings, copy
 import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
-warnings.filterwarnings("ignore")
 from box import Box
 
 
