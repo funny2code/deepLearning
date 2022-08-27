@@ -339,6 +339,93 @@ class myProblem:
 
 
 
+class myProblem:
+    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+            n_sample        : Number of Samples list to be generated, default = 5
+            kk              : Change the fake generated list rank , default = 1.0
+            ncorrect1       : the number of correctly ranked objects for first list , default = 40
+            ncorrect2       : the number of correctly ranked objects for second list , default = 50
+            adjust
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+        self.n_sample  = 1
+        self.kk        = kk
+        self.nsize     = nsize
+        self.ncorrect1 = ncorrect1
+        self.ncorrect2 = ncorrect2
+        self.adjust    = adjust
+
+
+
+    def get_cost(self, expr:None, symbols):
+        """ Cost Calculation, Objective to Maximize
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+
+        try:
+            correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        except:
+            correlm = 1.0
+
+        return(correlm)
+
+
+    def get_correlm(self, formulae_str:str):
+        """  Compare 2 lists lnew, ltrue and output correlation.
+             Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+
+        Docs:
+            formulae_str            : Formulae String
+
+        """
+        correls = []
+        for i in range(self.n_sample):
+
+            #### Merge them using rank_score
+            lnew, ltrue = self.rank_score(formulae_str= formulae_str)
+            lnew = lnew[:100]
+            # log(lnew)
+
+            ### Eval with True Rank
+            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
+
+        correlm = np.mean(correls)
+        return -correlm  ### minimize correlation val
+
+
+    def rank_score(self, fornulae_str:str):
+        """  ## Example of rank_scores0 = Formulae(list_ score1, list_score2)
+             ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
+        Docs::
+
+             Check with True Formulae.
+
+        """
+
+        x0 = np.random.random(20)
+        x1 = np.random.random(20)
+
+        scores_true =  np.sin(x1)*x0 + x0+x1
+
+        scores_new  =  eval(fornulae_str)
+        return scores_new, scores_true
+
+
+
 
 
 ###################################################################################################
