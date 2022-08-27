@@ -235,7 +235,7 @@ jobs:
         shell: bash
         run: |
           # If you want to figure it out dynamically
-          echo "BASE_BRANCH=$( echo 'main')" >> $GITHUB_ENV
+          echo "BASE_BRANCH=$( echo 'zdocs_y23487teg65f6')" >> $GITHUB_ENV
           
       - name: Create and Merge Pull Request
         id: create_pr
