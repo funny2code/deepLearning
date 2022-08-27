@@ -337,9 +337,6 @@ class myProblem2:
         """  Define the problem and cost calculation using formulae_str
         Docs::
 
-            n_sample        : Number of Samples list to be generated, default = 5
-            kk              : Change the fake generated list rank , default = 1.0
-            adjust
 
             myProblem.get_cost(   )
 
@@ -371,7 +368,7 @@ class myProblem2:
             lnew, ltrue = self.rank_score(formulae_str= formulae_str)
             # log(lnew)
 
-            ### Eval with True Rank
+            ### Eval with MSE
             metrics.append( np.mean( (ltrue -  lnew)**2 )  )
             # metrics.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
@@ -607,9 +604,6 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
         npool: 2 : Number of parallel runs
-
-
-
     """
     from utilmy.parallel import multiproc_run
 
@@ -638,8 +632,6 @@ def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verb
 
         1st argument should the list of parameters: inverse order
         pars_dict is a list --> pars_dict[0]: actual dict
-
-
     """
     search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
 
@@ -649,13 +641,11 @@ def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verb
 ###############################################################################################
 def test5():
     """Test search_island_meta
-
-
     """
     myproblem1,p = test_pars_values()
 
     #### Run Search
-    search_formuale_dcgpy_parallel_island(myproblem1, ddict_ref=p
+    search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [ 0.6 ] ]
                        ,pop_size=6
@@ -668,7 +658,7 @@ def test5():
 
 ### Feature engineerin for ML --> formulae
 ## PYGMO , DCGPY
-def search_formuale_dcgpy_parallel_island(myproblem1, ddict_ref
+def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
                        ,pop_size=2
@@ -685,14 +675,13 @@ def search_formuale_dcgpy_parallel_island(myproblem1, ddict_ref
       myproblem1,p = gp.test_pars_values()
 
       #### Run Search
-      gp.search_island_meta(myproblem1, ddict_ref=p
+      gp.search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
                        ,hyper_par_list   = [ 'pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [ 0.6 ] ]
                        ,pop_size=6
                        ,n_island=2
                        ,dir_log="./logs/"
                       )
-
 
        https://esa.github.io/pygmo2/archipelago.html
        https://esa.github.io/pygmo2/tutorials/coding_udi.html
@@ -828,10 +817,6 @@ def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
 
     def get_random_solution():
-        """Generate Random Expression
-
-        """
-
         return expression(inputs = nvars_in,
                             outputs     = nvars_out,
                             rows        = nr,
@@ -863,7 +848,6 @@ def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
     def run_experiment(max_gen, offsprings, dCGP,  theta, omega, c, screen_output=False):
         """Run the Experiment
-
         Docs::
             max_gen         : Number of Maximum Generations
             offsprings      : Number of offsprings
