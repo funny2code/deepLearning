@@ -625,14 +625,14 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
     ### parallel Run
-    multiproc_run(search_formuale_dcgpy_v2,
+    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
 
 
 
-def search_formuale_dcgpy_v2( pars_dict:dict=None, myproblem=None, verbose=False, ):
+def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verbose=False, ):
     """ Wrapper for parallel version, :
     Docs::
 
@@ -655,7 +655,7 @@ def test5():
     myproblem1,p = test_pars_values()
 
     #### Run Search
-    search_island_meta(myproblem1, ddict_ref=p
+    search_formuale_dcgpy_parallel_island(myproblem1, ddict_ref=p
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [ 0.6 ] ]
                        ,pop_size=6
@@ -668,7 +668,7 @@ def test5():
 
 ### Feature engineerin for ML --> formulae
 ## PYGMO , DCGPY
-def search_island_meta(myproblem1, ddict_ref
+def search_formuale_dcgpy_parallel_island(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
                        ,pop_size=2
@@ -751,7 +751,7 @@ def search_island_meta(myproblem1, ddict_ref
 
 
 ###################################################################################################
-def search_formuale_dcgpy_v3(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -932,7 +932,12 @@ def search_formuale_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False
     """ Search Optimal Formulae
     Docs::
 
-        -- Install  DCGP
+        -- Install  OPERON
+        https://github.com/heal-research/pyoperon
+
+        https://github.com/heal-research/pyoperon/blob/main/example/operon-bindings.py
+
+        https://github.com/heal-research/pyoperon/blob/cpp20/example/operon-bindings.py
 
 
 
