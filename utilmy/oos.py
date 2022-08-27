@@ -500,6 +500,44 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
 
 #####################################################################################################
 ##### File I-O ######################################################################################
+class fileCache(object):
+    def __init__(self, dir_cache=None, ttl=None, size_limit=10000000, verbose=1):
+        """ Simple cache system to store path --> list of files
+            for S3 or HDFS
+
+        """
+        import tempfile, diskcache as dc
+
+        dir_cache = tempfile.tempdir() if dir_cache is None else dir_cache
+        dir_cache= dir_cache.replace("\\","/")
+        dir_cache= dir_cache + "/filecache.db"
+        self.dir_cache = dir_cache
+
+        self.ttl = ttl
+
+        cache = dc.Cache(dir_cache, size_limit= size_limit, timeout= self.ttl )
+        if self.verbose: print('Cache size/limit', len(cache), cache.size_limit )
+        self.db = cache
+
+
+    def get(self, path):
+        path = path.replace("\\","/")
+        return self.db.get(path, None)
+
+
+    def set(self, path:str, flist:list, ttl=None):
+        """
+
+        expire (float) – seconds until item expires (default None, no expiry)
+
+        """
+        ttl = ttl if isinstance(ttl, int)  else self.ttl
+        path = path.replace("\\","/")
+        self.db.set(path, flist, expire=float(ttl), retry=True)
+
+
+
+
 def os_copy(dirfrom="folder/**/*.parquet", dirto="",
 
             mode='file',
