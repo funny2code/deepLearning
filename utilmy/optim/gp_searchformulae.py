@@ -31,43 +31,42 @@ Docs::
 
 
 
-
+    Docs:
+        https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
 
 
 
     -- Test Problem
-       cd utilmy/optim/
-       python gp_searchformulae.py  test1
+        cd $utilmy/optim/
+        python gp_searchformulae.py  test1
 
-    2) Goal is to find a formulae, which make merge_list as much sorted as possible
-    Example :
-        ## 1) Define Problem Class with get_cost methods
-        myproblem1 = myProblem()
-        ## myproblem1.get_cost(formuale_str, symbols  )
+        2) Goal is to find a formulae, which make merge_list as much sorted as possible
+        Example :
+            ## 1) Define Problem Class with get_cost methods
+            myproblem1 = myProblem()
+            ## myproblem1.get_cost(formuale_str, symbols  )
 
-        ## 2) Param Search
-        p               = Box({})
-        ...
-
-
-        ## 3) Run Search
-        from utilmy.optim.gp_formulaesearch import search_formuale_algo1
-        search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+            ## 2) Param Search
+            p               = Box({})
+            ...
 
 
-        #### Parallel version   ------------------------------------
-        for i in range(npool):
-            p2         = copy.deepcopy(p)
-            p2.f_trace = f'trace_{i}.log'
-            input_list.append(p2)
-
-        #### parallel Runs
-        from utilmy.parallel import multiproc_run
-        multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
-                      input_list=input_list,
-                      npool=3)
+            ## 3) Run Search
+            from utilmy.optim.gp_formulaesearch import search_formuale_algo1
+            search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
+            #### Parallel version   ------------------------------------
+            for i in range(npool):
+                p2         = copy.deepcopy(p)
+                p2.f_trace = f'trace_{i}.log'
+                input_list.append(p2)
+
+            #### parallel Runs
+            from utilmy.parallel import multiproc_run
+            multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                          input_list=input_list,
+                          npool=3)
 
 
 
@@ -206,12 +205,6 @@ class myProblem:
             symbols         : Symbols
 
         """
-        # def normalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Rmin)/(Rmax-Rmin)*(Tmax-Tmin))+Tmin)
-
-        # def denormalize(val,Rmin,Rmax,Tmin,Tmax):
-        #     return (((val-Tmin)/(Tmax-Tmin)*(Rmax-Rmin))+Rmin)
-
         try:
             correlm = self.get_correlm(formulae_str=expr(symbols)[0])
         except:
@@ -340,14 +333,12 @@ class myProblem:
 
 
 class myProblem2:
-    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
+    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,):
         """  Define the problem and cost calculation using formulae_str
         Docs::
 
             n_sample        : Number of Samples list to be generated, default = 5
             kk              : Change the fake generated list rank , default = 1.0
-            ncorrect1       : the number of correctly ranked objects for first list , default = 40
-            ncorrect2       : the number of correctly ranked objects for second list , default = 50
             adjust
 
             myProblem.get_cost(   )
@@ -361,9 +352,6 @@ class myProblem2:
         self.n_sample  = 1
         self.kk        = kk
         self.nsize     = nsize
-        self.ncorrect1 = ncorrect1
-        self.ncorrect2 = ncorrect2
-        self.adjust    = adjust
 
 
 
@@ -375,51 +363,34 @@ class myProblem2:
             symbols         : Symbols
 
         """
+        formulae_str=expr(symbols)[0]
 
-        try:
-            correlm = self.get_correlm(formulae_str=expr(symbols)[0])
-        except:
-            correlm = 1.0
-
-        return(correlm)
-
-
-    def get_correlm(self, formulae_str:str):
-        """  Compare 2 lists lnew, ltrue and output correlation.
-             Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
-
-        Docs:
-            formulae_str            : Formulae String
-
-        """
-        correls = []
+        metrics = []
         for i in range(self.n_sample):
-
-            #### Merge them using rank_score
+            ####
             lnew, ltrue = self.rank_score(formulae_str= formulae_str)
-            lnew = lnew[:100]
             # log(lnew)
 
             ### Eval with True Rank
-            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
+            metrics.append( np.mean( (ltrue -  lnew)**2 )  )
+            # metrics.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
-        correlm = np.mean(correls)
-        return -correlm  ### minimize correlation val
+        cost = -np.mean(metrics)
+        return cost  ### minimize cost
 
 
     def rank_score(self, fornulae_str:str):
-        """  ## Example of rank_scores0 = Formulae(list_ score1, list_score2)
+        """  ## Example of rank_scores0
              ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
         Docs::
 
              Check with True Formulae.
-
         """
 
         x0 = np.random.random(20)
         x1 = np.random.random(20)
 
-        scores_true =  np.sin(x1)*x0 + x0+x1
+        scores_true =  np.sin(x1)*x0 + x0+x1  #### True Formulae to find
 
         scores_new  =  eval(fornulae_str)
         return scores_new, scores_true
