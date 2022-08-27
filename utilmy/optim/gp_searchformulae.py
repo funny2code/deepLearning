@@ -45,7 +45,7 @@ Docs::
         Example :
             ## 1) Define Problem Class with get_cost methods
             myproblem1 = myProblem()
-            ## myproblem1.get_cost(formuale_str, symbols  )
+            ## myproblem1.get_cost(formulae_str, symbols  )
 
             ## 2) Param Search
             p               = Box({})
@@ -53,8 +53,8 @@ Docs::
 
 
             ## 3) Run Search
-            from utilmy.optim.gp_formulaesearch import search_formuale_algo1
-            search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+            from utilmy.optim.gp_formulaesearch import search_formulae_algo1
+            search_formulae_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
             #### Parallel version   ------------------------------------
@@ -65,7 +65,7 @@ Docs::
 
             #### parallel Runs
             from utilmy.parallel import multiproc_run
-            multiproc_run(search_formuale_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+            multiproc_run(search_formulae_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
                           input_list=input_list,
                           npool=3)
 
@@ -119,7 +119,7 @@ def test_pars_values():
 
 
 def test1():
-    """Test search_formuale_dcgpy_v1
+    """Test search_formulae_dcgpy_v1
     """
     from lib2to3.pygram import Symbols
     from dcgpy import expression_gdual_double as expression
@@ -129,19 +129,19 @@ def test1():
     myproblem1,p = test_pars_values()
 
     #### Run Search
-    search_formuale_dcgpy_v1(myproblem1, pars_dict=p, verbose=True)
+    search_formulae_dcgpy_v1(myproblem1, pars_dict=p, verbose=True)
 
 
 def test2():
-    """Test of search_formuale_dcgpy_v1_parallel
+    """Test of search_formulae_dcgpy_v1_parallel
     """
     myproblem1,p = test_pars_values()
 
-    search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+    search_formulae_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
 
 
 def test3():
-    """Test parralel run of search_formuale_dcgpy_v1, in customize parallle version.
+    """Test parralel run of search_formulae_dcgpy_v1, in customize parallle version.
     """
     from utilmy.parallel import multiproc_run
 
@@ -155,7 +155,7 @@ def test3():
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
+    multiproc_run(_search_formulae_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
@@ -163,12 +163,12 @@ def test3():
 
 
 def test4():
-    """Test search_formuale_dcgpy_v1_parallel_island
+    """Test search_formulae_dcgpy_v1_parallel_island
     """
     myproblem1,p = test_pars_values()
 
     #### Run Search
-    search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+    search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [ 0.6 ] ]
                        ,pop_size=6
@@ -410,7 +410,7 @@ class myProblem2:
 
 
 ###################################################################################################
-def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -427,7 +427,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
         from utilmy.optim import gp_searchformulae as gp
 
         myproblem1 = gp.myProblem()
-        ## myproblem1.get_cost(formuale_str, symbols  )
+        ## myproblem1.get_cost(formulae_str, symbols  )
 
         p               = Box({})
         p.log_file      = 'trace.log'
@@ -447,7 +447,7 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
         p.seed          = 43
 
         #### Run Search
-        gp.search_formuale_algo1(myproblem1, pars_dict=p, verbose=True)
+        gp.search_formulae_algo1(myproblem1, pars_dict=p, verbose=True)
 
 
         -- Add constraints in the functional space
@@ -607,13 +607,13 @@ def search_formuale_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
     return x
 
 
-def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
-    """Parallel run of search_formuale_dcgpy_v1
+def search_formulae_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
+    """Parallel run of search_formulae_dcgpy_v1
     Docs::
 
         from utilmy.optim import gp_searchformulae as gp
         myproblem1,p = gp.test_pars_values()
-        gp.search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+        gp.search_formulae_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
 
 
         npool: 2 : Number of parallel runs
@@ -632,26 +632,26 @@ def search_formuale_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbo
 
 
     ### parallel Run
-    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
+    multiproc_run(_search_formulae_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
 
 
 
-def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verbose=False, ):
+def _search_formulae_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verbose=False, ):
     """ Wrapper for parallel version, :
     Docs::
 
         1st argument should the list of parameters: inverse order
         pars_dict is a list --> pars_dict[0]: actual dict
     """
-    search_formuale_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+    search_formulae_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
 
 
 
 ###############################################################################################
-def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
+def search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
                        ,pop_size=2
@@ -667,7 +667,7 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
       myproblem1,p = gp.test_pars_values()
 
       #### Run Search
-      gp.search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+      gp.search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
                        ,hyper_par_list   = [ 'pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [ 0.6 ] ]
                        ,pop_size=6
@@ -688,7 +688,7 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
             ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
 
             ddict = {**ddict_ref, **ddict}
-            (cost, expr) =  search_formuale_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
+            (cost, expr) =  search_formulae_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
 
             ss = str(cost) + "," + str(expr)
             #try :
@@ -738,7 +738,7 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
 
 
 ###################################################################################################
-def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -910,7 +910,7 @@ def search_formuale_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
 
 ####################################################################################################
-def search_formuale_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
