@@ -80,12 +80,20 @@ from box import Box
 
 
 ####################################################################################################
-def log(*s):
-    """Log/Print
-    """
-    print(*s, flush=True)
+from utilmy.utilmy import log, log2
+
+# def log(*s):
+#     """Log/Print"""
+#     print(*s, flush=True)
 
 
+def help():
+    from utilmy import help_create
+    print(help_create("utilmy.parallel") )
+
+
+
+####################################################################################################
 def test_all():
     """function test_all
     """
@@ -94,6 +102,28 @@ def test_all():
 
 def test_pars_values():
     """ return test params
+    docs::
+
+        myproblem1 = myProblem()
+
+        p               = Box({})
+        p.log_file      = 'trace.log'
+        p.print_after   = 5
+        p.print_best    = True
+
+
+        p.nvars_in      = 2  ### nb of variables
+        p.nvars_out     = 1
+        p.operators     = ["sum", "diff", "div", "mul"]
+
+        p.max_iter      = 10
+        p.pop_size      = 20  ## Population (Suggested: 10~20)
+        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+        p.kmax          = 100000  ## Max iterations
+        p.nc, p.nr       = 10,1  ## Graph columns x rows
+        p.arity         = 2  # Arity
+        p.seed          = 43
+
     """
     myproblem1 = myProblem()
 
@@ -366,7 +396,7 @@ class myProblem2:
 
 
     def get_cost(self, expr:None, symbols):
-        """ Cost Calculation, Objective to Maximize
+        """ Cost Calculation, Objective to minimize Cost
         Docs::
 
             expr            : Expression whose cost has to be maximized
@@ -390,11 +420,9 @@ class myProblem2:
 
 
     def rank_score(self, fornulae_str:str):
-        """  ## Example of rank_scores0
-             ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
+        """  Generate 2 lists: yeval, ytrue from formulae_str
         Docs::
 
-             Check with True Formulae.
         """
 
         x0 = np.random.random(20)
@@ -651,20 +679,21 @@ def _search_formulae_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verb
 
 
 ###############################################################################################
-def search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref
-                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
-                       ,hyper_par_bounds = [ [0], [1.0 ] ]
-                       ,pop_size=2
-                       ,n_island=2
-                       ,n_step=1
-                       ,max_time_sec=100
-                       ,dir_log="./logs/"
-                      ):
+def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
+             , hyper_par_list   = ['pa',  ]  ### X[0],  X[1]
+             , hyper_par_bounds = [ [0], [1.0 ] ]
+             , pop_size=2
+             , n_island=2
+             , n_step=1
+             , max_time_sec=100
+             , dir_log="./logs/"
+             ):
     """ Use PYGMO Island model + DCGPY for mutiple parallel Search of formulae
     Docs::
 
       from utilmy.optim import gp_searchformulae as gp
       myproblem1,p = gp.test_pars_values()
+      # p ={}
 
       #### Run Search
       gp.search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
@@ -688,7 +717,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref
             ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
 
             ddict = {**ddict_ref, **ddict}
-            (cost, expr) =  search_formulae_dcgpy_v1(myproblem1, pars_dict=ddict, verbose=True)   ### Cost
+            (cost, expr) =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict, verbose=True)   ### Cost
 
             ss = str(cost) + "," + str(expr)
             #try :
@@ -718,7 +747,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref
         #status = archi.status()
         #isok   = True if status not in 'idle' else False
         status = archi.status
-        isok   = True if status!=pg.evolve_status.idle else False
+        isok   = True if status != pg.evolve_status.idle else False
         if time.time()-t0 > max_time_sec :  isok=False
         time.sleep(30)
     # archi.wait_check()
