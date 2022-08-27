@@ -1,4 +1,5 @@
-""" Search Formulae using GP
+""" Search  mathematical Formulae using Genetic Algorithm , Genetic Programming
+
 Docs::
 
     Install  DCGP
@@ -131,15 +132,12 @@ def test1():
     search_formuale_dcgpy_v1(myproblem1, pars_dict=p, verbose=True)
 
 
-
 def test2():
     """Test of search_formuale_dcgpy_v1_parallel
     """
     myproblem1,p = test_pars_values()
 
     search_formuale_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
-
-
 
 
 def test3():
@@ -162,6 +160,21 @@ def test3():
                   input_list=input_list,
                   npool=npool)
 
+
+
+def test4():
+    """Test search_formuale_dcgpy_v1_parallel_island
+    """
+    myproblem1,p = test_pars_values()
+
+    #### Run Search
+    search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
 
 
 
@@ -638,26 +651,6 @@ def _search_formuale_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verb
 
 
 ###############################################################################################
-###############################################################################################
-def test5():
-    """Test search_island_meta
-    """
-    myproblem1,p = test_pars_values()
-
-    #### Run Search
-    search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
-                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
-                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
-                       ,pop_size=6
-                       ,n_island=2
-                       ,dir_log="./logs/"
-                      )
-
-
-
-
-### Feature engineerin for ML --> formulae
-## PYGMO , DCGPY
 def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
                        ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
                        ,hyper_par_bounds = [ [0], [1.0 ] ]
@@ -667,9 +660,8 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
                        ,max_time_sec=100
                        ,dir_log="./logs/"
                       ):
-    """ Use PYGMO Island model for mutiple parallel Search of solution
+    """ Use PYGMO Island model + DCGPY for mutiple parallel Search of formulae
     Docs::
-
 
       from utilmy.optim import gp_searchformulae as gp
       myproblem1,p = gp.test_pars_values()
@@ -737,6 +729,10 @@ def search_formuale_dcgpy_v1_parallel_island(myproblem1, ddict_ref
     xs = archi.get_champions_x()
     print(fs, xs)
 
+    with open(dir_log +"/result.txt", mode='a') as fp:
+        fp.write( "cost_min," + str(fs))
+        fp.write( "xmin," + str(xs))
+    return fs, xs
 
 
 
