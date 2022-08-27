@@ -157,7 +157,7 @@ def test3():
         input_list.append(p2)
 
     ### parallel Runs
-    multiproc_run(search_formuale_dcgpy_v2,
+    multiproc_run(_search_formuale_dcgpy_v1_wrapper,
                   input_fixed={"myproblem": myproblem1, 'verbose':False},
                   input_list=input_list,
                   npool=npool)
