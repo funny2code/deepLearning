@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
-"""# 
+"""utils in DL
 Doc::
 
+   Command Line access, after pip install utilmy
 
-utils in DL
+    utilmy  gpu         : available GPU
+    utilmy  gpu_usage
+
+
+     tensorboard_log(pars_dict:dict=None,  writer=None,  verbose=True)
+
+     metrics_eval(ypred:np.ndarray,  ytrue:np.ndarray,
+                 metric_list:list=["mean_squared_error", "mean_absolute_error"],
+                 ypred_proba:np.ndarray, return_dict:bool, metric_pars:dict=None)
+
+
 
 """
 import os,io, numpy as np, sys, glob, time, copy, json, functools, pandas as pd
