@@ -368,6 +368,14 @@ def spark_read(sparksession=None, dirin="hdfs://", format=None, **kw)->sp_datafr
 
 
 
+def spark_df_rename(df, dmap:dict):
+    """ Rename Spark columns
+
+
+    """
+
+    return df
+
 
 
 def spark_schema_create(dlist:list):
