@@ -684,7 +684,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
              , hyper_par_bounds = [ [0], [1.0 ] ]
              , pop_size=2
              , n_island=2
-             , n_step=1
+             , max_step=1
              , max_time_sec=100
              , dir_log="./logs/"
              ):
@@ -738,7 +738,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
     algo  = pg.de(10)  ### Differentail DE
     archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
 
-    archi.evolve(n_step)
+    archi.evolve(max_step)
 
     t0 = time.time()
     isok= True

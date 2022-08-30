@@ -370,6 +370,51 @@ def spark_read(sparksession=None, dirin="hdfs://", format=None, **kw)->sp_datafr
 
 
 
+def spark_schema_create(dlist:list):
+    """ Convert simple dict schema to Spark Schema
+    Docs::    
+        
+        schema = [ ('ip', 'string'),  ('Rp', 'string'), ('ts', 'int')       ]        
+        schema_spark =  spark_schema_create(dlist = schema)
+    
+    
+        # Mapping Python types to Spark SQL DataType
+        _type_mappings = {
+            type(None): NullType,
+            bool: BooleanType,
+            int: LongType,
+            float: DoubleType,
+            str: StringType,
+            bytearray: BinaryType,
+            decimal.Decimal: DecimalType,
+            datetime.date: DateType,
+            datetime.datetime: TimestampType,
+            datetime.time: TimestampType,
+        }
+
+        schema = {
+            'type': 'struct',
+            'fields': [                
+                {'name': 'ip', 'type': 'string', 'nullable': True, 'metadata': {} },
+                {'name': 'Rp', 'type': 'string', 'nullable': True, 'metadata': {} },
+                {'name': 'ts', 'type': 'integer', 'nullable': True, 'metadata': {} },
+            ]
+        }  
+    """ 
+    ll = []
+    for x in dlist:
+        field, ttype = x[0], x[1].lower()
+        if   'string' in ttype:  ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )        
+        elif 'int'    in ttype  or 'long' in ttype :   ll.append(   {'name': field, 'type':   'long', 'nullable': True, 'metadata': {} } )
+        elif 'float'  in ttype:  ll.append( {'name': field, 'type': 'float', 'nullable': True, 'metadata': {}  }   )
+        else :
+            print('string type for', field)
+            ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )    
+    
+    schema = { 'type': 'struct', 'fields': ll }  
+    return schema
+
+    
 
 
 
