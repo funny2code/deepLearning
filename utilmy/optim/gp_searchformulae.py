@@ -221,7 +221,7 @@ def test5():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "diff", "div", "mul"]
+    p.operators     = ["sum", "diff", "div", "mul", 'sin']
 
     p.max_iter      = 10
     p.pop_size      = 20  ## Population (Suggested: 10~20)
@@ -248,7 +248,7 @@ def test6():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "diff", "div", "mul"]
+    p.operators     = ["sum", "diff", "div", "mul", "sin"]
 
     p.max_iter      = 10
     p.pop_size      = 20  ## Population (Suggested: 10~20)
