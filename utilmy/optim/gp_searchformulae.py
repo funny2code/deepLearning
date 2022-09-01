@@ -207,6 +207,66 @@ def test4():
                       )
 
 
+def test5():
+    """Test the myProblem2 class
+
+    """
+    myproblem = myProblem2()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "diff", "div", "mul"]
+
+    p.max_iter      = 10
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
+    p.arity         = 2  # Arity
+    p.seed          = 43
+
+    search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+
+
+def test6():
+    """Test the myProblem2 class, parrallel version
+
+    """
+    myproblem = myProblem2()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "diff", "div", "mul"]
+
+    p.max_iter      = 10
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
+    p.arity         = 2  # Arity
+    p.seed          = 43
+
+    #search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+    search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref=p
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
 
 
 ####################################################################################################
@@ -395,7 +455,7 @@ class myProblem2:
 
 
 
-    def get_cost(self, expr:None, symbols):
+    def get_cost(self, expr, symbols):
         """ Cost Calculation, Objective to minimize Cost
         Docs::
 
@@ -419,7 +479,7 @@ class myProblem2:
         return cost  ### minimize cost
 
 
-    def rank_score(self, fornulae_str:str):
+    def rank_score(self, formulae_str:str):
         """  Generate 2 lists: yeval, ytrue from formulae_str
         Docs::
 
@@ -430,7 +490,7 @@ class myProblem2:
 
         scores_true =  np.sin(x1)*x0 + x0+x1  #### True Formulae to find
 
-        scores_new  =  eval(fornulae_str)
+        scores_new  =  eval(formulae_str)
         return scores_new, scores_true
 
 
@@ -596,9 +656,10 @@ def search_formulae_dcgpy_v1(myproblem=None, pars_dict:dict=None, verbose=False,
                 idx         = random.randint(0,pop_size-1)
                 egg         = deepcopy(nest[idx]) # Pick an egg at random from the nest
                 cuckoo      = egg[0].mutate_active(var_choice(var_levy))
-                cost_cuckoo = myproblem.get_cost(expr=cuckoo, symbols=symbols)
-                if (cost_cuckoo <= egg[1]): # Check if the cuckoo egg is better
-                    nest[idx] = (cuckoo,cost_cuckoo)
+                if (cuckoo is not None):
+                    cost_cuckoo = myproblem.get_cost(expr=cuckoo, symbols=symbols)
+                    if (cost_cuckoo <= egg[1]): # Check if the cuckoo egg is better
+                        nest[idx] = (cuckoo,cost_cuckoo)
 
             nest.sort(key = itemgetter(1)) # Sorting
 
