@@ -477,7 +477,7 @@ class myProblem2:
             metrics.append( np.mean( (ltrue -  lnew)**2 )  )
             # metrics.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
-        cost = -np.mean(metrics)
+        cost = np.mean(metrics)
         return cost  ### minimize cost
 
 
