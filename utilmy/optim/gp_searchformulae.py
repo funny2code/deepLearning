@@ -453,6 +453,8 @@ class myProblem2:
         self.kk        = kk
         self.nsize     = nsize
 
+        self.x0 = np.random.random(50)*10 - 5.0
+        self.x1 = np.random.random(50)*10 - 5.0
 
 
     def get_cost(self, expr, symbols):
@@ -475,7 +477,7 @@ class myProblem2:
             metrics.append( np.mean( (ltrue -  lnew)**2 )  )
             # metrics.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
-        cost = -np.mean(metrics)
+        cost = np.mean(metrics)
         return cost  ### minimize cost
 
 
@@ -485,12 +487,13 @@ class myProblem2:
 
         """
 
-        x0 = np.random.random(20)
-        x1 = np.random.random(20)
+        x0 = self.x0
+        x1 = self.x1
 
-        scores_true =  np.sin(x1)*x0 + x0+x1  #### True Formulae to find
-
+        scores_true =  np.sin(x1) + x0+x1  #### True Formulae to find
         scores_new  =  eval(formulae_str)
+
+
         return scores_new, scores_true
 
 
