@@ -241,11 +241,35 @@ def test5():
     search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
 
 
+
 def test6():
     """Test the myProblem3 class, parrallel version
 
     """
-    myproblem3= myProblem3()
+    myproblem       = myProblem4()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 3  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "div", "diff"]
+    p.symbols       = ["x","v","k"]
+    p.max_iter      = 10
+    p.nexp          = 100
+    p.offsprings    = 10
+    p.stop          = 2000
+    search_formulae_dcgpy_v3_custom(myproblem = myproblem, pars_dict=p, verbose=False,)
+
+
+def test7():
+    """Test the myProblem4 class, parrallel version
+
+    """
+    myproblem      = myProblem3()
 
     p               = Box({})
     p.log_file      = 'trace.log'
@@ -256,14 +280,12 @@ def test6():
     p.nvars_in      = 3  ### nb of variables
     p.nvars_out     = 1
     p.operators     = ["sum", "mul", "div", "diff","sin","cos"]
-
+    p.symbols       = ["theta","omega","c"]
     p.max_iter      = 10
     p.nexp          = 100
     p.offsprings    = 10
     p.stop          = 2000
-    search_formulae_dcgpy_v3_custom(myproblem=myproblem3, pars_dict=p, verbose=False,)
-
-
+    search_formulae_dcgpy_v3_custom(myproblem = myproblem, pars_dict=p, verbose=False,)
 
 
 ####################################################################################################
@@ -493,23 +515,15 @@ class myProblem2:
 
         return scores_new, scores_true
 
+
+
 class myProblem3:
     def __init__(self):
-        """  Define the problem and cost calculation using formulae_str
-        Docs::
+        pass
 
 
-            myProblem.get_cost(   )
 
-            ---- My Problem
-            2)  list with scores (ie randomly generated)
-            We use 1 formulae to merge  2 list --> merge_list with score
-               Ojective to maximize  correlation(merge_list,  True_ordered_list)
-
-        """
-
-
-    def get_cost(self, dCGP, theta, omega, c):
+    def get_cost(self, dCGP, symbols):
         """ Cost Calculation, Objective to minimize Cost
         Docs::
 
@@ -517,15 +531,67 @@ class myProblem3:
             symbols         : Symbols
 
         """
-        res = dCGP([theta, omega, c])[0]
-        dPdtheta = np.array(res.get_derivative({"dtheta": 1}))
-        dPdomega = np.array(res.get_derivative({"domega": 1}))
+        n_points = 50
+        omega = []
+        theta = []
+        c = []
+        for i in range(n_points):
+            omega.append(random()*10 - 5)
+            theta.append(random()*10 - 5)
+            c.append(random()*10)
+
+        
+
+        theta = gdual(theta,symbols[0],1)
+        omega = gdual(omega,symbols[1],1)
+        c = gdual(c)
+        res = dCGP([theta,omega,c])[0]
+        derivative_symbols = ['d'+item for item in symbols]
+        dPdtheta = np.array(res.get_derivative({derivative_symbols[0]: 1}))
+        dPdomega = np.array(res.get_derivative({derivative_symbols[1]: 1}))
         thetacoeff = np.array(theta.constant_cf)
         omegacoeff = np.array(omega.constant_cf)
         ccoeff = np.array(c.constant_cf)
         err = dPdtheta/dPdomega + (-ccoeff * np.sin(thetacoeff)) / omegacoeff
         check = sum(dPdtheta*dPdtheta + dPdomega*dPdomega)
         return sum(err * err ), check
+
+
+
+class myProblem4:
+    def __init__(self):
+        pass
+
+    def get_cost(self, dCGP, symbols):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        n_points = 50
+        x = []
+        v = []
+        k = []
+        for i in range(n_points):
+            x.append(random()*2 + 2)
+            v.append(random()*2 + 2)
+            k.append(random()*2 + 2)
+        x = gdual(x,symbols[0],1)
+        v = gdual(v,symbols[1],1)
+        k = gdual(k)
+
+        res = dCGP([x,v,k])[0]
+        derivative_symbols = ['d'+item for item in symbols]
+        dPdx = np.array(res.get_derivative({derivative_symbols[0]: 1}))
+        dPdv = np.array(res.get_derivative({derivative_symbols[1]: 1}))
+        xcoeff = np.array(x.constant_cf)
+        vcoeff = np.array(v.constant_cf)
+        kcoeff = np.array(k.constant_cf)
+        err = dPdx/dPdv - kcoeff * xcoeff / vcoeff
+        return sum(err * err), 3
+
 
 
 ###################################################################################################
@@ -920,22 +986,10 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     nexp            = p.get('nexp', 100) 
     offsprings      = p.get('offsprings',10)
     stop            = p.get('stop', 2000) 
+    symbols         = p.get('symbols',['x0','x1','x2'])
 
 
-
-    ######### Define expression symbols  #######################
-    symbols = []
-    for i in range(nvars_in):
-        symbols.append(f"x{i}")
-
-    ######### Check   ##########################################
-    if verbose:
-        log(operator_list)
-        log(symbols)
-
-
-
-    def run_experiment(max_gen, offsprings, dCGP,  theta, omega, c, screen_output=False):
+    def run_experiment(max_gen, offsprings, dCGP,  symbols, screen_output=False):
         """Run the Experiment
         Docs::
             max_gen         : Number of Maximum Generations
@@ -958,16 +1012,15 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
                 while(check < 1e-3):
                     dCGP.set(best_chromosome)
                     dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
-                    fitness[i], check = problem.get_cost(dCGP, theta, omega, c)
+                    fitness[i], check = problem.get_cost(dCGP, symbols)
                 chromosome[i] = dCGP.get()
             for i in range(offsprings):
                 if fitness[i] <= best_fitness:
                     if (fitness[i] != best_fitness) and screen_output:
                         dCGP.set(chromosome[i])
-                        print("New best found: gen: ", g, " value: ", fitness[i], " ", dCGP.simplify(["theta","omega","c"]))
+                        print("New best found: gen: ", g, " value: ", fitness[i], " ", dCGP.simplify(symbols))
                     best_chromosome = chromosome[i]
                     best_fitness = fitness[i]
-            #print("Best fitness",best_fitness)
             if best_fitness < 1e-3:
                 break
         dCGP.set(best_chromosome)
@@ -980,45 +1033,24 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
 
         """
+        kernels_new = kernel_set(operator_list)()
+        dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = seed)
 
-        kernels = kernel_set(operator_list)()
-        dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = seed)
-        #kernels = kernel_set(["sum", "mul", "div", "diff","sin","cos"])() # note the call operator (returns the list of kernels)
-        #dCGP = expression(inputs=3, outputs=1, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
-
-
-        n_points = 50
-        omega = []
-        theta = []
-        c = []
-        for i in range(n_points):
-            omega.append(random()*10 - 5)
-            theta.append(random()*10 - 5)
-            c.append(random()*10)
-
-        
-
-        omega = gdual(omega,"omega",1)
-        theta = gdual(theta,'theta',1)
-        c = gdual(c)
         # We run nexp experiments to accumulate statistic for the ERT
         res = []
-        print("stop",stop)
         print("restart: \t gen: \t expression:")
         for i in range(nexp):
-            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
-            g, dCGP = run_experiment(stop, 10, dCGP, theta, omega, c, False)
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = randint(0,234213213))
+            g, dCGP = run_experiment(stop, 10, dCGP, symbols, False)
             res.append(g)
             #print("g ",g)
             if g < (stop-1):
-                print(i, "\t\t", res[i], "\t", dCGP(["theta","omega","c"]), " a.k.a ", dCGP.simplify(["theta","omega","c"]))
+                print(i, "\t\t", res[i], "\t", dCGP(symbols), " a.k.a ", dCGP.simplify(symbols))
                 one_sol = dCGP
         res = np.array(res)
-        print(one_sol.simplify(["theta","omega","c"]))
+        #print(one_sol.simplify(symbols))
 
     search()
-
-
 
 
 
