@@ -77,9 +77,7 @@ import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
 from box import Box
-from dcgpy import kernel_set_gdual_vdouble as kernel_set
-from dcgpy import expression_gdual_vdouble as expression
-from pyaudi import gdual_vdouble as gdual
+
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy import sin, cos
@@ -570,7 +568,13 @@ class myProblem4:
             symbols         : Symbols
 
         """
+        from dcgpy import kernel_set_gdual_vdouble as kernel_set
+        from dcgpy import expression_gdual_vdouble as expression
+        from pyaudi import gdual_vdouble as gdual
+
         n_points = 50
+
+        ###### Variable numerical  ################################
         x = []
         v = []
         k = []
@@ -581,16 +585,24 @@ class myProblem4:
         x = gdual(x,symbols[0],1)
         v = gdual(v,symbols[1],1)
         k = gdual(k)
-
-        res = dCGP([x,v,k])[0]
-        derivative_symbols = ['d'+item for item in symbols]
-        dPdx = np.array(res.get_derivative({derivative_symbols[0]: 1}))
-        dPdv = np.array(res.get_derivative({derivative_symbols[1]: 1}))
         xcoeff = np.array(x.constant_cf)
         vcoeff = np.array(v.constant_cf)
         kcoeff = np.array(k.constant_cf)
-        err = dPdx/dPdv - kcoeff * xcoeff / vcoeff
-        return sum(err * err), 3
+
+
+        #### Derivatives numerical  ##############################
+        derivative_symbols = ['d'+item for item in symbols]
+
+        formul = dCGP([x,v,k])[0]
+
+        dPdx = np.array(formul.get_derivative({derivative_symbols[0]: 1}))
+        dPdv = np.array(formul.get_derivative({derivative_symbols[1]: 1}))
+
+
+        ### Cost numerical
+        err  = dPdx/dPdv - kcoeff * xcoeff / vcoeff
+        cost = sum(err * err)
+        return cost, 3
 
 
 
@@ -1034,7 +1046,7 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
         """
         kernels_new = kernel_set(operator_list)()
-        dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = seed)
+        # dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = seed)
 
         # We run nexp experiments to accumulate statistic for the ERT
         res = []
