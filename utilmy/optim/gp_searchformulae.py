@@ -77,7 +77,14 @@ import scipy.stats
 from operator import itemgetter
 from copy import deepcopy
 from box import Box
-
+from dcgpy import kernel_set_gdual_vdouble as kernel_set
+from dcgpy import expression_gdual_vdouble as expression
+from pyaudi import gdual_vdouble as gdual
+from matplotlib import pyplot as plt
+import numpy as np
+from numpy import sin, cos
+from random import randint, random
+np.seterr(all='ignore') 
 
 ####################################################################################################
 from utilmy.utilmy import log, log2
@@ -235,10 +242,10 @@ def test5():
 
 
 def test6():
-    """Test the myProblem2 class, parrallel version
+    """Test the myProblem3 class, parrallel version
 
     """
-    myproblem = myProblem2()
+    myproblem3= myProblem3()
 
     p               = Box({})
     p.log_file      = 'trace.log'
@@ -246,26 +253,16 @@ def test6():
     p.print_best    = True
 
 
-    p.nvars_in      = 2  ### nb of variables
+    p.nvars_in      = 3  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "diff", "div", "mul", "sin"]
+    p.operators     = ["sum", "mul", "div", "diff","sin","cos"]
 
     p.max_iter      = 10
-    p.pop_size      = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc, p.nr       = 10,1  ## Graph columns x rows
-    p.arity         = 2  # Arity
-    p.seed          = 43
+    p.nexp          = 100
+    p.offsprings    = 10
+    p.stop          = 2000
+    search_formulae_dcgpy_v3_custom(myproblem=myproblem3, pars_dict=p, verbose=False,)
 
-    #search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
-    search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref=p
-                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
-                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
-                       ,pop_size=6
-                       ,n_island=2
-                       ,dir_log="./logs/"
-                      )
 
 
 
@@ -496,8 +493,39 @@ class myProblem2:
 
         return scores_new, scores_true
 
+class myProblem3:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
 
 
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+
+
+    def get_cost(self, dCGP, theta, omega, c):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        res = dCGP([theta, omega, c])[0]
+        dPdtheta = np.array(res.get_derivative({"dtheta": 1}))
+        dPdomega = np.array(res.get_derivative({"domega": 1}))
+        thetacoeff = np.array(theta.constant_cf)
+        omegacoeff = np.array(omega.constant_cf)
+        ccoeff = np.array(c.constant_cf)
+        err = dPdtheta/dPdomega + (-ccoeff * np.sin(thetacoeff)) / omegacoeff
+        check = sum(dPdtheta*dPdtheta + dPdomega*dPdomega)
+        return sum(err * err ), check
 
 
 ###################################################################################################
@@ -849,27 +877,27 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
         seed          = p.get('seed', 43)
         log_file      = p.get('log_file', 'log.log') # 'trace.py'
 
-        ### search
-        pa            = p.get( 'pa', 0.3)  # 0.3  ## Parasitic Probability (Suggested: 0.3)
-        nc,nr         = p.nc, p.nr # 10,1  ## Graph columns x rows
-        arity         = p.get( 'arity', 2)   #2  # Arity
-        n_cuckoo_eggs = round(p.pa*p.pop_size)
-        n_replace     = round(p.pa*p.pop_size)
-
         -- Add constraints in the functional space
 
         https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
 
 
     """
+    ###https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
     from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from dcgpy import kernel_set_gdual_double as kernel_set
-    from pyaudi import gdual_double as gdual
-
+    #from dcgpy import expression_gdual_double as expression
+    #from dcgpy import kernel_set_gdual_double as kernel_set
+    #from pyaudi import gdual_double as gdual
+    from dcgpy import expression_gdual_vdouble as expression
+    from dcgpy import kernel_set_gdual_vdouble as kernel_set
+    from pyaudi import gdual_vdouble as gdual
+    from matplotlib import pyplot as plt
+    import numpy as np
+    from numpy import sin, cos
+    from random import randint, random
     from box import Box
     ######### Problem definition and Cost calculation
-    #myproblem = myProblem()
+    problem = myproblem
 
 
     #### Formulae GP Search params   #################
@@ -878,7 +906,7 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     ### Problem
     nvars_in      = p.nvars_in  ### nb of variables
     nvars_out     = p.nvars_out
-    operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
+    operator_list = p.get('operators', ["sum", "mul", "div", "diff","sin","cos"])
 
     ### Log
     print_after   = p.get('print_after', 20)
@@ -889,11 +917,10 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     log_file      = p.get('log_file', 'log.log') # 'trace.py'
 
     ### search
-    pa            = p.get( 'pa', 0.3)  # 0.3  ## Parasitic Probability (Suggested: 0.3)
-    nc,nr         = p.nc, p.nr # 10,1  ## Graph columns x rows
-    arity         = p.get( 'arity', 2)   #2  # Arity
-    n_cuckoo_eggs = round(p.pa*p.pop_size)
-    n_replace     = round(p.pa*p.pop_size)
+    nexp            = p.get('nexp', 100) 
+    offsprings      = p.get('offsprings',10)
+    stop            = p.get('stop', 2000) 
+
 
 
     ######### Define expression symbols  #######################
@@ -906,35 +933,6 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
         log(operator_list)
         log(symbols)
 
-
-    def get_random_solution():
-        return expression(inputs = nvars_in,
-                            outputs     = nvars_out,
-                            rows        = nr,
-                            cols        = nc,
-                            levels_back = nc,
-                            arity       = arity,
-                            kernels     = operator_list(),
-                            n_eph       = 0,
-                            seed        = seed )
-
-    ### https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
-    kernels = kernel_set(["sum", "mul", "pdiv", "diff","sin","cos"])() # note the call operator (returns the list of kernels)
-    dCGP = expression(inputs=3, outputs=1, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
-
-
-    n_points = 50
-    omega = []
-    theta = []
-    c = []
-    for i in range(n_points):
-        omega.append(random()*10 - 5)
-        theta.append(random()*10 - 5)
-        c.append(random()*10)
-
-    omega = gdual(omega,"omega",1)
-    theta = gdual(theta,"theta",1)
-    c = gdual(c)
 
 
     def run_experiment(max_gen, offsprings, dCGP,  theta, omega, c, screen_output=False):
@@ -960,7 +958,7 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
                 while(check < 1e-3):
                     dCGP.set(best_chromosome)
                     dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
-                    fitness[i], check = myproblem.get_cost(dCGP, theta, omega, c)
+                    fitness[i], check = problem.get_cost(dCGP, theta, omega, c)
                 chromosome[i] = dCGP.get()
             for i in range(offsprings):
                 if fitness[i] <= best_fitness:
@@ -969,7 +967,8 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
                         print("New best found: gen: ", g, " value: ", fitness[i], " ", dCGP.simplify(["theta","omega","c"]))
                     best_chromosome = chromosome[i]
                     best_fitness = fitness[i]
-            if best_fitness < 1e-12:
+            #print("Best fitness",best_fitness)
+            if best_fitness < 1e-3:
                 break
         dCGP.set(best_chromosome)
         return g, dCGP
@@ -981,20 +980,41 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
 
 
         """
+
+        kernels = kernel_set(operator_list)()
+        dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = seed)
+        #kernels = kernel_set(["sum", "mul", "div", "diff","sin","cos"])() # note the call operator (returns the list of kernels)
+        #dCGP = expression(inputs=3, outputs=1, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
+
+
+        n_points = 50
+        omega = []
+        theta = []
+        c = []
+        for i in range(n_points):
+            omega.append(random()*10 - 5)
+            theta.append(random()*10 - 5)
+            c.append(random()*10)
+
+        
+
+        omega = gdual(omega,"omega",1)
+        theta = gdual(theta,'theta',1)
+        c = gdual(c)
         # We run nexp experiments to accumulate statistic for the ERT
-        nexp = 100
-        offsprings = 10
-        stop = 2000
         res = []
+        print("stop",stop)
         print("restart: \t gen: \t expression:")
         for i in range(nexp):
-            dCGP = expression(inputs=3, outputs=1, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels, seed = randint(0,234213213))
             g, dCGP = run_experiment(stop, 10, dCGP, theta, omega, c, False)
             res.append(g)
+            #print("g ",g)
             if g < (stop-1):
                 print(i, "\t\t", res[i], "\t", dCGP(["theta","omega","c"]), " a.k.a ", dCGP.simplify(["theta","omega","c"]))
                 one_sol = dCGP
         res = np.array(res)
+        print(one_sol.simplify(["theta","omega","c"]))
 
     search()
 
