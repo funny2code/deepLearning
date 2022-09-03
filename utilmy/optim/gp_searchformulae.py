@@ -81,7 +81,7 @@ from box import Box
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy import sin, cos
-from random import randint, random
+
 np.seterr(all='ignore') 
 
 ####################################################################################################
@@ -283,7 +283,7 @@ def test7():
     p.nexp          = 100
     p.offsprings    = 10
     p.stop          = 2000
-    search_formulae_dcgpy_v3_custom(myproblem = myproblem, pars_dict=p, verbose=False,)
+    search_formulae_dcgpy_v3_custom(problem = myproblem, pars_dict=p, verbose=False,)
 
 
 ####################################################################################################
@@ -568,6 +568,7 @@ class myProblem4:
             symbols         : Symbols
 
         """
+        import random
         from dcgpy import kernel_set_gdual_vdouble as kernel_set
         from dcgpy import expression_gdual_vdouble as expression
         from pyaudi import gdual_vdouble as gdual
@@ -579,9 +580,9 @@ class myProblem4:
         v = []
         k = []
         for i in range(n_points):
-            x.append(random()*2 + 2)
-            v.append(random()*2 + 2)
-            k.append(random()*2 + 2)
+            x.append(random.random()*2 + 2)
+            v.append(random.random()*2 + 2)
+            k.append(random.random()*2 + 2)
         x = gdual(x,symbols[0],1)
         v = gdual(v,symbols[1],1)
         k = gdual(k)
@@ -937,7 +938,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
 
 ###################################################################################################
-def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -969,13 +970,10 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     from dcgpy import expression_gdual_vdouble as expression
     from dcgpy import kernel_set_gdual_vdouble as kernel_set
     from pyaudi import gdual_vdouble as gdual
-    from matplotlib import pyplot as plt
-    import numpy as np
-    from numpy import sin, cos
-    from random import randint, random
+
+    import random
     from box import Box
     ######### Problem definition and Cost calculation
-    problem = myproblem
 
 
     #### Formulae GP Search params   #################
@@ -997,28 +995,28 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     ### search
     nexp            = p.get('nexp', 100) 
     offsprings      = p.get('offsprings',10)
-    stop            = p.get('stop', 2000) 
+    max_step        = p.get('stop', 2000)
     symbols         = p.get('symbols',['x0','x1','x2'])
+    seed            = p.get('seed', 23)
 
 
-    def run_experiment(max_gen, offsprings, dCGP,  symbols, screen_output=False):
-        """Run the Experiment
+    def run_experiment(max_step, offsprings, dCGP, symbols, verbose=False):
+        """Run the Experiment in max_step
         Docs::
-            max_gen         : Number of Maximum Generations
+            max_step        : Maximum Generations
             offsprings      : Number of offsprings
-            dCGP            : dCGP object
-            theta           : Parameter for get_cost Function
-            omega           : Parameter for get_cost Function 
-            c               : Parameter for get_cost Function 
-            screen_output   : Boolean Value whether to display output on screen
+            dCGP            : dCGP object : hold the formulae
+            symbols   : list of variable as string
+
 
         """
-        chromosome = [1] * offsprings
-        fitness = [1] *offsprings
+        chromosome      = [1] * offsprings
+        fitness         = [1] * offsprings
         best_chromosome = dCGP.get()
-        best_fitness = 1e10
+        best_fitness    = 1e10
 
-        for g in range(max_gen):
+
+        for kstep in range(max_step):
             for i in range(offsprings):
                 check = 0
                 while(check < 1e-3):
@@ -1026,43 +1024,47 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
                     dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
                     fitness[i], check = problem.get_cost(dCGP, symbols)
                 chromosome[i] = dCGP.get()
+
             for i in range(offsprings):
                 if fitness[i] <= best_fitness:
-                    if (fitness[i] != best_fitness) and screen_output:
+                    if (fitness[i] != best_fitness) and verbose:
                         dCGP.set(chromosome[i])
-                        print("New best found: gen: ", g, " value: ", fitness[i], " ", dCGP.simplify(symbols))
+                        print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify(symbols))
                     best_chromosome = chromosome[i]
                     best_fitness = fitness[i]
             if best_fitness < 1e-3:
                 break
+
         dCGP.set(best_chromosome)
-        return g, dCGP
+        return kstep, dCGP
 
 
     def search():
-        """function search
-        Search for best possible solution using Genetic Algorithm
+        # Search for best possible solution using Genetic Algorithm
 
-
-        """
         kernels_new = kernel_set(operator_list)()
         # dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = seed)
 
-        # We run nexp experiments to accumulate statistic for the ERT
-        res = []
+        #  nexp experiments to accumulate statistic
+        result = []
         print("restart: \t gen: \t expression:")
         for i in range(nexp):
-            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = randint(0,234213213))
-            g, dCGP = run_experiment(stop, 10, dCGP, symbols, False)
-            res.append(g)
-            #print("g ",g)
-            if g < (stop-1):
-                print(i, "\t\t", res[i], "\t", dCGP(symbols), " a.k.a ", dCGP.simplify(symbols))
-                one_sol = dCGP
-        res = np.array(res)
-        #print(one_sol.simplify(symbols))
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
+            kstep, dCGP = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
+            # res.append(kstep)
+            # print("g ",g)
+            if kstep < (max_step-1):
+                form1 = dCGP(symbols)
+                form2 = dCGP.simplify(symbols)
+                print(i, "\t\t", i, "\t", form1, " a.k.a ", form2)
 
-    search()
+                result.append(form2)
+        # res = np.array(res)
+        #print(one_sol.simplify(symbols))
+        return result
+
+    res = search()
+    return res
 
 
 
