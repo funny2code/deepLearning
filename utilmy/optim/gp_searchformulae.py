@@ -564,8 +564,8 @@ class myProblem4:
         """ Cost Calculation, Objective to minimize Cost
         Docs::
 
-            expr            : Expression whose cost has to be maximized
-            symbols         : Symbols
+            DCGP            : Formulae Expression Object
+            symbols         : Symbols  [ 'x1', 'x2', 'x3' ]
 
         """
         import random
@@ -583,8 +583,8 @@ class myProblem4:
         #    x.append(random.random()*2 + 2)
         #    v.append(random.random()*2 + 2)
         #    k.append(random.random()*2 + 2)
-        x = gdual(x,symbols[0],1)
-        v = gdual(v,symbols[1],1)
+        x = gdual(x,symbols[0], 1)
+        v = gdual(v,symbols[1], 1)
         k = gdual(k)
         xcoeff = np.array(x.constant_cf)
         vcoeff = np.array(v.constant_cf)
@@ -595,6 +595,9 @@ class myProblem4:
         derivative_symbols = ['d'+item for item in symbols]
 
         formul = dCGP([x,v,k])[0]
+
+        ### formul_str = dCGP.simplify(symbols)
+        ### formul_val = eval( formul_str )    ### numerical values
 
         dPdx = np.array(formul.get_derivative({derivative_symbols[0]: 1}))
         dPdv = np.array(formul.get_derivative({derivative_symbols[1]: 1}))
@@ -1060,7 +1063,7 @@ def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=F
 
                 result.append(form2)
         # res = np.array(res)
-        #print(one_sol.simplify(symbols))
+        # print(one_sol.simplify(symbols))
         return result
 
     res = search()
