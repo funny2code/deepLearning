@@ -81,7 +81,7 @@ from box import Box
 from matplotlib import pyplot as plt
 import numpy as np
 from numpy import sin, cos
-from random import randint, random
+
 np.seterr(all='ignore') 
 
 ####################################################################################################
@@ -568,6 +568,7 @@ class myProblem4:
             symbols         : Symbols
 
         """
+        import random
         from dcgpy import kernel_set_gdual_vdouble as kernel_set
         from dcgpy import expression_gdual_vdouble as expression
         from pyaudi import gdual_vdouble as gdual
@@ -579,9 +580,9 @@ class myProblem4:
         v = []
         k = []
         for i in range(n_points):
-            x.append(random()*2 + 2)
-            v.append(random()*2 + 2)
-            k.append(random()*2 + 2)
+            x.append(random.random()*2 + 2)
+            v.append(random.random()*2 + 2)
+            k.append(random.random()*2 + 2)
         x = gdual(x,symbols[0],1)
         v = gdual(v,symbols[1],1)
         k = gdual(k)
