@@ -46,7 +46,7 @@ def test1():
     p.stop          = 2000
 
     #### Run Search
-    search_formulae_dcgpy_v3_custom(myproblem, pars_dict=p, verbose=True)
+    search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
 
 
 def test2():
@@ -83,7 +83,7 @@ def test2():
     p.stop          = 2000
 
     #### Run Search
-    search_formulae_dcgpy_v3_custom(myproblem, pars_dict=p, verbose=True)
+    search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
 
 
 def test6():
@@ -106,7 +106,7 @@ def test6():
     p.nexp          = 100
     p.offsprings    = 10
     p.stop          = 2000
-    search_formulae_dcgpy_v3_custom(problem = myproblem, pars_dict=p, verbose=False,)
+    search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=False, )
 
 
 def test7():
@@ -129,7 +129,7 @@ def test7():
     p.nexp          = 100
     p.offsprings    = 10
     p.stop          = 2000
-    search_formulae_dcgpy_v3_custom(problem = myproblem, pars_dict=p, verbose=False,)
+    search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=False, )
 
 
 ###################################################################################################
@@ -313,9 +313,7 @@ class myProblem4:
 
 
 ###################################################################################################
-
-
-def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
