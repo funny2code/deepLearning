@@ -1,33 +1,85 @@
+""" Search  mathematical Formulae using Genetic Algorithm , Genetic Programming
 
+Docs::
+
+    Install  DCGP
+
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire utilmy
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
+          https://darioizzo.github.io/dcgp/installation.html#python
+
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+    Install  DSO
+           https://github.com/brendenpetersen/deep-symbolic-optimization
+
+           https://iclr.cc/virtual/2021/poster/2578
+
+
+
+    Install  Operon
+
+        https://github.com/heal-research/pyoperon
+
+        https://github.com/heal-research/pyoperon/blob/main/example/operon-bindings.py
+
+
+
+    Docs:
+        https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
+
+
+
+    -- Test Problem
+        cd $utilmy/optim/
+        python gp_searchformulae.py  test1
+
+        2) Goal is to find a formulae, which make merge_list as much sorted as possible
+        Example :
+            ## 1) Define Problem Class with get_cost methods
+            myproblem1 = myProblem()
+            ## myproblem1.get_cost(formulae_str, symbols  )
+
+            ## 2) Param Search
+            p               = Box({})
+            ...
+
+
+            ## 3) Run Search
+            from utilmy.optim.gp_formulaesearch import search_formulae_algo1
+            search_formulae_algo1(myproblem1, pars_dict=p, verbose=True)
+
+
+            #### Parallel version   ------------------------------------
+            for i in range(npool):
+                p2         = copy.deepcopy(p)
+                p2.f_trace = f'trace_{i}.log'
+                input_list.append(p2)
+
+            #### parallel Runs
+            from utilmy.parallel import multiproc_run
+            multiproc_run(search_formulae_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
+                          input_list=input_list,
+                          npool=3)
+
+
+
+"""
 import os, random, math, numpy as np, warnings, copy
-import scipy.stats
-from operator import itemgetter
-from copy import deepcopy
 from box import Box
-
-from matplotlib import pyplot as plt
-import numpy as np
-from numpy import sin, cos
-
 np.seterr(all='ignore') 
 
 
 def test1():
     """Test search_formulae_dcgpy_v1
     """
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from pyaudi import gdual_double as gdual
-    import os, random, math, numpy as np, warnings, copy
-    import scipy.stats
-    from operator import itemgetter
-    from copy import deepcopy
-    from box import Box
-    from matplotlib import pyplot as plt
-    import numpy as np
-    from numpy import sin, cos
-
-
     myproblem       = myProblem2()
 
     p               = Box({})
@@ -49,22 +101,10 @@ def test1():
     search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
 
 
+
 def test2():
     """Test search_formulae_dcgpy_v1
     """
-    from lib2to3.pygram import Symbols
-    from dcgpy import expression_gdual_double as expression
-    from pyaudi import gdual_double as gdual
-    import os, random, math, numpy as np, warnings, copy
-    import scipy.stats
-    from operator import itemgetter
-    from copy import deepcopy
-    from box import Box
-    from matplotlib import pyplot as plt
-    import numpy as np
-    from numpy import sin, cos
-
-
     myproblem       = myProblem1()
 
     p               = Box({})
@@ -366,7 +406,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     symbols         = p.get('symbols',['x0','x1','x2'])
     seed            = p.get('seed', 23)
 
-    
+
 
     from utilmy import os_makedirs
     os_makedirs(log_file)
