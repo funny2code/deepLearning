@@ -309,7 +309,7 @@ class myProblem4:
 
 
 ###################################################################################################
-def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -366,11 +366,13 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
     symbols         = p.get('symbols',['x0','x1','x2'])
     seed            = p.get('seed', 23)
 
+    
+
     from utilmy import os_makedirs
     os_makedirs(log_file)
     def print_file(*s,):
         ss = " ".join([str(x) for x in  s])
-        print(ss, flush=True)
+        if verbose>0 : print(ss, flush=True)
         with open(log_file, mode='a') as fp :
             fp.write(ss +"\n")
 
@@ -438,6 +440,147 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
 
     res = search()
     return res
+
+
+
+
+###############################################################################################
+############ Parallel version #################################################################
+def search_formulae_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
+    """Parallel run of search_formulae_dcgpy_v1
+    Docs::
+
+        from utilmy.optim import gp_searchformulae as gp
+        myproblem1,p = gp.test_pars_values()
+        gp.search_formulae_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
+        npool: 2 : Number of parallel runs
+    """
+    from utilmy.parallel import multiproc_run
+
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(pars_dict)
+
+        fsplit = p2['log_file'].split("/")
+        fsplit[-1] = f'trace_{i}.log'
+        fi         = "/".join(fsplit)
+        p2['log_file'] = fi
+        input_list.append(p2)
+
+
+    ### parallel Run
+    multiproc_run(_search_formulae_dcgpy_v1_wrapper,
+                  input_fixed={"myproblem": myproblem, 'verbose':False},
+                  input_list=input_list,
+                  npool=npool)
+
+
+
+def _search_formulae_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verbose=False, ):
+    """ Wrapper for parallel version, :
+    Docs::
+
+        1st argument should the list of parameters: inverse order
+        pars_dict is a list --> pars_dict[0]: actual dict
+    """
+    search_formulae_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+
+
+
+
+def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
+             , hyper_par_list   = ['pa',  ]  ### X[0],  X[1]
+             , hyper_par_bounds = [ [0], [1.0 ] ]
+             , pop_size=2
+             , n_island=2
+             , max_step=1
+             , max_time_sec=100
+             , dir_log="./logs/"
+             ):
+    """ Use PYGMO Island model + DCGPY for mutiple parallel Search of formulae
+    Docs::
+
+      from utilmy.optim import gp_searchformulae as gp
+      myproblem1,p = gp.test_pars_values()
+      # p ={}
+
+      #### Run Search
+      gp.search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+                       ,hyper_par_list   = [ 'pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
+       https://esa.github.io/pygmo2/archipelago.html
+       https://esa.github.io/pygmo2/tutorials/coding_udi.html
+
+
+    """
+    os.makedirs(dir_log, exist_ok=True)
+
+    class meta_problem(object):
+        def fitness(self,X):
+            # ddict = {  'pa': X[0] }
+            ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
+
+            ddict = {**ddict_ref, **ddict}
+            (cost, expr) =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict, verbose=True)   ### Cost
+
+            ss = str(cost) + "," + str(expr)
+            #try :
+            #  with open(dir_log + "/log.txt", mode='a') as fp:
+            #    fp.write(ss)
+            #except :
+            #    print(ss)
+
+            return [cost]   #### Put it as a list
+
+        def get_bounds(self):
+            return hyper_par_bounds
+            #return ([0.0]*len(X),[1.0]*len(X))
+
+    import pygmo as pg, time
+
+    prob  = pg.problem( meta_problem() )
+    algo  = pg.de(10)  ### Differentail DE
+    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
+
+    archi.evolve(max_step)
+
+    t0 = time.time()
+    isok= True
+    while isok :
+        # https://esa.github.io/pygmo2/archipelago.html#pygmo.archipelago.status
+        #status = archi.status()
+        #isok   = True if status not in 'idle' else False
+        status = archi.status
+        isok   = True if status != pg.evolve_status.idle else False
+        if time.time()-t0 > max_time_sec :  isok=False
+        time.sleep(30)
+    # archi.wait_check()
+
+
+    ##### Let us inspect the results
+    fs = archi.get_champions_f()
+    xs = archi.get_champions_x()
+    print(fs, xs)
+
+    with open(dir_log +"/result.txt", mode='a') as fp:
+        fp.write( "cost_min," + str(fs))
+        fp.write( "xmin," + str(xs))
+    return fs, xs
+
+
+
+
+
+
+
+
 
 
 ###################################################################################################
