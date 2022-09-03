@@ -576,13 +576,13 @@ class myProblem4:
         n_points = 50
 
         ###### Variable numerical  ################################
-        x = []
-        v = []
-        k = []
-        for i in range(n_points):
-            x.append(random.random()*2 + 2)
-            v.append(random.random()*2 + 2)
-            k.append(random.random()*2 + 2)
+        x = np.random.random(n_points)*2 +2
+        v = np.random.random(n_points)*2 +2
+        k = np.random.random(n_points)*2 +2
+        #for i in range(n_points):
+        #    x.append(random.random()*2 + 2)
+        #    v.append(random.random()*2 + 2)
+        #    k.append(random.random()*2 + 2)
         x = gdual(x,symbols[0],1)
         v = gdual(v,symbols[1],1)
         k = gdual(k)
@@ -1047,7 +1047,7 @@ def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=F
 
         #  nexp experiments to accumulate statistic
         result = []
-        print("restart: \t gen: \t expression:")
+        print("restart: \t gen: \t expr1: \t expr2")
         for i in range(nexp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
             kstep, dCGP = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
@@ -1056,7 +1056,7 @@ def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=F
             if kstep < (max_step-1):
                 form1 = dCGP(symbols)
                 form2 = dCGP.simplify(symbols)
-                print(i, "\t\t", i, "\t", form1, " a.k.a ", form2)
+                print(i, "\t\t", kstep, "\t", form1, "   \t ", form2)
 
                 result.append(form2)
         # res = np.array(res)
