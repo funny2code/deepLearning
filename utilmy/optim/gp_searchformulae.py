@@ -283,7 +283,7 @@ def test7():
     p.nexp          = 100
     p.offsprings    = 10
     p.stop          = 2000
-    search_formulae_dcgpy_v3_custom(myproblem = myproblem, pars_dict=p, verbose=False,)
+    search_formulae_dcgpy_v3_custom(problem = myproblem, pars_dict=p, verbose=False,)
 
 
 ####################################################################################################
@@ -937,7 +937,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
 
 ###################################################################################################
-def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose=False, ):
+def search_formulae_dcgpy_v3_custom(problem=None, pars_dict:dict=None, verbose=False, ):
     """ Search Optimal Formulae
     Docs::
 
@@ -973,7 +973,6 @@ def search_formulae_dcgpy_v3_custom(myproblem=None, pars_dict:dict=None, verbose
     import random
     from box import Box
     ######### Problem definition and Cost calculation
-    problem = myproblem
 
 
     #### Formulae GP Search params   #################
