@@ -76,6 +76,74 @@ import os, random, math, numpy as np, warnings, copy
 from box import Box
 np.seterr(all='ignore') 
 
+####################################################################################################
+from utilmy.utilmy import log, log2
+
+# def log(*s):
+#     """Log/Print"""
+#     print(*s, flush=True)
+
+
+def help():
+    from utilmy import help_create
+    print(help_create("utilmy.parallel") )
+
+
+
+####################################################################################################
+def test_all():
+    """function test_all
+    """
+    test1()
+
+
+def test_pars_values():
+    """ return test params
+    docs::
+
+        myproblem1 = myProblem()
+
+        p               = Box({})
+        p.log_file      = 'trace.log'
+        p.print_after   = 5
+        p.print_best    = True
+
+
+        p.nvars_in      = 2  ### nb of variables
+        p.nvars_out     = 1
+        p.operators     = ["sum", "diff", "div", "mul"]
+
+        p.max_iter      = 10
+        p.pop_size      = 20  ## Population (Suggested: 10~20)
+        p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+        p.kmax          = 100000  ## Max iterations
+        p.nc, p.nr       = 10,1  ## Graph columns x rows
+        p.arity         = 2  # Arity
+        p.seed          = 43
+
+    """
+    myproblem1 = myProblem1()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "diff", "div", "mul", 'sin']
+
+    p.max_iter      = 10
+    p.pop_size      = 20  ## Population (Suggested: 10~20)
+    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
+    p.kmax          = 100000  ## Max iterations
+    p.nc, p.nr       = 10,1  ## Graph columns x rows
+    p.arity         = 2  # Arity
+    p.seed          = 43
+
+    return myproblem1, p
+
 
 def test1():
     """Test search_formulae_dcgpy_v1
@@ -90,7 +158,7 @@ def test1():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "mul", "div", "diff","sin"]
+    p.operators     = ["sum", "mul", "div", "diff"]
     p.symbols       = ["x0","x1"]
     p.max_iter      = 10
     p.nexp          = 100
@@ -170,6 +238,52 @@ def test7():
     p.offsprings    = 10
     p.stop          = 2000
     search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=False, )
+
+
+def test1_parallel():
+    """Test of search_formulae_dcgpy_v1_parallel
+    """
+    myproblem1,p = test_pars_values()
+
+    search_formulae_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=False, npool=3 )
+
+
+def test1_parallel2():
+    """Test parralel run of search_formulae_dcgpy_v1, in customize parallle version.
+    """
+    from utilmy.parallel import multiproc_run
+
+    myproblem1,p = test_pars_values()
+
+    npool= 3
+    input_list = []
+    for i in range(npool):
+        p2 = copy.deepcopy(p)
+        p2['log_file'] = f'trace_{i}.log'
+        input_list.append(p2)
+
+    ### parallel Runs
+    multiproc_run(_search_formulae_dcgpy_v1_wrapper,
+                  input_fixed={"myproblem": myproblem1, 'verbose':False},
+                  input_list=input_list,
+                  npool=npool)
+
+
+
+def test4_island():
+    """Test search_formulae_dcgpy_v1_parallel_island
+    """
+    myproblem1,p = test_pars_values()
+
+    #### Run Search
+    search_formulae_dcgpy_v1_parallel_island(myproblem1, ddict_ref=p
+                       ,hyper_par_list  = ['pa',  ]    ### X[0],  X[1]
+                       ,hyper_par_bounds = [ [0], [ 0.6 ] ]
+                       ,pop_size=6
+                       ,n_island=2
+                       ,dir_log="./logs/"
+                      )
+
 
 
 ###################################################################################################
