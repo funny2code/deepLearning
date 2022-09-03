@@ -218,8 +218,6 @@ class myProblem3:
     def __init__(self):
         pass
 
-
-
     def get_cost(self, dCGP, symbols):
         """ Cost Calculation, Objective to minimize Cost
         Docs::
@@ -240,8 +238,6 @@ class myProblem3:
             omega.append(random()*10 - 5)
             theta.append(random()*10 - 5)
             c.append(random()*10)
-
-        
 
         theta = gdual(theta,symbols[0],1)
         omega = gdual(omega,symbols[1],1)
@@ -334,18 +330,14 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
         -- Add constraints in the functional space
 
         https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
+        https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
 
 
     """
-    ###https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
     from lib2to3.pygram import Symbols
-    #from dcgpy import expression_gdual_double as expression
-    #from dcgpy import kernel_set_gdual_double as kernel_set
-    #from pyaudi import gdual_double as gdual
     from dcgpy import expression_gdual_vdouble as expression
     from dcgpy import kernel_set_gdual_vdouble as kernel_set
     from pyaudi import gdual_vdouble as gdual
-    import numpy as np
     import random
     from box import Box
     ######### Problem definition and Cost calculation
@@ -373,6 +365,15 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
     max_step        = p.get('stop', 2000)
     symbols         = p.get('symbols',['x0','x1','x2'])
     seed            = p.get('seed', 23)
+
+    from utilmy import os_makedirs
+    os_makedirs(log_file)
+    def print_file(*s,):
+        ss = " ".join([str(x) for x in  s])
+        print(ss, flush=True)
+        with open(log_file, mode='a') as fp :
+            fp.write(ss +"\n")
+
 
 
     def run_experiment(max_step, offsprings, dCGP, symbols, verbose=False):
@@ -418,7 +419,6 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
         # Search for best possible solution using Genetic Algorithm
 
         kernels_new = kernel_set(operator_list)()
-        # dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = seed)
 
         #  nexp experiments to accumulate statistic
         result = []
@@ -426,16 +426,14 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=False, )
         for i in range(nexp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
             kstep, dCGP = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
-            # res.append(kstep)
-            # print("g ",g)
+
             if kstep < (max_step-1):
                 form1 = dCGP(symbols)
                 form2 = dCGP.simplify(symbols)
-                print(i, "\t\t", kstep, "\t", form1, "   \t ", form2)
+                print_file(i, "\t\t", kstep, "\t", form1, "   \t ", form2)
 
                 result.append(form2)
-        # res = np.array(res)
-        # print(one_sol.simplify(symbols))
+
         return result
 
     res = search()
