@@ -74,6 +74,8 @@ Docs::
 """
 import os, random, math, numpy as np, warnings, copy
 from box import Box
+from numpy import sin, cos
+from random import randint, random
 np.seterr(all='ignore') 
 
 ####################################################################################################
@@ -117,7 +119,7 @@ def test_pars_values():
         p.seed          = 43
 
     """
-    myproblem1 = myProblem1()
+    myproblem1 = myProblem2()
 
     p               = Box({})
     p.log_file      = 'trace.log'
@@ -127,15 +129,13 @@ def test_pars_values():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "diff", "div", "mul", 'sin']
-
+    p.operators     = ["sum", "mul", "div", "diff","sin"]
+    p.symbols       = ["x0","x1"]
     p.max_iter      = 10
-    p.pop_size      = 20  ## Population (Suggested: 10~20)
-    p.pa            = 0.3  ## Parasitic Probability (Suggested: 0.3)
-    p.kmax          = 100000  ## Max iterations
-    p.nc, p.nr       = 10,1  ## Graph columns x rows
-    p.arity         = 2  # Arity
-    p.seed          = 43
+    p.nexp          = 100
+    p.offsprings    = 10
+    p.stop          = 2000
+
 
     return myproblem1, p
 
@@ -153,7 +153,7 @@ def test1():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "mul", "div", "diff"]
+    p.operators     = ["sum", "mul", "div", "diff","sin"]
     p.symbols       = ["x0","x1"]
     p.max_iter      = 10
     p.nexp          = 100
@@ -161,7 +161,9 @@ def test1():
     p.stop          = 2000
 
     #### Run Search
-    search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+    res,cost = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+    print("Best Simplified Expression",res[-1])
+    print("Best Simplified Expression Cost",cost[-1])
 
 
 
@@ -186,11 +188,13 @@ def test2():
     p.stop          = 2000
 
     #### Run Search
-    search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+    res,cost = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
+    print("Best Simplified Expression",res[-1])
+    print("Best Simplified Expression Cost",cost[-1])
 
 
 def test6():
-    """Test the myProblem4 class, parrallel version
+    """Test the myProblem4 class,
 
     """
     myproblem       = myProblem4()
@@ -213,7 +217,7 @@ def test6():
 
 
 def test7():
-    """Test the myProblem3 class, parrallel version
+    """Test the myProblem3 class,
 
     """
     myproblem       = myProblem3()
@@ -313,7 +317,7 @@ class myProblem1:
 
         """
         #yt is the true expression
-        yt = np.sin(self.x1)/self.x1 + self.x0*self.x1 + self.x1*np.cos(self.x1) 
+        yt = np.cos(self.x1)/self.x1 + self.x0*self.x1 + self.x1 
         x0 = self.x0  
         x1 = self.x1
         y = eval(expr(symbols)[0])
@@ -707,7 +711,6 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         best_chromosome = dCGP.get()
         best_fitness    = 1e10
 
-
         for kstep in range(max_step):
             for i in range(offsprings):
                 check = 0
@@ -728,7 +731,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
                 break
 
         dCGP.set(best_chromosome)
-        return kstep, dCGP
+        return kstep, dCGP, best_fitness
 
 
     def search():
@@ -738,22 +741,24 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
         #  nexp experiments to accumulate statistic
         result = []
-        print("restart: \t gen: \t expr1: \t expr2")
+        cost = []
+        if verbose:
+            print("restart: \t gen: \t expr1: \t expr2")
         for i in range(nexp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
-            kstep, dCGP = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
+            kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
 
             if kstep < (max_step-1):
                 form1 = dCGP(symbols)
                 form2 = dCGP.simplify(symbols)
                 print_file(i, "\t\t", kstep, "\t", form1, "   \t ", form2)
-
+                cost.append(best_fitness)
                 result.append(form2)
 
-        return result
+        return result,cost
 
-    res = search()
-    return res
+    res,cost = search()
+    return res,cost
 
 
 
@@ -799,14 +804,14 @@ def _search_formulae_dcgpy_v1_wrapper( pars_dict:dict=None, myproblem=None, verb
         1st argument should the list of parameters: inverse order
         pars_dict is a list --> pars_dict[0]: actual dict
     """
-    search_formulae_dcgpy_v1(myproblem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
+    search_formulae_dcgpy_v1(problem=myproblem, pars_dict=pars_dict[0], verbose=verbose, )
 
 
 
 
 def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
              , hyper_par_list   = ['pa',  ]  ### X[0],  X[1]
-             , hyper_par_bounds = [ [0], [1.0 ] ]
+             , hyper_par_bounds = [ [0,0], [1.0,1.0 ] ]
              , pop_size=2
              , n_island=2
              , max_step=1
@@ -838,30 +843,20 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
     class meta_problem(object):
         def fitness(self,X):
-            # ddict = {  'pa': X[0] }
-            ddict = {  hyper_par_list[i]:  X[i] for i in range( len(X)) }
-
-            ddict = {**ddict_ref, **ddict}
-            (cost, expr) =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict, verbose=True)   ### Cost
-
-            ss = str(cost) + "," + str(expr)
-            #try :
-            #  with open(dir_log + "/log.txt", mode='a') as fp:
-            #    fp.write(ss)
-            #except :
-            #    print(ss)
-
+            exprs, costs =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict_ref, verbose=False)   ### Cost
+            cost = costs[-1]#We select the last element and its cost
+            expr = exprs[-1]
+            print(expr)
             return [cost]   #### Put it as a list
 
         def get_bounds(self):
             return hyper_par_bounds
-            #return ([0.0]*len(X),[1.0]*len(X))
 
     import pygmo as pg, time
 
     prob  = pg.problem( meta_problem() )
     algo  = pg.de(10)  ### Differentail DE
-    archi = pg.archipelago(algo = algo, prob =prob , pop_size = pop_size, n= n_island)
+    archi = pg.archipelago(algo = algo, prob = prob , pop_size = pop_size, n= n_island)
 
     archi.evolve(max_step)
 
