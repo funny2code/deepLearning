@@ -43,32 +43,24 @@ Docs::
 
         2) Goal is to find a formulae, which make merge_list as much sorted as possible
         Example :
-            ## 1) Define Problem Class with get_cost methods
-            myproblem1 = myProblem()
-            ## myproblem1.get_cost(formulae_str, symbols  )
+            import utilmy.optim.gp_formulaesearch as gp
+            from numpy import (sin, cos, log, exp, sqrt )
 
-            ## 2) Param Search
-            p               = Box({})
-            ...
+            ## 1) Define Problem Class with get_cost methods
+                myproblem1 = myProblem()
+                ## myproblem1.get_cost(formulae_str, symbols  )
+
+                ## 2) Param Search
+                p               = Box({})
+                ...
 
 
             ## 3) Run Search
-            from utilmy.optim.gp_formulaesearch import search_formulae_algo1
-            search_formulae_algo1(myproblem1, pars_dict=p, verbose=1)
+            gp.search_formulae_algo1(myproblem1, pars_dict=p, verbose=1)
 
 
             #### Parallel version   ------------------------------------
-            for i in range(npool):
-                p2         = copy.deepcopy(p)
-                p2.f_trace = f'trace_{i}.log'
-                input_list.append(p2)
-
-            #### parallel Runs
-            from utilmy.parallel import multiproc_run
-            multiproc_run(search_formulae_dcgpy, input_fixed={"myproblem": myproblem1, 'verbose':False},
-                          input_list=input_list,
-                          npool=3)
-
+            gp.search_formulae_dcgpy_v1_parallel(myproblem=myproblem1, pars_dict=p, verbose=1, npool=3 )
 
 
 """
@@ -139,7 +131,7 @@ def test_pars_values():
 
 
     p.n_exp         = 1
-    p.max_step      = 5
+    p.max_step      = 100
     p.offsprings    = 10
 
 
@@ -274,7 +266,7 @@ def test1_parallel2():
 
 
 
-def test4_island():
+def test1_parallel_island():
     """Test search_formulae_dcgpy_v1_parallel_island
     """
     myproblem1,p = test_pars_values()
@@ -346,12 +338,12 @@ class myProblem2:
 
         """
         import numpy as np
-        self.n_sample  = 1
-        self.kk        = kk
-        self.nsize     = nsize
+        x0 = np.random.random(50)*10 - 5.0
+        x1 = np.random.random(50)*10 - 5.0
 
-        self.x0 = np.random.random(50)*10 - 5.0
-        self.x1 = np.random.random(50)*10 - 5.0
+        self.x0 = x0
+        self.x1 = x1
+        self.ytrue =  np.sin(x1 * x0) + x0**2 + x1*x0  #This is the true expression
 
 
     def get_cost(self, expr, symbols):
@@ -363,13 +355,11 @@ class myProblem2:
 
         """
 
-
         x0 = self.x0
         x1 = self.x1
 
-        ytrue =  np.sin(x1 * x0) + x0**2 + x1*x0  #This is the true expression
         y     = eval(expr(symbols)[0])
-        cost  = np.sum((ytrue-y)**2)
+        cost  = np.sum((self.ytrue-y)**2)
 
         check = 3
         return cost, check
@@ -639,24 +629,79 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     """ Search Optimal Formulae
     Docs::
 
-        conda install  dcgpy
+        -- Install
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire utilmy sympy
 
-        nvars_in      = p.nvars_in  ### nb of variables
-        nvars_out     = p.nvars_out
-        operator_list = kernel_set(p.operators, ["sum", "diff", "div", "mul"] )
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
 
-        ### Log
-        print_after   = p.get('print_after', 20)
-        print_best    = p.get('print_best', True)
-        pop_size      = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
-        max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
-        seed          = p.get('seed', 43)
-        log_file      = p.get('log_file', 'log.log') # 'trace.py'
+
+          https://darioizzo.github.io/dcgp/installation.html#python
+
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+        -- Usagge
+            import utilmy.optim.gp_formulaesearch as gp
+            from numpy import (sin, cos, log, exp, sqrt )
+
+            -- 1) Define Problem Class with get_cost methods
+                myproblem       = gp.myProblem2()
+
+                p               = Box({})
+                p.log_file      = 'trace.log'
+                p.print_after   = 5
+                p.print_best    = True
+
+
+                p.nvars_in      = 2  ### nb of variables
+                p.nvars_out     = 1
+                p.operators     = ["sum", "mul", "div", "diff","sin"]
+                p.symbols       = ["x0","x1"]
+
+                p.n_exp         = 4
+                p.max_step      = 1000  ## per expriemnet
+                p.offsprings    = 20
+
+
+                --- Run Search
+                res = gp.search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
+
+                --- Parallel version
+                gp.search_formulae_dcgpy_v1_parallel(myproblem=myproblem, pars_dict=p, verbose=1, npool=3 )
+
+
+
+
+            --  Custom Problem
+
+                class myProblem2:
+                    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,):
+                        x0 = np.random.random(50)*10 - 5.0
+                        x1 = np.random.random(50)*10 - 5.0
+
+                        self.x0 = x0
+                        self.x1 = x1
+                        self.ytrue =  np.sin(x1 * x0) + x0**2 + x1*x0  #This is the true expression
+
+
+                    def get_cost(self, expr, symbols):
+                        x0,x1 = self.x0, self.x1
+
+                        ### Eval New Formulae
+                        y     =  eval(expr(symbols)[0])
+                        cost  =  np.sum((self.ytrue-y)**2)
+
+                        check = 3
+                        return cost, check
+
 
         -- Add constraints in the functional space
 
-        https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
-        https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
+            https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
+            https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
 
 
     """
@@ -837,6 +882,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
              , max_step=1
              , max_time_sec=100
              , dir_log="./logs/"
+             , verbose=0
              ):
     """ Use PYGMO Island model + DCGPY for mutiple parallel Search of formulae
     Docs::
@@ -863,9 +909,10 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
     class meta_problem(object):
         def fitness(self,X):
-            exprs, costs =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict_ref, verbose=False)   ### Cost
-            cost = costs[-1]#We select the last element and its cost
-            expr = exprs[-1]
+            df =  search_formulae_dcgpy_v1(myproblem, pars_dict=ddict_ref, verbose=verbose)   ### Cost
+
+            cost = df['cost'].values[0]         #We select the1st  element and its cost
+            expr = df['formulae'].values[0]
             print(expr)
             return [cost]   #### Put it as a list
 
