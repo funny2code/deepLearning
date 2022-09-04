@@ -187,6 +187,33 @@ def test2():
     #### Run Search
     res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
 
+def test3():
+    """Test search_formulae_dcgpy_v1
+    """
+    from box import Box
+    myproblem       = myProblem5()
+
+    p               = Box({})
+    p.log_file      = 'trace4.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul","pdiv"]
+    p.symbols       = ["x0","x1"]
+
+    p.max_step      = 5
+    p.n_exp         = 1
+    p.offsprings    = 10
+    p.n_eph         = 3
+    p.verbose       = 1
+
+
+    #### Run Search
+    res = search_formulae_dcgpy_Xy_regression_v1(myproblem, pars_dict=p, verbose=1)
+
 
 def test6():
     """Test the myProblem4 class,
@@ -458,6 +485,40 @@ class myProblem4:
         return cost, 3
 
 
+class myProblem5:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+        pass
+
+    def get_data(self):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+
+        #Insert your data here 
+        X = np.linspace(0,15, 100)
+        Y = X * ((X**3) - 18 * X + 32) / 32
+        Y[X>2] = 1. / X[X>2]**2
+        X = np.reshape(X, (100,1))
+        Y = np.reshape(Y, (100,1))
+        return X,Y
+
+
 
 class myProblem_ranking:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
@@ -722,14 +783,11 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     nvars_out     = p.nvars_out
     operator_list = p.get('operators', ["sum", "mul", "div", "diff","sin","cos"])
     symbols       = p.get('symbols',['x0','x1','x2'])
-
+    n_constant = 0 ## nb of constant to determine
 
     ### Log
-    print_after   = p.get('print_after', 20)
-    print_best    = p.get('print_best', True)
-    # max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
-    # seed          = p.get('seed', 43)
     log_file      = p.get('log_file', 'log.log') # 'trace.py'
+
 
     ### search
     n_exp           = p.get('n_exp', 1)
@@ -739,6 +797,12 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     pop_size        = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
 
     seed            = p.get('seed', 23)
+
+
+    ### search DCGPY Algo
+
+
+
 
 
 
@@ -791,7 +855,15 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
 
     def search():
-        # Search for best possible solution using Genetic Algorithm
+        """ Search for best possible solution using Genetic Algorithm
+        Docs::
+
+            classdcgpy.expression_double(inputs, outputs, rows, cols, levels_back, arity = 2, kernels, n_eph = 0, seed = randint)
+            A CGP expression
+            https://darioizzo.github.io/dcgp/docs/python/expression.html
+
+
+        """
 
         kernels_new = kernel_set(operator_list)()
 
@@ -800,7 +872,9 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         if verbose>0:
             print_file( 'id_exp', 'niter', 'cost', 'formulae', )
         for i in range(n_exp):
-            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                              kernels=kernels_new,n_eph = n_constant,
+                              seed = random.randint(0,234213213))
             kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
 
 
@@ -825,8 +899,6 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
 
 
-
-###############################################################################################
 ############ Parallel version #################################################################
 def search_formulae_dcgpy_v1_parallel(myproblem=None, pars_dict:dict=None, verbose=False, npool=2 ):
     """Parallel run of search_formulae_dcgpy_v1
@@ -948,6 +1020,156 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
         fp.write( "xmin," + str(xs))
     return fs, xs
 
+
+
+
+#########################################################################################
+#########################Symbolic Regression Version####################################
+def search_formulae_dcgpy_Xy_regression_v1(problem=None, pars_dict:dict=None, verbose=1, ):
+    """ Search Optimal Formulae
+    Docs::
+
+        -- Install
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire utilmy sympy
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
+          https://darioizzo.github.io/dcgp/installation.html#python
+
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+        -- Usagge
+            import utilmy.optim.gp_formulaesearch as gp
+            from numpy import (sin, cos, log, exp, sqrt )
+
+            -- 1) Define Problem Class with get_cost methods
+                myproblem       = gp.myProblem5()
+
+                p               = Box({})
+                p.log_file      = 'trace.log'
+                p.print_after   = 5
+                p.print_best    = True
+
+
+                p.nvars_in      = 2  ### nb of variables
+                p.nvars_out     = 1
+                p.operators     = ["sum", "mul", "div", "diff","sin"]
+                p.symbols       = ["x0","x1"]
+
+                p.n_exp         = 4
+                p.max_step      = 1000  ## per expriemnet
+                p.offsprings    = 20
+
+
+                --- Run Search
+                res = gp.search_formulae_dcgpy_Xy_regression_v1(myproblem, pars_dict=p, verbose=1)
+
+
+            --  Custom Problem
+                class myProblem5:
+                    def __init__(self):
+                        pass
+
+                    def get_data(self):
+                        #Insert your data here
+                        X = np.linspace(0,15, 100)
+                        Y = X * ((X**3) - 18 * X + 32) / 32
+                        Y[X>2] = 1. / X[X>2]**2
+                        X = np.reshape(X, (100,1))
+                        Y = np.reshape(Y, (100,1))
+                        return X,Y
+
+
+
+
+        -- Add constraints in the functional space
+
+            https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
+            https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
+            https://darioizzo.github.io/dcgp/notebooks/real_world2.html
+
+
+    """
+    import dcgpy
+    import pygmo as pg
+    # Sympy is nice to have for basic symbolic manipulation.
+    from sympy import init_printing
+    #from sympy.parsing.sympy_parser import *
+    from sympy.parsing.sympy_parser import parse_expr
+    # Fundamental for plotting.
+    from matplotlib import pyplot as plt
+    ### Problem
+    p             = Box(pars_dict)
+    nvars_in      = p.nvars_in  ### nb of variables
+    nvars_out     = p.nvars_out
+    operator_list = p.get('operators', ["sum", "mul", "div", "diff","sin","cos"])
+    symbols       = p.get('symbols',['x0','x1','x2'])
+
+
+    ### Log
+    print_after     = p.get('print_after', 20)
+    print_best      = p.get('print_best', True)
+    # max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
+    # seed          = p.get('seed', 43)
+    log_file        = p.get('log_file', 'log.log') # 'trace.py'
+
+    ### search
+    n_exp           = p.get('n_exp', 1)
+    max_step        = p.get('max_step', 10)
+
+    offsprings      = p.get('offsprings',10)
+    pop_size        = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
+
+    seed            = p.get('seed', 23)
+    n_eph           = p.get('kernels_new',3)
+    verbose         = p.get('verbose',1)
+
+
+
+    from utilmy import os_makedirs
+    os_makedirs(log_file)
+    def print_file(*s,):
+        ss = "\t".join([str(x) for x in  s])
+        if verbose>0 : print(ss, flush=True)
+        with open(log_file, mode='a') as fp :
+            fp.write(ss +"\n")
+
+
+
+    def run_experiment(udp, uda, verbose=1):
+        prob = pg.problem(udp)
+        algo = pg.algorithm(uda)
+        # Set verbosity>0 for getting
+        algo.set_verbosity(verbose-1)
+        pop = pg.population(prob, 20)
+        pop = algo.evolve(pop)
+        idx = np.argmin(pop.get_f(), axis=0)[0]
+        cost  = pop.get_f()[idx][0]
+        expr = parse_expr(udp.prettier(pop.get_x()[idx]))
+        return expr,cost
+
+    def search():
+        # Search for best possible solution using Genetic Algorithm
+
+        kernels_new = dcgpy.kernel_set_double(operator_list)()
+        X, Y = problem.get_data()
+        udp = dcgpy.symbolic_regression(points = X, labels = Y, kernels=kernels_new, n_eph=n_eph, rows =1, cols=20, levels_back=21, multi_objective=True)
+        uda  = dcgpy.momes4cgp(gen = 3000, max_mut = 4)
+        expr,cost = run_experiment(udp,uda,verbose)
+        if verbose>1:
+            print_file(expr)
+            print_file(cost)
+        return [expr,cost]
+
+    res = search()
+    llog('Best Results',)
+    llog( res )
+    return res
 
 
 
