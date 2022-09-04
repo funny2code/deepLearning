@@ -54,7 +54,7 @@ Docs::
 
             ## 3) Run Search
             from utilmy.optim.gp_formulaesearch import search_formulae_algo1
-            search_formulae_algo1(myproblem1, pars_dict=p, verbose=True)
+            search_formulae_algo1(myproblem1, pars_dict=p, verbose=1)
 
 
             #### Parallel version   ------------------------------------
@@ -74,12 +74,17 @@ Docs::
 """
 import os, random, math, numpy as np, warnings, copy
 from box import Box
-from numpy import sin, cos
-from random import randint, random
+from random import random
 np.seterr(all='ignore') 
 
+
+### Needs to evaluate formulae
+# from numpy import (sin, cos, log, exp, sqrt )
+from numpy import (sin, cos, log, exp, sqrt )
+
+
 ####################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy import log as llog, log2
 
 def help():
     from utilmy import help_create
@@ -156,17 +161,14 @@ def test1():
     p.nvars_out     = 1
     p.operators     = ["sum", "mul", "div", "diff","sin"]
     p.symbols       = ["x0","x1"]
-    
-    p.max_step      = 10  ## per expriemnet
-    p.n_exp         = 1
-    p.offsprings    = 10
+
+    p.n_exp         = 4
+    p.max_step      = 1000  ## per expriemnet
+    p.offsprings    = 20
 
 
     #### Run Search
-    res,cost = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
-    print("Best Simplified Expression",res[-1])
-    print("Best Simplified Expression Cost",cost[-1])
-
+    res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
 
 
 def test2():
@@ -191,9 +193,7 @@ def test2():
 
 
     #### Run Search
-    res,cost = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=True)
-    print("Best Simplified Expression",res[-1])
-    print("Best Simplified Expression Cost",cost[-1])
+    res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
 
 
 def test6():
@@ -322,7 +322,7 @@ class myProblem1:
 
         """
         #yt is the true expression
-        yt = np.cos(self.x1)/self.x1 + self.x0*self.x1 + self.x1 
+        yt = np.cos(self.x1)/self.x1 + self.x0*self.x1 + self.x1
         x0 = self.x0  
         x1 = self.x1
         y = eval(expr(symbols)[0])
@@ -363,13 +363,16 @@ class myProblem2:
 
         """
 
-        yt = np.sin(self.x1) + self.x0 + self.x1*self.x1 #This is the true expression
-        x0 = self.x0  
+
+        x0 = self.x0
         x1 = self.x1
-        y = eval(expr(symbols)[0])
-        err = yt-y
+
+        ytrue =  np.sin(x1 * x0) + x0**2 + x1*x0  #This is the true expression
+        y     = eval(expr(symbols)[0])
+        cost  = np.sum((ytrue-y)**2)
+
         check = 3
-        return sum(err*err), check
+        return cost, check
 
 
 class myProblem3:
@@ -536,7 +539,7 @@ class myProblem_ranking:
             #### Merge them using rank_score
             lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
             lnew = lnew[:100]
-            # log(lnew)
+            # llog(lnew)
 
             ### Eval with True Rank
             correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
@@ -661,7 +664,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     from dcgpy import expression_gdual_vdouble as expression
     from dcgpy import kernel_set_gdual_vdouble as kernel_set
     from pyaudi import gdual_vdouble as gdual
-    import random
+    import random, pandas as pd
     from box import Box
     ######### Problem definition and Cost calculation
 
@@ -697,7 +700,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     from utilmy import os_makedirs
     os_makedirs(log_file)
     def print_file(*s,):
-        ss = " ".join([str(x) for x in  s])
+        ss = "\t".join([str(x) for x in  s])
         if verbose>0 : print(ss, flush=True)
         with open(log_file, mode='a') as fp :
             fp.write(ss +"\n")
@@ -749,24 +752,33 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
         #  n_exp experiments to accumulate statistic
         result = []
-        cost = []
         if verbose:
-            print("restart: \t gen: \t expr1: \t expr2")
+            print("Exp: \t gen: \t expr1: \t expr2")
         for i in range(n_exp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
             kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
 
-            if kstep < (max_step-1):
-                form1 = dCGP(symbols)
-                form2 = dCGP.simplify(symbols)
-                print_file(i, "\t\t", kstep, "\t", form1, "   \t ", form2)
-                cost.append(best_fitness)
-                result.append(form2)
+            form1 = dCGP(symbols)[0]
+            form2 = dCGP.simplify(symbols)[0]
+            result.append( ( i, best_fitness, form2, kstep    ) )
 
-        return result,cost
+            #if kstep < (max_step-1):
+            if   verbose >=2 : print_file(i, kstep,  form1,  form2)
+            elif verbose >=1 : print_file(i, kstep, form2, best_fitness)
 
-    res,cost = search()
-    return res,cost
+
+        import pandas as pd
+        result = pd.DataFrame(result,  columns=['id_exp', 'cost', 'formulae',  'niter' ])
+        result = result.sort_values('cost', ascending=1)
+        return result
+
+    res = search()
+    llog('Best\n',)
+    llog( res.iloc[:2,:] )
+    # llog("\nBest Formulae", res.iloc[0, 2] )
+    # llog("Best  Cost   ",   res.iloc[0, 1])
+
+    return res
 
 
 
@@ -914,7 +926,7 @@ def search_formulae_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False
 
 
     #### Formulae GP Search params   #################
-    log(pars_dict)
+    llog(pars_dict)
     p = Box(pars_dict)
 
 
@@ -1096,7 +1108,7 @@ def zzz_search_formulae_dcgpy_cuckoo(myproblem=None, pars_dict:dict=None, verbos
         p.seed          = 43
 
         #### Run Search
-        gp.search_formulae_algo1(myproblem1, pars_dict=p, verbose=True)
+        gp.search_formulae_algo1(myproblem1, pars_dict=p, verbose=1)
 
 
         -- Add constraints in the functional space
@@ -1130,7 +1142,7 @@ def zzz_search_formulae_dcgpy_cuckoo(myproblem=None, pars_dict:dict=None, verbos
 
 
     #### Formulae GP Search params   #################
-    log(pars_dict)
+    llog(pars_dict)
     p = Box(pars_dict)
 
     ### Problem
@@ -1161,8 +1173,8 @@ def zzz_search_formulae_dcgpy_cuckoo(myproblem=None, pars_dict:dict=None, verbos
 
     ######### Check   ##########################################
     if verbose:
-        log(operator_list)
-        log(symbols)
+        llog(operator_list)
+        llog(symbols)
 
 
     def get_random_solution():
@@ -1206,7 +1218,7 @@ def zzz_search_formulae_dcgpy_cuckoo(myproblem=None, pars_dict:dict=None, verbos
 
 
         # # 5 - Mutate the expression with 2 random mutations of active genes and print
-        # ex.mutate_active(2)   log("Mutated expression:", ex(symbols)[0])
+        # ex.mutate_active(2)   llog("Mutated expression:", ex(symbols)[0])
         # global best_egg, k, dic_front
         ls_trace = []
 
@@ -1242,12 +1254,12 @@ def zzz_search_formulae_dcgpy_cuckoo(myproblem=None, pars_dict:dict=None, verbos
                 nest.sort(key = itemgetter(1)) # Rank nests and find current best
                 best_egg  = deepcopy(nest[0])
                 #best_cost = deepcopy(nest[1])
-                log(f'\n#{k}', f'{best_egg[1]}')
+                llog(f'\n#{k}', f'{best_egg[1]}')
 
                 if print_best :
-                    log(best_egg[0](symbols)[0])
-                    #log(best_egg[0].simplify(symbols))
-                    log('\n')
+                    llog(best_egg[0](symbols)[0])
+                    #llog(best_egg[0].simplify(symbols))
+                    llog('\n')
 
         expr = str(best_egg[0](symbols)[0])
         best_cost = best_egg[1]
