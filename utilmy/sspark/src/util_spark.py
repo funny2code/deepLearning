@@ -412,9 +412,11 @@ def spark_schema_create(dlist:list):
     ll = []
     for x in dlist:
         field, ttype = x[0], x[1].lower()
-        if   'string' in ttype:  ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )        
+        if   'string' in ttype or 'str' in ttype:  ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )        
         elif 'int'    in ttype  or 'long' in ttype :   ll.append(   {'name': field, 'type':   'long', 'nullable': True, 'metadata': {} } )
         elif 'float'  in ttype:  ll.append( {'name': field, 'type': 'float', 'nullable': True, 'metadata': {}  }   )
+        elif 'bool'  in ttype:  ll.append( {'name': field, 'type': 'boolean', 'nullable': True, 'metadata': {}  }   )
+        elif 'double'  in ttype:  ll.append( {'name': field, 'type': 'double', 'nullable': True, 'metadata': {}  }   )
         else :
             print('string type for', field)
             ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )    
