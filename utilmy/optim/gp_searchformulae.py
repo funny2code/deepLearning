@@ -722,14 +722,11 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     nvars_out     = p.nvars_out
     operator_list = p.get('operators', ["sum", "mul", "div", "diff","sin","cos"])
     symbols       = p.get('symbols',['x0','x1','x2'])
-
+    n_constant = 0 ## nb of constant to determine
 
     ### Log
-    print_after   = p.get('print_after', 20)
-    print_best    = p.get('print_best', True)
-    # max_iter      = p.get('max_iter', 2) #100000  ## Max iterations
-    # seed          = p.get('seed', 43)
     log_file      = p.get('log_file', 'log.log') # 'trace.py'
+
 
     ### search
     n_exp           = p.get('n_exp', 1)
@@ -740,6 +737,12 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
     seed            = p.get('seed', 23)
 
+
+    ### search DCGPY Algo
+
+
+
+    
 
 
     from utilmy import os_makedirs
@@ -791,7 +794,15 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
 
     def search():
-        # Search for best possible solution using Genetic Algorithm
+        """ Search for best possible solution using Genetic Algorithm
+        Docs::
+
+            classdcgpy.expression_double(inputs, outputs, rows, cols, levels_back, arity = 2, kernels, n_eph = 0, seed = randint)
+            A CGP expression
+            https://darioizzo.github.io/dcgp/docs/python/expression.html
+
+
+        """
 
         kernels_new = kernel_set(operator_list)()
 
@@ -800,7 +811,9 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         if verbose>0:
             print_file( 'id_exp', 'niter', 'cost', 'formulae', )
         for i in range(n_exp):
-            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                              kernels=kernels_new,n_eph = n_constant,
+                              seed = random.randint(0,234213213))
             kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
 
 
