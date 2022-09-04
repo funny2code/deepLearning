@@ -797,32 +797,30 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
         #  n_exp experiments to accumulate statistic
         result = []
-        if verbose:
-            print("Exp: \t gen: \t expr1: \t expr2")
+        if verbose>0:
+            print_file( 'id_exp', 'niter', 'cost', 'formulae', )
         for i in range(n_exp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2, kernels=kernels_new, seed = random.randint(0,234213213))
             kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
 
-            form1 = dCGP(symbols)[0]
-            form2 = dCGP.simplify(symbols)[0]
-            result.append( ( i, best_fitness, form2, kstep    ) )
 
-            #if kstep < (max_step-1):
-            if   verbose >=2 : print_file(i, kstep,  form1,  form2)
+            form2 = dCGP.simplify(symbols)[0]
+            result.append( ( i, kstep , best_fitness, form2   ) )
+
+            if   verbose >=2 :
+                form1 = dCGP(symbols)[0]
+                print_file(i, kstep,  form1,  form2)
+
             elif verbose >=1 : print_file(i, kstep, form2, best_fitness)
 
 
-        import pandas as pd
-        result = pd.DataFrame(result,  columns=['id_exp', 'cost', 'formulae',  'niter' ])
+        result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',   ])
         result = result.sort_values('cost', ascending=1)
         return result
 
     res = search()
     llog('Best\n',)
     llog( res.iloc[:2,:] )
-    # llog("\nBest Formulae", res.iloc[0, 2] )
-    # llog("Best  Cost   ",   res.iloc[0, 1])
-
     return res
 
 
