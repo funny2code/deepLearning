@@ -378,7 +378,7 @@ def spark_df_rename(df, dmap:dict):
 
 
 
-def spark_schema_create(dlist:list):
+def spark_schema_create(dlist:list, struct_type='struct'):
     """ Convert simple dict schema to Spark Schema
     Docs::    
         
@@ -410,16 +410,31 @@ def spark_schema_create(dlist:list):
         }  
     """ 
     ll = []
-    for x in dlist:
-        field, ttype = x[0], x[1].lower()
-        if   'string' in ttype or 'str' in ttype:  ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )        
-        elif 'int'    in ttype  or 'long' in ttype :   ll.append(   {'name': field, 'type':   'long', 'nullable': True, 'metadata': {} } )
-        elif 'float'  in ttype:  ll.append( {'name': field, 'type': 'float', 'nullable': True, 'metadata': {}  }   )
-        elif 'bool'  in ttype:  ll.append( {'name': field, 'type': 'boolean', 'nullable': True, 'metadata': {}  }   )
-        elif 'double'  in ttype:  ll.append( {'name': field, 'type': 'double', 'nullable': True, 'metadata': {}  }   )
-        else :
-            print('string type for', field)
-            ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )    
+    if struct_type == 'struct':
+        for x in dlist:
+            field, ttype = x[0], x[1].lower()
+            if  'string' in ttype or 'str' in ttype: ll.append(T.StructField(field, T.StringType()))
+            elif 'int' in ttype: ll.append(T.StructField(field, T.IntegerType()))
+            elif 'long' in ttype: ll.append(T.StructField(field, T.LongType()))
+            elif 'float' in ttype: ll.append(T.StructField(field, T.LongType()))
+            elif 'double' in ttype: ll.append(T.StructField(field, T.DoubleType()))
+            elif 'bool' in ttype: ll.append(T.StructField(field, T.BooleanType()))
+            elif 'timestamp' in ttype: ll.append(T.StructField(field, T.TimestampType()))
+            else :
+                print('string type for', field)
+                ll.append(T.StructField(field, T.StringType()))
+        ll = T.StructType(ll)
+    else:
+        for x in dlist:
+            field, ttype = x[0], x[1].lower()
+            if   'string' in ttype or 'str' in ttype:  ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )        
+            elif 'int'    in ttype  or 'long' in ttype :   ll.append(   {'name': field, 'type':   'long', 'nullable': True, 'metadata': {} } )
+            elif 'float'  in ttype:  ll.append( {'name': field, 'type': 'float', 'nullable': True, 'metadata': {}  }   )
+            elif 'bool'  in ttype:  ll.append( {'name': field, 'type': 'boolean', 'nullable': True, 'metadata': {}  }   )
+            elif 'double'  in ttype:  ll.append( {'name': field, 'type': 'double', 'nullable': True, 'metadata': {}  }   )
+            else :
+                print('string type for', field)
+                ll.append(  {'name': field, 'type': 'string', 'nullable': True, 'metadata': {} }  )    
     
     schema = { 'type': 'struct', 'fields': ll }  
     return schema
