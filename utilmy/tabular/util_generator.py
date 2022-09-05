@@ -18,7 +18,7 @@ import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as 
 
 ####################################################################################################
 from utilmy import global_verbosity, os_makedirs, pd_read_file
-from utilmy import log, log2
+from utilmy import log, log2, log3
 verbosity= 5
 
 
@@ -34,10 +34,10 @@ try:
     from sdv.evaluation import evaluate
     import ctgan
     
-    if ctgan.__version__ != '0.3.1.dev0':
-        raise Exception('ctgan outdated, ctgan.__version__ != '0.3.1.dev0')
+    if ctgan.__version__ != '0.5.1':
+        raise Exception('ctgan outdated', ctgan.__version__ != '0.5.1')
 except:
-    print("pip install sdv ctgan==0.3.1.dev0   scikit-learn ")
+    print("pip install sdv ctgan==0.5.1  scikit-learn ")
     1/0 
 
 
@@ -184,11 +184,11 @@ def test():
                 },
                 }
     }
+
     log("######## running Models test ##################")
     for model_name, model_pars in models.items():
         log(f"test --> {model_name}")
         test_helper(model_pars, data_pars, compute_pars)
-
 
 
 def test2(n_sample = 1000):
@@ -259,6 +259,142 @@ def test2(n_sample = 1000):
     test_helper(m['model_pars'], m['data_pars'], m['compute_pars'])
 
 
+def test4(n_sample = 1000):
+    """function test4.
+    """
+    global model, session
+    root  = "ztmp/"
+    from sdv.demo import load_tabular_demo
+    from sdv.constraints import Unique
+
+    data = load_tabular_demo('student_placements')
+    #####################################################################
+    colid = 'student_id'
+
+    unique_employee_student_id_constraint = Unique(column_names=['student_id'])
+
+    constraints = [unique_employee_student_id_constraint]
+    models = {
+        'CTGAN': {'model_class': 'CTGAN',
+                  'model_pars': {
+                      ## CTGAN
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'anonymize_fields': {},
+                     'batch_size' :100,
+                     'generator_dim' : (256, 256, 256),
+                     'discriminator_dim' : (256, 256, 256),
+                     'constraints':constraints
+                },
+                },
+        'TVAE': {'model_class': 'TVAE',
+                  'model_pars': { 
+                      ## TVAE
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'batch_size' :100,
+                },
+                },
+              }
+
+    ###############################################################################
+
+    n_sample = 100
+    data_col = {'cols':list(data.columns)}
+    data_pars = {'n_sample': n_sample,
+                'cols_model_type2' : data_col
+                }
+    compute_pars = { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                   }
+
+    data_pars['gen_samp'] =   {'Xtrain': data}
+    data_pars['eval']     =   {'X': data, 'y': None}
+
+    model = Model(model_pars=models['CTGAN'], data_pars=None, compute_pars=None)
+
+    log('\n\nTraining the model')
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
+    print()
+
+    log('Predict data..')
+    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    log(f'Xnew', Xnew)
+
+    log('Evaluating the model..')
+    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
+
+    log('Saving model..')
+    save(path= root + '/model_dir/')
+
+    log('Load model..')
+    model, session = load_model(path= root + "/model_dir/")
+    log(model)
+
+
+
+def test5(n_sample = 1000):
+    """function test5.
+    """
+    global model, session
+    root  = "ztmp/"
+    from sdv.demo import load_timeseries_demo
+    from sdv.constraints import Unique
+
+    data = load_timeseries_demo()
+    #####################################################################
+    entity_columns = ['Symbol']
+
+    context_columns = ['MarketCap', 'Sector', 'Industry']
+    models = {
+        'PAR': {'model_class': 'PAR',
+                  'model_pars': {
+                     ## PAR
+                     'epochs': 1,
+                     'entity_columns': entity_columns,
+                     'context_columns': context_columns,
+                     'sequence_index': 'Date'
+                                },
+                }
+              }
+
+    ###############################################################################
+
+    n_sample = 100
+    data_col = {'cols':list(data.columns)}
+    data_pars = {'n_sample': n_sample,
+                'cols_model_type2' : data_col
+                }
+    compute_pars = { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
+                     'n_sample_generation' : 10
+                   }
+
+    data_pars['gen_samp'] =   {'Xtrain': data}
+    data_pars['eval']     =   {'X': data, 'y': None}
+
+    model = Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
+
+    log('\n\nTraining the model')
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
+    print()
+
+    log('Predict data..')
+    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    log(f'Xnew', Xnew)
+
+    log('Evaluating the model..')
+    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
+
+    log('Saving model..')
+    save(path= root + '/model_dir/')
+
+    log('Load model..')
+    model, session = load_model(path= root + "/model_dir/")
+    log(model)
+
+
+
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     """function RUN the model test_helper.
     Doc::                
@@ -283,12 +419,6 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     log('Load model..')
     model, session = load_model(path= root + "/model_dir/")
     log(model)
-
-
-
-
-
-
 
 
 ############### Model #########################################################################
@@ -317,12 +447,12 @@ class Model(object):
             log2(model_class, self.model)
 
 
-def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw):
+def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, task_type = "train",**kw):
     """            
     """
     global model, session
     session = None  # Session type for compute
-    Xtrain_tuple, ytrain, Xtest_tuple, ytest = get_dataset(data_pars, task_type="train")
+    Xtrain_tuple, ytrain, Xtest_tuple, ytest = get_dataset(data_pars, task_type=task_type)
 
     cpars = copy.deepcopy(compute_pars.get("compute_pars", {}))
     log('cpars', cpars)
@@ -348,7 +478,7 @@ def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
     
     # log(data_pars)
     mpars = compute_pars.get("metrics_pars", {'aggregate': True})
-
+    mpars = {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
     if model.model_pars['model_class'] in SDV_MODELS:
         evals = evaluate(Xnew, Xval, **mpars )
         return evals
@@ -392,13 +522,13 @@ def transform(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
 
 
     if name in SDV_MODELS :
-        if Xpred is None:
-            Xpred_tuple = get_dataset(data_pars, task_type="predict")
+        # if Xpred is None:
+        #     Xpred_tuple = get_dataset(data_pars, task_type="predict")
 
-        cols_type         = data_pars['cols_model_type2']
-        cols_ref_formodel = cols_type  ### Always match with feeded cols_type
-        split             = kw.get("split", False)
-        Xpred_tuple       = get_dataset_tuple(Xpred, cols_type, cols_ref_formodel, split)
+        # cols_type         = data_pars['cols_model_type2']
+        # cols_ref_formodel = cols_type  ### Always match with feeded cols_type
+        # split             = kw.get("split", False)
+        # Xpred_tuple       = get_dataset_tuple(Xpred, cols_type, cols_ref_formodel, split)
         Xnew = model.model.sample(compute_pars.get('n_sample_generation', 100) )
         log3("generated data", Xnew)
         return Xnew
@@ -563,7 +693,7 @@ def get_dataset(data_pars=None, task_type="train", **kw):
 
         if task_type == "eval":
             d = data_pars[task_type]
-            Xtrain, ytrain  = get_dataset_load( d["X"]), get_dataset_load( d["y"] )
+            Xtrain, ytrain  = get_dataset_load( d["X"]), None if d['y'] is None else get_dataset_load( d["y"] )
             Xtuple_train    = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split)
             return Xtuple_train, ytrain
 
@@ -578,6 +708,16 @@ def get_dataset(data_pars=None, task_type="train", **kw):
 
             return Xtuple_train, ytrain, Xtuple_test, ytest
 
+        if task_type == "gen_samp":
+            d = data_pars[task_type]
+            Xtrain = get_dataset_load( d["Xtrain"])
+
+            ### dict  colgroup ---> list of df
+            Xtuple_train = get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split )
+            log2("Xtuple_train", Xtuple_train)
+
+            return Xtuple_train, None, None, None
+
     elif data_type == "file":
         raise Exception(f' {data_type} data_type Not implemented ')
 
@@ -591,7 +731,8 @@ if __name__ == "__main__":
     import fire
     fire.Fire()
     #profiler.stop() ; print(profiler.output_text(unicode=True, color=True))
-
+    test4()
+    test5()
 
     
     
