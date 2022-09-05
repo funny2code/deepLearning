@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Genreate New train_data  by sampling existing data.
+"""Genreate New train_data  using advanced Auto-Encoder, GAN
 Docs::
 
     Install :
-       pip install sdv ctgan==0.5.1  scikit-learn   imlearn
+       pip install sdv ctgan==0.5.1  scikit-learn   imlearn  utilmy
 
 
-
+    -------------------------------------------------------------------------------------
     import utilmy.tabular.util_generator as ug
     from utilmy import log
 
     root  = "ztmp/"
+
+
+    -------------------------------------------------------------------------------------
+    n_sample = 100
     from sdv.demo import load_timeseries_demo
     from sdv.constraints import Unique
 
@@ -34,11 +38,9 @@ Docs::
                      'context_columns': context_columns,
                      'sequence_index': 'Date'
                                 },
-                }
-              }
+               } }
 
 
-    n_sample = 100
     compute_pars = { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
                      'n_sample_generation' : 10
@@ -47,7 +49,7 @@ Docs::
     -------------------------------------------------------------------------------------
     model = ug.Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
 
-    log('\n\nTraining the model')
+    log('Training the model')
     ug.fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
     print()
 
@@ -55,10 +57,10 @@ Docs::
     Xnew = ug.transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
     log(f'Xnew', Xnew)
 
-    log('Evaluating the model..')
+    log('Evaluating model..')
     log( ug.evaluate(data_pars=data_pars, compute_pars=compute_pars))
 
-    log('Saving model..')
+    log('Savinf model..')
     ug.save(path= root + '/model_dir/')
 
     log('Load model..')
