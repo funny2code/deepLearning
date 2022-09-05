@@ -136,22 +136,22 @@ def reset():
 
 
 ####################################################################################################
-try :
-    # CONSTANTS
-    SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
-    IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
-    MODEL_LIST      = {'TVAE'           : TVAE,
-                        'CTGAN'         : CTGAN,
-                        'PAR'           : PAR,
-                        'SMOTE'         : SMOTE,
-                        'SMOTEENN'      : SMOTEENN,
-                        'SMOTETomek'    : SMOTETomek,
-                        'NearMiss'      : NearMiss
-                        }
-except : pass
+# try :
+#     # CONSTANTS
+#     SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+#     IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+#     MODEL_LIST      = {'TVAE'           : TVAE,
+#                         'CTGAN'         : CTGAN,
+#                         'PAR'           : PAR,
+#                         'SMOTE'         : SMOTE,
+#                         'SMOTEENN'      : SMOTEENN,
+#                         'SMOTETomek'    : SMOTETomek,
+#                         'NearMiss'      : NearMiss
+#                         }
+# except : pass
 
-##################################################################################################################
-###################### test ######################################################################################
+#################################################################################################
+###################### test #####################################################################
 def test():
     """function test.      
     """
@@ -262,10 +262,10 @@ def test2(n_sample = 1000):
     #df, colnum, colcat, coly = test_dataset_classi_fake(nrows= n_sample)
     #X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = train_test_split2(df, coly)
 
-    from adatasets import test_data_classifier_fake, pd_train_test_split2
-    df, d = test_data_classifier_fake(n_sample)
+    import utilmy.adatasets as ad
+    df, d = ad.test_data_classifier_fake(n_sample)
     colnum, colcat, coly = d['colnum'], d['colcat'], d['coly']
-    X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = pd_train_test_split2(df, coly)
+    X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes  = ad.pd_train_test_split2(df, coly)
 
     #### Matching Big dict  ##################################################
     def post_process_fun(y): return int(y)
