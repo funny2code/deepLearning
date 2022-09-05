@@ -405,17 +405,25 @@ def test5(n_sample = 1000):
     from sdv.demo import load_timeseries_demo
     from sdv.constraints import Unique
 
-    data = load_timeseries_demo()
     #####################################################################
+    n_sample = 100
+    data = load_timeseries_demo()
     entity_columns = ['Symbol']
-
     context_columns = ['MarketCap', 'Sector', 'Industry']
+    data_col = {'cols':list(data.columns)}
+    data_pars = {'n_sample': n_sample,
+                'cols_model_type2' : data_col }
+    data_pars['gen_samp'] =   {'Xtrain': data}
+    data_pars['eval']     =   {'X': data, 'y': None}
+
+
+    #####################################################################
     models = {
         'PAR': {'model_class': 'PAR',
                   'model_pars': {
                      ## PAR
                      'epochs': 1,
-                     'entity_columns': entity_columns,
+                     'entity_columns':  entity_columns,
                      'context_columns': context_columns,
                      'sequence_index': 'Date'
                                 },
@@ -423,20 +431,13 @@ def test5(n_sample = 1000):
               }
 
     ###############################################################################
-
-    n_sample = 100
-    data_col = {'cols':list(data.columns)}
-    data_pars = {'n_sample': n_sample,
-                'cols_model_type2' : data_col
-                }
     compute_pars = { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
                      'n_sample_generation' : 10
                    }
 
-    data_pars['gen_samp'] =   {'Xtrain': data}
-    data_pars['eval']     =   {'X': data, 'y': None}
 
+    #####################################################################
     model = Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
 
     log('\n\nTraining the model')
