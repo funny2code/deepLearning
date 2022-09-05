@@ -136,18 +136,19 @@ def reset():
 
 
 ####################################################################################################
-# CONSTANTS
-SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
-IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
-MODEL_LIST      = {'TVAE'           : TVAE, 
-                    'CTGAN'         : CTGAN, 
-                    'PAR'           : PAR, 
-                    'SMOTE'         : SMOTE, 
-                    'SMOTEENN'      : SMOTEENN, 
-                    'SMOTETomek'    : SMOTETomek, 
-                    'NearMiss'      : NearMiss
-                    }
-
+try :
+    # CONSTANTS
+    SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+    IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+    MODEL_LIST      = {'TVAE'           : TVAE,
+                        'CTGAN'         : CTGAN,
+                        'PAR'           : PAR,
+                        'SMOTE'         : SMOTE,
+                        'SMOTEENN'      : SMOTEENN,
+                        'SMOTETomek'    : SMOTETomek,
+                        'NearMiss'      : NearMiss
+                        }
+except : pass
 
 ##################################################################################################################
 ###################### test ######################################################################################
@@ -499,6 +500,19 @@ class Model(object):
                     Returns:
                        
         """
+        # CONSTANTS
+        SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+        IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+        MODEL_LIST      = {'TVAE'           : TVAE,
+                            'CTGAN'         : CTGAN,
+                            'PAR'           : PAR,
+                            'SMOTE'         : SMOTE,
+                            'SMOTEENN'      : SMOTEENN,
+                            'SMOTETomek'    : SMOTETomek,
+                            'NearMiss'      : NearMiss
+                            }
+
+
         self.model_pars, self.compute_pars, self.data_pars = model_pars, compute_pars, data_pars
 
         if model_pars is None:
