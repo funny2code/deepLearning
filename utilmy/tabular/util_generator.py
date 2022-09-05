@@ -2,6 +2,11 @@
 """Genreate New train_data  by sampling existing data.
 Docs::
 
+    Install :
+       pip install sdv ctgan==0.5.1  scikit-learn   imlearn
+
+
+
     import utilmy.tabular.util_generator as ug
     from utilmy import log
 
@@ -106,7 +111,7 @@ try:
     from imblearn.combine import SMOTEENN, SMOTETomek
     from imblearn.under_sampling import NearMiss
 except:
-    print("pip install imlearn scikit-learn ") 
+    print("pip install imlearn scikit-learn ")
 
 
 
@@ -131,18 +136,19 @@ def reset():
 
 
 ####################################################################################################
-# CONSTANTS
-SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
-IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
-MODEL_LIST      = {'TVAE'           : TVAE, 
-                    'CTGAN'         : CTGAN, 
-                    'PAR'           : PAR, 
-                    'SMOTE'         : SMOTE, 
-                    'SMOTEENN'      : SMOTEENN, 
-                    'SMOTETomek'    : SMOTETomek, 
-                    'NearMiss'      : NearMiss
-                    }
-
+try :
+    # CONSTANTS
+    SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+    IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+    MODEL_LIST      = {'TVAE'           : TVAE,
+                        'CTGAN'         : CTGAN,
+                        'PAR'           : PAR,
+                        'SMOTE'         : SMOTE,
+                        'SMOTEENN'      : SMOTEENN,
+                        'SMOTETomek'    : SMOTETomek,
+                        'NearMiss'      : NearMiss
+                        }
+except : pass
 
 ##################################################################################################################
 ###################### test ######################################################################################
@@ -400,17 +406,25 @@ def test5(n_sample = 1000):
     from sdv.demo import load_timeseries_demo
     from sdv.constraints import Unique
 
-    data = load_timeseries_demo()
     #####################################################################
+    n_sample = 100
+    data = load_timeseries_demo()
     entity_columns = ['Symbol']
-
     context_columns = ['MarketCap', 'Sector', 'Industry']
+    data_col = {'cols':list(data.columns)}
+    data_pars = {'n_sample': n_sample,
+                'cols_model_type2' : data_col }
+    data_pars['gen_samp'] =   {'Xtrain': data}
+    data_pars['eval']     =   {'X': data, 'y': None}
+
+
+    #####################################################################
     models = {
         'PAR': {'model_class': 'PAR',
                   'model_pars': {
                      ## PAR
                      'epochs': 1,
-                     'entity_columns': entity_columns,
+                     'entity_columns':  entity_columns,
                      'context_columns': context_columns,
                      'sequence_index': 'Date'
                                 },
@@ -418,20 +432,13 @@ def test5(n_sample = 1000):
               }
 
     ###############################################################################
-
-    n_sample = 100
-    data_col = {'cols':list(data.columns)}
-    data_pars = {'n_sample': n_sample,
-                'cols_model_type2' : data_col
-                }
     compute_pars = { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
                      'n_sample_generation' : 10
                    }
 
-    data_pars['gen_samp'] =   {'Xtrain': data}
-    data_pars['eval']     =   {'X': data, 'y': None}
 
+    #####################################################################
     model = Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
 
     log('\n\nTraining the model')
@@ -493,6 +500,19 @@ class Model(object):
                     Returns:
                        
         """
+        # CONSTANTS
+        SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+        IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+        MODEL_LIST      = {'TVAE'           : TVAE,
+                            'CTGAN'         : CTGAN,
+                            'PAR'           : PAR,
+                            'SMOTE'         : SMOTE,
+                            'SMOTEENN'      : SMOTEENN,
+                            'SMOTETomek'    : SMOTETomek,
+                            'NearMiss'      : NearMiss
+                            }
+
+
         self.model_pars, self.compute_pars, self.data_pars = model_pars, compute_pars, data_pars
 
         if model_pars is None:
