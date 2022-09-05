@@ -2,16 +2,74 @@
 """Genreate New train_data  by sampling existing data.
 Docs::
 
-  python model_sampler.py test
+    import utilmy.tabular.util_generator as ug
+    from utilmy import log
 
-  Transformation for ALL Columns :   Increase samples, Reduce Samples.
+    root  = "ztmp/"
+    from sdv.demo import load_timeseries_demo
+    from sdv.constraints import Unique
 
-  WARNING :
-  Main isssue is the number of rows change  !!!!
-    cannot merge with others
-    --> store as train data
-    train data ---> new train data
-    Transformation with less rows !
+    data = load_timeseries_demo()
+    entity_columns  = ['Symbol']
+    context_columns = ['MarketCap', 'Sector', 'Industry']
+    data_col  = {'cols':list(data.columns)}
+    data_pars = { 'n_sample':          n_sample,
+                  'cols_model_type2' : data_col
+                }
+    data_pars['gen_samp'] =   {'Xtrain': data}
+    data_pars['eval']     =   {'X': data, 'y': None}
+
+    -------------------------------------------------------------------------------------
+    models = {
+        'PAR': {'model_class': 'PAR',
+                  'model_pars': {
+                     ## PAR
+                     'epochs': 1,
+                     'entity_columns': entity_columns,
+                     'context_columns': context_columns,
+                     'sequence_index': 'Date'
+                                },
+                }
+              }
+
+
+    n_sample = 100
+    compute_pars = { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
+                     'n_sample_generation' : 10
+                   }
+
+    -------------------------------------------------------------------------------------
+    model = ug.Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
+
+    log('\n\nTraining the model')
+    ug.fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
+    print()
+
+    log('Predict data..')
+    Xnew = ug.transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    log(f'Xnew', Xnew)
+
+    log('Evaluating the model..')
+    log( ug.evaluate(data_pars=data_pars, compute_pars=compute_pars))
+
+    log('Saving model..')
+    ug.save(path= root + '/model_dir/')
+
+    log('Load model..')
+    ug.model, session = load_model(path= root + "/model_dir/")
+    log(model)
+
+
+    ----------------------------------------------------------------------------------
+      Transformation for ALL Columns :   Increase samples, Reduce Samples.
+
+      WARNING :
+      Main isssue is the number of rows change  !!!!
+        cannot merge with others
+        --> store as train data
+        train data ---> new train data
+        Transformation with less rows !
 
 """
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
@@ -38,16 +96,17 @@ try:
         raise Exception('ctgan outdated', ctgan.__version__ != '0.5.1')
 except:
     print("pip install sdv ctgan==0.5.1  scikit-learn ")
-    1/0 
 
 
 ### IMBLEARN
 import six
 sys.modules['sklearn.externals.six'] = six
-from imblearn.over_sampling import SMOTE
-from imblearn.combine import SMOTEENN, SMOTETomek
-from imblearn.under_sampling import NearMiss
-
+try:
+    from imblearn.over_sampling import SMOTE
+    from imblearn.combine import SMOTEENN, SMOTETomek
+    from imblearn.under_sampling import NearMiss
+except:
+    print("pip install imlearn scikit-learn ") 
 
 
 
