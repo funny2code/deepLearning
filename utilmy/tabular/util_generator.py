@@ -478,7 +478,6 @@ def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
     
     # log(data_pars)
     mpars = compute_pars.get("metrics_pars", {'aggregate': True})
-    mpars = {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
     if model.model_pars['model_class'] in SDV_MODELS:
         evals = evaluate(Xnew, Xval, **mpars )
         return evals
