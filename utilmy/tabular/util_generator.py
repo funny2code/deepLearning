@@ -82,7 +82,7 @@ Docs::
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
 from box import Box
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs, pd_read_file
+from utilmy import global_verbosity, os_makedirs, pd_read_file, pd_to_file
 from utilmy import log, log2, log3
 verbosity= 5
 
@@ -522,22 +522,30 @@ def generator_train_save(dirin="", dirout="", pars:dict=None):
 
 
 
-def generator_load_generate(dirmodel="", pars:dict=None):
+def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
 
 
     """
-    log('Load model..')
+    global model, session
+
 
     p = Box(pars)
-    data_pars = Box({})
-    compute_pars =Box({})
+    data_pars = {}
+    compute_pars = {}
 
-    global model, session
+
+    log('Load model..')
     model, session = load_model(path= dirmodel)
     log(model)
+
     Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+
+    if dirout is not None :
+        pd_to_file(Xnew, show=1)
+    else :
+        return Xnew
 
 
 
