@@ -2,6 +2,11 @@
 """Genreate New train_data  by sampling existing data.
 Docs::
 
+    Install :
+       pip install sdv ctgan==0.5.1  scikit-learn   imlearn
+
+
+
     import utilmy.tabular.util_generator as ug
     from utilmy import log
 
@@ -106,7 +111,7 @@ try:
     from imblearn.combine import SMOTEENN, SMOTETomek
     from imblearn.under_sampling import NearMiss
 except:
-    print("pip install imlearn scikit-learn ") 
+    print("pip install imlearn scikit-learn ")
 
 
 
