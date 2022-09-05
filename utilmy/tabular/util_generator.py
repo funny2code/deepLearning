@@ -10,11 +10,11 @@ Docs::
     from sdv.constraints import Unique
 
     data = load_timeseries_demo()
-    entity_columns = ['Symbol']
+    entity_columns  = ['Symbol']
     context_columns = ['MarketCap', 'Sector', 'Industry']
-    data_col = {'cols':list(data.columns)}
-    data_pars = {'n_sample': n_sample,
-                'cols_model_type2' : data_col
+    data_col  = {'cols':list(data.columns)}
+    data_pars = { 'n_sample':          n_sample,
+                  'cols_model_type2' : data_col
                 }
     data_pars['gen_samp'] =   {'Xtrain': data}
     data_pars['eval']     =   {'X': data, 'y': None}
@@ -31,7 +31,6 @@ Docs::
                                 },
                 }
               }
-
 
 
     n_sample = 100
