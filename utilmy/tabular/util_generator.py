@@ -95,7 +95,7 @@ try:
     if ctgan.__version__ != '0.5.1':
         raise Exception('ctgan outdated', ctgan.__version__ != '0.5.1')
 except:
-    print("pip install sdv ctgan==0.5.1  scikit-learn "); 1/0
+    print("pip install sdv ctgan==0.5.1  scikit-learn ")
 
 
 ### IMBLEARN
@@ -106,7 +106,7 @@ try:
     from imblearn.combine import SMOTEENN, SMOTETomek
     from imblearn.under_sampling import NearMiss
 except:
-    print("pip install imlearn scikit-learn ") ; 1/0
+    print("pip install imlearn scikit-learn ") 
 
 
 
