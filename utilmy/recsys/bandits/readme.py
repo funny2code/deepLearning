@@ -8,7 +8,7 @@ Docs:
 https://genrl.readthedocs.io/en/latest/api/common/bandit.html#genrl-bandit-core
 
 
-
+https://github.com/arita37/rl-agents/pull/1
 
 
 
