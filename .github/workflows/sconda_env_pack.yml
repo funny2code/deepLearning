@@ -6,6 +6,12 @@ name: zconda_build_long
 # platform + package + channel specific conda list --explicit>ENV.txt
 
 
+####   Upload to Google Drive and other cloud
+###   https://dist.duck.sh/
+
+
+
+
 on:
   workflow_dispatch:
     inputs:
