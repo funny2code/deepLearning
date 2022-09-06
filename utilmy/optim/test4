@@ -1,0 +1,116 @@
+[1mNAME[0m
+    check4.py
+
+[1mSYNOPSIS[0m
+    check4.py [4mGROUP[0m | [4mCOMMAND[0m | [4mVALUE[0m
+
+[1mGROUPS[0m
+    [1m[4mGROUP[0m[0m is one of the following:
+
+     os
+       OS routines for NT or Posix depending on what system we're on.
+
+     math
+       This module provides access to the mathematical functions defined by the C standard.
+
+     np
+       NumPy =====
+
+     warnings
+       Python part of the warnings subsystem.
+
+     copy
+       Generic (shallow and deep) copying operations.
+
+     fire
+       The Python Fire module.
+
+[1mCOMMANDS[0m
+    [1m[4mCOMMAND[0m[0m is one of the following:
+
+     random
+       random() -> x in the interval [0, 1).
+
+     Box
+       Improved dictionary access through dot notation with additional tools.
+
+     llog
+
+     log2
+
+     help
+
+     test_all
+       function test_all
+
+     test_pars_values
+       return test params docs::
+
+     test1
+       Test search_formulae_dcgpy_v1
+
+     test2
+       Test search_formulae_dcgpy_v1
+
+     test3
+       Test search_formulae_dcgpy_v1
+
+     test4
+       Test search_formulae_dcgpy_v1
+
+     test6
+       Test the myProblem4 class,
+
+     test7
+       Test the myProblem3 class,
+
+     test1_parallel
+       Test of search_formulae_dcgpy_v1_parallel
+
+     test1_parallel2
+       Test parralel run of search_formulae_dcgpy_v1, in customize parallle version.
+
+     test1_parallel_island
+       Test search_formulae_dcgpy_v1_parallel_island
+
+     myProblem1
+
+     myProblem2
+
+     myProblem3
+
+     myProblem4
+
+     myProblem7
+
+     myProblem5
+
+     myProblem_ranking
+
+     search_formulae_dcgpy_v1
+       Search Optimal Formulae Docs::
+
+     search_formulae_dcgpy_v1_parallel
+       Parallel run of search_formulae_dcgpy_v1 Docs::
+
+     search_formulae_dcgpy_v1_parallel_island
+       Use PYGMO Island model + DCGPY for mutiple parallel Search of formulae Docs::
+
+     search_formulae_dcgpy_Xy_regression_v1
+       Search Optimal Formulae Docs::
+
+     search_formulae_operon_v1
+       Search Optimal Formulae Docs::
+
+[1mVALUES[0m
+    [1m[4mVALUE[0m[0m is one of the following:
+
+     sin
+
+     cos
+
+     log
+
+     exp
+
+     sqrt
