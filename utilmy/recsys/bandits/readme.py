@@ -3,6 +3,15 @@ Docs:
 
 
 
+### bayesian bandit Setup
+
+https://genrl.readthedocs.io/en/latest/api/common/bandit.html#genrl-bandit-core
+
+
+
+
+
+
 
 zozotown
 
