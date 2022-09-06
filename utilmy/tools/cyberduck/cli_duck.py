@@ -1,13 +1,21 @@
 """ Ducke Download
 Docs::
 
+### manage Secreat 
+
+
+
+https://tianhaozhou.medium.com/fill-the-gap-of-credential-management-in-github-actions-a313e230e58b
+
+
+
     C:\Program Files\Cyberduck CLI\
 
 
 
 
     ##### Dataset  from google
-    duck --list "googledrive:/My Drive/dataset/"  --username yakimonofr@gmail.com  
+    duck --list "googledrive:/My Drive/dataset/"  --username emial@gmail.com  
 
 
 Connection Profiles
