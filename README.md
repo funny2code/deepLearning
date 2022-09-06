@@ -4,6 +4,7 @@
 [     https://pypi.org/project/utilmy/#history ](https://pypi.org/project/utilmy/#history)
 
 
+
 ## utilnmy
     1000s of One liner function utilities.
     
@@ -16,16 +17,6 @@
 ### Install for development
 
     https://github.com/arita37/myutil/issues/9
-
-
-    Patching for Intel CPU speed up
-
-        https://intel.github.io/scikit-learn-intelex/acceleration.html
-
-        Through global patching to enable patching for your scikit-learn installation for all further runs:
-        python sklearnex.glob patch_sklearn
-
-        pip install scikit-learn-intelex
 
 
 
@@ -54,6 +45,14 @@
  
  
  
+ #   Patching for Intel CPU speed up
+
+        https://intel.github.io/scikit-learn-intelex/acceleration.html
+
+        Through global patching to enable patching for your scikit-learn installation for all further runs:
+        python sklearnex.glob patch_sklearn
+
+        pip install scikit-learn-intelex
  
 
 
