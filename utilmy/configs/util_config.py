@@ -116,7 +116,7 @@ def config_load(
     #########Default value setup ###########################################
     if path_default is None:
         config_path_default = os.environ.get(environ_path_default, str(pathlib.Path.home()) + "/.myconfig/config.yaml"  ) 
-        path_default = os.path.parent(config_path_default)
+        path_default = os.path.dirname(config_path_default)
 
     if config_default is None:
         config_default = {"field1": "", "field2": {}}
