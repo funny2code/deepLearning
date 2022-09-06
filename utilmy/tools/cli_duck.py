@@ -10,6 +10,27 @@ Docs::
     duck --list "googledrive:/My Drive/dataset/"  --username yakimonofr@gmail.com  
 
 
+Connection Profiles
+You can install additional connection profiles in the application support directory. Use the --profile option
+ to reference a connection profile file to use not installed in the standard location.
+
+Linux
+The support directory is ~/.duck/ on Linux. You can install third party profiles in ~/.duck/profiles/.
+
+Install additional profiles in %AppData%\Cyberduck\Profiles on Windows.
+
+Google Drive.cyberduckprofile
+
+
+wget  https://dist.duck.sh/
+
+wget https://dist.duck.sh/duck_8.4.3.38269-1_arm64.deb
+
+
+
+
+    duck --list "googledrive:/My Drive/dataset/"  --profiles  mygoogledrive.xml   --username myemai@gmail.com 
+
 
     Command Line Interface (CLI)
     Cyberduck with a command-line interface (CLI) is available for Mac, Windows & Linux. It is installed as duck.
