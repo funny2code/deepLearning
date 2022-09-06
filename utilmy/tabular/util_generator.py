@@ -80,9 +80,9 @@ Docs::
 
 """
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
-
+from box import Box
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs, pd_read_file
+from utilmy import global_verbosity, os_makedirs, pd_read_file, pd_to_file
 from utilmy import log, log2, log3
 verbosity= 5
 
@@ -138,19 +138,19 @@ def reset():
 
 
 ####################################################################################################
-# try :
-#     # CONSTANTS
-#     SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
-#     IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
-#     MODEL_LIST      = {'TVAE'           : TVAE,
-#                         'CTGAN'         : CTGAN,
-#                         'PAR'           : PAR,
-#                         'SMOTE'         : SMOTE,
-#                         'SMOTEENN'      : SMOTEENN,
-#                         'SMOTETomek'    : SMOTETomek,
-#                         'NearMiss'      : NearMiss
-#                         }
-# except : pass
+try :
+    # CONSTANTS
+    SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
+    IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
+    MODEL_LIST      = {'TVAE'           : TVAE,
+                        'CTGAN'         : CTGAN,
+                        'PAR'           : PAR,
+                        'SMOTE'         : SMOTE,
+                        'SMOTEENN'      : SMOTEENN,
+                        'SMOTETomek'    : SMOTETomek,
+                        'NearMiss'      : NearMiss
+                        }
+except : pass
 
 #################################################################################################
 ###################### test #####################################################################
@@ -489,6 +489,68 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     log(model)
 
 
+
+###############################################################################################
+############### Wrapper #######################################################################
+def generator_train_save(dirin="", dirout="", pars:dict=None):
+    """ Data Generator Wrapper to train/save
+    Docs::
+
+
+
+    """
+    global model, session
+    p = Box(pars)
+
+    model_pars   = {}
+    data_pars    = {}
+    compute_pars = {}
+
+
+    model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
+
+    log('Train model')
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
+
+
+    log('Evaluate model..')
+    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
+
+
+    log('Save model..')
+    save(path= dirout)
+
+
+
+def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
+    """ Data genrator to load/generate
+    Docs::
+
+
+    """
+    global model, session
+
+
+    p = Box(pars)
+    data_pars = {}
+    compute_pars = {}
+
+
+    log('Load model..')
+    model, session = load_model(path= dirmodel)
+    log(model)
+
+    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+
+    if dirout is not None :
+        pd_to_file(Xnew, show=1)
+    else :
+        return Xnew
+
+
+
+
+
 ############### Model #########################################################################
 class Model(object):
     def __init__(self, model_pars=None, data_pars=None, compute_pars=None):
@@ -555,7 +617,7 @@ def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
     if model.model_pars['model_class'] in IMBLEARN_MODELS:
         Xnew, ynew     = transform((Xval, yval), data_pars, compute_pars, out_pars)
     else:
-        Xnew            = transform(Xval, data_pars, compute_pars, out_pars)
+        Xnew           = transform(Xval, data_pars, compute_pars, out_pars)
     
     # log(data_pars)
     mpars = compute_pars.get("metrics_pars", {'aggregate': True})

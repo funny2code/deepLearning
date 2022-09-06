@@ -1,4 +1,19 @@
 """"
+
+
+#### Generic Structure learning algo generators:
+
+https://benchpressdocs.readthedocs.io/en/latest/json_overview.html
+
+
+https://github.com/felixleopoldo/benchpress/issues/34
+
+
+
+
+
+
+
 R models for structured Learning
 
 https://rdrr.io/github/rlebron-bioinfo/gnlearn/man/notears.html
