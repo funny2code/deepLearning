@@ -23,9 +23,11 @@ so needed to increase the number of n_exp to get consistent results.
 
 
 ##### Approach 3 
-Added test3, Newton method
+>Added test3, Newton method
 http://darioizzo.github.io/dcgp/notebooks/weighted_symbolic_regression.html
 
+>test 4 is sample with 3 variable
+Results are not consistent and might need high value of max_step, and n_step
 
 Will be merged with  gp_searchformulae once things become clear
 """
@@ -267,8 +269,35 @@ def test3():
     p.operators     = ["sum", "mul", "div", "diff"]
     p.symbols       = ["x0"]
 
+    p.n_exp         = 1
+    p.max_step      = 500  ## per expriemnet
+    p.offsprings    = 20
+    p.n_eph         = 1
+
+    #### Run Search
+    res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
+
+
+def test4():
+    """Test search_formulae_dcgpy_v1
+    """
+    
+
+    myproblem       = myProblem7()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 3  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "div", "diff"]
+    p.symbols       = ["x0","x1","x2"]
+
     p.n_exp         = 20
-    p.max_step      = 1000  ## per expriemnet
+    p.max_step      = 5000  ## per expriemnet
     p.offsprings    = 20
     p.n_eph         = 1
 
@@ -371,11 +400,11 @@ class myProblem6:
 
         x = np.linspace(1,3,10)
 
-        ### Formulae Space
+        # ### Formulae Space
         x = gdual(x)
         yt =  x**5 - np.pi*x**3 + 2*x
-        self.x  = x
         self.yt = yt
+        self.x = x
 
     def get_data_symbolic(self):
         """ Cost Calculation, Objective to minimize Cost
@@ -391,9 +420,59 @@ class myProblem6:
 
     def get_cost_symbolic(self,dCGP):
         y    = dCGP([self.x])[0]
+        #y    = dCGP([self.x[0],self.x[1]])[0]
         cost = (y-self.yt)**2
         return cost
 
+class myProblem7:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+        from pyaudi import gdual_vdouble as gdual
+
+        # x = np.linspace(1,3,10)
+
+        # ### Formulae Space
+        # x = gdual(x)
+        # yt =  x**5 - np.pi*x**3 + 2*x
+        x0 = np.linspace(1,10,1000)
+        x1 = np.linspace(1,10,1000)
+        x2 = np.linspace(1,10,1000)
+        x0 = gdual(x0)
+        x1 = gdual(x1)
+        x2 = gdual(x2)
+        yt =  3*x0*x1 - np.pi*x1 + 2*x2
+
+        self.x  = [x0,x1,x2]
+        self.yt = yt
+
+    def get_data_symbolic(self):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        #Insert your data here
+        return self.x
+
+
+    def get_cost_symbolic(self,dCGP):
+        #y    = dCGP([self.x])[0]
+        y    = dCGP([self.x[0],self.x[1],self.x[2]])[0]
+        cost = (y-self.yt)**2
+        return cost
 
 ###################################################################################################3
 
@@ -741,7 +820,6 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         c = ex.get_cols()
         a = ex.get_arity()[0]
         v = np.zeros(r * c * a)
-
         # random initialization of weights
         w=[]
         for i in range(r*c):
@@ -784,11 +862,20 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             dw = np.zeros(len(ss))
             H = np.zeros((len(ss),len(ss)))
             for k in range(len(ss)):
-                dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym.constant_cf))
-                H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym.constant_cf))
-                for l in range(k):
-                    H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym.constant_cf))
-                    H[l][k] = H[k][l]
+                #print(len(xsym1[0].constant_cf))
+                try:
+                    #len(xsym[0].constant_cf)) gives error when n_eph = 1
+                    dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym[0].constant_cf))
+                    H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym[0].constant_cf))
+                    for l in range(k):
+                        H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym[0].constant_cf))
+                        H[l][k] = H[k][l]
+                except:
+                    dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym.constant_cf))
+                    H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym.constant_cf))
+                    for l in range(k):
+                        H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym.constant_cf))
+                        H[l][k] = H[k][l]
 
             det = np.linalg.det(H)
             if det == 0: # if H is singular
@@ -837,7 +924,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         best_chromosome = dCGP.get()
         best_fitness    = 1e10
         best_weights = dCGP.get_weights()
-        best_fitness = sum(problem.get_cost(dCGP).constant_cf)
+        best_fitness = sum(problem.get_cost_symbolic(dCGP).constant_cf)
 
         for kstep in range(max_step):
             for i in range(offsprings):
@@ -846,7 +933,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
 
 
                 xsym  = problem.get_data_symbolic()     ####
-                newton(dCGP, problem.get_cost_symbolic(), xsym=xsym, p= newtonParams)
+                newton(dCGP, problem.get_cost_symbolic, xsym=xsym, p= newtonParams)
 
 
                 costsym = problem.get_cost_symbolic(dCGP)
@@ -888,7 +975,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         if verbose>0:
             print_file( 'id_exp', 'niter', 'weights', 'formulae', )
         for i in range(n_exp):
-            dCGP = expression(inputs=1, outputs=1, rows=1, cols=15, levels_back=16, arity=2,
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
                               kernels=kernels_new,
                               seed = random.randint(0,234213213))
 
