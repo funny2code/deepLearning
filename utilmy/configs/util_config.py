@@ -17,24 +17,34 @@ from box import Box
 
 
 #########################################################################################################
-def log(*s):
-    print(*s, flush=True)
-
+from utilmy.utilmy import (log, log2,  to_file)
 
 def loge(*s):
-    print(*s, flush=True)
-
+    print(*s,  flush=True)
 
 
 #########################################################################################################
 #########################################################################################################
+def test_all():
+    test_yamlschema()
+    # test_pydanticgenrator()
+
+
 def test_yamlschema():
-    cfg_dict = config_load("config.yaml")
-    isok     = config_isvalid_yamlschema(cfg_dict, "config_val.yaml")
-    log(isok)
+
+   dircur = os.path.dirname( os.path.abspath(__file__) )
+   cfg_dict = config_load(  "config.yaml")
+   isok     = config_isvalid_yamlschema(cfg_dict,   "config_val.yaml")
+   log(isok)
 
 
 def test_pydanticgenrator():
+    """
+    Docs::
+
+        https://github.com/koxudaxi/datamodel-code-generator
+        pip install datamodel-code-generator
+    """
     from datamodel_code_generator import InputFileType
     # generating from json file
     pydantic_model_generator(
@@ -56,7 +66,15 @@ def test4():
     assert isinstance(pydantic_model, BaseModel)
 
 
-def test_example():
+def test_generate_files():
+    import tempfile
+    from pathlib import Path
+    dirtmp = Path( tempfile.gettempdir().replace("\\", "/") )
+    dirtmp = dirtmp / "test_util_config"
+    os.makedirs(dirtmp, exist_ok=True)
+
+    res= []
+
     ss = """
         string: ok
         regex:  abcd
@@ -74,7 +92,34 @@ def test_example():
                 string: "ok"
 
     """
-    return ss
+
+    ss = """
+string: "hello"
+regex: 'abcde'
+number: 13.12
+integer: 2
+boolean: True
+list: ['hi']
+enum: 1
+map:
+    hello: 1
+    another: "hi"
+empty: null
+date: 2015-01-01
+nest:
+    integer: 1
+    nest:
+        string: "nested"
+      
+   """
+    to_file(ss, dirtmp / "config.yaml")
+    res.append( dirtmp / "config.yaml" )
+
+    return res
+
+
+
+
 
 
 #########################################################################################################
@@ -220,11 +265,12 @@ def config_isvalid_yamlschema(config_dict: dict, schema_path: str = 'config_val.
 def config_isvalid_pydantic(config_dict: dict,
                             pydanctic_schema: str = 'config_py.yaml', silent: bool = False) -> bool:
     """Validate using a pydantic files
-    Args:
-        config_dict:
-        pydanctic_schema:
-        silent:
-    Returns: True/False
+    Docs::
+
+            config_dict:
+            pydanctic_schema:
+            silent:
+        Returns: True/False
     """
     import yamale
     try:
@@ -261,16 +307,18 @@ def pydantic_model_generator(
         output_file: Path,
         **kwargs,
 ) -> None:
-    """
-    Args:
-        input_file:
-        input_file_type:
-        output_file:
-        **kwargs:
+    """ Generate Pydantic template
+    Docs::
 
-    Returns:
-    # https://github.com/koxudaxi/datamodel-code-generator
-    # pip install datamodel-code-generator
+        Args:
+            input_file:
+            input_file_type:
+            output_file:
+            **kwargs:
+
+        Returns:
+        # https://github.com/koxudaxi/datamodel-code-generator
+        # pip install datamodel-code-generator
 
     """
     from datamodel_code_generator import Error, generate
@@ -290,7 +338,6 @@ def pydantic_model_generator(
 
 
 #########################################################################################################
-
 def global_verbosity(cur_path, path_relative="/../../config.json",
                    default=5, key='verbosity',):
     """ Get global verbosity

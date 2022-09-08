@@ -15,183 +15,351 @@ Doc::
     # ERROR         40              logger.error()
     # CRITICAL      50              logger.critical()
 """
-import os,sys
+import os,sys,json
 from logging.handlers import SocketHandler
 from pathlib import Path
-
 import yaml
-from loguru import logger
+
+
+
+######################################################################################
+##### Global settting  ###############################################################
+LOG_CONFIG_PATH  = os.environ.get('log_config', "" )
+LOG_CONFIG = {}
+if LOG_CONFIG_PATH is not None :
+    with open(LOG_CONFIG_PATH, mode='r') as fp :
+        LOG_CONFIG = json.load(fp)
+
+
+VERBOSITY   = os.environ.get('log_verbosity', 0)     if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
+LOG_TYPE    = os.environ.get('log_type',   'base')   if 'log_type'      not in LOG_CONFIG else LOG_CONFIG['log_type']
+
+THISFILE_PATH = Path(__file__).resolve().parent
+
 
 #####################################################################################
-root = Path(__file__).resolve().parent
-LOG_CONFIG_PATH = root / "config_log.yaml"
-
-# "socket_test", 'default'  'debug0;
-#
-LOG_TEMPLATE = "debug0"
-
-
-#####################################################################################
-def logger_setup(log_config_path: str = None, log_template: str = "default", **kwargs):
-    """ Generic Logging setup
-    Doc::
-
-        Overide logging using loguru setup
-        1) Custom config from log_config_path .yaml file
-        2) Use shortname log, log2, logw, loge for logging output
-
-        Args:
-            log_config_path:
-            template_name:
-            **kwargs:
-        Returns:None
-
-    """
-    try:
-        with open(log_config_path, "r") as fp:
-            cfg = yaml.safe_load(fp)
-
-    except Exception as e:
-        print(f"Cannot load yaml file {log_config_path}, Using Default logging setup")
-        cfg = {"log_level": "DEBUG", "handlers": {"default": [{"sink": "sys.stdout"}]}}
-
-    ########## Parse handlers  ####################################################
-    globals_ = cfg
-    handlers = cfg.pop("handlers")[log_template]
-    rotation = globals_.pop("rotation")
+if LOG_TYPE == 'base':
+    def log(*s):
+        """function log.
+        """
+        print(*s, flush=True)
 
 
-    for handler in handlers:
-        if 'sink' not in handler : 
-            print(f'Skipping {handler}')
-            continue
-
-        if handler["sink"] == "sys.stdout":
-            handler["sink"] = sys.stdout
-
-        elif handler["sink"] == "sys.stderr":
-            handler["sink"] = sys.stderr
-
-        elif handler["sink"].startswith("socket"):
-            sink_data       = handler["sink"].split(",")
-            ip              = sink_data[1]
-            port            = int(sink_data[2])
-            handler["sink"] = SocketHandler(ip, port)
-
-        elif ".log" in handler["sink"] or ".txt" in handler["sink"]:
-            handler["rotation"] = handler.get("rotation", rotation)
-
-        # override globals values
-        for key, value in handler.items():
-            if key in globals_:
-                globals_[key] = value
-
-        handler.update(globals_)
-
-    ########## Addon config  ##############################################
-    logger.configure(handlers=handlers)
-
-    ########## Custom log levels  #########################################
-    # configure log level in config_log.yaml to be able to use logs depends on severity value
-    # if no=9 it means that you should set log level below DEBUG to see logs,
-    try:
-        logger.level("DEBUG_2", no=9, color="<cyan>")
-
-    except Exception as e:
-        ### Error when re=-defining level
-        print('warning', e)
-
-    return logger
+    def log2(*s):
+        """function log2.
+        """
+        if VERBOSITY >=2 : print(*s, flush=True)
 
 
-#######################################################################################
-##### Initialization ##################################################################
-logger_setup(log_config_path=LOG_CONFIG_PATH, log_template=LOG_TEMPLATE)
+    def log3(*s):  ### Debugging level 2
+        """function log3.
+        """
+        if VERBOSITY >=3 : print(*s, flush=True)
 
 
-#######################################################################################
-##### Alias ###########################################################################
-
-def log(*s):
-    """function log.
-    Doc::
-            
-    """
-    logger.opt(depth=1, lazy=True).info(",".join([str(t) for t in s]))
+    def logw(*s):
+        """function logw.
+        """
+        print(*s, flush=True)
 
 
-def log2(*s):
-    """function log2.
-    Doc::
-            
-    """
-    logger.opt(depth=1, lazy=True).debug(",".join([str(t) for t in s]))
+    def logc(*s):
+        """function logc.
+        """
+        print(*s, flush=True)
 
 
-def log3(*s):  ### Debuggine level 2
-    """function log3.
-    Doc::
-            
-    """
-
-def logw(*s):
-    """function logw.
-    Doc::
-            
-                
-    """
-    logger.opt(depth=1, lazy=True).warning(",".join([str(t) for t in s]))
+    def loge(*s):
+        """function loge.
+        """
+        print(*s, flush=True)
 
 
-def logc(*s):
-    """function logc.
-    Doc::
-            
+    def logr(*s):
+        """function logr.
+        """
+        print(*s, flush=True)
+
+
+
+
+
+
+
+
+##############################################################################################
+if LOG_TYPE == 'logging':
+    import logging, socket
+    ################### Logs #################################################################
+    FORMATTER_1 = logging.Formatter("%(asctime)s,  %(name)s, %(levelname)s, %(message)s")
+    FORMATTER_2 = logging.Formatter("%(asctime)s.%(msecs)03dZ %(levelname)s %(message)s")
+    FORMATTER_3 = logging.Formatter("%(asctime)s  %(levelname)s %(message)s")
+    FORMATTER_4 = logging.Formatter("%(asctime)s, %(process)d, %(filename)s,    %(message)s")
+    FORMATTER_5 = logging.Formatter(
+        "%(asctime)s, %(process)d, %(pathname)s%(filename)s, %(funcName)s, %(lineno)s,  %(message)s"
+    )
+
+
+    ########################################################################################
+    ################### Logger #############################################################
+    def logger_setup(
+        logger_name=None,
+        log_file=None,
+        formatter=FORMATTER_1,
+        isrotate=False,
+        isconsole_output=True,
+        logging_level=logging.DEBUG,
+    ):
+        """
+        my_logger = util_log.logger_setup("my module name", log_file="")
+        APP_ID    = util_log.create_appid(__file__ )
+        def log(*argv):
+          my_logger.info(",".join([str(x) for x in argv]))
+
+       """
+
+        if logger_name is None:
+            logger = logging.getLogger()  # Gets the root logger
+        else:
+            logger = logging.getLogger(logger_name)
+
+        logger.setLevel(logging_level)  # better to have too much log than not enough
+
+        if isconsole_output:
+            logger.addHandler(logger_handler_console(formatter))
+
+        if log_file is not None:
+            logger.addHandler(
+                logger_handler_file(formatter=formatter, log_file_used=log_file, isrotate=isrotate)
+            )
+
+        # with this pattern, it's rarely necessary to propagate the error up to parent
+        logger.propagate = False
+        return logger
+
+
+    def logger_handler_console(formatter=None):
+        formatter = FORMATTER_1 if formatter is None else formatter
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        return console_handler
+
+
+    def logger_handler_file(isrotate=False, rotate_time="midnight", formatter=None, log_file_used=None):
+        from logging.handlers import TimedRotatingFileHandler
+        formatter = FORMATTER_1 if formatter is None else formatter
+        if isrotate:
+            print("Rotate log", rotate_time)
+            fh = TimedRotatingFileHandler(log_file_used, when=rotate_time)
+            fh.setFormatter(formatter)
+            return fh
+        else:
+            fh = logging.FileHandler(log_file_used)
+            fh.setFormatter(formatter)
+            return fh
+
+
+    logger = logger_setup()
+
+
+    #######################################################################################
+    ##### Alias ###########################################################################
+    def log(*s):
+        """function log.
+        """
+        logger.info(",".join([str(t) for t in s]))
+
+
+    def log2(*s):
+        """function log2.
+        """
+        logger.info(",".join([str(t) for t in s]))
+
+
+    def log3(*s):  ### Debuggine level 2
+        """function log3.
+        """
+        logger.info(",".join([str(t) for t in s]))
+
+
+    def logw(*s):
+        """function logw.
+        """
+        logger.warning(",".join([str(t) for t in s]))
+
+
+    def logc(*s):
+        """function logc.
+        """
+        logger.critical(",".join([str(t) for t in s]))
+
+
+    def loge(*s):
+        """function loge.
+        """
+        logger.error(",".join([str(t) for t in s]))
+
+
+    def logr(*s):
+        """function logr.
+        """
+        logger.info(",".join([str(t) for t in s]))
+
+
+
+
+##############################################################################################
+if LOG_TYPE == 'loguru':
+    from loguru import logger
+    #####################################################################################
+    # "socket_test", 'default'  'debug0;
+    #
+    LOG_CONFIG_PATH = THISFILE_PATH / "config_loguru.yaml"
+    LOG_TEMPLATE    = os.environ.get('log_loguru_template', "debug0")
+
+
+    #####################################################################################
+    def logger_setup(log_config_path: str = None, log_template: str = "default", **kwargs):
+        """ Generic Logging setup
+        Doc::
+
+            Overide logging using loguru setup
+            1) Custom config from log_config_path .yaml file
+            2) Use shortname log, log2, logw, loge for logging output
+
             Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.opt(depth=1, lazy=True).critical(",".join([str(t) for t in s]))
+                log_config_path:
+                template_name:
+                **kwargs:
+            Returns:None
+
+        """
+        try:
+            with open(log_config_path, "r") as fp:
+                cfg = yaml.safe_load(fp)
+
+        except Exception as e:
+            print(f"Cannot load yaml file {log_config_path}, Using Default logging setup")
+            cfg = {"log_level": "DEBUG", "handlers": {"default": [{"sink": "sys.stdout"}]}}
+
+        ########## Parse handlers  ####################################################
+        globals_ = cfg
+        handlers = cfg.pop("handlers")[log_template]
+        rotation = globals_.pop("rotation")
 
 
-def loge(*s):
-    """function loge.
-    Doc::
-            
-    """
-    logger.opt(depth=1, lazy=True).exception(",".join([str(t) for t in s]))
+        for handler in handlers:
+            if 'sink' not in handler :
+                print(f'Skipping {handler}')
+                continue
+
+            if handler["sink"] == "sys.stdout":
+                handler["sink"] = sys.stdout
+
+            elif handler["sink"] == "sys.stderr":
+                handler["sink"] = sys.stderr
+
+            elif handler["sink"].startswith("socket"):
+                sink_data       = handler["sink"].split(",")
+                ip              = sink_data[1]
+                port            = int(sink_data[2])
+                handler["sink"] = SocketHandler(ip, port)
+
+            elif ".log" in handler["sink"] or ".txt" in handler["sink"]:
+                handler["rotation"] = handler.get("rotation", rotation)
+
+            # override globals values
+            for key, value in handler.items():
+                if key in globals_:
+                    globals_[key] = value
+
+            handler.update(globals_)
+
+        ########## Addon config  ##############################################
+        logger.configure(handlers=handlers)
+
+        ########## Custom log levels  #########################################
+        # configure log level in config_log.yaml to be able to use logs depends on severity value
+        # if no=9 it means that you should set log level below DEBUG to see logs,
+        try:
+            logger.level("DEBUG_2", no=9, color="<cyan>")
+
+        except Exception as e:
+            ### Error when re=-defining level
+            print('warning', e)
+
+        return logger
 
 
-def logr(*s):
-    """function logr.
-    Doc::
-            
-    """
-    logger.opt(depth=1, lazy=True).error(",".join([str(t) for t in s]))
+    #######################################################################################
+    ##### Initialization ##################################################################
+    logger_setup(log_config_path=LOG_CONFIG_PATH, log_template=LOG_TEMPLATE)
 
 
-#########################################################################################
-def test():
-    """function test.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    log3("debug2")
-    log2("debug")
-    log("info")
-    logw("warning")
-    loge("error")
-    logc("critical")
+    #######################################################################################
+    ##### Alias ###########################################################################
+    def log(*s):
+        """function log.
+        """
+        logger.opt(depth=1, lazy=True).info(",".join([str(t) for t in s]))
 
-    try:
-        a = 1 / 0
-    except Exception as e:
-        logr("error", e)
-        loge("Catcch"), e
+
+    def log2(*s):
+        """function log2.
+        """
+        logger.opt(depth=2, lazy=True).debug(",".join([str(t) for t in s]))
+
+
+    def log3(*s):  ### Debuggine level 2
+        """function log3.
+        """
+        logger.opt(depth=2, lazy=True).debug(",".join([str(t) for t in s]))
+
+    def logw(*s):
+        """function logw.
+        """
+        logger.opt(depth=1, lazy=True).warning(",".join([str(t) for t in s]))
+
+
+    def logc(*s):
+        """function logc.
+        """
+        logger.opt(depth=1, lazy=True).critical(",".join([str(t) for t in s]))
+
+
+    def loge(*s):
+        """function loge.
+        """
+        logger.opt(depth=1, lazy=True).exception(",".join([str(t) for t in s]))
+
+
+    def logr(*s):
+        """function logr.
+        """
+        logger.opt(depth=1, lazy=True).error(",".join([str(t) for t in s]))
+
+
+    #########################################################################################
+    def test():
+        """function test.
+        Doc::
+
+                Args:
+                Returns:
+
+        """
+        log3("debug2")
+        log2("debug")
+        log("info")
+        logw("warning")
+        loge("error")
+        logc("critical")
+
+        try:
+            a = 1 / 0
+        except Exception as e:
+            logr("error", e)
+            loge("Catcch"), e
 
 
 #######################################################################################
