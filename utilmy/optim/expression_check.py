@@ -377,7 +377,7 @@ class myProblem6:
         self.x  = x
         self.yt = yt
 
-    def get_data(self):
+    def get_data_symbolic(self):
         """ Cost Calculation, Objective to minimize Cost
         Docs::
 
@@ -389,7 +389,7 @@ class myProblem6:
         return self.x
 
 
-    def get_cost(self,dCGP):
+    def get_cost_symbolic(self,dCGP):
         y    = dCGP([self.x])[0]
         cost = (y-self.yt)**2
         return cost
@@ -845,11 +845,11 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
 
 
-                xsym  = problem.get_data()     ####
-                newton(dCGP, problem.get_cost, xsym=xsym, p= newtonParams)
+                xsym  = problem.get_data_symbolic()     ####
+                newton(dCGP, problem.get_cost_symbolic(), xsym=xsym, p= newtonParams)
 
-                
-                costsym = problem.get_cost(dCGP)
+
+                costsym = problem.get_cost_symbolic(dCGP)
                 fitness[i]    = sum(costsym.constant_cf)
                 chromosome[i] = dCGP.get()
                 weights[i]    = dCGP.get_weights()
