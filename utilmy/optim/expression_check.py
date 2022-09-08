@@ -250,9 +250,8 @@ def test1():
     #### Run Search
     res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
 
-
 def test3():
-    """Test search_formulae_dcgpy_v1
+    """Test search_formulae_dcgpy_newton with 1 variable
     """
     
 
@@ -277,9 +276,10 @@ def test3():
     #### Run Search
     res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
-
 def test4():
-    """Test search_formulae_dcgpy_v1
+    """Test search_formulae_dcgpy_newton with 3 variables
+
+
     """
     
 
@@ -687,7 +687,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
 
 
 def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, ):
-    """ Search Optimal Formulae
+    """ Search Optimal Formulae with constants using Newton Formulae
     Docs::
 
         -- Install
@@ -709,7 +709,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             from numpy import (sin, cos, log, exp, sqrt )
 
             -- 1) Define Problem Class with get_cost methods
-                myproblem       = gp.myProblem2()
+                myproblem       = myProblem7()
 
                 p               = Box({})
                 p.log_file      = 'trace.log'
@@ -717,53 +717,59 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 p.print_best    = True
 
 
-                p.nvars_in      = 2  ### nb of variables
+                p.nvars_in      = 3  ### nb of variables
                 p.nvars_out     = 1
-                p.operators     = ["sum", "mul", "div", "diff","sin"]
-                p.symbols       = ["x0","x1"]
+                p.operators     = ["sum", "mul", "div", "diff"]
+                p.symbols       = ["x0","x1","x2"]
 
-                p.n_exp         = 4
-                p.max_step      = 1000  ## per expriemnet
+                p.n_exp         = 20
+                p.max_step      = 5000  ## per expriemnet
                 p.offsprings    = 20
+                p.n_eph         = 1
 
-
-                --- Run Search
-                res = gp.search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
-
-                --- Parallel version
-                gp.search_formulae_dcgpy_v1_parallel(myproblem=myproblem, pars_dict=p, verbose=1, npool=3 )
-
+                #### Run Search
+                res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
 
 
             --  Custom Problem
 
-                class myProblem2:
-                    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,):
-                        x0 = np.random.random(50)*10 - 5.0
-                        x1 = np.random.random(50)*10 - 5.0
+                    class myProblem7:
+                        def __init__(self):
+                            from pyaudi import gdual_vdouble as gdual
+                            # ### Formulae Space
+                            x0 = np.linspace(1,10,1000)
+                            x1 = np.linspace(1,10,1000)
+                            x2 = np.linspace(1,10,1000)
+                            x0 = gdual(x0)
+                            x1 = gdual(x1)
+                            x2 = gdual(x2)
+                            yt =  3*x0*x1 - np.pi*x1 + 2*x2
 
-                        self.x0 = x0
-                        self.x1 = x1
-                        self.ytrue =  np.sin(x1 * x0) + x0**2 + x1*x0  #This is the true expression
+                            self.x  = [x0,x1,x2]
+                            self.yt = yt
 
+                        def get_data_symbolic(self):
 
-                    def get_cost(self, expr, symbols):
-                        x0,x1 = self.x0, self.x1
+                            #Insert your data here
+                            return self.x
 
-                        ### Eval New Formulae
-                        y     =  eval(expr(symbols)[0])
-                        cost  =  np.sum((self.ytrue-y)**2)
-
-                        check = 3
-                        return cost, check
+                        def get_cost_symbolic(self,dCGP):
+                            #y    = dCGP([self.x])[0]
+                            y    = dCGP([self.x[0],self.x[1],self.x[2]])[0]
+                            cost = (y-self.yt)**2
+                            return cost
 
 
         -- Add constraints in the functional space
 
             https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
             https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
-
+            http://darioizzo.github.io/dcgp/notebooks/weighted_symbolic_regression.html
+            
+        --My Issue:
+            As the number of variables increases , we will need high values of max_step, and n_step,
+            to get the correct expression
 
     """
     from pyaudi import gdual_vdouble as gdual
