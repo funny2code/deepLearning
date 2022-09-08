@@ -30,6 +30,7 @@ http://darioizzo.github.io/dcgp/notebooks/weighted_symbolic_regression.html
 Will be merged with  gp_searchformulae once things become clear
 """
 import os, random, math, numpy as np, warnings, copy
+from re import X
 from box import Box
 from random import random
 np.seterr(all='ignore') 
@@ -366,6 +367,8 @@ class myProblem6:
                Ojective to maximize  correlation(merge_list,  True_ordered_list)
 
         """
+        self.x = 0  
+        self.yt = 0
         pass
 
     def get_data(self):
@@ -378,17 +381,16 @@ class myProblem6:
         """
         from pyaudi import gdual_vdouble as gdual
         #Insert your data here 
-        #x = np.linspace(1,20,100)
-        #Y = x**5 - np.pi*x**3 + 2*x
-        #Y = x**5 - np.pi*x**3 + 2*np.pi / x
-        #Y = x**5 - 3.967*x**3 + 8.756/ x
-        #X = np.reshape(x, (100,1))
-        #Y = np.reshape(Y, (100,1))
         x = np.linspace(1,3,10)
         x = gdual(x)
         yt =  x**5 - np.pi*x**3 + 2*x
+        self.x = x  
+        self.yt = yt
         return x,yt
     
+    def get_cost(self,dCGP):
+        y = dCGP([self.x])[0]
+        return (y-self.yt)**2
 
 ###################################################################################################3
 
@@ -773,7 +775,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             ex.set_weights(w)
 
             # compute the error
-            E = f(ex, x, yt)
+            E = f(ex)
             Ei = sum(E.constant_cf)
 
             # get gradient and Hessian
@@ -804,7 +806,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             ex.set_weights(wfe)
 
             # if error increased restore the initial weights
-            Ef = sum(f(ex, x, yt).constant_cf)
+            Ef = sum(f(ex).constant_cf)
             if not Ef < Ei:
                 for j in range(len(awidx)):
                     idx = (aw[awidx[j]][0] - n) * a + aw[awidx[j]][1]
@@ -814,13 +816,10 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     # Quadratic error of a dCGP expression. The error is computed over the input points xin (of type gdual, order 0 as
     # we are not interested in expanding the program w.r.t. these). The target values are contained in yt (of type gdual,
     # order 0 as we are not interested in expanding the program w.r.t. these)
-    def mse(dCGP,x,yt):
-        y = dCGP([x])[0]
-        return (y-yt)**2
 
 
 
-    def run_experiment(max_step, offsprings, dCGP, symbols,newtonParams, x, yt,verbose=False):
+    def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, x, yt,verbose=False):
         """Run the Experiment in max_step
         Docs::
             max_step        : Maximum Generations
@@ -836,14 +835,14 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         best_chromosome = dCGP.get()
         best_fitness    = 1e10
         best_weights = dCGP.get_weights()
-        best_fitness = sum(mse(dCGP, x, yt).constant_cf)
+        best_fitness = sum(problem.get_cost(dCGP).constant_cf)
 
         for kstep in range(max_step):
             for i in range(offsprings):
                 dCGP.set(best_chromosome)
                 dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
-                newton(dCGP, mse, x, yt, newtonParams)
-                fitness[i] = sum(mse(dCGP, x, yt).constant_cf)
+                newton(dCGP, problem.get_cost, x, yt, newtonParams)
+                fitness[i] = sum(problem.get_cost(dCGP).constant_cf)
                 chromosome[i] = dCGP.get()
                 weights[i] = dCGP.get_weights()
             #print(fitness)
@@ -887,10 +886,10 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             for j in range(dCGP.get_n(), dCGP.get_n() + dCGP.get_rows() * dCGP.get_cols()):
                 for k in range(dCGP.get_arity()[0]):
                     dCGP.set_weight(j, k, gdual([np.random.normal(0,1)]))
-            kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, x=x, yt=yt, newtonParams= newtonParams, verbose=False)
+            kstep, dCGP, best_fitness = run_experiment(problem=problem,max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, x=x, yt=yt, newtonParams= newtonParams, verbose=False)
 
             form2 = dCGP.simplify(symbols,True)
-            result.append( ( i, kstep , best_fitness, form2   ) )
+            result.append((i, kstep , best_fitness, form2))
 
             if   verbose >=2 :
                 form1 = dCGP(symbols,True)
@@ -899,7 +898,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             elif verbose >=1 : print_file(i, kstep, best_fitness,form2)
 
             
-        result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',   ])
+        result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',])
         result = result.sort_values('cost', ascending=1)
         return result
 
