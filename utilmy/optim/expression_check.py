@@ -367,9 +367,15 @@ class myProblem6:
                Ojective to maximize  correlation(merge_list,  True_ordered_list)
 
         """
-        self.x = 0  
-        self.yt = 0
-        pass
+        from pyaudi import gdual_vdouble as gdual
+
+        x = np.linspace(1,3,10)
+
+        ### Formulae Space
+        x = gdual(x)
+        yt =  x**5 - np.pi*x**3 + 2*x
+        self.x  = x
+        self.yt = yt
 
     def get_data(self):
         """ Cost Calculation, Objective to minimize Cost
@@ -379,18 +385,15 @@ class myProblem6:
             symbols         : Symbols
 
         """
-        from pyaudi import gdual_vdouble as gdual
-        #Insert your data here 
-        x = np.linspace(1,3,10)
-        x = gdual(x)
-        yt =  x**5 - np.pi*x**3 + 2*x
-        self.x = x  
-        self.yt = yt
-        return x,yt
-    
+        #Insert your data here
+        return self.x
+
+
     def get_cost(self,dCGP):
-        y = dCGP([self.x])[0]
-        return (y-self.yt)**2
+        y    = dCGP([self.x])[0]
+        cost = (y-self.yt)**2
+        return cost
+
 
 ###################################################################################################3
 
@@ -717,7 +720,6 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     seed            = p.get('seed', 23)
     n_eph           = p.get('n_eph',0)
 
-    x,yt             = problem.get_data()
     ### search DCGPY Algo
 
     from utilmy import os_makedirs
@@ -733,7 +735,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             return sum(x)
         return x[0] * N
 
-    def newton(ex, f, x,yt,p):
+    def newton(ex, f, xsym, p):
         n = ex.get_n()
         r = ex.get_rows()
         c = ex.get_cols()
@@ -782,10 +784,10 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             dw = np.zeros(len(ss))
             H = np.zeros((len(ss),len(ss)))
             for k in range(len(ss)):
-                dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(x.constant_cf))
-                H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(x.constant_cf))
+                dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym.constant_cf))
+                H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym.constant_cf))
                 for l in range(k):
-                    H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(x.constant_cf))
+                    H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym.constant_cf))
                     H[l][k] = H[k][l]
 
             det = np.linalg.det(H)
@@ -819,7 +821,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
 
 
 
-    def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, x, yt,verbose=False):
+    def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, verbose=False):
         """Run the Experiment in max_step
         Docs::
             max_step        : Maximum Generations
@@ -841,20 +843,26 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             for i in range(offsprings):
                 dCGP.set(best_chromosome)
                 dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
-                newton(dCGP, problem.get_cost, x, yt, newtonParams)
-                fitness[i] = sum(problem.get_cost(dCGP).constant_cf)
+
+
+                xsym  = problem.get_data()     ####
+                newton(dCGP, problem.get_cost, xsym=xsym, p= newtonParams)
+
+                
+                costsym = problem.get_cost(dCGP)
+                fitness[i]    = sum(costsym.constant_cf)
                 chromosome[i] = dCGP.get()
-                weights[i] = dCGP.get_weights()
+                weights[i]    = dCGP.get_weights()
             #print(fitness)
             for i in range(offsprings):
                 if fitness[i] <= best_fitness:
                     if (fitness[i] != best_fitness) and verbose:
                         dCGP.set(chromosome[i])
-                        print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify(["x0"]))
+                        print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify())
                     best_chromosome = chromosome[i]
                     best_fitness = fitness[i]
                     best_weights = weights[i]
-            if best_fitness < 1e-14:
+            if best_fitness < 1e-3:
                 break
 
         dCGP.set(best_chromosome)
@@ -883,10 +891,14 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             dCGP = expression(inputs=1, outputs=1, rows=1, cols=15, levels_back=16, arity=2,
                               kernels=kernels_new,
                               seed = random.randint(0,234213213))
+
+            ### Constant setup
             for j in range(dCGP.get_n(), dCGP.get_n() + dCGP.get_rows() * dCGP.get_cols()):
                 for k in range(dCGP.get_arity()[0]):
                     dCGP.set_weight(j, k, gdual([np.random.normal(0,1)]))
-            kstep, dCGP, best_fitness = run_experiment(problem=problem,max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, x=x, yt=yt, newtonParams= newtonParams, verbose=False)
+
+            ### Get results
+            kstep, dCGP, best_fitness = run_experiment(problem=problem,max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, newtonParams= newtonParams, verbose=False)
 
             form2 = dCGP.simplify(symbols,True)
             result.append((i, kstep , best_fitness, form2))
