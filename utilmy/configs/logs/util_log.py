@@ -173,7 +173,7 @@ if LOG_TYPE == 'logging':
     def log2(*s):
         """function log2.
         """
-        logger.info(",".join([str(t) for t in s]))
+        logger.debug(",".join([str(t) for t in s]))
 
 
     def log3(*s):  ### Debuggine level 2

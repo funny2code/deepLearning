@@ -445,13 +445,13 @@ class myProblem7:
         # ### Formulae Space
         # x = gdual(x)
         # yt =  x**5 - np.pi*x**3 + 2*x
-        x0 = np.linspace(1,10,1000)
-        x1 = np.linspace(1,10,1000)
-        x2 = np.linspace(1,10,1000)
+        x0 = np.random.random(1000)
+        x1 = np.random.random(1000)
+        x2 = np.random.random(1000)
         x0 = gdual(x0)
         x1 = gdual(x1)
         x2 = gdual(x2)
-        yt =  3*x0*x1 - np.pi*x1 + 2*x2
+        yt =  3*x0*x1 - np.pi*x1 + np.pi**2 *x2
 
         self.x  = [x0,x1,x2]
         self.yt = yt
