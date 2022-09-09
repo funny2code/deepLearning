@@ -545,6 +545,35 @@ def generator_train_save(dirin_or_df="", dirout="",
     """ Data Generator Wrapper to train/save
     Docs::
 
+        root   = "ztmp/"
+        dirout = "ztmp/"
+
+        data  = sdv.demo.load_tabular_demo('student_placements')
+        colid = 'student_id'
+
+        rule_unique_employee_student_id = sdv.constraints.Unique(column_names=['student_id'])
+        constraints = [rule_unique_employee_student_id]
+
+
+        model_pars = {'model_class': 'CTGAN',
+                    'model_pars': {
+                          ## CTGAN
+                         'primary_key': colid,
+                         'epochs': 1,
+                         'anonymize_fields': {},
+                         'batch_size' :100,
+                         'generator_dim' : (256, 256, 256),
+                         'discriminator_dim' : (256, 256, 256),
+                         'constraints':constraints
+                                     },
+                    }
+
+        compute_pars = { 'compute_pars' : {},
+                         'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                       }
+
+        generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
+        generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
     """
@@ -581,10 +610,19 @@ def generator_train_save(dirin_or_df="", dirout="",
     save(path= dirout)
 
 
+
 def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
 
+
+        root   = "ztmp/"
+        dirout = "ztmp/"
+
+        compute_pars = { 'compute_pars' : {},
+                         'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                       }
+        generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
     """
     global model, session
