@@ -24,14 +24,14 @@ import yaml
 
 ######################################################################################
 ##### Global settting  ###############################################################
-LOG_CONFIG_PATH  = os.environ.get('log_config', "" )
+LOG_CONFIG_PATH  = os.environ.get('log_config', None )
 LOG_CONFIG = {}
 if LOG_CONFIG_PATH is not None :
     with open(LOG_CONFIG_PATH, mode='r') as fp :
         LOG_CONFIG = json.load(fp)
 
 
-VERBOSITY   = os.environ.get('log_verbosity', 0)     if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
+VERBOSITY   = os.environ.get('log_verbosity', 10)    if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
 LOG_TYPE    = os.environ.get('log_type',   'base')   if 'log_type'      not in LOG_CONFIG else LOG_CONFIG['log_type']
 
 THISFILE_PATH = Path(__file__).resolve().parent
@@ -213,7 +213,6 @@ if LOG_TYPE == 'loguru':
     from loguru import logger
     #####################################################################################
     # "socket_test", 'default'  'debug0;
-    #
     LOG_CONFIG_PATH = THISFILE_PATH / "config_loguru.yaml"
     LOG_TEMPLATE    = os.environ.get('log_loguru_template', "debug0")
 
@@ -362,12 +361,23 @@ if LOG_TYPE == 'loguru':
             loge("Catcch"), e
 
 
+
+########################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+
+
+
+
+
 #######################################################################################
 #######################################################################################
 def z_logger_stdout_override():
     """ Redirect stdout --> logger.
     Doc::
-            
+
             Returns:
     """
     import contextlib
@@ -394,10 +404,10 @@ def z_logger_stdout_override():
 def z_logger_custom_1():
     """function z_logger_custom_1.
     Doc::
-            
+
             Args:
             Returns:
-                
+
     """
     import logging
     import sys
@@ -472,8 +482,3 @@ def z_logger_custom_1():
             ]
         )
         logger.level("TIMEIT", no=22, color="<cyan>")
-
-
-############################################################################
-if __name__ == "__main__":
-    test()
