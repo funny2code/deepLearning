@@ -296,8 +296,8 @@ def test4():
     p.operators     = ["sum", "mul", "div", "diff"]
     p.symbols       = ["x0","x1","x2"]
 
-    p.n_exp         = 20
-    p.max_step      = 5000  ## per expriemnet
+    p.n_exp         = 1
+    p.max_step      = 500  ## per expriemnet
     p.offsprings    = 20
     p.n_eph         = 1
 
@@ -778,6 +778,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     import random, pandas as pd
     from box import Box
     import pyaudi 
+    import json  
     ######### Problem definition and Cost calculation
 
 
@@ -959,7 +960,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 break
 
         dCGP.set(best_chromosome)
-        return kstep, dCGP, best_fitness
+        return kstep, dCGP, best_fitness,best_weights,best_chromosome
 
 
     def search():
@@ -991,7 +992,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                     dCGP.set_weight(j, k, gdual([np.random.normal(0,1)]))
 
             ### Get results
-            kstep, dCGP, best_fitness = run_experiment(problem=problem,max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, newtonParams= newtonParams, verbose=False)
+            kstep, dCGP, best_fitness,best_weights,best_chromosome = run_experiment(problem=problem,max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, newtonParams= newtonParams, verbose=False)
 
             form2 = dCGP.simplify(symbols,True)
             result.append((i, kstep , best_fitness, form2))
@@ -1001,8 +1002,46 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 print_file(i, kstep,  form1,  form2)
 
             elif verbose >=1 : print_file(i, kstep, best_fitness,form2)
+        ###Save the weights for future use
+        
+        '''
+        Issues: In saving and loading the weights
+        We need to save best_weights and best_chromosome
+        best_chromosome : list
+        best_weights  : list
 
-            
+        a. Tried converting weights into list but json.dumps is not able to serialize the file
+        best_weights = np.array(best_weights)
+        best_weights = list(best_weights)
+        dict = {"best_chromosome":best_chromosome,"best_weights":best_weights}
+        #s = json.dumps(weight)  ------->This is giving error
+        
+        b. Tried saving into text, IN this case reloading as dictionary is not working
+        with open("myfile.txt", 'w') as f: 
+            for key, value in dict.items(): 
+                f.write('%s:%s\n' % (key, value))
+
+        import ast
+  
+        # reading the data from the file
+        with open('myfile.txt') as f:
+            data = f.read()
+        d = ast.literal_eval(data)
+        print(d)
+        c. Also tried saving as dataframe but saving list of lists is giving error
+         when appending using df.at--- or using df.iloc
+        '''
+        #Load the weight and chormosome to obtain the results
+
+        dCGP2 = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                              kernels=kernels_new,
+                              seed = random.randint(0,234213213))
+
+        dCGP2.set_weights(best_weights)
+        dCGP2.set(best_chromosome)
+        print("Loading the saved results :")
+        print(dCGP2.simplify(in_sym = symbols,subs_weights=True))
+        ##### Store thre results in a dataframe
         result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',])
         result = result.sort_values('cost', ascending=1)
         return result
