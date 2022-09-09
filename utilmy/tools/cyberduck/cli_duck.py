@@ -4,7 +4,6 @@ Docs::
 ### manage Secreat 
 
 
-
 ##### Using pydrive   ################################################################################
 Please copy the Google json auth in same folder than scripot
 
@@ -34,10 +33,6 @@ for file in fileList:
   print('Title: %s, ID: %s' % (file['title'], file['id']))
   # Get the folder ID that you want
   break
-
-
-
-
 
 
 
