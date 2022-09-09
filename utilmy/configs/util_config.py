@@ -16,7 +16,7 @@ from box import Box
 
 
 #########################################################################################################
-from utilmy.utilmy import (log, log2, loge,  to_file, os_get_dirtmp)
+from utilmy.utilmy import (log, log2, loge,  os_get_dirtmp)
 
 
 
@@ -127,6 +127,11 @@ def test4():
 
 
 ###############################################################################################
+def to_file(txt, fpath, mode='a'):
+    with open(fpath, mode=mode) as fp:
+        fp.write(txt)
+
+
 def test_create_file(dirout=None):
     import tempfile
     import yaml, json, toml
