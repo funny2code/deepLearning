@@ -735,7 +735,7 @@ from utilmy.oos import(
 
 ### Alias
 os_remove = os_removedirs
-to_file   = os_to_file
+#to_file   = os_to_file
 
 
 
