@@ -1025,13 +1025,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         if load_old_weights is not None:
             try:
                 check_file = 1
-                #with open( load_old_weights, 'rb') as handle:
-                #    b = pickle.load(handle)
                 w_old = load_save(path=load_old_weights, mode='load')
-                #print("Weights are",b["best_weights"])
-                #loaded_weights     = w_old[problem_id]["best_weights"]
-                #loaded_choromosome = w_old[problem_id]["best_chromosome"]
-                #loaded_fitness     = w_old[problem_id]["best_fitness"]
 
                 loaded_weights     = w_old.best_weights
                 loaded_choromosome = w_old.best_chromosome
@@ -1105,10 +1099,6 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         #ddict = {problem_id:{"best_chromosome":best_chromosome,"best_weights":best_weights,"best_fitness":best_fitness} }
         ddict = {"best_chromosome":best_chromosome,"best_weights":best_weights,"best_fitness":best_fitness}
         load_save(path=save_new_weights, mode='save', ddict=ddict)
-        # if save_new_weights is not None:
-        #     os_makedirs(save_new_weights)
-        #     with open(  save_new_weights , 'wb') as handle:
-        #         pickle.dump(ddict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
         ##### Store thre results in a dataframe
