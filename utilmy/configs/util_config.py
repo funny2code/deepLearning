@@ -30,8 +30,9 @@ def test_all():
 
 
 #################################################
+
 def test1():
-    """
+    """ config_load
     """
     flist = test_create_file(dirout=None)
     for xi in flist:
@@ -44,9 +45,54 @@ def test1():
 
 
 def test2():
-   dircur = os.path.dirname( os.path.abspath(__file__) )
+   """ config_isvalid_yaml  schema
+
+
+   """
+   dircur   = os_get_dirtmp()
+
+   #######  yaml file ###############################################
+   ss ="""
+string: "hello"
+regex: 'abcde'
+number: 13.12
+integer: 2
+boolean: True
+list: ['hi']
+enum: 1
+map:
+    hello: 1
+    another: "hi"
+empty: null
+date: 2015-01-01
+nest:
+    integer: 1
+    nest:
+        string: "nested"   
+   """
+   to_file(ss, dircur + "/config_val.yaml")
    cfg_dict = config_load(  "config.yaml")
-   isok     = config_isvalid_yamlschema(cfg_dict,   "config_val.yaml")
+
+
+   #######  config_val file ########################################
+   ss ="""
+string: str()
+regex: regex('abcde')
+number: num(min=1, max=13.12)
+integer: int()
+boolean: bool()
+list: list()
+enum: enum('one', True, 1)
+map: map()
+empty: null()
+date: day()
+nest:
+    integer: int()
+    nest:
+        string: str()   
+   """
+   to_file(ss, dircur + "/config_val.yaml")
+   isok = config_isvalid_yamlschema(cfg_dict,  dircur + "/config_val.yaml")
    log(isok)
 
 
@@ -81,19 +127,6 @@ def test4():
 
 
 ###############################################################################################
-def os_get_dirtmp(subdir=None, return_path=False):
-    """ Return dir temp for testing,...
-
-    """
-    import tempfile
-    from pathlib import Path
-    dirtmp = tempfile.gettempdir().replace("\\", "/")
-    dirtmp = dirtmp + f"/{subdir}/" if subdir is not None else dirtmp
-    os.makedirs(dirtmp, exist_ok=True)
-    return Path(dirtmp) if return_path  else dirtmp
-
-
-
 def test_create_file(dirout=None):
     import tempfile
     import yaml, json, toml

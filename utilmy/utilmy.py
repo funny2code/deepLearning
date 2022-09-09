@@ -259,6 +259,11 @@ from utilmy.configs.util_config import config_load
 
 
 ###################################################################################################
+def to_file(txt, fpath, mode='a'):
+    with open(fpath, mode=mode) as fp:
+        fp.write(txt)
+
+
 def find_fuzzy(word:str, wlist:list, threshold=0.0):
   """ Find closest fuzzy string
         ll = dir(utilmy)
