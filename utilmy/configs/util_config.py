@@ -30,18 +30,45 @@ def test_all():
 
 
 #################################################
-
 def test1():
-    """ config_load
+    """ config_load test code
     """
     flist = test_create_file(dirout=None)
     for xi in flist:
-        ddict = config_load(xi )
+        cfg_dict = config_load(xi )
 
-        if len(ddict) > 2 :
-            log( str(xi) +", " + str(ddict) +'', "\n")
+        if len(cfg_dict) > 2 :
+            log( str(xi) +", " + str(cfg_dict) +'', "\n")
         else :
             raise Exception( f" dict is empty {xi}"  )
+
+    ###  Add other test for config_load
+    xi=flist[0]
+
+    log("# test to_dataclass")
+    cfg_dict = config_load(xi, to_dataclass=True)
+    log(cfg_dict.details )
+
+
+    log('test config_field_name')
+    cfg_dict = config_load(xi, config_field_name='details')
+    assert len(cfg_dict) > 0
+
+
+    log('ENV varibales')
+    os.environ['myconfig'] = 'default_output_config/config.yaml'
+    cfg_dict = config_load(None, environ_path_default='myconfig',save_default=True)
+    assert len(cfg_dict) > 1
+
+
+    log('test path_default and save_default')
+    cfg_dict = config_load(None,path_default='default_output_config/config.yaml',save_default=True)
+    # assert os.path.exists( )
+
+    log('\ntest config_default')
+    config_default= {"field1": "test config_default", "field2": {"version":"1.0"},"field3":"data"}
+    cfg_dict = config_load(None,config_default=config_default)
+
 
 
 def test2():
@@ -203,9 +230,13 @@ def config_load(
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties INTO a dict
     Doc::
 
-       to_dataclass : True, can access the dict as dot   mydict.field
-       verbose :  2 print the config
-       config_field_name:  Extract sub-field name from the dict
+        config_path:    str  = None,
+        to_dataclass:   bool = True,  True, can access the dict as dot   mydict.field
+        config_field_name :  str  = Extract sub-field name from the dict
+        environ_path_default: str = "config_path_default",
+        path_default:   str  = None,
+        config_default: dict = None,
+        save_default:   bool = False,
 
        -- Priority steps
         1) load config_path
