@@ -62,6 +62,10 @@ def log2(*s, **kw):
 def log3(*s, **kw):
     if verbose >=3 : print(*s, flush=True, **kw)
 
+def loge(*s):
+    print(*s,  flush=True)
+
+
 def help():
     suffix = "\n\n\n###############################"
     ss     = help_create(modulename='utilmy', prefixs=None) + suffix

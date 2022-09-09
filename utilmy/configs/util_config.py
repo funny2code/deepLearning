@@ -15,30 +15,44 @@ from typing import Union
 from box import Box
 
 
-
 #########################################################################################################
-from utilmy.utilmy import (log, log2,  to_file)
+from utilmy.utilmy import (log, log2, loge,  to_file, os_get_dirtmp)
 
-def loge(*s):
-    print(*s,  flush=True)
 
 
 #########################################################################################################
 #########################################################################################################
 def test_all():
-    test_yamlschema()
-    # test_pydanticgenrator()
+    test1()
+    test2()
+    test3()
 
 
-def test_yamlschema():
+
+#################################################
+def test1():
+    """
+    """
+    flist = test_create_file(dirout=None)
+    for xi in flist:
+        ddict = config_load(xi )
+
+        if len(ddict) > 2 :
+            log( str(xi) +", " + str(ddict) +'', "\n")
+        else :
+            raise Exception( f" dict is empty {xi}"  )
+
+
+def test2():
    dircur = os.path.dirname( os.path.abspath(__file__) )
    cfg_dict = config_load(  "config.yaml")
    isok     = config_isvalid_yamlschema(cfg_dict,   "config_val.yaml")
    log(isok)
 
 
-def test_pydanticgenrator():
-    """
+
+def test3():
+    """  test_pydanticgenrator(
     Docs::
 
         https://github.com/koxudaxi/datamodel-code-generator
@@ -65,8 +79,10 @@ def test4():
     assert isinstance(pydantic_model, BaseModel)
 
 
+
+###############################################################################################
 def os_get_dirtmp(subdir=None, return_path=False):
-    """ return dir temp for testing,...
+    """ Return dir temp for testing,...
 
     """
     import tempfile
@@ -77,36 +93,6 @@ def os_get_dirtmp(subdir=None, return_path=False):
     return Path(dirtmp) if return_path  else dirtmp
 
 
-def test_generate_files():
-    dirtmp = os_get_dirtmp('test_config')
-
-    res= []
-
-    ss = """
-string: "hello"
-regex: 'abcde'
-number: 13.12
-integer: 2
-boolean: True
-list: ['hi']
-enum: 1
-map:
-    hello: 1
-    another: "hi"
-empty: null
-date: 2015-01-01
-nest:
-    integer: 1
-    nest:
-        string: "nested"
-      
-   """
-    to_file(ss, dirtmp / "config.yaml")
-    res.append( dirtmp / "config.yaml" )
-
-    return res
-
-
 
 def test_create_file(dirout=None):
     import tempfile
@@ -115,25 +101,26 @@ def test_create_file(dirout=None):
     dir_cur = os_get_dirtmp() if dirout is None else dirout
 
     ##### create file for test
-    config_test = {"data": "test", "details": {"version":"1.0", 'integer': 1, 'float': 1.0, 'boolean': True }}
+    ddict = {"data": "test", "details": {"version":"1.0", 'integer': 1, 'float': 1.0, 'boolean': True }}
 
     flist = []
 
     ##### create config.yaml
     with open( dir_cur + "config.yaml", mode="w") as fp:
-        yaml.dump(config_test, fp, default_flow_style=False)
+        ddict['list1'] = [1,2]
+        yaml.dump(ddict, fp, default_flow_style=False)
         flist.append(dir_cur + "config.yaml")
 
 
     #### create config.json
     with open( dir_cur + "config.json", mode="w") as fp:
-        json.dump(config_test, fp,indent=3)
+        json.dump(ddict, fp,indent=3)
         flist.append(dir_cur + "config.json")
 
 
     #### create config.toml
     with open( dir_cur + "config.toml", "w") as toml_file:
-        toml.dump(config_test, toml_file)
+        toml.dump(ddict, toml_file)
         flist.append(dir_cur + "config.toml")
 
     ### create  config.ini
@@ -161,25 +148,9 @@ db.url=localhost"""
     return flist
 
 
-def test1():
-    """
-    """
-    flist = test_create_file(dirout=None)
-    for xi in flist:
-        cfg_dict = config_load(xi )
-
-        if len(cfg_dict) > 2 :
-            print( str(xi) +", " + str(cfg_dict) +'', "\n")
-        else :
-            raise Exception( f" dict is empty {xi}"  )
-
-    ###
-
-
 
 
 #########################################################################################################
-
 def config_load(
         config_path:    str  = None,
         to_dataclass:   bool = True,
@@ -213,7 +184,6 @@ def config_load(
     """
     import pathlib
 
-
     #########Default value setup ###########################################
     if path_default is None:
         config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
@@ -224,14 +194,14 @@ def config_load(
 
     #########Config path setup #############################################
     if config_path is None or config_path == "default":
-        print(f"Config: Using {config_path_default}")
+        log(f"Config: Using {config_path_default}")
         config_path = config_path_default
     else:
         config_path = pathlib.Path(config_path)
 
     ######### Load Config ##################################################
     try:
-        print("Config: Loading ", config_path)
+        log("Config: Loading ", config_path)
         if config_path.suffix in {".yaml", ".yml"}  :
             import yaml
             #Load the yaml config file
@@ -267,7 +237,7 @@ def config_load(
 
 
         if verbose >=2 :
-            print(cfg)
+            log(cfg)
 
         if to_dataclass:  ### myconfig.val  , myconfig.val2
             from box import Box
@@ -275,13 +245,13 @@ def config_load(
         return cfg
 
     except Exception as e:
-        print(f"Config: Cannot read file {config_path}", e)
+        log(f"Config: Cannot read file {config_path}", e)
 
     ######################################################################
-    print("Config: Using default config")
-    print(config_default)
+    log("Config: Using default config")
+    log(config_default)
     if save_default:
-        print(f"Config: Writing config in {config_path_default}")
+        log(f"Config: Writing config in {config_path_default}")
         os.makedirs(path_default, exist_ok=True)
         with open(config_path_default, mode="w") as fp:
             yaml.dump(config_default, fp, default_flow_style=False)
@@ -457,10 +427,10 @@ def zzz_config_load_validate(config_path: str, schema_path: str, silent: bool = 
         return convert_yaml_to_box(config_path)
 
     except yamale.YamaleError as e:
-        print("Validation failed!\n")
+        log("Validation failed!\n")
         for result in e.results:
-            print(f"Error validating data '{result.data}' with '{result.schema}'\n\t")
+            log(f"Error validating data '{result.data}' with '{result.schema}'\n\t")
             for error in result.errors:
-                print(f"\t{error}")
+                log(f"\t{error}")
         if not silent:
             raise e
