@@ -203,9 +203,13 @@ def config_load(
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties INTO a dict
     Doc::
 
-       to_dataclass : True, can access the dict as dot   mydict.field
-       verbose :  2 print the config
-       config_field_name:  Extract sub-field name from the dict
+        config_path:    str  = None,
+        to_dataclass:   bool = True,  True, can access the dict as dot   mydict.field
+        config_field_name :  str  = Extract sub-field name from the dict
+        environ_path_default: str = "config_path_default",
+        path_default:   str  = None,
+        config_default: dict = None,
+        save_default:   bool = False,
 
        -- Priority steps
         1) load config_path

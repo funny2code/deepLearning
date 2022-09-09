@@ -460,22 +460,23 @@ def test5(n_sample = 1000):
     model, session = load_model(path= root + "/model_dir/")
     log(model)
 
-def test6():
-    root  = "ztmp/"
-    from sdv.demo import load_tabular_demo
-    from sdv.constraints import Unique
 
-    data = load_tabular_demo('student_placements')
+def test6():
+    import sdv
+
     #####################################################################
+    root   = "ztmp/"
+    dirout = "ztmp/"
+
+    data  = sdv.demo.load_tabular_demo('student_placements')
     colid = 'student_id'
 
-    unique_employee_student_id_constraint = Unique(column_names=['student_id'])
+    rule_unique_employee_student_id = sdv.constraints.Unique(column_names=['student_id'])
+    constraints = [rule_unique_employee_student_id]
 
-    constraints = [unique_employee_student_id_constraint]
-    pars = {
-    'models' : {
-        'model_class': 'CTGAN',
-                  'model_pars': {
+
+    model_pars = {'model_class': 'CTGAN',
+                'model_pars': {
                       ## CTGAN
                      'primary_key': colid,
                      'epochs': 1,
@@ -485,16 +486,14 @@ def test6():
                      'discriminator_dim' : (256, 256, 256),
                      'constraints':constraints
                                  },
-               
-                },
+                }
 
-    'compute_pars' : { 'compute_pars' : {},
+    compute_pars = { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
-                   },
-	}
+                   }
 
-    generator_train_save(dirin = data, dirout=root, model_pars=pars['models'], compute_pars=pars['compute_pars'])
-    generator_load_generate(dirmodel=root, compute_pars=pars['compute_pars'])
+    generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
+    generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
@@ -505,7 +504,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     root  = "ztmp/"
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
-    log('\n\nTraining the model')
+    log('Training the model')
     fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
 
     log('Predict data..')
@@ -526,31 +525,78 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
 
 ###############################################################################################
 ############### Wrapper #######################################################################
-def generator_train_save(dirin="", dirout="", model_pars:dict=None, compute_pars:dict=None):
+def generator_train_save(dirin_or_df="", dirout="",
+
+
+                         model_pars:dict=None,
+                         model_class = 'CTGAN',
+                         model_class_pars = None,
+
+                         compute_pars:dict=None,
+
+                         metrics_pars =None,
+
+
+                         n_sample=1000,
+                         cols = None,
+
+
+                         ):
     """ Data Generator Wrapper to train/save
     Docs::
 
+        root   = "ztmp/"
+        dirout = "ztmp/"
+
+        data  = sdv.demo.load_tabular_demo('student_placements')
+        colid = 'student_id'
+
+        rule_unique_employee_student_id = sdv.constraints.Unique(column_names=['student_id'])
+        constraints = [rule_unique_employee_student_id]
+
+
+        model_pars = {'model_class': 'CTGAN',
+                    'model_pars': {
+                          ## CTGAN
+                         'primary_key': colid,
+                         'epochs': 1,
+                         'anonymize_fields': {},
+                         'batch_size' :100,
+                         'generator_dim' : (256, 256, 256),
+                         'discriminator_dim' : (256, 256, 256),
+                         'constraints':constraints
+                                     },
+                    }
+
+        compute_pars = { 'compute_pars' : {},
+                         'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                       }
+
+        generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
+        generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
     """
     global model, session
 
-    if dirin is None:
-        print("Dataset path is empty")
-        exit()
-    
-    df = pd_read_file(dirin)
-    
-    model_pars   =   model_pars
-    compute_pars =   compute_pars
+
+    df = pd_read_file(dirin_or_df)
+
+
+    if model_pars  is None :
+        model_pars = {'model_class': model_class,
+                      'model_pars':  model_class_pars  }
+
+    if compute_pars  is None :
+        compute_pars = { 'compute_pars' : {}, 'metrics_pars' : metrics_pars   }
+
+
     data_pars    =   {}
+    data_pars['cols_model_type2'] = {'cols':list(df.columns) if cols is None else cols }
+    data_pars['gen_samp']         = {'Xtrain': df}
+    data_pars['eval']             = {'X': df, 'y': None}
+    data_pars['n_sample']         =  n_sample
 
-
-    data_pars['gen_samp'] =   {'Xtrain': df}
-    data_col = {'cols':list(df.columns)}
-    data_pars['cols_model_type2'] =    data_col
-    data_pars['eval'] =   {'X': df, 'y': None}
-    data_pars['n_sample'] =  100
 
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
@@ -564,15 +610,23 @@ def generator_train_save(dirin="", dirout="", model_pars:dict=None, compute_pars
     save(path= dirout)
 
 
+
 def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
 
 
+        root   = "ztmp/"
+        dirout = "ztmp/"
+
+        compute_pars = { 'compute_pars' : {},
+                         'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                       }
+        generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
+
     """
     global model, session
 
-    compute_pars =   compute_pars
 
 
     log('Load model..')
@@ -582,7 +636,7 @@ def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None
     Xnew = transform(Xpred=None, compute_pars=compute_pars)
 
     if dirout is not None :
-        pd_to_file(Xnew, show=1)
+        pd_to_file(Xnew, dirout, show=1)
     else :
         return Xnew
 
