@@ -472,7 +472,6 @@ def test6():
     unique_employee_student_id_constraint = Unique(column_names=['student_id'])
 
     constraints = [unique_employee_student_id_constraint]
-    eval_sample = 100
     pars = {
     'models' : {
         'model_class': 'CTGAN',
@@ -492,14 +491,10 @@ def test6():
     'compute_pars' : { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
                    },
-
-    'data_pars' : {
-	            'n_sample': eval_sample,
-				 }
 	}
 
-    generator_train_save(dirin = data, dirout=root, pars=pars)
-    generator_load_generate(dirmodel=root, pars=pars)
+    generator_train_save(dirin = data, dirout=root, model_pars=pars['models'], compute_pars=pars['compute_pars'])
+    generator_load_generate(dirmodel=root, compute_pars=pars['compute_pars'])
 
 
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
@@ -531,7 +526,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
 
 ###############################################################################################
 ############### Wrapper #######################################################################
-def generator_train_save(dirin="", dirout="", pars:dict=None):
+def generator_train_save(dirin="", dirout="", model_pars:dict=None, compute_pars:dict=None):
     """ Data Generator Wrapper to train/save
     Docs::
 
@@ -543,25 +538,19 @@ def generator_train_save(dirin="", dirout="", pars:dict=None):
     if dirin is None:
         print("Dataset path is empty")
         exit()
-
+    
     df = pd_read_file(dirin)
     
-    model_pars   =   pars['models']
-    compute_pars =   pars['compute_pars']
-    data_pars    =   pars['data_pars']
+    model_pars   =   model_pars
+    compute_pars =   compute_pars
+    data_pars    =   {}
 
-    if 'gen_samp' not in data_pars.keys():
-       data_pars['gen_samp'] =   {'Xtrain': df}
 
-    if 'cols_model_type2' not in data_pars.keys():
-       data_col = {'cols':list(df.columns)}
-       data_pars['cols_model_type2'] =    data_col
-
-    if 'eval' not in data_pars.keys():
-       data_pars['eval'] =   {'X': df, 'y': None}
-
-    if 'n_sample' not in data_pars.keys():
-       data_pars['n_sample'] =  100
+    data_pars['gen_samp'] =   {'Xtrain': df}
+    data_col = {'cols':list(df.columns)}
+    data_pars['cols_model_type2'] =    data_col
+    data_pars['eval'] =   {'X': df, 'y': None}
+    data_pars['n_sample'] =  100
 
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
@@ -575,7 +564,7 @@ def generator_train_save(dirin="", dirout="", pars:dict=None):
     save(path= dirout)
 
 
-def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
+def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
 
@@ -583,22 +572,19 @@ def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
     """
     global model, session
 
-    compute_pars =   pars['compute_pars']
-    data_pars    =   pars['data_pars']
-
+    compute_pars =   compute_pars
 
 
     log('Load model..')
     model, session = load_model(path= dirmodel)
     log(model)
 
-    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    Xnew = transform(Xpred=None, compute_pars=compute_pars)
 
     if dirout is not None :
         pd_to_file(Xnew, show=1)
     else :
         return Xnew
-
 
 
 
@@ -764,10 +750,10 @@ def predict(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
 def save(path=None, info=None):
     """function save.
     Doc::
-            
+
             Args:
-                path:   
-                info:   
+                path:
+                info:
             Returns:
                 
     """
