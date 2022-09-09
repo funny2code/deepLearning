@@ -9,7 +9,7 @@ Doc::
 
 
 """
-import importlib, os, yaml
+import importlib, os
 from pathlib import Path
 from typing import Union
 from box import Box
@@ -31,7 +31,6 @@ def test_all():
 
 
 def test_yamlschema():
-
    dircur = os.path.dirname( os.path.abspath(__file__) )
    cfg_dict = config_load(  "config.yaml")
    isok     = config_isvalid_yamlschema(cfg_dict,   "config_val.yaml")
@@ -66,32 +65,22 @@ def test4():
     assert isinstance(pydantic_model, BaseModel)
 
 
-def test_generate_files():
-    import tempfile
-    from pathlib import Path
-    dirtmp = Path( tempfile.gettempdir().replace("\\", "/") )
-    dirtmp = dirtmp / "test_util_config"
-    os.makedirs(dirtmp, exist_ok=True)
-
-    res= []
-
-    ss = """
-        string: ok
-        regex:  abcd
-        number: 6.7
-        integer: 3
-        boolean: True
-        list: [1,2,3]
-        enum: 'one'
-        map:
-        null:
-        date:
-        nest:
-            integer: 7
-            nest:
-                string: "ok"
+def os_get_dirtmp(subdir=None, return_path=False):
+    """ return dir temp for testing,...
 
     """
+    import tempfile
+    from pathlib import Path
+    dirtmp = tempfile.gettempdir().replace("\\", "/")
+    dirtmp = dirtmp + f"/{subdir}/" if subdir is not None else dirtmp
+    os.makedirs(dirtmp, exist_ok=True)
+    return Path(dirtmp) if return_path  else dirtmp
+
+
+def test_generate_files():
+    dirtmp = os_get_dirtmp('test_config')
+
+    res= []
 
     ss = """
 string: "hello"
@@ -119,29 +108,96 @@ nest:
 
 
 
+def test_create_file(dirout=None):
+    import tempfile
+    import yaml, json, toml
+
+    dir_cur = os_get_dirtmp() if dirout is None else dirout
+
+    ##### create file for test
+    config_test = {"data": "test", "details": {"version":"1.0", 'integer': 1, 'float': 1.0, 'boolean': True }}
+
+    flist = []
+
+    ##### create config.yaml
+    with open( dir_cur + "config.yaml", mode="w") as fp:
+        yaml.dump(config_test, fp, default_flow_style=False)
+        flist.append(dir_cur + "config.yaml")
+
+
+    #### create config.json
+    with open( dir_cur + "config.json", mode="w") as fp:
+        json.dump(config_test, fp,indent=3)
+        flist.append(dir_cur + "config.json")
+
+
+    #### create config.toml
+    with open( dir_cur + "config.toml", "w") as toml_file:
+        toml.dump(config_test, toml_file)
+        flist.append(dir_cur + "config.toml")
+
+    ### create  config.ini
+    data_ini="""[APP]
+            ENVIRONMENT = development
+            DEBUG = False
+
+            [DATABASE]
+            USERNAME = root
+            PASSWORD = p@ssw0rd
+    """
+    with open( dir_cur + "config.ini", "w") as fp:
+        fp.write(data_ini)
+        flist.append(dir_cur + "config.ini")
+
+
+    ### create  config.properties
+    properties="""db.user=mkyong
+db.password=password
+db.url=localhost"""
+    with open( dir_cur + "config.properties", "w") as fp:
+        fp.write(properties)
+        flist.append(dir_cur + "config.properties")
+
+    return flist
+
+
+def test1():
+    """
+    """
+    flist = test_create_file(dirout=None)
+    for xi in flist:
+        cfg_dict = config_load(xi )
+
+        if len(cfg_dict) > 2 :
+            print( str(xi) +", " + str(cfg_dict) +'', "\n")
+        else :
+            raise Exception( f" dict is empty {xi}"  )
+
+    ###
+
 
 
 
 #########################################################################################################
+
 def config_load(
         config_path:    str  = None,
         to_dataclass:   bool = True,
         config_field_name :  str  = None,
-
         environ_path_default: str = "config_path_default",
         path_default:   str  = None,
         config_default: dict = None,
         save_default:   bool = False,
-    
+
         verbose=0
 ) -> dict:
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties INTO a dict
     Doc::
-       
-       to_dataclass : True, can access the dict as dot   mydict.field 
+
+       to_dataclass : True, can access the dict as dot   mydict.field
        verbose :  2 print the config
        config_field_name:  Extract sub-field name from the dict
-    
+
        -- Priority steps
         1) load config_path
         2) If not, load in USER/.myconfig/.config.yaml
@@ -155,42 +211,42 @@ def config_load(
             save_default:   save default config on disk
         Returns: dict config
     """
-    import json,  pathlib
-    
+    import pathlib
+
 
     #########Default value setup ###########################################
     if path_default is None:
-        config_path_default = os.environ.get(environ_path_default, str(pathlib.Path.home()) + "/.myconfig/config.yaml"  ) 
+        config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
         path_default = os.path.dirname(config_path_default)
 
     if config_default is None:
-        config_default = {"field1": "", "field2": {}}
+        config_default = {"field1": "test", "field2": {"version":"1.0"}}
 
     #########Config path setup #############################################
     if config_path is None or config_path == "default":
-        log(f"Config: Using {config_path_default}")
+        print(f"Config: Using {config_path_default}")
         config_path = config_path_default
     else:
         config_path = pathlib.Path(config_path)
 
     ######### Load Config ##################################################
     try:
-        log("Config: Loading ", config_path)
+        print("Config: Loading ", config_path)
         if config_path.suffix in {".yaml", ".yml"}  :
             import yaml
             #Load the yaml config file
             with open(config_path, "r") as yamlfile:
                 config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)
-                 
-            if isinstance(config_data, dict ):            
+
+            if isinstance(config_data, dict ):
                 cfg = config_data
-            else :    
+            else :
                 dd = {}
                 for x in config_data :
                     for key,val in x.items():
                        dd[key] = val
                 cfg = dd
-            
+
         elif config_path.suffix == ".json":
             import json
             cfg = json.loads(config_path.read_text())
@@ -208,29 +264,31 @@ def config_load(
 
         if config_field_name in cfg :
             cfg = cfg[config_field_name]
-            
-            
+
+
         if verbose >=2 :
             print(cfg)
-            
+
         if to_dataclass:  ### myconfig.val  , myconfig.val2
-            from box import Box 
-            return Box(cfg)        
+            from box import Box
+            return Box(cfg)
         return cfg
 
     except Exception as e:
-        log(f"Config: Cannot read file {config_path}", e)
+        print(f"Config: Cannot read file {config_path}", e)
 
     ######################################################################
-    log("Config: Using default config")
-    log(config_default)
+    print("Config: Using default config")
+    print(config_default)
     if save_default:
-        log(f"Config: Writing config in {config_path_default}")
+        print(f"Config: Writing config in {config_path_default}")
         os.makedirs(path_default, exist_ok=True)
         with open(config_path_default, mode="w") as fp:
-            yaml.dump(config_default, fp)
+            yaml.dump(config_default, fp, default_flow_style=False)
 
     return config_default
+
+
 
 
 

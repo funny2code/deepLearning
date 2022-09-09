@@ -304,8 +304,8 @@ def test4():
     #### Run Search
     res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
-###############################################################################################################
 
+###############################################################################################################
 class myProblem2:
     def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,):
         """  Define the problem and cost calculation using formulae_str
