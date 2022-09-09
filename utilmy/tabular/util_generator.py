@@ -399,7 +399,6 @@ def test4(n_sample = 1000):
     log(model)
 
 
-
 def test5(n_sample = 1000):
     """function test5.
     """
@@ -461,6 +460,41 @@ def test5(n_sample = 1000):
     model, session = load_model(path= root + "/model_dir/")
     log(model)
 
+def test6():
+    root  = "ztmp/"
+    from sdv.demo import load_tabular_demo
+    from sdv.constraints import Unique
+
+    data = load_tabular_demo('student_placements')
+    #####################################################################
+    colid = 'student_id'
+
+    unique_employee_student_id_constraint = Unique(column_names=['student_id'])
+
+    constraints = [unique_employee_student_id_constraint]
+    pars = {
+    'models' : {
+        'model_class': 'CTGAN',
+                  'model_pars': {
+                      ## CTGAN
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'anonymize_fields': {},
+                     'batch_size' :100,
+                     'generator_dim' : (256, 256, 256),
+                     'discriminator_dim' : (256, 256, 256),
+                     'constraints':constraints
+                                 },
+               
+                },
+
+    'compute_pars' : { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                   },
+	}
+
+    generator_train_save(dirin = data, dirout=root, model_pars=pars['models'], compute_pars=pars['compute_pars'])
+    generator_load_generate(dirmodel=root, compute_pars=pars['compute_pars'])
 
 
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
@@ -492,7 +526,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
 
 ###############################################################################################
 ############### Wrapper #######################################################################
-def generator_train_save(dirin="", dirout="", pars:dict=None):
+def generator_train_save(dirin="", dirout="", model_pars:dict=None, compute_pars:dict=None):
     """ Data Generator Wrapper to train/save
     Docs::
 
@@ -500,29 +534,37 @@ def generator_train_save(dirin="", dirout="", pars:dict=None):
 
     """
     global model, session
-    p = Box(pars)
 
-    model_pars   = {}
-    data_pars    = {}
-    compute_pars = {}
+    if dirin is None:
+        print("Dataset path is empty")
+        exit()
+    
+    df = pd_read_file(dirin)
+    
+    model_pars   =   model_pars
+    compute_pars =   compute_pars
+    data_pars    =   {}
 
+
+    data_pars['gen_samp'] =   {'Xtrain': df}
+    data_col = {'cols':list(df.columns)}
+    data_pars['cols_model_type2'] =    data_col
+    data_pars['eval'] =   {'X': df, 'y': None}
+    data_pars['n_sample'] =  100
 
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
     log('Train model')
-    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
-
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None, task_type='gen_samp')
 
     log('Evaluate model..')
     log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
-
 
     log('Save model..')
     save(path= dirout)
 
 
-
-def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
+def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
 
@@ -530,23 +572,19 @@ def generator_load_generate(dirmodel="", pars:dict=None, dirout:str=None):
     """
     global model, session
 
-
-    p = Box(pars)
-    data_pars = {}
-    compute_pars = {}
+    compute_pars =   compute_pars
 
 
     log('Load model..')
     model, session = load_model(path= dirmodel)
     log(model)
 
-    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    Xnew = transform(Xpred=None, compute_pars=compute_pars)
 
     if dirout is not None :
         pd_to_file(Xnew, show=1)
     else :
         return Xnew
-
 
 
 
@@ -712,10 +750,10 @@ def predict(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
 def save(path=None, info=None):
     """function save.
     Doc::
-            
+
             Args:
-                path:   
-                info:   
+                path:
+                info:
             Returns:
                 
     """
@@ -875,6 +913,7 @@ if __name__ == "__main__":
     #profiler.stop() ; print(profiler.output_text(unicode=True, color=True))
     test4()
     test5()
+    test6()
 
     
     
