@@ -944,7 +944,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             # loaded_choromosome = b[problem_id]["best_chromosome"]
             # loaded_fitness     = b[problem_id]["best_fitness"]
             return Box(ddict)
-        
+
        elif mode =='save':
             if path is not None:
                 os_makedirs(path)
@@ -1026,12 +1026,16 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 #loaded_choromosome = w_old[problem_id]["best_chromosome"]
                 #loaded_fitness     = w_old[problem_id]["best_fitness"]
 
+                loaded_weights     = w_old.best_weights
+                loaded_choromosome = w_old.best_chromosome
+                loaded_fitness     = w_old.best_fitness
+
                 dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
                                     kernels=kernels_new,
                                     seed = random.randint(0,234213213))
 
-                dCGP.set_weights( w_old.loaded_weights)
-                dCGP.set(         w_old.loaded_choromosome)
+                dCGP.set_weights( loaded_weights)
+                dCGP.set(         loaded_choromosome)
                 print("Old saved result is:")
                 print(dCGP.simplify(in_sym = symbols,subs_weights=True))
 
@@ -1083,10 +1087,10 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
 
         #If the result is previous result then only save new results
         if load_old_weights is not None  and check_file!=0 :
-            if best_fitness > w_old.loaded_fitness:
-                best_fitness    = w_old.loaded_fitness
-                best_weights    = w_old.loaded_weights
-                best_chromosome = w_old.loaded_choromosome
+            if best_fitness > loaded_fitness:
+                best_fitness    = loaded_fitness
+                best_weights    = loaded_weights
+                best_chromosome = loaded_choromosome
 
 
         best_weights = list(np.array(best_weights))
