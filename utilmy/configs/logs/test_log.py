@@ -48,7 +48,7 @@ def test2():
     from util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
-    util_log.logger_setup('config_log.yaml', 'default')
+    util_log.logger_setup('config_loguru.yaml', 'default')
 
     log3("debug2")
     log2("debug")
@@ -131,7 +131,7 @@ def test_server():
     from util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
-    util_log.logger_setup('config_log.yaml', 'server_socket')
+    util_log.logger_setup('config_loguru.yaml', 'server_socket')
 
     log3("debug2")
     log2("debug")

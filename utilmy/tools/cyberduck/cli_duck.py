@@ -5,6 +5,49 @@ Docs::
 
 
 
+##### Using pydrive   ################################################################################
+Please copy the Google json auth in same folder than scripot
+
+https://console.cloud.google.com/apis/dashboard
+
+client_secrets.json
+
+
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+gauth = GoogleAuth()
+gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
+drive = GoogleDrive(gauth)
+
+
+####
+Your browser has been opened to visit:
+
+    https://accounts.google.com/o/oauth2/auth?client_id=132171571023-bcjjt9cohln6l0gejs9rh1vfe6bq7rrn.apps.googleusercontent.com&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2F&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&access_type=offline&response_type=code
+
+
+
+
+fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+for file in fileList:
+  print('Title: %s, ID: %s' % (file['title'], file['id']))
+  # Get the folder ID that you want
+  break
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 https://tianhaozhou.medium.com/fill-the-gap-of-credential-management-in-github-actions-a313e230e58b
 
 

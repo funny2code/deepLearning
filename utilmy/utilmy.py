@@ -62,6 +62,10 @@ def log2(*s, **kw):
 def log3(*s, **kw):
     if verbose >=3 : print(*s, flush=True, **kw)
 
+def loge(*s):
+    print(*s,  flush=True)
+
+
 def help():
     suffix = "\n\n\n###############################"
     ss     = help_create(modulename='utilmy', prefixs=None) + suffix
@@ -208,6 +212,18 @@ def help_create(modulename='utilmy.nnumpy', prefixs=None):
 
 
 ###################################################################################################
+def os_get_dirtmp(subdir=None, return_path=False):
+    """ return dir temp for testing,...
+
+    """
+    import tempfile
+    from pathlib import Path
+    dirtmp = tempfile.gettempdir().replace("\\", "/")
+    dirtmp = dirtmp + f"/{subdir}/" if subdir is not None else dirtmp
+    os.makedirs(dirtmp, exist_ok=True)
+    return Path(dirtmp) if return_path  else dirtmp
+
+
 def os_module_name(filepath=None, mode='importname'):
     try:
         dir1 = os.path.abspath(filepath).replace("\\","/")
@@ -217,7 +233,6 @@ def os_module_name(filepath=None, mode='importname'):
             return dir1
     except :
         return direpo()
-
 
 
 def get_loggers(mode='print', n_loggers=2, verbose_level=None):

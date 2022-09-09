@@ -9,32 +9,55 @@ Doc::
 
 
 """
-import importlib, os, yaml
+import importlib, os
 from pathlib import Path
 from typing import Union
 from box import Box
 
 
-
 #########################################################################################################
-def log(*s):
-    print(*s, flush=True)
-
-
-def loge(*s):
-    print(*s, flush=True)
+from utilmy.utilmy import (log, log2, loge,  to_file, os_get_dirtmp)
 
 
 
 #########################################################################################################
 #########################################################################################################
-def test_yamlschema():
-    cfg_dict = config_load("config.yaml")
-    isok     = config_isvalid_yamlschema(cfg_dict, "config_val.yaml")
-    log(isok)
+def test_all():
+    test1()
+    test2()
+    test3()
 
 
-def test_pydanticgenrator():
+
+#################################################
+def test1():
+    """
+    """
+    flist = test_create_file(dirout=None)
+    for xi in flist:
+        ddict = config_load(xi )
+
+        if len(ddict) > 2 :
+            log( str(xi) +", " + str(ddict) +'', "\n")
+        else :
+            raise Exception( f" dict is empty {xi}"  )
+
+
+def test2():
+   dircur = os.path.dirname( os.path.abspath(__file__) )
+   cfg_dict = config_load(  "config.yaml")
+   isok     = config_isvalid_yamlschema(cfg_dict,   "config_val.yaml")
+   log(isok)
+
+
+
+def test3():
+    """  test_pydanticgenrator(
+    Docs::
+
+        https://github.com/koxudaxi/datamodel-code-generator
+        pip install datamodel-code-generator
+    """
     from datamodel_code_generator import InputFileType
     # generating from json file
     pydantic_model_generator(
@@ -56,25 +79,75 @@ def test4():
     assert isinstance(pydantic_model, BaseModel)
 
 
-def test_example():
-    ss = """
-        string: ok
-        regex:  abcd
-        number: 6.7
-        integer: 3
-        boolean: True
-        list: [1,2,3]
-        enum: 'one'
-        map:
-        null:
-        date:
-        nest:
-            integer: 7
-            nest:
-                string: "ok"
+
+###############################################################################################
+def os_get_dirtmp(subdir=None, return_path=False):
+    """ Return dir temp for testing,...
 
     """
-    return ss
+    import tempfile
+    from pathlib import Path
+    dirtmp = tempfile.gettempdir().replace("\\", "/")
+    dirtmp = dirtmp + f"/{subdir}/" if subdir is not None else dirtmp
+    os.makedirs(dirtmp, exist_ok=True)
+    return Path(dirtmp) if return_path  else dirtmp
+
+
+
+def test_create_file(dirout=None):
+    import tempfile
+    import yaml, json, toml
+
+    dir_cur = os_get_dirtmp() if dirout is None else dirout
+
+    ##### create file for test
+    ddict = {"data": "test", "details": {"version":"1.0", 'integer': 1, 'float': 1.0, 'boolean': True }}
+
+    flist = []
+
+    ##### create config.yaml
+    with open( dir_cur + "config.yaml", mode="w") as fp:
+        ddict['list1'] = [1,2]
+        yaml.dump(ddict, fp, default_flow_style=False)
+        flist.append(dir_cur + "config.yaml")
+
+
+    #### create config.json
+    with open( dir_cur + "config.json", mode="w") as fp:
+        json.dump(ddict, fp,indent=3)
+        flist.append(dir_cur + "config.json")
+
+
+    #### create config.toml
+    with open( dir_cur + "config.toml", "w") as toml_file:
+        toml.dump(ddict, toml_file)
+        flist.append(dir_cur + "config.toml")
+
+    ### create  config.ini
+    data_ini="""[APP]
+            ENVIRONMENT = development
+            DEBUG = False
+
+            [DATABASE]
+            USERNAME = root
+            PASSWORD = p@ssw0rd
+    """
+    with open( dir_cur + "config.ini", "w") as fp:
+        fp.write(data_ini)
+        flist.append(dir_cur + "config.ini")
+
+
+    ### create  config.properties
+    properties="""db.user=mkyong
+db.password=password
+db.url=localhost"""
+    with open( dir_cur + "config.properties", "w") as fp:
+        fp.write(properties)
+        flist.append(dir_cur + "config.properties")
+
+    return flist
+
+
 
 
 #########################################################################################################
@@ -82,21 +155,20 @@ def config_load(
         config_path:    str  = None,
         to_dataclass:   bool = True,
         config_field_name :  str  = None,
-
         environ_path_default: str = "config_path_default",
         path_default:   str  = None,
         config_default: dict = None,
         save_default:   bool = False,
-    
+
         verbose=0
 ) -> dict:
     """ Universal config loader: .yaml, .conf, .toml, .json, .ini .properties INTO a dict
     Doc::
-       
-       to_dataclass : True, can access the dict as dot   mydict.field 
+
+       to_dataclass : True, can access the dict as dot   mydict.field
        verbose :  2 print the config
        config_field_name:  Extract sub-field name from the dict
-    
+
        -- Priority steps
         1) load config_path
         2) If not, load in USER/.myconfig/.config.yaml
@@ -110,16 +182,15 @@ def config_load(
             save_default:   save default config on disk
         Returns: dict config
     """
-    import json,  pathlib
-    
+    import pathlib
 
     #########Default value setup ###########################################
     if path_default is None:
-        config_path_default = os.environ.get(environ_path_default, str(pathlib.Path.home()) + "/.myconfig/config.yaml"  ) 
+        config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
         path_default = os.path.dirname(config_path_default)
 
     if config_default is None:
-        config_default = {"field1": "", "field2": {}}
+        config_default = {"field1": "test", "field2": {"version":"1.0"}}
 
     #########Config path setup #############################################
     if config_path is None or config_path == "default":
@@ -136,16 +207,16 @@ def config_load(
             #Load the yaml config file
             with open(config_path, "r") as yamlfile:
                 config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)
-                 
-            if isinstance(config_data, dict ):            
+
+            if isinstance(config_data, dict ):
                 cfg = config_data
-            else :    
+            else :
                 dd = {}
                 for x in config_data :
                     for key,val in x.items():
                        dd[key] = val
                 cfg = dd
-            
+
         elif config_path.suffix == ".json":
             import json
             cfg = json.loads(config_path.read_text())
@@ -163,14 +234,14 @@ def config_load(
 
         if config_field_name in cfg :
             cfg = cfg[config_field_name]
-            
-            
+
+
         if verbose >=2 :
-            print(cfg)
-            
+            log(cfg)
+
         if to_dataclass:  ### myconfig.val  , myconfig.val2
-            from box import Box 
-            return Box(cfg)        
+            from box import Box
+            return Box(cfg)
         return cfg
 
     except Exception as e:
@@ -183,9 +254,11 @@ def config_load(
         log(f"Config: Writing config in {config_path_default}")
         os.makedirs(path_default, exist_ok=True)
         with open(config_path_default, mode="w") as fp:
-            yaml.dump(config_default, fp)
+            yaml.dump(config_default, fp, default_flow_style=False)
 
     return config_default
+
+
 
 
 
@@ -220,11 +293,12 @@ def config_isvalid_yamlschema(config_dict: dict, schema_path: str = 'config_val.
 def config_isvalid_pydantic(config_dict: dict,
                             pydanctic_schema: str = 'config_py.yaml', silent: bool = False) -> bool:
     """Validate using a pydantic files
-    Args:
-        config_dict:
-        pydanctic_schema:
-        silent:
-    Returns: True/False
+    Docs::
+
+            config_dict:
+            pydanctic_schema:
+            silent:
+        Returns: True/False
     """
     import yamale
     try:
@@ -261,16 +335,18 @@ def pydantic_model_generator(
         output_file: Path,
         **kwargs,
 ) -> None:
-    """
-    Args:
-        input_file:
-        input_file_type:
-        output_file:
-        **kwargs:
+    """ Generate Pydantic template
+    Docs::
 
-    Returns:
-    # https://github.com/koxudaxi/datamodel-code-generator
-    # pip install datamodel-code-generator
+        Args:
+            input_file:
+            input_file_type:
+            output_file:
+            **kwargs:
+
+        Returns:
+        # https://github.com/koxudaxi/datamodel-code-generator
+        # pip install datamodel-code-generator
 
     """
     from datamodel_code_generator import Error, generate
@@ -290,7 +366,6 @@ def pydantic_model_generator(
 
 
 #########################################################################################################
-
 def global_verbosity(cur_path, path_relative="/../../config.json",
                    default=5, key='verbosity',):
     """ Get global verbosity
@@ -352,10 +427,10 @@ def zzz_config_load_validate(config_path: str, schema_path: str, silent: bool = 
         return convert_yaml_to_box(config_path)
 
     except yamale.YamaleError as e:
-        print("Validation failed!\n")
+        log("Validation failed!\n")
         for result in e.results:
-            print(f"Error validating data '{result.data}' with '{result.schema}'\n\t")
+            log(f"Error validating data '{result.data}' with '{result.schema}'\n\t")
             for error in result.errors:
-                print(f"\t{error}")
+                log(f"\t{error}")
         if not silent:
             raise e
