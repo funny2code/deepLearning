@@ -1,0 +1,39 @@
+language: python
+python:
+  - "3.6"      
+install:
+  - python setup.py install
+  - pip install codecov
+  - pip install pytest-cov
+
+jobs:
+  include:
+    # Deploy Documentation
+    - stage: Docs
+      python: "3.6"
+      if: type != cron
+      # Use previously defined before_install
+
+      install:
+        - pip install -r docs/requirements.txt
+
+      script:
+        - make clean -C docs/ html
+      after_success: # Nothing to do
+
+      # Deploy built docs : a) when PR is merged to master, b) when a tag is built
+      deploy:
+        - provider: pages
+          edge: true
+          token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
+          keep_history: false
+          local_dir: docs/build/html
+          on:
+            branch: master
+        - provider: pages
+          edge: true
+          token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
+          keep_history: false
+          local_dir: docs/build/html
+          on:
+            tags: true
