@@ -228,7 +228,7 @@ tzlocal==4.2
 umap-learn==0.5.3
 urllib3==1.26.12
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@5f3884cf899e2656fd45e6b533d0243bcc36bc25#egg=utilmy
+-e git+https://github.com/arita37/myutil@6ba94fbbcb7e00b0cf06ba4b1b89f38ee5b2c74f#egg=utilmy
 visions==0.7.5
 wasabi==0.10.1
 wcwidth==0.2.5

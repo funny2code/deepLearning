@@ -3262,6 +3262,9 @@ zplot(ax, area = 0.95, two_tailed = True, align_right = False)
 utilmy/recsys/bandits/__init__.py
 
 
+utilmy/recsys/bandits/aabandit_design.py
+
+
 utilmy/recsys/bandits/banditml/__init__.py
 
 
@@ -3332,6 +3335,73 @@ utilmy/recsys/bandits/eval_replay/bandits/utils.py
 score(history, df, t, batch_size, recs)
 summarise()
 
+
+
+utilmy/recsys/bandits/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/examples/bandit.py
+
+
+utilmy/recsys/bandits/genrl/examples/deep.py
+-------------------------functions----------------------
+get_logger(log)
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/deep_cb.py
+-------------------------functions----------------------
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+get_logger(log)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl_q_learning.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/run_cb.py
+-------------------------functions----------------------
+plot_multi_runs(args, multi_results, title)
+run(args, agent, bandit, plot = True)
+run_experiment(args)
+run_multi_algos(args)
+run_multi_bandits(args)
+run_single_algos_on_bandit(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/sample.py
+
+
+utilmy/recsys/bandits/genrl/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/setup.py
+-------------------------functions----------------------
+get_requires(path = REQUIRE_PATH)
+read(*parts)
+
+
+
+utilmy/recsys/bandits/genrl/tests/__init__.py
 
 
 utilmy/recsys/bandits/offline_replayer_eval_amzon.py
