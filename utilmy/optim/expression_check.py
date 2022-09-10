@@ -946,10 +946,6 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             with open( path, 'rb') as handle:
                 ddict = pickle.load(handle)
 
-            # print("Weights are",b["best_weights"])
-            # loaded_weights     = b[problem_id]["best_weights"]
-            # loaded_choromosome = b[problem_id]["best_chromosome"]
-            # loaded_fitness     = b[problem_id]["best_fitness"]
             return Box(ddict)
 
        elif mode =='save':

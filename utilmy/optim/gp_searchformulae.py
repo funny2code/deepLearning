@@ -1352,15 +1352,14 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
        if mode=='load':
             with open( path, 'rb') as handle:
                 ddict = pickle.load(handle)
+            ddict = Box(ddict)
+            return ddict.best_weights, ddict.best_chromosome, ddict.best_fitness
 
-            return Box(ddict)
-
-       elif mode =='save':
-            if path is not None:
+       elif mode =='save' and path is not None:
                 os_makedirs(path)
                 with open(  path , 'wb') as handle:
                     pickle.dump(ddict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                llog('Saved', path )
+                log('Saved', path )
 
 
     def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, verbose=False):
@@ -1424,29 +1423,25 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
 
         kernels_new = kernel_set(operator_list)()
         newtonParams = {'steps': 100,}
-        check_file = 1
+        isweight_ok = False
         if load_old_weights is not None:
             try:
-                check_file = 1
-                w_old = load_save(path=load_old_weights, mode='load')
+                log("Data loaded")
+                loaded_weights, loaded_chromosome, loaded_fitness= load_save(path=load_old_weights, mode='load')
 
-                loaded_weights     = w_old.best_weights
-                loaded_choromosome = w_old.best_chromosome
-                loaded_fitness     = w_old.best_fitness
-                print("Data loaded")
+                ###  Check if works
                 dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
-                                    kernels=kernels_new,
-                                    seed = random.randint(0,234213213))
-
+                                    kernels=kernels_new,  seed = random.randint(0,234213213))
                 dCGP.set_weights(loaded_weights)
-                dCGP.set(loaded_choromosome)
-                print("Old saved result is:")
-                print(dCGP.simplify(in_sym = symbols,subs_weights=True))
+                dCGP.set(loaded_chromosome)
+                log("Old saved result is:")
+                log(dCGP.simplify(in_sym = symbols,subs_weights=True))
+                isweight_ok = True
 
             except Exception as e:
-                print(e)
-                print("Error in loading old data, so creating expressions from scratch")
-                check_file = 0
+                log(e)
+                log("Error in loading old data, so creating expressions from scratch")
+                isweight_ok = False
 
         #  n_exp experiments to accumulate statistic
         result = []
@@ -1456,16 +1451,15 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
 
         #Check results for new iterations
         for i in range(n_exp):
-            if ((load_old_weights is not None) & (i<=int(frac_old*n_exp)) & (check_file!=0)):
-                dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
                                 kernels=kernels_new,
                                 seed = random.randint(0,234213213))
+
+            ### Previous weights
+            if ((load_old_weights is not None) & (i<=int(frac_old*n_exp)) & (isweight_ok)):
                 dCGP.set_weights(loaded_weights)
-                dCGP.set(loaded_choromosome)
-            else:
-                dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
-                                kernels=kernels_new,
-                                seed = random.randint(0,234213213))
+                dCGP.set(        loaded_chromosome)
+
 
             ### Constant setup
             for j in range(dCGP.get_n(), dCGP.get_n() + dCGP.get_rows() * dCGP.get_cols()):
@@ -1488,19 +1482,17 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
             elif verbose >=1 : print_file(i, kstep, best_fitness,form2)
 
 
-        #Load the weight and chormosome to obtain the results
 
-        #If the result is previous result then only save new results
-        if load_old_weights is not None  and check_file!=0 :
+        ##### Save Best: If the result is previous result then only save new results
+        if load_old_weights is not None  and isweight_ok :
             if best_fitness > loaded_fitness:
                 best_fitness    = loaded_fitness
                 best_weights    = loaded_weights
-                best_chromosome = loaded_choromosome
+                best_chromosome = loaded_chromosome
 
-
-        best_weights = list(np.array(best_weights))
-        ddict = {"best_chromosome":best_chromosome,"best_weights":best_weights,"best_fitness":best_fitness}
+        ddict = {"best_chromosome":best_chromosome,"best_weights":list(np.array(best_weights)),"best_fitness":best_fitness}
         load_save(path=save_new_weights, mode='save', ddict=ddict)
+
 
 
         ##### Store thre results in a dataframe
