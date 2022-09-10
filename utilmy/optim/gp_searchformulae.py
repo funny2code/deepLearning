@@ -1110,7 +1110,6 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
 
 #########################################################################################
-
 def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, ):
     """ Search Optimal Formulae with constants using Newton Formulae
     Helps to obtain expression of equations with constants terms
@@ -1161,7 +1160,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
                 
                 #### Run Search
-                res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
+                res = gp.search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
 
 
@@ -1209,7 +1208,6 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     import pyaudi 
     import pickle 
     from utilmy.utilmy import log as llog, log2
-    ######### Problem definition and Cost calculation
 
 
     #### Formulae GP Search params   #################
