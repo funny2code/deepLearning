@@ -587,44 +587,6 @@ class Index0(object):
         return True   
 
 
-###################################################################################################
-###### Test #######################################################################################
-def test_all():
-   """function test_all
-   Args:
-   Returns:
-       
-   """
-   import utilmy as m
-
-   ###################################################################################
-   log("\n##### git_repo_root  ")
-   log(m.git_repo_root())
-   assert not m.git_repo_root() == None, "err git repo"
-
-
-   log("\n##### Doc generator: help_create  ")
-   for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
-      log("\n#############", name,"\n", m.help_create(name))
-      log("\n#############", name,"\n", m.help_info(name))
-
-
-   ###################################################################################
-   log("\n##### global_verbosity  ")
-   print('verbosity', m.global_verbosity(__file__, "config.json", 40,))
-   print('verbosity', m.global_verbosity('../', "config.json", 40,))
-   print('verbosity', m.global_verbosity(__file__))
-
-   verbosity = 40
-   gverbosity = m.global_verbosity(__file__)
-   assert gverbosity == 5, "incorrect default verbosity"
-   gverbosity =m.global_verbosity(__file__, "config.json", 40,)
-   assert gverbosity == verbosity, "incorrect verbosity "
-
-   ################################################################################################
-
-
-
 
 ###################################################################################################
 ###### Pandas #####################################################################################
@@ -946,6 +908,53 @@ def load(to_file=""):
   import pickle
   dd =   pickle.load(open(to_file, mode="rb"))
   return dd
+
+
+
+
+
+
+###################################################################################################
+###### Test #######################################################################################
+def test_all():
+   """function test_all
+   """
+   test1()
+
+
+def test1():
+   import utilmy as m
+
+   ###################################################################################
+   log("\n##### git_repo_root  ")
+   log(m.git_repo_root())
+   assert not m.git_repo_root() == None, "err git repo"
+
+
+   log("\n##### Doc generator: help_create  ")
+   for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+      log("\n#############", name,"\n", m.help_create(name))
+      log("\n#############", name,"\n", m.help_info(name))
+
+
+   ###################################################################################
+   log("\n##### global_verbosity  ")
+   print('verbosity', m.global_verbosity(__file__, "config.json", 40,))
+   print('verbosity', m.global_verbosity('../', "config.json", 40,))
+   print('verbosity', m.global_verbosity(__file__))
+
+   verbosity = 40
+   gverbosity = m.global_verbosity(__file__)
+   assert gverbosity == 5, "incorrect default verbosity"
+   gverbosity =m.global_verbosity(__file__, "config.json", 40,)
+   assert gverbosity == verbosity, "incorrect verbosity "
+
+   ################################################################################################
+
+
+
+
+
 
 
 
