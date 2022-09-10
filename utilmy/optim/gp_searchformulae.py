@@ -76,7 +76,7 @@ from numpy import (sin, cos, log, exp, sqrt )
 
 
 ####################################################################################################
-from utilmy.utilmy import log as llog, log2
+from utilmy.utilmy import log as llog, log2 ### Conflict with numpy.log
 
 def help():
     from utilmy import help_create
@@ -133,10 +133,14 @@ def test_pars_values():
     p.n_exp         = 1
     p.max_step      = 100
     p.offsprings    = 10
+    p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+    #### Re-use old problem setting
+    p.load_old_weights  = "ztmp/dcpy_weight_1662799885.pickle" # path
+    p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
 
 
     return myproblem1, p
-
 
 def test1():
     """Test search_formulae_dcgpy_v1
@@ -158,10 +162,16 @@ def test1():
     p.max_step      = 1000  ## per expriemnet
     p.offsprings    = 20
 
+    p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+    #### Re-use old problem setting
+    p.load_old_weights  = "ztmp/dcpy_weight_1662799885.pickle" # path
+    p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
+
+
 
     #### Run Search
     res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
-
 
 def test2():
     """Test search_formulae_dcgpy_v1
@@ -180,8 +190,14 @@ def test2():
     p.symbols       = ["x0","x1"]
 
     p.max_step      = 5
-    p.n_exp         = 1
+    p.n_exp         = 5
     p.offsprings    = 10
+
+    p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+    #### Re-use old problem setting
+    p.load_old_weights  = "ztmp/dcpy_weight_1662800328.pickle" # path
+    p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
 
 
     #### Run Search
@@ -213,7 +229,6 @@ def test3():
 
     #### Run Search
     res = search_formulae_dcgpy_Xy_regression_v1(myproblem, pars_dict=p, verbose=1)
-
 
 def test4():
     """Test search_formulae_dcgpy_newton with 3 variables
@@ -249,6 +264,36 @@ def test4():
     #### Run Search
     res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
+def test5():
+    """Test search_formulae_dcgpy_v1 with myProblem_ranking
+    """
+    myproblem       = myProblem_ranking()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 2  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "div", "diff"]
+    p.symbols       = ["x0","x1"]
+
+    p.n_exp         = 10
+    p.max_step      = 5000  ## per expriemnet
+    p.offsprings    = 200
+
+    p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+    #### Re-use old problem setting
+    p.load_old_weights  = "ztmp/dcpy_weight_1662801438.pickle" # path
+    p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
+
+
+
+    #### Run Search
+    res = search_formulae_dcgpy_v1(myproblem, pars_dict=p, verbose=1)
 
 def test6():
     """Test the myProblem4 class,
@@ -327,7 +372,6 @@ def test1_parallel2():
                   npool=npool)
 
 
-
 def test1_parallel_island():
     """Test search_formulae_dcgpy_v1_parallel_island
     """
@@ -341,6 +385,7 @@ def test1_parallel_island():
                        ,n_island=2
                        ,dir_log="./logs/"
                       )
+
 
 
 
@@ -648,8 +693,8 @@ class myProblem_ranking:
             correlm = self.get_correlm(formulae_str=expr(symbols)[0])
         except:
             correlm = 1.0
-
-        return(correlm)
+        check = 3
+        return correlm,check
 
 
     def get_correlm(self, formulae_str:str):
@@ -811,6 +856,11 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
                 p.n_exp         = 4
                 p.max_step      = 1000  ## per expriemnet
                 p.offsprings    = 20
+                p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+                #### Re-use old problem setting
+                p.load_old_weights  = "ztmp/dcpy_weight_1662799885.pickle" # path
+                p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
 
 
                 --- Run Search
@@ -858,6 +908,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     from pyaudi import gdual_vdouble as gdual
     import random, pandas as pd
     from box import Box
+    import pickle
     ######### Problem definition and Cost calculation
 
 
@@ -883,14 +934,12 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     pop_size        = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
 
     seed            = p.get('seed', 23)
+    load_old_weights    = p.get('load_old_weights', None)
+    frac_old            = p.get('frac_old',0.1)
+    save_new_weights    = p.get('save_new_weights', None)
 
 
     ### search DCGPY Algo
-
-
-
-
-
 
     from utilmy import os_makedirs
     os_makedirs(log_file)
@@ -900,7 +949,19 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         with open(log_file, mode='a') as fp :
             fp.write(ss +"\n")
 
+    def load_save(path, mode='load', ddict:dict=None):
 
+       if mode=='load':
+            with open( path, 'rb') as handle:
+                ddict = pickle.load(handle)
+            ddict = Box(ddict)
+            return ddict.best_weights, ddict.best_chromosome, ddict.best_fitness
+
+       elif mode =='save' and path is not None:
+                os_makedirs(path)
+                with open(  path , 'wb') as handle:
+                    pickle.dump(ddict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                llog('Saved', path )
 
     def run_experiment(max_step, offsprings, dCGP, symbols, verbose=False):
         """Run the Experiment in max_step
@@ -925,7 +986,7 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
                     dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
                     fitness[i], check = problem.get_cost(dCGP, symbols)
                 chromosome[i] = dCGP.get()
-            #print(fitness)
+
             for i in range(offsprings):
                 if fitness[i] <= best_fitness:
                     if (fitness[i] != best_fitness) and verbose:
@@ -933,11 +994,12 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
                         print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify(symbols))
                     best_chromosome = chromosome[i]
                     best_fitness = fitness[i]
+                    best_weights = [0] 
             if best_fitness < 1e-3:
                 break
 
         dCGP.set(best_chromosome)
-        return kstep, dCGP, best_fitness
+        return kstep, dCGP, best_fitness,best_weights,best_chromosome
 
 
     def search():
@@ -952,16 +1014,47 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         """
 
         kernels_new = kernel_set(operator_list)()
+        isweight_ok = False
+
+
+        if load_old_weights is not None:
+            try:
+                llog("Data loaded")
+                loaded_weights, loaded_chromosome, loaded_fitness= load_save(path=load_old_weights, mode='load')
+
+                ###  Check if works
+                dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                                    kernels=kernels_new,  seed = random.randint(0,234213213))
+                dCGP.set(loaded_chromosome)
+                llog("Old saved result is:")
+                llog(dCGP.simplify(in_sym = symbols))
+                isweight_ok = True
+
+            except Exception as e:
+                llog(e)
+                llog("Error in loading old data, so creating expressions from scratch")
+                isweight_ok = False
 
         #  n_exp experiments to accumulate statistic
         result = []
         if verbose>0:
             print_file( 'id_exp', 'niter', 'cost', 'formulae', )
+
+
+        #Check results for new iterations
         for i in range(n_exp):
             dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
-                              kernels=kernels_new,n_eph = n_constant,
-                              seed = random.randint(0,234213213))
-            kstep, dCGP, best_fitness = run_experiment(max_step=max_step, offsprings=10, dCGP=dCGP, symbols=symbols, verbose=False)
+                                kernels=kernels_new,
+                                seed = random.randint(0,234213213))
+
+            ### Previous weights
+            if ((load_old_weights is not None) & (i<=int(frac_old*n_exp)) & (isweight_ok)):
+                dCGP.set(        loaded_chromosome)
+
+            ### Get results
+            kstep, dCGP, best_fitness,best_weights,best_chromosome = run_experiment(max_step=max_step, offsprings=10,
+                                                                                    dCGP=dCGP, symbols=symbols,
+                                                                                    verbose=False)
 
 
             form2 = dCGP.simplify(symbols)[0]
@@ -972,6 +1065,16 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
                 print_file(i, kstep,  form1,  form2)
 
             elif verbose >=1 : print_file(i, kstep, form2, best_fitness)
+
+        ##### Save Best: If the result is previous result then only save new results
+        if load_old_weights is not None  and isweight_ok :
+            if best_fitness > loaded_fitness:
+                best_fitness    = loaded_fitness
+                best_weights    = loaded_weights
+                best_chromosome = loaded_chromosome
+
+        ddict = {"best_chromosome":best_chromosome,"best_weights":list(np.array(best_weights)),"best_fitness":best_fitness}
+        load_save(path=save_new_weights, mode='save', ddict=ddict)
 
 
         result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',   ])
@@ -1109,7 +1212,7 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
 
 
-#########################################################################################
+################################NEWTON VERSION#############################################
 def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, ):
     """ Search Optimal Formulae with constants using Newton Formulae
     Helps to obtain expression of equations with constants terms
@@ -1207,7 +1310,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     from box import Box
     import pyaudi 
     import pickle 
-    from utilmy.utilmy import log as llog, log2
+    from utilmy.utilmy import log as llog, log2 ### Conflicting with numpy.log
 
 
     #### Formulae GP Search params   #################
@@ -1357,7 +1460,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                 os_makedirs(path)
                 with open(  path , 'wb') as handle:
                     pickle.dump(ddict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-                log('Saved', path )
+                llog('Saved', path )
 
 
     def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, verbose=False):
@@ -1424,7 +1527,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
         isweight_ok = False
         if load_old_weights is not None:
             try:
-                log("Data loaded")
+                llog("Data loaded")
                 loaded_weights, loaded_chromosome, loaded_fitness= load_save(path=load_old_weights, mode='load')
 
                 ###  Check if works
@@ -1432,13 +1535,13 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
                                     kernels=kernels_new,  seed = random.randint(0,234213213))
                 dCGP.set_weights(loaded_weights)
                 dCGP.set(loaded_chromosome)
-                log("Old saved result is:")
-                log(dCGP.simplify(in_sym = symbols,subs_weights=True))
+                llog("Old saved result is:")
+                llog(dCGP.simplify(in_sym = symbols,subs_weights=True))
                 isweight_ok = True
 
             except Exception as e:
-                log(e)
-                log("Error in loading old data, so creating expressions from scratch")
+                llog(e)
+                llog("Error in loading old data, so creating expressions from scratch")
                 isweight_ok = False
 
         #  n_exp experiments to accumulate statistic
@@ -1790,17 +1893,6 @@ def search_formulae_operon_v1(myproblem=None, pars_dict:dict=None, verbose=False
     best = gp.BestModel()
     model_string = Operon.InfixFormatter.Format(best.Genotype, ds, 6)
     print(f'\n{model_string}')
-
-
-
-
-
-
-
-
-
-
-
 
 
 
