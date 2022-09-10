@@ -64,7 +64,7 @@ Docs::
 
 
 """
-import os, random, math, numpy as np, warnings, copy
+import os, random, math, numpy as np, warnings, copy, time
 from box import Box
 from random import random
 np.seterr(all='ignore') 
@@ -213,6 +213,41 @@ def test3():
 
     #### Run Search
     res = search_formulae_dcgpy_Xy_regression_v1(myproblem, pars_dict=p, verbose=1)
+
+
+def test4():
+    """Test search_formulae_dcgpy_newton with 3 variables
+
+
+    """
+    
+
+    myproblem       = myProblem6()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 3  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "div", "diff"]
+    p.symbols       = ["x0","x1","x2"]
+
+    p.n_exp         = 10
+    p.max_step      = 500  ## per expriemnet
+    p.offsprings    = 20
+    p.n_eph         = 1
+
+    p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+    #### Re-use old problem setting
+    p.load_old_weights  = "ztmp/dcpy_weight_1662743807.pickle" # path
+    p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
+
+    #### Run Search
+    res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
 
 
 def test6():
@@ -517,6 +552,57 @@ class myProblem5:
         X = np.reshape(X, (100,1))
         Y = np.reshape(Y, (100,1))
         return X,Y
+
+
+class myProblem6:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+        """
+        from pyaudi import gdual_vdouble as gdual
+
+        # x = np.linspace(1,3,10)
+
+        # ### Formulae Space
+        # x = gdual(x)
+        # yt =  x**5 - np.pi*x**3 + 2*x
+        x0 = np.random.random(1000)
+        x1 = np.random.random(1000)
+        x2 = np.random.random(1000)
+        x0 = gdual(x0)
+        x1 = gdual(x1)
+        x2 = gdual(x2)
+        yt =  3*x0*x1 - np.pi*x1 + np.pi**2 *x2
+
+        self.x  = [x0,x1,x2]
+        self.yt = yt
+
+    def get_data_symbolic(self):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        #Insert your data here
+        return self.x
+
+
+    def get_cost_symbolic(self,dCGP):
+        #y    = dCGP([self.x])[0]
+        y    = dCGP([self.x[0],self.x[1],self.x[2]])[0]
+        cost = (y-self.yt)**2
+        return cost
 
 
 
@@ -1024,6 +1110,400 @@ def search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref
 
 
 #########################################################################################
+def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, ):
+    """ Search Optimal Formulae with constants using Newton Formulae
+    Helps to obtain expression of equations with constants terms
+    Docs::
+
+        -- Install
+          conda create -n dcgp  python==3.8.1
+          source activate dcgp
+          conda install   -y  -c conda-forge dcgp-python  scipy
+          pip install python-box fire utilmy sympy
+
+          python -c "from dcgpy import test; test.run_test_suite(); import pygmo; pygmo.mp_island.shutdown_pool(); pygmo.mp_bfe.shutdown_pool()"
+
+
+          https://darioizzo.github.io/dcgp/installation.html#python
+
+          https://darioizzo.github.io/dcgp/notebooks/real_world1.html
+
+
+        -- Usagge
+            import utilmy.optim.gp_formulaesearch as gp
+            from numpy import (sin, cos, log, exp, sqrt )
+
+            -- 1) Define Problem Class with get_cost methods
+                myproblem       = myProblem6()
+
+                p                       = Box({})
+                p.log_file              = 'trace.log'
+                p.print_after           = 5
+                p.print_best            = True
+
+
+                p.nvars_in               = 3  ### nb of variables
+                p.nvars_out              = 1
+                p.operators              = ["sum", "mul", "div", "diff"]
+                p.symbols                = ["x0","x1","x2"]
+
+                p.n_exp                  = 20     ## Number of experiments
+                p.max_step               = 5000  ## per expriment
+                p.offsprings             = 20
+                p.n_eph                  = 1
+                p.load_old_weights       = False
+                p.frac_old               = 0.05   ##Fraction of chromosomes to be used from old learnings
+                p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
+
+                #### Re-use old problem setting
+                p.load_old_weights  = "ztmp/dcpy_weight_1662743807.pickle" # path to saved pickle file
+                p.frac_old      = 0.05 ###Fraction of chromosomes to be used from old learnings
+                
+                #### Run Search
+                res = gp.search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
+
+
+
+            --  Custom Problem
+
+                    class myProblem6:
+                        def __init__(self):
+                            from pyaudi import gdual_vdouble as gdual
+                            ##### Formulae Space
+                            x0 = np.random.random(1000)
+                            x1 = np.random.random(1000)
+                            x2 = np.random.random(1000)
+                            x0 = gdual(x0)
+                            x1 = gdual(x1)
+                            x2 = gdual(x2)
+                            yt =  3*x0*x1 - np.pi*x1 + 2*x2
+                            self.x  = [x0,x1,x2] ##Add all x0,x1,.. values in the self.x
+                            self.yt = yt
+
+                        def get_data_symbolic(self):
+
+                            #Insert your data here
+                            return self.x
+
+                        def get_cost_symbolic(self,dCGP):
+                            #y    = dCGP([self.x])[0]
+                            y    = dCGP([self.x[0],self.x[1],self.x[2]])[0]
+                            cost = (y-self.yt)**2
+                            return cost
+
+
+        -- Add constraints in the functional space
+
+            https://darioizzo.github.io/dcgp/notebooks/phenotype_correction_ex.html
+            https://darioizzo.github.io/dcgp/notebooks/finding_prime_integrals.html
+            http://darioizzo.github.io/dcgp/notebooks/weighted_symbolic_regression.html
+            
+
+    """
+    from pyaudi import gdual_vdouble as gdual
+    from dcgpy import expression_weighted_gdual_vdouble as expression
+    from dcgpy import kernel_set_gdual_vdouble as kernel_set
+    import random, pandas as pd
+    from box import Box
+    import pyaudi 
+    import pickle 
+    from utilmy.utilmy import log as llog, log2
+
+
+    #### Formulae GP Search params   #################
+    p = Box(pars_dict)
+
+    ### Problem
+    nvars_in      = p.nvars_in  ### nb of variables
+    nvars_out     = p.nvars_out
+    operator_list = p.get('operators', ["sum", "mul", "div", "diff","sin","cos"])
+    symbols       = p.get('symbols',['x0','x1'])
+    n_constant = 0 ## nb of constant to determine
+
+    ### Log
+    log_file      = p.get('log_file', 'log.log') # 'trace.py'
+
+
+    ### search
+    n_exp               = p.get('n_exp', 1)
+    max_step            = p.get('max_step', 10)
+
+    offsprings          = p.get('offsprings',10)
+    pop_size            = p.get("pop_size", 5) #20  ## Population (Suggested: 10~20)
+
+    seed                = p.get('seed', 23)
+    n_eph               = p.get('n_eph',0)
+    load_old_weights    = p.get('load_old_weights', None)
+    frac_old            = p.get('frac_old',0.1)
+    save_new_weights    = p.get('save_new_weights', None)
+
+
+    ### search DCGPY Algo    ########################################################
+    from utilmy import os_makedirs
+    os_makedirs(log_file)
+    def print_file(*s,):
+        ss = "\t".join([str(x) for x in  s])
+        if verbose>0 : print(ss, flush=True)
+        with open(log_file, mode='a') as fp :
+            fp.write(ss +"\n")
+    
+    def collapse_vectorized_coefficient(x, N):
+        if len(x) == N:
+            return sum(x)
+        return x[0] * N
+
+    def newton(ex, f, xsym, p):
+        n = ex.get_n()
+        r = ex.get_rows()
+        c = ex.get_cols()
+        a = ex.get_arity()[0]
+        v = np.zeros(r * c * a)
+        # random initialization of weights
+        w=[]
+        for i in range(r*c):
+            for j in range(a):
+                w.append(gdual([np.random.normal(0,1)]))
+        ex.set_weights(w)
+        wi = ex.get_weights()
+
+        # get active weights
+        an = ex.get_active_nodes()
+        is_active = [False] * (n + r * c) # bool vector of active nodes
+        for k in range(len(an)):
+            is_active[an[k]] = True
+        aw=[] # list of active weights
+        for k in range(len(an)):
+            if an[k] >= n:
+                for l in range(a):
+                    aw.append([an[k], l]) # pair node/ingoing connection
+        if len(aw)<2:
+            return
+
+        for i in range(p['steps']):
+            w = ex.get_weights() # initial weights
+
+            # random choice of the weights w.r.t. which we'll minimize the error
+            num_vars = np.random.randint(2, min(3, len(aw)) + 1) # number of weights (2 or 3)
+            awidx = np.random.choice(len(aw), num_vars, replace = False) # indexes of chosen weights
+            ss = [] # symbols
+            for j in range(len(awidx)):
+                ss.append("w" + str(aw[awidx[j]][0]) + "_" + str(aw[awidx[j]][1]))
+                idx = (aw[awidx[j]][0] - n) * a + aw[awidx[j]][1]
+                w[idx] = gdual(w[idx].constant_cf, ss[j], 2)
+            ex.set_weights(w)
+
+            # compute the error
+            E = f(ex)
+            Ei = sum(E.constant_cf)
+
+            # get gradient and Hessian
+            dw = np.zeros(len(ss))
+            H = np.zeros((len(ss),len(ss)))
+            for k in range(len(ss)):
+                #print(len(xsym1[0].constant_cf))
+                try:
+                    #len(xsym[0].constant_cf)) gives error when n_eph = 1
+                    dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym[0].constant_cf))
+                    H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym[0].constant_cf))
+                    for l in range(k):
+                        H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym[0].constant_cf))
+                        H[l][k] = H[k][l]
+                except:
+                    dw[k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1}), len(xsym.constant_cf))
+                    H[k][k] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 2}), len(xsym.constant_cf))
+                    for l in range(k):
+                        H[k][l] = collapse_vectorized_coefficient(E.get_derivative({"d"+ss[k]: 1, "d"+ss[l]: 1}), len(xsym.constant_cf))
+                        H[l][k] = H[k][l]
+
+            det = np.linalg.det(H)
+            if det == 0: # if H is singular
+                continue
+
+            # compute the updates
+            updates = - np.linalg.inv(H) @ dw
+
+            # update the weights
+            for k in range(len(updates)):
+                idx = (aw[awidx[k]][0] - n) * a + aw[awidx[k]][1]
+                ex.set_weight(aw[awidx[k]][0], aw[awidx[k]][1], w[idx] + updates[k])
+            wfe = ex.get_weights()
+            for j in range(len(awidx)):
+                idx = (aw[awidx[j]][0] - n) * a + aw[awidx[j]][1]
+                wfe[idx] = gdual(wfe[idx].constant_cf)
+            ex.set_weights(wfe)
+
+            # if error increased restore the initial weights
+            Ef = sum(f(ex).constant_cf)
+            if not Ef < Ei:
+                for j in range(len(awidx)):
+                    idx = (aw[awidx[j]][0] - n) * a + aw[awidx[j]][1]
+                    w[idx] = gdual(w[idx].constant_cf)
+                ex.set_weights(w)
+
+    # Quadratic error of a dCGP expression. The error is computed over the input points xin (of type gdual, order 0 as
+    # we are not interested in expanding the program w.r.t. these). The target values are contained in yt (of type gdual,
+    # order 0 as we are not interested in expanding the program w.r.t. these)
+
+
+    def load_save(path, mode='load', ddict:dict=None):
+
+       if mode=='load':
+            with open( path, 'rb') as handle:
+                ddict = pickle.load(handle)
+            ddict = Box(ddict)
+            return ddict.best_weights, ddict.best_chromosome, ddict.best_fitness
+
+       elif mode =='save' and path is not None:
+                os_makedirs(path)
+                with open(  path , 'wb') as handle:
+                    pickle.dump(ddict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                log('Saved', path )
+
+
+    def run_experiment(problem, max_step, offsprings, dCGP, symbols,newtonParams, verbose=False):
+        """Run the Experiment in max_step
+        Docs::
+            max_step        : Maximum Generations
+            offsprings      : Number of offsprings
+            dCGP            : dCGP object : hold the formulae
+            symbols   : list of variable as string
+
+
+        """
+        chromosome      = [1] * offsprings
+        fitness         = [1] * offsprings
+        weights         = [1] * offsprings
+        best_chromosome = dCGP.get()
+        best_fitness    = 1e10
+        best_weights = dCGP.get_weights()
+        best_fitness = sum(problem.get_cost_symbolic(dCGP).constant_cf)
+
+        for kstep in range(max_step):
+            for i in range(offsprings):
+                dCGP.set(best_chromosome)
+                dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
+
+
+                xsym  = problem.get_data_symbolic()     ####
+                newton(dCGP, problem.get_cost_symbolic, xsym=xsym, p= newtonParams)
+
+
+                costsym = problem.get_cost_symbolic(dCGP)
+                fitness[i]    = sum(costsym.constant_cf)
+                chromosome[i] = dCGP.get()
+                weights[i]    = dCGP.get_weights()
+
+            for i in range(offsprings):
+                if fitness[i] <= best_fitness:
+                    if (fitness[i] != best_fitness) and verbose:
+                        dCGP.set(chromosome[i])
+                        print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify())
+                    best_chromosome = chromosome[i]
+                    best_fitness = fitness[i]
+                    best_weights = weights[i]
+            if best_fitness < 1e-3:
+                break
+
+        dCGP.set(best_chromosome)
+        return kstep, dCGP, best_fitness,best_weights,best_chromosome
+
+
+    def search():
+        """ Search for best possible solution using Genetic Algorithm
+        Docs::
+
+            classdcgpy.expression_double(inputs, outputs, rows, cols, levels_back, arity = 2, kernels, n_eph = 0, seed = randint)
+            A CGP expression
+            https://darioizzo.github.io/dcgp/docs/python/expression.html
+
+
+        """
+
+        kernels_new = kernel_set(operator_list)()
+        newtonParams = {'steps': 100,}
+        isweight_ok = False
+        if load_old_weights is not None:
+            try:
+                log("Data loaded")
+                loaded_weights, loaded_chromosome, loaded_fitness= load_save(path=load_old_weights, mode='load')
+
+                ###  Check if works
+                dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                                    kernels=kernels_new,  seed = random.randint(0,234213213))
+                dCGP.set_weights(loaded_weights)
+                dCGP.set(loaded_chromosome)
+                log("Old saved result is:")
+                log(dCGP.simplify(in_sym = symbols,subs_weights=True))
+                isweight_ok = True
+
+            except Exception as e:
+                log(e)
+                log("Error in loading old data, so creating expressions from scratch")
+                isweight_ok = False
+
+        #  n_exp experiments to accumulate statistic
+        result = []
+        if verbose>0:
+            print_file( 'id_exp', 'niter', 'weights', 'formulae', )
+
+
+        #Check results for new iterations
+        for i in range(n_exp):
+            dCGP = expression(inputs=nvars_in, outputs=nvars_out, rows=1, cols=15, levels_back=16, arity=2,
+                                kernels=kernels_new,
+                                seed = random.randint(0,234213213))
+
+            ### Previous weights
+            if ((load_old_weights is not None) & (i<=int(frac_old*n_exp)) & (isweight_ok)):
+                dCGP.set_weights(loaded_weights)
+                dCGP.set(        loaded_chromosome)
+
+
+            ### Constant setup
+            for j in range(dCGP.get_n(), dCGP.get_n() + dCGP.get_rows() * dCGP.get_cols()):
+                for k in range(dCGP.get_arity()[0]):
+                    dCGP.set_weight(j, k, gdual([np.random.normal(0,1)]))
+
+
+            ### Get results
+            kstep, dCGP, best_fitness,best_weights,best_chromosome = run_experiment(problem=problem,max_step=max_step, offsprings=10,
+                                                                                    dCGP=dCGP, symbols=symbols,
+                                                                                    newtonParams= newtonParams, verbose=False)
+
+            form2 = dCGP.simplify(symbols,True)
+            result.append((i, kstep , best_fitness, form2))
+
+            if  verbose >=2 :
+                form1 = dCGP(symbols,True)
+                print_file(i, kstep,  form1,  form2)
+
+            elif verbose >=1 : print_file(i, kstep, best_fitness,form2)
+
+
+
+        ##### Save Best: If the result is previous result then only save new results
+        if load_old_weights is not None  and isweight_ok :
+            if best_fitness > loaded_fitness:
+                best_fitness    = loaded_fitness
+                best_weights    = loaded_weights
+                best_chromosome = loaded_chromosome
+
+        ddict = {"best_chromosome":best_chromosome,"best_weights":list(np.array(best_weights)),"best_fitness":best_fitness}
+        load_save(path=save_new_weights, mode='save', ddict=ddict)
+
+
+
+        ##### Store thre results in a dataframe
+        result = pd.DataFrame(result,  columns=['id_exp', 'niter', 'cost', 'formulae',])
+        result = result.sort_values('cost', ascending=1)
+        return result
+
+    res = search()
+    #llog('Best\n',)
+    #llog( res.iloc[:2,:] )
+    return res
+
+
 #########################Symbolic Regression Version####################################
 def search_formulae_dcgpy_Xy_regression_v1(problem=None, pars_dict:dict=None, verbose=1, ):
     """ Search Optimal Formulae

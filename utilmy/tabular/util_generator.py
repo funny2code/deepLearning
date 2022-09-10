@@ -378,25 +378,9 @@ def test4(n_sample = 1000):
     data_pars['gen_samp'] =   {'Xtrain': data}
     data_pars['eval']     =   {'X': data, 'y': None}
 
-    model = Model(model_pars=models['CTGAN'], data_pars=None, compute_pars=None)
+    test_helper(model['CTGAN'], data_pars, compute_pars)
 
-    log('\n\nTraining the model')
-    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
-    print()
 
-    log('Predict data..')
-    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
-    log(f'Xnew', Xnew)
-
-    log('Evaluating the model..')
-    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
-
-    log('Saving model..')
-    save(path= root + '/model_dir/')
-
-    log('Load model..')
-    model, session = load_model(path= root + "/model_dir/")
-    log(model)
 
 
 def test5(n_sample = 1000):
@@ -440,25 +424,8 @@ def test5(n_sample = 1000):
 
 
     #####################################################################
-    model = Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
+    test_helper(model['PAR'], data_pars, compute_pars)
 
-    log('\n\nTraining the model')
-    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
-    print()
-
-    log('Predict data..')
-    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
-    log(f'Xnew', Xnew)
-
-    log('Evaluating the model..')
-    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
-
-    log('Saving model..')
-    save(path= root + '/model_dir/')
-
-    log('Load model..')
-    model, session = load_model(path= root + "/model_dir/")
-    log(model)
 
 
 def test6():
