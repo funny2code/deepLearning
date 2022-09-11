@@ -147,12 +147,9 @@ if LOG_TYPE == 'logging':
             def log(*argv):
             my_logger.info(",".join([str(x) for x in argv]))
 
-       """
-
-        if logger_name is None:
-            logger = logging.getLogger()  # Gets the root logger
-        else:
-            logger = logging.getLogger(logger_name)
+        """        
+        # Gets the root logger or local one
+        logger = logging.getLogger(logger_name)  if logger_name is noy None  else logging.getLogger() 
 
         logger.setLevel(logging_level)  # better to have too much log than not enough
 
@@ -160,9 +157,7 @@ if LOG_TYPE == 'logging':
             logger.addHandler(logger_handler_console(formatter))
 
         if log_file is not None:
-            logger.addHandler(
-                logger_handler_file(formatter=formatter, log_file_used=log_file, isrotate=isrotate)
-            )
+            logger.addHandler(logger_handler_file(formatter=formatter, log_file_used=log_file, isrotate=isrotate))
 
         # with this pattern, it's rarely necessary to propagate the error up to parent
         logger.propagate = False
@@ -190,11 +185,10 @@ if LOG_TYPE == 'logging':
             return fh
 
 
-    logger = logger_setup()
-
-
     #######################################################################################
     ##### Alias ###########################################################################
+    logger = logger_setup()
+
     def log(*s):
         """function log.
         """
