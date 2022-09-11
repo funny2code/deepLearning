@@ -5,6 +5,7 @@
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, random
+from tkinter import E
 from box import Box
 
 
@@ -548,7 +549,8 @@ class Index0(object):
         Returns:
            
         """
-        self.findex = findex        
+        self.findex = findex
+        print(os.path.dirname(self.findex))
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
         if not os.path.isfile(self.findex):
             with open(self.findex, mode='a') as fp:
@@ -581,48 +583,11 @@ class Index0(object):
         if len(flist) < 1 : return True
         ss = ""
         for fi in flist :
-          ss = ss + fi + "\n"                
+          ss = ss + str(fi) + "\n"        
+        # print(ss)        
         with open(self.findex, mode='a') as fp:
             fp.write(ss )
         return True   
-
-
-###################################################################################################
-###### Test #######################################################################################
-def test_all():
-   """function test_all
-   Args:
-   Returns:
-       
-   """
-   import utilmy as m
-
-   ###################################################################################
-   log("\n##### git_repo_root  ")
-   log(m.git_repo_root())
-   assert not m.git_repo_root() == None, "err git repo"
-
-
-   log("\n##### Doc generator: help_create  ")
-   for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
-      log("\n#############", name,"\n", m.help_create(name))
-      log("\n#############", name,"\n", m.help_info(name))
-
-
-   ###################################################################################
-   log("\n##### global_verbosity  ")
-   print('verbosity', m.global_verbosity(__file__, "config.json", 40,))
-   print('verbosity', m.global_verbosity('../', "config.json", 40,))
-   print('verbosity', m.global_verbosity(__file__))
-
-   verbosity = 40
-   gverbosity = m.global_verbosity(__file__)
-   assert gverbosity == 5, "incorrect default verbosity"
-   gverbosity =m.global_verbosity(__file__, "config.json", 40,)
-   assert gverbosity == verbosity, "incorrect verbosity "
-
-   ################################################################################################
-
 
 
 
@@ -800,17 +765,22 @@ def git_repo_root():
 
 
 def git_current_hash(mode='full'):
-   """function git_current_hash
-   Args:
-       mode:   
-   Returns:
-       
-   """
-   import subprocess
-   # label = subprocess.check_output(["git", "describe", "--always"]).strip();
-   label = subprocess.check_output([ 'git', 'rev-parse', 'HEAD' ]).strip();
-   label = label.decode('utf-8')
-   return label
+    """function git_current_hash
+    Args:
+        mode:   
+    Returns:
+        
+    """
+    import subprocess
+    label = None
+    try:
+        # label = subprocess.check_output(["git", "describe", "--always"]).strip();
+        label = subprocess.check_output([ 'git', 'rev-parse', 'HEAD' ]).strip()
+        label = label.decode('utf-8')
+    except Exception as e:
+        print('Error get git hash')
+        label=  None
+    return label
 
 
 
@@ -952,6 +922,97 @@ def load(to_file=""):
 
 
 
+###################################################################################################
+###### Test #######################################################################################
+def test_all():
+    """function test_all
+    """
+    test1()
+    test2()
+    test3()
+
+def test1():
+    import utilmy as m
+
+    ###################################################################################
+    log("\n##### git_repo_root  ")
+    log(m.git_repo_root())
+    assert not m.git_repo_root() == None, "err git repo"
+
+    log("\n##### git_current_hash  ")
+    print(m.git_current_hash())
+    assert not m.git_current_hash() == None, "err git hash"
+
+    log("\n##### Doc generator: help_create  ")
+    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+        log("\n#############", name,"\n", m.help_create(name))
+        log("\n#############", name,"\n", m.help_info(name))
+
+
+    ###################################################################################
+    log("\n##### global_verbosity  ")
+    print('verbosity', m.global_verbosity(__file__, "config.json", 40,))
+    print('verbosity', m.global_verbosity('../', "config.json", 40,))
+    print('verbosity', m.global_verbosity(__file__))
+
+    verbosity = 40
+    gverbosity = m.global_verbosity(__file__)
+    assert gverbosity == 5, "incorrect default verbosity"
+    gverbosity =m.global_verbosity(__file__, "config.json", 40,)
+    assert gverbosity == verbosity, "incorrect verbosity "
+
+    ################################################################################################
+
+
+def test2():
+    import os
+    import time
+
+    import utilmy as m
+
+    print('############# Start test Index0')
+    file_name = f"{os.path.dirname(os.path.abspath(__file__))}/test_file_{int(time.time())}.txt"
+    index = m.Index0(file_name)
+
+    # 2 save some data
+    data = [
+        "testestest",
+        2,
+        'for ii in rnage zz',
+        '#comment',
+    ]
+    output = [
+        'testestest',
+        'for ii in rnage zz',
+    ]
+    index.save(data)
+
+    assert index.read() == output, 'FAILED, -> get data wrong'
+
+
+
+
+
+def test3():
+    import os
+    import time
+
+    import utilmy as m
+
+    print('############# Start test Session')
+    folder_name = f"{os.path.dirname(os.path.abspath(__file__))}/session"
+
+    session = m.Session(folder_name)
+    print(session)
+
+    # save session
+    glob = {'test': 'qwe rty yui'}
+    res = session.save(name='session1', glob=glob)
+
+    glob2 = {'test': 'nothing here'}
+    res = session.load(name='session1', glob=glob2)
+    
+    assert glob2 == glob, 'FAILED, -> session error'
 
 
 

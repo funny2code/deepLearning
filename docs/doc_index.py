@@ -2869,6 +2869,7 @@ test1_parallel_island()
 test2()
 test3()
 test4()
+test5()
 test6()
 test7()
 test_all()
@@ -3262,6 +3263,9 @@ zplot(ax, area = 0.95, two_tailed = True, align_right = False)
 utilmy/recsys/bandits/__init__.py
 
 
+utilmy/recsys/bandits/aabandit_design.py
+
+
 utilmy/recsys/bandits/banditml/__init__.py
 
 
@@ -3332,6 +3336,73 @@ utilmy/recsys/bandits/eval_replay/bandits/utils.py
 score(history, df, t, batch_size, recs)
 summarise()
 
+
+
+utilmy/recsys/bandits/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/examples/bandit.py
+
+
+utilmy/recsys/bandits/genrl/examples/deep.py
+-------------------------functions----------------------
+get_logger(log)
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/deep_cb.py
+-------------------------functions----------------------
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+get_logger(log)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl_q_learning.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/run_cb.py
+-------------------------functions----------------------
+plot_multi_runs(args, multi_results, title)
+run(args, agent, bandit, plot = True)
+run_experiment(args)
+run_multi_algos(args)
+run_multi_bandits(args)
+run_single_algos_on_bandit(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/sample.py
+
+
+utilmy/recsys/bandits/genrl/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/setup.py
+-------------------------functions----------------------
+get_requires(path = REQUIRE_PATH)
+read(*parts)
+
+
+
+utilmy/recsys/bandits/genrl/tests/__init__.py
 
 
 utilmy/recsys/bandits/offline_replayer_eval_amzon.py
@@ -5174,8 +5245,8 @@ test_imodels()
 
 utilmy/tabular/util_generator.py
 -------------------------functions----------------------
-evaluate(data_pars = None, compute_pars = None, out_pars = None, **kw)
-fit(data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, task_type  =  "train", **kw)
+evaluate(data_pars = None, compute_pars:dict = None, out_pars: dict = None, **kw)
+fit(data_pars: dict = None, compute_pars: dict = None, task_type  =  "train", **kw)
 generator_load_generate(dirmodel = "", compute_pars:dict = None, dirout:str = None)
 generator_train_save(dirin_or_df = "", dirout = "", model_pars:dict = None, model_class  =  'CTGAN', model_class_pars  =  None, compute_pars:dict = None, metrics_pars  = None, n_sample = 1000, cols  =  None, )
 get_dataset(data_pars = None, task_type = "train", **kw)
@@ -5184,7 +5255,7 @@ get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split = False)
 init(*kw, **kwargs)
 load_info(path = "")
 load_model(path = "")
-predict(Xpred = None, data_pars = {}, compute_pars = {}, out_pars = {}, **kw)
+predict(Xpred = None, data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
 reset()
 save(path = None, info = None)
 test()
@@ -5192,8 +5263,9 @@ test2(n_sample  =  1000)
 test4(n_sample  =  1000)
 test5(n_sample  =  1000)
 test6()
-test_helper(model_pars:dict, data_pars:dict, compute_pars:dict)
-transform(Xpred = None, data_pars = {}, compute_pars = {}, out_pars = {}, **kw)
+test7()
+test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type  =  "train")
+transform(Xpred = None, data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
 zz_pd_augmentation_sdv(df, col = None, pars = {})
 zz_pd_covariate_shift_adjustment()
 zz_pd_sample_imblearn(df = None, col = None, pars = None)
@@ -6215,6 +6287,7 @@ save(dd, to_file = "", verbose = False)
 sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
+test1()
 test_all()
 test_load_function_uri()
 to_file(txt, fpath, mode = 'a')

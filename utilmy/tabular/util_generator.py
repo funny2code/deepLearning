@@ -82,7 +82,7 @@ Docs::
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
 from box import Box
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs, pd_read_file, pd_to_file
+from utilmy import pd_read_file, pd_to_file
 from utilmy import log, log2, log3
 verbosity= 5
 
@@ -378,7 +378,7 @@ def test4(n_sample = 1000):
     data_pars['gen_samp'] =   {'Xtrain': data}
     data_pars['eval']     =   {'X': data, 'y': None}
 
-    test_helper(model['CTGAN'], data_pars, compute_pars)
+    test_helper(models['CTGAN'], data_pars, compute_pars, task_type = "gen_samp")
 
 
 
@@ -424,11 +424,13 @@ def test5(n_sample = 1000):
 
 
     #####################################################################
-    test_helper(model['PAR'], data_pars, compute_pars)
+    test_helper(models['PAR'], data_pars, compute_pars, task_type = "gen_samp")
 
 
 
 def test6():
+    """function test6.
+    """
     import sdv
 
     #####################################################################
@@ -463,7 +465,51 @@ def test6():
     generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
-def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
+def test7():
+    """function test7
+    Doc:: Generating synthetic samples of tabular Custom DataSet
+    """
+
+    #####################################################################
+    root   = "ztmp/"
+    dirout = "ztmp/"
+
+    import wget
+    import csv
+
+    fname = os.path.join(root,"mlb_players.csv")
+
+    if os.path.exists(fname) == False:
+       ###Downloading tabular dataset
+       wget.download("https://people.sc.fsu.edu/~jburkardt/data/csv/mlb_players.csv",out = root+"mlb_players.csv")
+    
+    assert(os.path.exists(fname) == True)
+    data = pd_read_file(fname, quoting=csv.QUOTE_NONE, encoding='utf-8')
+    #####################################################################
+    colid = '"Name"'   #Column Name 
+
+    model_pars = {'model_class': 'CTGAN',
+                'model_pars': {
+                      ## CTGAN
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'anonymize_fields': {},
+                     'batch_size' :100,
+                     'generator_dim' : (256, 256, 256),
+                     'discriminator_dim' : (256, 256, 256),
+                                 },
+                }
+
+    compute_pars = { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                   }
+
+    generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
+    generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
+
+
+
+def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = "train"):
     """function RUN the model test_helper.
     Doc::                
     """
@@ -472,7 +518,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict):
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
     log('Training the model')
-    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None)
+    fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None, task_type = task_type)
 
     log('Predict data..')
     Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
@@ -623,19 +669,6 @@ class Model(object):
                     Returns:
                        
         """
-        # CONSTANTS
-        SDV_MODELS      = ['TVAE', 'CTGAN', 'PAR'] # The Synthetic Data Vault Models
-        IMBLEARN_MODELS = ['SMOTE', 'SMOTEENN', 'SMOTETomek', 'NearMiss']
-        MODEL_LIST      = {'TVAE'           : TVAE,
-                            'CTGAN'         : CTGAN,
-                            'PAR'           : PAR,
-                            'SMOTE'         : SMOTE,
-                            'SMOTEENN'      : SMOTEENN,
-                            'SMOTETomek'    : SMOTETomek,
-                            'NearMiss'      : NearMiss
-                            }
-
-
         self.model_pars, self.compute_pars, self.data_pars = model_pars, compute_pars, data_pars
 
         if model_pars is None:
@@ -649,7 +682,7 @@ class Model(object):
             log2(model_class, self.model)
 
 
-def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, task_type = "train",**kw):
+def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw):
     """            
     """
     global model, session
@@ -665,7 +698,7 @@ def fit(data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, task
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
+def evaluate(data_pars=None, compute_pars:dict=None, out_pars: dict=None, **kw):
     """ Return metrics of the model when fitted.
     """
     global model, session
@@ -687,7 +720,7 @@ def evaluate(data_pars=None, compute_pars=None, out_pars=None, **kw):
         return None
 
 
-def transform(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
+def transform(Xpred=None, data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw):
     """ Geenrate Xtrain  ----> Xtrain_new.
     Doc::
             
@@ -723,13 +756,6 @@ def transform(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
 
 
     if name in SDV_MODELS :
-        # if Xpred is None:
-        #     Xpred_tuple = get_dataset(data_pars, task_type="predict")
-
-        # cols_type         = data_pars['cols_model_type2']
-        # cols_ref_formodel = cols_type  ### Always match with feeded cols_type
-        # split             = kw.get("split", False)
-        # Xpred_tuple       = get_dataset_tuple(Xpred, cols_type, cols_ref_formodel, split)
         Xnew = model.model.sample(compute_pars.get('n_sample_generation', 100) )
         log3("generated data", Xnew)
         return Xnew
@@ -749,7 +775,7 @@ def transform(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
        return Xnew
 
 
-def predict(Xpred=None, data_pars={}, compute_pars={}, out_pars={}, **kw):
+def predict(Xpred=None, data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw):
     """function predict.
     Doc::
             
@@ -935,6 +961,7 @@ if __name__ == "__main__":
     test4()
     test5()
     test6()
+    test7()
 
     
     
