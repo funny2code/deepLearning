@@ -3,12 +3,12 @@
 Doc::
 
    Global ENV Variables
+     ## Only those ones are needed:
+        export log_verbosity=10
+        export log_type='logging'   / 'base' / 'loguru'
 
-    export log_config_path=""
-    export log_verbosity=10
-    export log_type='logging'   / 'base' / 'loguru'
 
-
+        export log_config_path="~/myconfig.json"
 
 
     Usage :
@@ -23,6 +23,7 @@ Doc::
     # WARNING       30              logger.warning()
     # ERROR         40              logger.error()
     # CRITICAL      50              logger.critical()
+
 """
 import os,sys,json
 from logging.handlers import SocketHandler
@@ -137,13 +138,14 @@ if LOG_TYPE == 'logging':
         isconsole_output=True,
         logging_level=logging.DEBUG,
     ):
-        """
-        from utilmy.config.log import util_log
-        
-        my_logger = util_log.logger_setup("my module name", log_file="")
-        APP_ID    = util_log.create_appid(__file__ )
-        def log(*argv):
-          my_logger.info(",".join([str(x) for x in argv]))
+        """  Python logger setup
+        Docs::
+
+            from utilmy.config.log import util_log
+            
+            my_logger = util_log.logger_setup("my module name", log_file="")
+            def log(*argv):
+            my_logger.info(",".join([str(x) for x in argv]))
 
        """
 
