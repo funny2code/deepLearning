@@ -2,6 +2,15 @@
 """#
 Doc::
 
+   Global ENV Variables
+
+    export log_config_path=""
+    export log_verbosity=10
+    export log_type='logging'   / 'base' / 'loguru'
+
+
+
+
     Usage :
     from util_log import log
 
@@ -24,7 +33,7 @@ from pathlib import Path
 
 ######################################################################################
 ##### Global settting  ###############################################################
-LOG_CONFIG_PATH  = os.environ.get('log_config', None )
+LOG_CONFIG_PATH  = os.environ.get('log_config_path', None )
 LOG_CONFIG = {}
 if LOG_CONFIG_PATH is not None :
     try :
