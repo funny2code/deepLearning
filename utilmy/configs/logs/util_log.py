@@ -82,8 +82,27 @@ if LOG_TYPE == 'base':
 
 
 
+    #########################################################################################
+    def test_log():
+        """function test.
+        Doc::
 
+                Args:
+                Returns:
 
+        """
+        log3("debug2")
+        log2("debug")
+        log("info")
+        logw("warning")
+        loge("error")
+        logc("critical")
+
+        try:
+            a = 1 / 0
+        except Exception as e:
+            logr("error", e)
+            loge("Catcch"), e
 
 
 
@@ -204,6 +223,29 @@ if LOG_TYPE == 'logging':
         """function logr.
         """
         logger.info(",".join([str(t) for t in s]))
+
+
+    #########################################################################################
+    def test_log():
+        """function test.
+        Doc::
+
+                Args:
+                Returns:
+
+        """
+        log3("debug2")
+        log2("debug")
+        log("info")
+        logw("warning")
+        loge("error")
+        logc("critical")
+
+        try:
+            a = 1 / 0
+        except Exception as e:
+            logr("error", e)
+            loge("Catcch"), e
 
 
 
@@ -339,7 +381,7 @@ if LOG_TYPE == 'loguru':
 
 
     #########################################################################################
-    def test():
+    def test_log():
         """function test.
         Doc::
 
@@ -359,6 +401,13 @@ if LOG_TYPE == 'loguru':
         except Exception as e:
             logr("error", e)
             loge("Catcch"), e
+
+
+
+
+########################################################################################
+def test_all():
+    test_log()
 
 
 

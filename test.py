@@ -86,31 +86,31 @@ def test_import_all():
 
 
 def test_utilmy():
-   from utilmy import utilmy as m
-   m.test_all()
-   
-   
-   #####  Bug of globals() in utilmy.py #################################################
-   log("\n##### Session  ")
-   sess = m.Session("ztmp/session")
+    from utilmy import utilmy as m
+    m.test_all()
 
-   global mydf
-   mydf = pd_generate_data()
 
-   sess.save('mysess', glob=globals(), tag='01')
-   os.system("ls ztmp/session")
-   sess.show()
-   import glob
-   flist = glob.glob("ztmp/session/" + "/*")
-   for f in flist:
-       t = os.path.exists(os.path.abspath(f))
-       assert  t == True, "session path not created "
+    #####  Bug of globals() in utilmy.py #################################################
+    log("\n##### Session  ")
+    sess = m.Session("ztmp/session")
 
-       pickle_created = os.path.exists(os.path.abspath(f + "/mydf.pkl"))
-       assert  pickle_created == True, "Pickle file not created"
+    global mydf
+    mydf = pd_generate_data()
 
-   sess.load('mysess')
-   sess.load('mysess', tag='01')
+    sess.save('mysess', glob=globals(), tag='01')
+    os.system("ls ztmp/session")
+    sess.show()
+    import glob
+    flist = glob.glob("ztmp/session/" + "/*")
+    for f in flist:
+        t = os.path.exists(os.path.abspath(f))
+        assert  t == True, "session path not created "
+
+        pickle_created = os.path.exists(os.path.abspath(f + "/mydf.pkl"))
+        assert  pickle_created == True, "Pickle file not created"
+
+    sess.load('mysess')
+    sess.load('mysess', tag='01')
 
 
 
@@ -254,6 +254,11 @@ import utilmy as  uu
 
 
 #######################################################################################
+def test_util_log():
+    from utilmy.configs.logs import util_log as util_log
+    util_log.test_all()
+
+#######################################################################################
 def test_all():
     test_utilmy()
     test_decorators()
@@ -278,6 +283,9 @@ def test_all():
     ###############
     test_recsys()
 
+
+    ###############
+    test_util_log()
 
       
 #######################################################################################
