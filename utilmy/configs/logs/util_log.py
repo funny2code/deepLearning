@@ -2,6 +2,15 @@
 """#
 Doc::
 
+   Global ENV Variables
+     ## Only those ones are needed:
+        export log_verbosity=10
+        export log_type='logging'   / 'base' / 'loguru'
+
+
+        export log_config_path="~/myconfig.json"
+
+
     Usage :
     from util_log import log
 
@@ -14,17 +23,16 @@ Doc::
     # WARNING       30              logger.warning()
     # ERROR         40              logger.error()
     # CRITICAL      50              logger.critical()
+
 """
 import os,sys,json
 from logging.handlers import SocketHandler
 from pathlib import Path
 
 
-
-
 ######################################################################################
 ##### Global settting  ###############################################################
-LOG_CONFIG_PATH  = os.environ.get('log_config', None )
+LOG_CONFIG_PATH  = os.environ.get('log_config_path', None )
 LOG_CONFIG = {}
 if LOG_CONFIG_PATH is not None :
     try :
@@ -40,7 +48,8 @@ LOG_TYPE    = os.environ.get('log_type',   'base')   if 'log_type'      not in L
 THISFILE_PATH = Path(__file__).resolve().parent
 
 
-#####################################################################################
+
+##############################################################################################
 if LOG_TYPE == 'base':
     def log(*s):
         """function log.
@@ -61,19 +70,19 @@ if LOG_TYPE == 'base':
 
 
     def logw(*s):
-        """function logw.
+        """function log warning
         """
         print(*s, flush=True)
 
 
     def logc(*s):
-        """function logc.
+        """function log critical
         """
         print(*s, flush=True)
 
 
     def loge(*s):
-        """function loge.
+        """function log error
         """
         print(*s, flush=True)
 
@@ -89,10 +98,6 @@ if LOG_TYPE == 'base':
     def test_log():
         """function test.
         Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
@@ -132,20 +137,18 @@ if LOG_TYPE == 'logging':
         isconsole_output=True,
         logging_level=logging.DEBUG,
     ):
-        """
-        from utilmy.config.log import util_log
-        
-        my_logger = util_log.logger_setup("my module name", log_file="")
-        APP_ID    = util_log.create_appid(__file__ )
-        def log(*argv):
-          my_logger.info(",".join([str(x) for x in argv]))
+        """  Python logger setup
+        Docs::
 
-       """
+            from utilmy.config.log import util_log
+            
+            my_logger = util_log.logger_setup("my module name", log_file="")
+            def log(*argv):
+            my_logger.info(",".join([str(x) for x in argv]))
 
-        if logger_name is None:
-            logger = logging.getLogger()  # Gets the root logger
-        else:
-            logger = logging.getLogger(logger_name)
+        """        
+        # Gets the root logger or local one
+        logger = logging.getLogger(logger_name)  if logger_name is noy None  else logging.getLogger() 
 
         logger.setLevel(logging_level)  # better to have too much log than not enough
 
@@ -153,9 +156,7 @@ if LOG_TYPE == 'logging':
             logger.addHandler(logger_handler_console(formatter))
 
         if log_file is not None:
-            logger.addHandler(
-                logger_handler_file(formatter=formatter, log_file_used=log_file, isrotate=isrotate)
-            )
+            logger.addHandler(logger_handler_file(formatter=formatter, log_file_used=log_file, isrotate=isrotate))
 
         # with this pattern, it's rarely necessary to propagate the error up to parent
         logger.propagate = False
@@ -183,11 +184,10 @@ if LOG_TYPE == 'logging':
             return fh
 
 
-    logger = logger_setup()
-
-
     #######################################################################################
     ##### Alias ###########################################################################
+    logger = logger_setup()
+
     def log(*s):
         """function log.
         """
@@ -233,11 +233,6 @@ if LOG_TYPE == 'logging':
     #########################################################################################
     def test_log():
         """function test.
-        Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
@@ -389,10 +384,6 @@ if LOG_TYPE == 'loguru':
     def test_log():
         """function test.
         Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
@@ -410,7 +401,7 @@ if LOG_TYPE == 'loguru':
 
 
 
-########################################################################################
+##############################################################################################
 def test_all():
     test_log()
 
