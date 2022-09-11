@@ -277,7 +277,7 @@ def test5():
 
     p.nvars_in      = 2  ### nb of variables
     p.nvars_out     = 1
-    p.operators     = ["sum", "mul", "div", "diff"]
+    p.operators     = ["sum", "mul", "div", "diff", "exp", "log"]
     p.symbols       = ["x0","x1"]
 
     p.n_exp         = 10
