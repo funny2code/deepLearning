@@ -70,19 +70,19 @@ if LOG_TYPE == 'base':
 
 
     def logw(*s):
-        """function logw.
+        """function log warning
         """
         print(*s, flush=True)
 
 
     def logc(*s):
-        """function logc.
+        """function log critical
         """
         print(*s, flush=True)
 
 
     def loge(*s):
-        """function loge.
+        """function log error
         """
         print(*s, flush=True)
 
@@ -98,10 +98,6 @@ if LOG_TYPE == 'base':
     def test_log():
         """function test.
         Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
@@ -242,11 +238,6 @@ if LOG_TYPE == 'logging':
     #########################################################################################
     def test_log():
         """function test.
-        Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
@@ -398,10 +389,6 @@ if LOG_TYPE == 'loguru':
     def test_log():
         """function test.
         Doc::
-
-                Args:
-                Returns:
-
         """
         log3("debug2")
         log2("debug")
