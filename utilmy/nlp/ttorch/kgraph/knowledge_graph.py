@@ -1,39 +1,73 @@
+""" Generate Embedding from raw text using Graph Neural Network.
+Docs::
+
+    -- Separate in 3 parts  (classes)
+        raw text --> NER extraction
+        NER  --> KGraph training + embedding generation/
+        KG Embedding Losses
+
+        Reason :
+        make the code modular, easy to change when needed.
+        make thing independant.
+
+     -- Code:
+        url = 'https://github.com/arita37/data/raw/main/kgraph_pykeen_small/data_kgraph_pykeen.zip'
+        dname = dataset_download(url=url)
+        dname = dname.replace("\\", "/")
+        path  = os.path.join(dname, 'final_dataset_clean_v2 .tsv')
+        df    = pd.read_csv(path, delimiter='\t')
+        dname = os.path.join(dname, 'embed')
+
+        if not os.path.exists(dname):
+            os.makedirs(dname)
+
+        log('##### NER extraction from text ')
+        extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
+        extractor.extract_triples(max_text=-1)
+        extractor.export_data()
+        # data_kgf  = extractor.extractTriples(max_text=-1)
+        # extractor.export_data(data_kgf)
+
+
+        log('##### Build Knowledge Graph')
+        data_kgf_path = os.path.join(dname, 'data_kgf.tsv')
+        grapher = knowledge_grapher(embedding_dim=10)
+        grapher.load_data(data_kgf_path)
+        grapher.build_graph()
+        # data_kgf = knowledge_grapher.load_data(data_kgf_path)
+        #grapher = knowledge_grapher(data_kgf=data_kgf,embedding_dim=10, load_spacy=True)
+
+
+
+        log('##### Build KG Embeddings')
+        dirout_emb = dname
+        embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
+        # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+        embedder.compute_embeddings('none', batch_size=1024)
+        embedder.save_embeddings()
+
+
+        log('##### load KG Embeddings')
+        embedder.load_embeddings('none')
+
+
 """
-
-Separate in 3 parts  (classes)
-
-  raw text --> NER extraction
-
-
-  NER  --> KGraph training + embedding generation/
-
-
-  KG Embedding Losses
-
-
-
-Reason :
-   make the code modular, easy to change when needed.
-   make thing independant.
-
-
-
-"""
-import sys
-import os
-import spacy
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import networkx as ntx
-from tqdm import tqdm
+import sys, os, numpy as np, pandas as pd
 from typing import Tuple, Any, Dict, Union, List
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from box import Box
+
+#### Text
+import networkx as ntx
+import spacy
 from spacy.matcher import Matcher
 #from node2vec import Node2Vec as n2v
 
 import torch
 
-# from utilmy.data import dataset_download
+#####
+import pykeen as pyk
 from pykeen.triples import TriplesFactory
 from pykeen.pipeline import pipeline
 from pykeen.models import TransE,ERModel
@@ -43,14 +77,13 @@ from pykeen.evaluation import RankBasedEvaluator
 from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
-from box import Box
 from utilmy import (log,log2, pd_to_file, pd_read_file)
 
 
 
 ######################################################################################################
 def test_all():
-    pass
+    ztest1()
 
 
 def ztest1(dirin='final_dataset_clean_v2 .tsv'):
@@ -108,7 +141,7 @@ def runall(config=None, config_field=None,  dirin='', dirout='', embed_dim=10, b
     Doc::
 
         cd utilmy/nlp/tttorch/kgraph
-        python knowledge_graph test1  --dirin mydirdata/
+        python knowledge_graph.py runall  --dirin mydirdata/
 
 
     """

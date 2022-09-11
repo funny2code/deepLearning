@@ -148,7 +148,7 @@ if LOG_TYPE == 'logging':
 
         """        
         # Gets the root logger or local one
-        logger = logging.getLogger(logger_name)  if logger_name is noy None  else logging.getLogger() 
+        logger = logging.getLogger(logger_name)  if logger_name is not None  else logging.getLogger()
 
         logger.setLevel(logging_level)  # better to have too much log than not enough
 
