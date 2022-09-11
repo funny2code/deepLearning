@@ -18,7 +18,7 @@ Doc::
 import os,sys,json
 from logging.handlers import SocketHandler
 from pathlib import Path
-import yaml
+
 
 
 
@@ -27,8 +27,11 @@ import yaml
 LOG_CONFIG_PATH  = os.environ.get('log_config', None )
 LOG_CONFIG = {}
 if LOG_CONFIG_PATH is not None :
-    with open(LOG_CONFIG_PATH, mode='r') as fp :
-        LOG_CONFIG = json.load(fp)
+    try :
+       with open(LOG_CONFIG_PATH, mode='r') as fp :
+          LOG_CONFIG = json.load(fp)
+    except Exception as e:
+        print('Cannot open config file, using default config', e)
 
 
 VERBOSITY   = os.environ.get('log_verbosity', 10)    if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
@@ -130,6 +133,8 @@ if LOG_TYPE == 'logging':
         logging_level=logging.DEBUG,
     ):
         """
+        from utilmy.config.log import util_log
+        
         my_logger = util_log.logger_setup("my module name", log_file="")
         APP_ID    = util_log.create_appid(__file__ )
         def log(*argv):
@@ -276,8 +281,8 @@ if LOG_TYPE == 'loguru':
 
         """
         try:
-            with open(log_config_path, "r") as fp:
-                cfg = yaml.safe_load(fp)
+            from utilmy import config_load
+            cfg = config_load(log_config_path)
 
         except Exception as e:
             print(f"Cannot load yaml file {log_config_path}, Using Default logging setup")
