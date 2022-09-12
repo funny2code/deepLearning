@@ -80,7 +80,7 @@ from utilmy.utilmy import log as llog, log2 ### Conflict with numpy.log
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.parallel") )
+    print(help_create("utilmy.optim.gp_searchformulae") )
 
 
 
@@ -89,7 +89,18 @@ def test_all():
     """function test_all
     """
     test1()
+    test2()
+    test3()
+    test4()
+    test5()
+    test6()
+    test7()
 
+    test1_parallel()
+    test1_parallel2()
+    test1_parallel_island()
+
+    
 
 def test_pars_values():
     """ return test params
