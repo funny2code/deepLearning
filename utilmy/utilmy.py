@@ -933,6 +933,7 @@ def test_all():
     test4()
     test5()
 
+
 def test1():
     import utilmy as m
 
@@ -970,7 +971,8 @@ def test2():
     import utilmy as m
 
     print('############# Start test Index0')
-    file_name = f"{os.path.dirname(os.path.abspath(__file__))}/test_file_{int(time.time())}.txt"
+    d0 = os_get_dirtmp()    
+    file_name = f"{d0}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name)
 
     # 2 save some data
@@ -981,14 +983,12 @@ def test2():
     assert index.read() == output, 'FAILED, -> get data wrong'
 
 
-
-
-
 def test3():
     import utilmy as m
 
     print('############# Start test Session')
-    folder_name = f"{os.path.dirname(os.path.abspath(__file__))}/session"
+    d0 = os_get_dirtmp()
+    folder_name = f"{d0}/session"
 
     session = m.Session(folder_name)
     print(session)
@@ -1001,7 +1001,6 @@ def test3():
     res = session.load(name='session1', glob=glob2)
     
     assert glob2 == glob, 'FAILED, -> session error'
-
 
 
 def test4():
@@ -1037,8 +1036,7 @@ def test5():
 
     import utilmy as m
 
-    dc = os.path.dirname(__file__)
-    dc = dc.replace("\\", "/") +"/"
+    drepo = direpo()
 
     log("\n#############", m.os_get_dirtmp())
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
@@ -1050,7 +1048,7 @@ def test5():
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
 
     log("\n#############", m.os_module_name(filepath='utilmy/utilmy.py'))
-    assert m.os_module_name(filepath=dc + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
+    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
 
 
     log("\n#############", m.get_loggers())
