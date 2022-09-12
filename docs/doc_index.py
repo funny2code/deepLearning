@@ -313,15 +313,6 @@ LoggingStreamHandler.handle(self)
 
 utilmy/configs/logs/util_log.py
 -------------------------functions----------------------
-log(*s)
-log2(*s)
-log3(*s)
-logc(*s)
-loge(*s)
-logger_setup(log_config_path: str  =  None, log_template: str  =  "default", **kwargs)
-logr(*s)
-logw(*s)
-test()
 z_logger_custom_1()
 z_logger_stdout_override()
 
@@ -355,17 +346,18 @@ utilmy/configs/util_config.py
 -------------------------functions----------------------
 config_isvalid_pydantic(config_dict: dict, pydanctic_schema: str  =  'config_py.yaml', silent: bool  =  False)
 config_isvalid_yamlschema(config_dict: dict, schema_path: str  =  'config_val.yaml', silent: bool  =  False)
-config_load(config_path:    str   =  None, to_dataclass:   bool  =  True, config_field_name :  str   =  None, environ_path_default: str  =  "config_path_default", path_default:   str   =  None, config_default: dict  =  None, save_default:   bool  =  False, verbose = 0)
+config_load(to_dataclass:   bool  =  True, config_field_name :  str   =  None, verbose = 0)
 convert_dict_to_pydantic(config_dict: dict, schema_name: str)
 convert_yaml_to_box(yaml_path: str)
 global_verbosity(cur_path, path_relative = "/../../config.json", default = 5, key = 'verbosity', )
-log(*s)
-loge(*s)
 pydantic_model_generator(input_file: Union[Path, str], input_file_type, output_file: Path, **kwargs, )
+test1()
+test2()
+test3()
 test4()
-test_example()
-test_pydanticgenrator()
-test_yamlschema()
+test_all()
+test_create_file(dirout = None)
+to_file(txt, fpath, mode = 'a')
 zzz_config_load_validate(config_path: str, schema_path: str, silent: bool  =  False)
 
 
@@ -2835,19 +2827,49 @@ fixedDict._check_size_limit(self)
 utilmy/optim/__init__.py
 
 
+utilmy/optim/expression_check.py
+-------------------------functions----------------------
+search_formulae_dcgpy_Xy_regression_v1(problem = None, pars_dict:dict = None, verbose = 1, )
+search_formulae_dcgpy_newton(problem = None, pars_dict:dict = None, verbose = 1, )
+search_formulae_dcgpy_v1(problem = None, pars_dict:dict = None, verbose = 1, )
+test1()
+test2()
+test3()
+test4()
+test6()
+test8()
+
+-------------------------methods----------------------
+myProblem2.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, )
+myProblem2.get_cost(self, expr, symbols)
+myProblem5.__init__(self)
+myProblem5.get_data(self)
+myProblem6.__init__(self)
+myProblem6.get_cost_symbolic(self, dCGP)
+myProblem6.get_data_symbolic(self)
+myProblem7.__init__(self)
+myProblem7.get_cost_symbolic(self, dCGP)
+myProblem7.get_data_symbolic(self)
+
+
 utilmy/optim/gp_searchformulae.py
 -------------------------functions----------------------
 _search_formulae_dcgpy_v1_wrapper(pars_dict:dict = None, myproblem = None, verbose = False, )
 help()
+search_formulae_dcgpy_Xy_regression_v1(problem = None, pars_dict:dict = None, verbose = 1, )
+search_formulae_dcgpy_newton(problem = None, pars_dict:dict = None, verbose = 1, )
 search_formulae_dcgpy_v1(problem = None, pars_dict:dict = None, verbose = 1, )
 search_formulae_dcgpy_v1_parallel(myproblem = None, pars_dict:dict = None, verbose = False, npool = 2)
-search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref, hyper_par_list    =  ['pa', ]  ### X[0], X[1], hyper_par_bounds  =  [ [0], [1.0 ] ], pop_size = 2, n_island = 2, max_step = 1, max_time_sec = 100, dir_log = "./logs/")
+search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref, hyper_par_list    =  ['pa', ]  ### X[0], X[1], hyper_par_bounds  =  [ [0, 0], [1.0, 1.0 ] ], pop_size = 2, n_island = 2, max_step = 1, max_time_sec = 100, dir_log = "./logs/", verbose = 0)
 search_formulae_operon_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
 test1()
 test1_parallel()
 test1_parallel2()
+test1_parallel_island()
 test2()
-test4_island()
+test3()
+test4()
+test5()
 test6()
 test7()
 test_all()
@@ -2863,47 +2885,17 @@ myProblem3.__init__(self)
 myProblem3.get_cost(self, dCGP, symbols)
 myProblem4.__init__(self)
 myProblem4.get_cost(self, dCGP, symbols)
+myProblem5.__init__(self)
+myProblem5.get_data(self)
+myProblem6.__init__(self)
+myProblem6.get_cost_symbolic(self, dCGP)
+myProblem6.get_data_symbolic(self)
 myProblem_ranking.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
 myProblem_ranking.get_correlm(self, formulae_str:str)
 myProblem_ranking.get_cost(self, expr:None, symbols)
 myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
 myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
 myProblem_ranking.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
-
-
-utilmy/optim/gp_searchformulae_old.py
--------------------------functions----------------------
-_search_formulae_dcgpy_v1_wrapper(pars_dict:dict = None, myproblem = None, verbose = False, )
-help()
-search_formulae_dcgpy_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
-search_formulae_dcgpy_v1_parallel(myproblem = None, pars_dict:dict = None, verbose = False, npool = 2)
-search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref, hyper_par_list    =  ['pa', ]  ### X[0], X[1], hyper_par_bounds  =  [ [0], [1.0 ] ], pop_size = 2, n_island = 2, max_step = 1, max_time_sec = 100, dir_log = "./logs/")
-search_formulae_dcgpy_v3_custom(problem = None, pars_dict:dict = None, verbose = False, )
-search_formulae_operon_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
-test1()
-test2()
-test3()
-test4()
-test5()
-test6()
-test7()
-test_all()
-test_pars_values()
-
--------------------------methods----------------------
-myProblem2.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, )
-myProblem2.get_cost(self, expr, symbols)
-myProblem2.rank_score(self, formulae_str:str)
-myProblem3.__init__(self)
-myProblem3.get_cost(self, dCGP, symbols)
-myProblem4.__init__(self)
-myProblem4.get_cost(self, dCGP, symbols)
-myProblem.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
-myProblem.get_correlm(self, formulae_str:str)
-myProblem.get_cost(self, expr:None, symbols)
-myProblem.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
-myProblem.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
-myProblem.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/optim/util_hyper.py
@@ -2958,6 +2950,41 @@ utilmy/optim/zold/gp_formulae.py
 -------------------------functions----------------------
 run1()
 
+
+
+utilmy/optim/zold/gp_searchformulae_old.py
+-------------------------functions----------------------
+_search_formulae_dcgpy_v1_wrapper(pars_dict:dict = None, myproblem = None, verbose = False, )
+help()
+search_formulae_dcgpy_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
+search_formulae_dcgpy_v1_parallel(myproblem = None, pars_dict:dict = None, verbose = False, npool = 2)
+search_formulae_dcgpy_v1_parallel_island(myproblem, ddict_ref, hyper_par_list    =  ['pa', ]  ### X[0], X[1], hyper_par_bounds  =  [ [0], [1.0 ] ], pop_size = 2, n_island = 2, max_step = 1, max_time_sec = 100, dir_log = "./logs/")
+search_formulae_dcgpy_v3_custom(problem = None, pars_dict:dict = None, verbose = False, )
+search_formulae_operon_v1(myproblem = None, pars_dict:dict = None, verbose = False, )
+test1()
+test2()
+test3()
+test4()
+test5()
+test6()
+test7()
+test_all()
+test_pars_values()
+
+-------------------------methods----------------------
+myProblem2.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, )
+myProblem2.get_cost(self, expr, symbols)
+myProblem2.rank_score(self, formulae_str:str)
+myProblem3.__init__(self)
+myProblem3.get_cost(self, dCGP, symbols)
+myProblem4.__init__(self)
+myProblem4.get_cost(self, dCGP, symbols)
+myProblem.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
+myProblem.get_correlm(self, formulae_str:str)
+myProblem.get_cost(self, expr:None, symbols)
+myProblem.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
+myProblem.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/parallel.py
@@ -3231,6 +3258,205 @@ test_plot_binom_dist()
 test_zplot()
 zplot(ax, area = 0.95, two_tailed = True, align_right = False)
 
+
+
+utilmy/recsys/bandits/__init__.py
+
+
+utilmy/recsys/bandits/aabandit_design.py
+
+
+utilmy/recsys/bandits/banditml/__init__.py
+
+
+utilmy/recsys/bandits/banditml/banditml/__init__.py
+
+
+utilmy/recsys/bandits/banditml/scripts/create_bq_tables.py
+-------------------------functions----------------------
+create_dataset(client: bigquery.Client, dataset_id: str, description: str, location: str)
+create_table(client: bigquery.Client, dataset_id: str, table_id: str, fields: List[Dict])
+main(args)
+
+
+
+utilmy/recsys/bandits/banditml/setup.py
+
+
+utilmy/recsys/bandits/banditml/tests/__init__.py
+
+
+utilmy/recsys/bandits/banditml/tests/fixtures.py
+
+
+utilmy/recsys/bandits/banditml/tests/test_models.py
+-------------------------methods----------------------
+TestFeedbackMappers.assert_match_bq_record(self, r: LegacyBase, f: Feedback, delayed: bool  =  False)
+TestFeedbackMappers.assert_metrics(self, metrics: Dict, feedbacks: List[Feedback])
+TestFeedbackMappers.make_reward(metrics: Dict, delayed: bool  =  False)
+TestFeedbackMappers.setUp(self)
+TestFeedbackMappers.test_from_decision(self)
+TestFeedbackMappers.test_from_delayed_reward(self)
+TestFeedbackMappers.test_from_immediate_reward(self)
+TestFeedbackMappers.test_to_from_decision(self)
+
+
+utilmy/recsys/bandits/banditml_eval/__init__.py
+
+
+utilmy/recsys/bandits/banditml_eval/ope/__init__.py
+
+
+utilmy/recsys/bandits/banditml_eval/setup.py
+
+
+utilmy/recsys/bandits/eval_replay/bandits/epsilon_greedy.py
+-------------------------functions----------------------
+epsilon_greedy_policy(df, arms, epsilon = 0.15, slate_size = 5, batch_size = 50)
+
+
+
+utilmy/recsys/bandits/eval_replay/bandits/exp3.py
+-------------------------functions----------------------
+distr(weights, gamma = 0.0)
+draw(probability_distribution, n_recs = 1)
+exp3_policy(df, history, t, weights, movieId_weight_mapping, gamma, n_recs, batch_size)
+update_weights(weights, gamma, movieId_weight_mapping, probability_distribution, actions)
+
+
+
+utilmy/recsys/bandits/eval_replay/bandits/ucb.py
+-------------------------functions----------------------
+ucb1_policy(df, t, ucb_scale = 2.0)
+
+
+
+utilmy/recsys/bandits/eval_replay/bandits/utils.py
+-------------------------functions----------------------
+score(history, df, t, batch_size, recs)
+summarise()
+
+
+
+utilmy/recsys/bandits/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/examples/bandit.py
+
+
+utilmy/recsys/bandits/genrl/examples/deep.py
+-------------------------functions----------------------
+get_logger(log)
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/deep_cb.py
+-------------------------functions----------------------
+main(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+get_logger(log)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/genetic_rl_q_learning.py
+-------------------------functions----------------------
+generate(generations, no_of_parents, agent_parameter_choices, envirnment, generic_agent, args)
+main(args)
+train_population(agents, envirnment, args)
+
+-------------------------methods----------------------
+GATuner.fitness(self, agent)
+
+
+utilmy/recsys/bandits/genrl/examples/run_cb.py
+-------------------------functions----------------------
+plot_multi_runs(args, multi_results, title)
+run(args, agent, bandit, plot = True)
+run_experiment(args)
+run_multi_algos(args)
+run_multi_bandits(args)
+run_single_algos_on_bandit(args)
+
+
+
+utilmy/recsys/bandits/genrl/examples/sample.py
+
+
+utilmy/recsys/bandits/genrl/genrl/__init__.py
+
+
+utilmy/recsys/bandits/genrl/setup.py
+-------------------------functions----------------------
+get_requires(path = REQUIRE_PATH)
+read(*parts)
+
+
+
+utilmy/recsys/bandits/genrl/tests/__init__.py
+
+
+utilmy/recsys/bandits/offline_replayer_eval_amzon.py
+-------------------------functions----------------------
+export_to_json(dictionary, file_name)
+log(*s)
+
+-------------------------methods----------------------
+ABTestReplayer.__init__(self, n_visits, n_test_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+ABTestReplayer.record_result(self, visit, item_idx, reward)
+ABTestReplayer.reset(self)
+ABTestReplayer.select_item(self)
+ABTestReplayer.simulator(self)
+EpsilonGreedyReplayer.__init__(self, epsilon, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+EpsilonGreedyReplayer.record_result(self, visit, item_idx, reward)
+EpsilonGreedyReplayer.reset(self)
+EpsilonGreedyReplayer.select_item(self)
+EpsilonGreedyReplayer.simulator(self)
+ReplaySimulator.__init__(self, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1, random_seed = 1)
+ReplaySimulator.record_result(self, visit, item_idx, reward)
+ReplaySimulator.replay(self)
+ReplaySimulator.reset(self)
+ReplaySimulator.select_item(self)
+ThompsonSamplingReplayer.__init__(self, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+ThompsonSamplingReplayer.record_result(self, visit, item_idx, reward)
+ThompsonSamplingReplayer.reset(self)
+ThompsonSamplingReplayer.select_item(self)
+ThompsonSamplingReplayer.simulator(self)
+UCBSamplingReplayer.__init__(self, ucb_c, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+UCBSamplingReplayer.record_result(self, visit, item_idx, reward)
+UCBSamplingReplayer.reset(self)
+UCBSamplingReplayer.select_item(self)
+UCBSamplingReplayer.simulator(self)
+
+
+utilmy/recsys/bandits/readme.py
+
+
+utilmy/recsys/bandits/recostep_offline_replayer_eval_movielens.py
+-------------------------methods----------------------
+ABTestReplayer.__init__(self, n_visits, n_test_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+ABTestReplayer.record_result(self, visit, item_idx, reward)
+ABTestReplayer.reset(self)
+ABTestReplayer.select_item(self)
+EpsilonGreedyReplayer.__init__(self, epsilon, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1)
+EpsilonGreedyReplayer.select_item(self)
+ReplaySimulator.__init__(self, n_visits, reward_history, item_col_name, visitor_col_name, reward_col_name, n_iterations = 1, random_seed = 1)
+ReplaySimulator.record_result(self, visit, item_idx, reward)
+ReplaySimulator.replay(self)
+ReplaySimulator.reset(self)
+ReplaySimulator.select_item(self)
+ThompsonSamplingReplayer.record_result(self, visit, item_idx, reward)
+ThompsonSamplingReplayer.reset(self)
+ThompsonSamplingReplayer.select_item(self)
 
 
 utilmy/recsys/metric.py
@@ -4377,7 +4603,7 @@ spark_metrics_classifier_summary(df_labels_preds)
 spark_metrics_roc_summary(labels_and_predictions_df)
 spark_read(sparksession = None, dirin="hdfs = "hdfs://", format = None, **kw)
 spark_run_sqlfile(sparksession = None, spark_config:dict = None, sql_path:str = "", map_sql_variables:dict = None)
-spark_schema_create(dlist:list)
+spark_schema_create(dlist:list, struct_type = 'struct')
 sql_generatedate()
 sql_generatedate_mysql()
 sql_generateint()
@@ -5019,21 +5245,27 @@ test_imodels()
 
 utilmy/tabular/util_generator.py
 -------------------------functions----------------------
-evaluate(data_pars = None, compute_pars = None, out_pars = None, **kw)
-fit(data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
+evaluate(data_pars = None, compute_pars:dict = None, out_pars: dict = None, **kw)
+fit(data_pars: dict = None, compute_pars: dict = None, task_type  =  "train", **kw)
+generator_load_generate(dirmodel = "", compute_pars:dict = None, dirout:str = None)
+generator_train_save(dirin_or_df = "", dirout = "", model_pars:dict = None, model_class  =  'CTGAN', model_class_pars  =  None, compute_pars:dict = None, metrics_pars  = None, n_sample = 1000, cols  =  None, )
 get_dataset(data_pars = None, task_type = "train", **kw)
 get_dataset_load(df_or_path)
 get_dataset_tuple(Xtrain, cols_type_received, cols_ref, split = False)
 init(*kw, **kwargs)
 load_info(path = "")
 load_model(path = "")
-predict(Xpred = None, data_pars = {}, compute_pars = {}, out_pars = {}, **kw)
+predict(Xpred = None, data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
 reset()
 save(path = None, info = None)
 test()
 test2(n_sample  =  1000)
-test_helper(model_pars:dict, data_pars:dict, compute_pars:dict)
-transform(Xpred = None, data_pars = {}, compute_pars = {}, out_pars = {}, **kw)
+test4(n_sample  =  1000)
+test5(n_sample  =  1000)
+test6()
+test7()
+test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type  =  "train")
+transform(Xpred = None, data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
 zz_pd_augmentation_sdv(df, col = None, pars = {})
 zz_pd_covariate_shift_adjustment()
 zz_pd_sample_imblearn(df = None, col = None, pars = None)
@@ -5619,6 +5851,9 @@ test_toplvl()
 
 
 
+utilmy/tools/cyberduck/cli_duck.py
+
+
 utilmy/tools/globre.py
 -------------------------functions----------------------
 compile(pattern, flags = 0, sep = None, split_prefix = False)
@@ -6041,6 +6276,8 @@ load_function_uri(uri_name: str = "MyFolder/myfile.py:my_function")
 log(*s, **kw)
 log2(*s, **kw)
 log3(*s, **kw)
+loge(*s)
+os_get_dirtmp(subdir = None, return_path = False)
 os_module_name(filepath = None, mode = 'importname')
 pd_generate_data(ncols = 7, nrows = 100)
 pd_getdata(verbose = True)
@@ -6050,8 +6287,10 @@ save(dd, to_file = "", verbose = False)
 sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
+test1()
 test_all()
 test_load_function_uri()
+to_file(txt, fpath, mode = 'a')
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt")
@@ -6093,6 +6332,9 @@ utilmy/viz/css.py
 -------------------------functions----------------------
 fontsize_css(size)
 
+
+
+utilmy/viz/dash.py
 
 
 utilmy/viz/embedding.py
