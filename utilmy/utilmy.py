@@ -46,7 +46,7 @@ def direpo():
        import utilmy
        dir_repo1 =  utilmy.__path__[0].replace("\\","/")  + "/"
     except:
-       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/")
+       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/") + "/"
     return dir_repo1
 
 
