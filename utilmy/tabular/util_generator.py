@@ -94,10 +94,10 @@ sys.path.append( os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "
 ### SDV
 try:
     #from sdv.demo import load_tabular_demo
+    import sdv
     from sdv.tabular import TVAE, CTGAN
     from sdv.timeseries import PAR
     from sdv.evaluation import evaluate
-    from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
     import ctgan
     
     if ctgan.__version__ != '0.5.1':
@@ -152,9 +152,7 @@ try :
                         'NearMiss'      : NearMiss
                         }
 
-    ML_EFF_METRICS = { 'TSFClassifierEfficacy'   :TSFClassifierEfficacy, 
-                       'LSTMClassifierEfficacy'  :LSTMClassifierEfficacy
-                     }
+
 except : pass
 
 #################################################################################################
@@ -715,25 +713,26 @@ def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     """ Return metrics of the model when fitted.
     """
 
-    from sdv.evaluation import evaluate
-
     # log(data_pars)
     mpars = compute_pars.get("metrics_pars", {'aggregate': True})
     single_table_met = compute_pars.get("single-table", True)
     if model.model_pars['model_class'] in SDV_MODELS:
         if single_table_met:
-            evals = evaluate(Xnew, Xval, **mpars )
+            evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
         else:
-            evals = time_series_evaluate(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])           
+            evals = evaluate_timeseries(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])
         return evals
     else:
         return None
 
 
-def time_series_evaluate(synthetic_data, real_data=None, metadata=None, metrics=None, target="region"):
+def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="region"):
     """ Return metrics of the model for Time series data.
     """
-
+    from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
+    ML_EFF_METRICS = { 'TSFClassifierEfficacy'   :TSFClassifierEfficacy,
+                       'LSTMClassifierEfficacy'  :LSTMClassifierEfficacy
+                     }
     evals = []
     for m in metrics:
         metric = ML_EFF_METRICS[m]
