@@ -399,6 +399,74 @@ if LOG_TYPE == 'loguru':
             loge("Catcch"), e
 
 
+    ######## Stream Server ####################################################################
+    import socketserver, pickle, struct,  json
+
+    class LoggingStreamHandler(socketserver.StreamRequestHandler):
+        def handle(self):
+            """ LoggingStreamHandler:handle.
+            Doc::
+            """
+            from loguru import logger
+            while True:
+                chunk = self.connection.recv(4)
+                if len(chunk) < 4:
+                    break
+                slen = struct.unpack('>L', chunk)[0]
+                chunk = self.connection.recv(slen)
+                while len(chunk) < slen:
+                    chunk = chunk + self.connection.recv(slen - len(chunk))
+                record = pickle.loads(chunk)
+                #print(json.loads(record['msg']))
+                level, message = record["levelname"], json.loads(record["msg"])['text']
+                logger.patch(lambda record: record.update(record)).log(level, message)
+
+
+
+    def test_launch_server():
+        '''.
+        Doc::
+
+                Server code from loguru.readthedocs.io
+                Use to test network logging
+
+                python   test.py test_launch_server
+        '''
+        PORT = 5000 #Make sure to set the same port defined in logging template
+        server = socketserver.TCPServer(('localhost', PORT), LoggingStreamHandler)
+        server.serve_forever()
+
+
+    def test_server():
+        """function test_server.
+        Doc::
+        """
+        print("\n\n\n########## Test 2############################")
+        os.environ['log_type'] = 'loguru'
+        import util_log
+
+
+        from util_log import log3, log2, log, logw, loge, logc, logr
+
+        ### Redefine new template
+        util_log.logger_setup('config_loguru.yaml', 'server_socket')
+
+        log3("debug2")
+        log2("debug")
+        log("info")
+        logw("warning")
+        logc("critical")
+
+        try:
+            a = 1 / 0
+        except Exception as e:
+            logr("error", e)
+            loge("Exception"), e
+
+        log("finish")
+
+
+
 
 
 ##############################################################################################
