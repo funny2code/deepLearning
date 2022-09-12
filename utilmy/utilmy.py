@@ -70,7 +70,7 @@ def loge(*s):
 def help():
     suffix = "\n\n\n###############################"
     ss     = help_create(modulename='utilmy', prefixs=None) + suffix
-    print(ss)
+    log(ss)
 
 
 ###################################################################################################
@@ -117,9 +117,9 @@ def help_info(fun_name:str="os.system", doprint=True):
        dd.args2 = dd.args
 
    if doprint == 1 or doprint == True :
-       print( 'Name: ', "\n",  module_name +"."+ fun_name, "\n" )
-       print( 'args:', "\n",  dd.args2, "\n" )
-       print( 'doc:',  "\n",  dd.doc, "\n" )
+       log( 'Name: ', "\n",  module_name +"."+ fun_name, "\n" )
+       log( 'args:', "\n",  dd.args2, "\n" )
+       log( 'doc:',  "\n",  dd.doc, "\n" )
        return ''
 
    return dd
@@ -268,13 +268,13 @@ def to_file(txt, fpath, mode='a'):
 def find_fuzzy(word:str, wlist:list, threshold=0.0):
   """ Find closest fuzzy string
         ll = dir(utilmy)
-        print(ll)
+        log(ll)
         find_fuzzy('help create fun arguu', ll)  
   """  
   # import numpy as np   
   from difflib import SequenceMatcher as SM
   scores = [ SM(None, str(word), str(s2) ).ratio() for s2 in wlist  ]
-  #print(scores)
+  #log(scores)
   # imax = np.argmax(scores)  
   imax = max(range(len(scores)), key=scores.__getitem__)
 
@@ -323,7 +323,7 @@ def sys_exit(msg="exited",  err_int=0):
         
     """
     import os, sys
-    print(msg)         
+    log(msg)         
     ### exit with no error msg 
     # sys.stderr = open(os.devnull, 'w')
     sys.stdout = sys.__stdout__ = open(os.devnull, 'w')
@@ -338,11 +338,11 @@ def sys_install(cmd=""):
        
    """
    import os, sys, time  
-   print("Installing  ")
-   print( cmd +"  \n\n ...") ; time.sleep(7)
+   log("Installing  ")
+   log( cmd +"  \n\n ...") ; time.sleep(7)
    os.system(cmd )
-   print( "\n\n\n############### Please relaunch python  ############## \n")   
-   print('Exit \n\n\n')
+   log( "\n\n\n############### Please relaunch python  ############## \n")   
+   log('Exit \n\n\n')
 
 
 def pip_install(pkg_str=" pandas "):
@@ -529,12 +529,12 @@ def pd_getdata(verbose=True):
     data = {}
     for url in flist :
        fname =  url.split("/")[-1]
-       print( "\n", "\n", url, )
+       log( "\n", "\n", url, )
        df = pd.read_csv(url)
        data[fname] = df
-       if verbose: print(df)
+       if verbose: log(df)
        # df.to_csv(fname , index=False)
-    print(data.keys() )
+    log(data.keys() )
     return data
 
 
@@ -550,7 +550,7 @@ class Index0(object):
            
         """
         self.findex = findex
-        print(os.path.dirname(self.findex))
+        log(os.path.dirname(self.findex))
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
         if not os.path.isfile(self.findex):
             with open(self.findex, mode='a') as fp:
@@ -584,7 +584,7 @@ class Index0(object):
         ss = ""
         for fi in flist :
           ss = ss + str(fi) + "\n"        
-        # print(ss)        
+        # log(ss)        
         with open(self.findex, mode='a') as fp:
             fp.write(ss )
         return True   
@@ -778,7 +778,7 @@ def git_current_hash(mode='full'):
         label = subprocess.check_output([ 'git', 'rev-parse', 'HEAD' ]).strip()
         label = label.decode('utf-8')
     except Exception as e:
-        print('Error get git hash')
+        log('Error get git hash')
         label=  None
     return label
 
@@ -804,7 +804,7 @@ class Session(object) :
       os.makedirs(dir_session, exist_ok=True)
       self.dir_session =  dir_session
       self.cur_session =  None
-      print(self.dir_session)
+      log(self.dir_session)
 
     def show(self) :
        """ Session:show
@@ -814,7 +814,7 @@ class Session(object) :
        """
        import glob
        flist = glob.glob(self.dir_session + "/*" )
-       print(flist)
+       log(flist)
 
     def save(self, name, glob=None, tag="") :
        """ Session:save
@@ -841,7 +841,7 @@ class Session(object) :
       """
       path = f"{self.dir_session}/{name}{tag}/"
       self.cur_session = path
-      print(self.cur_session)
+      log(self.cur_session)
       self.load_session(self.cur_session , glob )
 
 
@@ -871,24 +871,24 @@ class Session(object) :
               elif x_type in lcheck or x.startswith('clf')  :
                   save( globs[x], fname )
 
-              print(fname)
+              log(fname)
             except Exception as e:
-                  print(x, x_type, e)
+                  log(x, x_type, e)
 
 
     def load_session(self, folder, globs=None) :
       """
       """
-      print(folder)
+      log(folder)
       for dirpath, subdirs, files in os.walk( folder ):
         for x in files:
            filename = os.path.join(dirpath, x)
            x = x.replace(".pkl", "")
            try :
              globs[x] = load(  filename )
-             print(filename)
+             log(filename)
            except Exception as e :
-             print(filename, e)
+             log(filename, e)
 
 
 def save(dd, to_file="", verbose=False):
@@ -943,7 +943,7 @@ def test1():
     assert not m.git_repo_root() == None, "err git repo"
 
     log("\n##### git_current_hash  ")
-    print(m.git_current_hash())
+    log(m.git_current_hash())
     assert not m.git_current_hash() == None, "err git hash"
 
     log("\n##### Doc generator: help_create  ")
@@ -954,9 +954,9 @@ def test1():
 
     ###################################################################################
     log("\n##### global_verbosity  ")
-    print('verbosity', m.global_verbosity(__file__, "config.json", 40,))
-    print('verbosity', m.global_verbosity('../', "config.json", 40,))
-    print('verbosity', m.global_verbosity(__file__))
+    log('verbosity', m.global_verbosity(__file__, "config.json", 40,))
+    log('verbosity', m.global_verbosity('../', "config.json", 40,))
+    log('verbosity', m.global_verbosity(__file__))
 
     verbosity = 40
     gverbosity = m.global_verbosity(__file__)
@@ -970,7 +970,7 @@ def test1():
 def test2():
     import utilmy as m
 
-    print('############# Start test Index0')
+    log('#### Index0')
     d0 = os_get_dirtmp()    
     file_name = f"{d0}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name)
@@ -986,12 +986,12 @@ def test2():
 def test3():
     import utilmy as m
 
-    print('############# Start test Session')
+    log('#### Session')
     d0 = os_get_dirtmp()
     folder_name = f"{d0}/session"
 
     session = m.Session(folder_name)
-    print(session)
+    log(session)
 
     # save session
     glob = {'test': 'qwe rty yui'}
@@ -1033,11 +1033,9 @@ def test4():
 
 
 def test5():
-
     import utilmy as m
 
     drepo = direpo()
-
 
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
@@ -1056,7 +1054,7 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = dc + "utilmy/utilmy.py:test2"
+    uri_name = drepo + "utilmy/utilmy.py:test2"
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'
