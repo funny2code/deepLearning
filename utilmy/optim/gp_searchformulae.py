@@ -722,7 +722,7 @@ class myProblem_ranking:
 
         #### Create noisy list
         ltrue_rank = {i:x for i,x in enumerate(ltrue)}
-        list_overlap =  np.random.choice(ltrue, 20) #ltrue[:80]  #### Common elements
+        list_overlap =  np.random.choice(ltrue, 80) #ltrue[:80]  #### Common elements
 
 
         correls = []
@@ -739,7 +739,7 @@ class myProblem_ranking:
             correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
         correlm = np.mean(correls)
-        return -correlm  ### minimize correlation val
+        return -abs(correlm)  ### minimize correlation val
 
 
     def rank_score(self, fornulae_str:str, rank1:list, rank2:list)-> list:
