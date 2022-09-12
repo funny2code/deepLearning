@@ -46,7 +46,7 @@ def direpo():
        import utilmy
        dir_repo1 =  utilmy.__path__[0].replace("\\","/")  + "/"
     except:
-       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/")
+       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/") + "/"
     return dir_repo1
 
 
@@ -967,9 +967,6 @@ def test1():
 
 
 def test2():
-    import os
-    import time
-
     import utilmy as m
 
     print('############# Start test Index0')
@@ -977,16 +974,8 @@ def test2():
     index = m.Index0(file_name)
 
     # 2 save some data
-    data = [
-        "testestest",
-        2,
-        'for ii in rnage zz',
-        '#comment',
-    ]
-    output = [
-        'testestest',
-        'for ii in rnage zz',
-    ]
+    data = [ "testestest", 2, 'for ii in rnage zz', '#comment',]
+    output = [ 'testestest', 'for ii in rnage zz', ]
     index.save(data)
 
     assert index.read() == output, 'FAILED, -> get data wrong'
@@ -996,9 +985,6 @@ def test2():
 
 
 def test3():
-    import os
-    import time
-
     import utilmy as m
 
     print('############# Start test Session')
@@ -1019,13 +1005,15 @@ def test3():
 
 
 def test4():
+    import utilmy as m
+
 
     def test_func(arg1, arg2):
         """HELP doc string
         """
         return arg1 + arg2
 
-    import utilmy as m
+
     for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
         log("\n#############", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
@@ -1049,6 +1037,9 @@ def test5():
 
     import utilmy as m
 
+    dc = os.path.dirname(__file__)
+    dc = dc.replace("\\", "/") +"/"
+
     log("\n#############", m.os_get_dirtmp())
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
 
@@ -1059,7 +1050,7 @@ def test5():
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
 
     log("\n#############", m.os_module_name(filepath='utilmy/utilmy.py'))
-    assert m.os_module_name(filepath='utilmy/utilmy.py'), 'FAILED -> os_module_name'
+    assert m.os_module_name(filepath=dc + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
 
 
     log("\n#############", m.get_loggers())
@@ -1069,7 +1060,7 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = "utilmy/utilmy.py:test2"
+    uri_name = dc + "utilmy/utilmy.py:test2"
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'
