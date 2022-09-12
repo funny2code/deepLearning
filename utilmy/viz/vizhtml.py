@@ -359,6 +359,20 @@ class htmlDoc(object):
             os.system(f'start chrome "file:///{self.dir_out}" ')
             ### file:///D:/_devs/Python01/gitdev/myutil/utilmy/viz/test_viz_table.html   
 
+    def serve_file(self):       
+        full = self.head + self.html + self.tail
+
+        # import flask
+        import flask
+        from flask import Flask
+        app = Flask(__name__)
+
+        @app.route("/")
+        def get_report():
+            return full
+
+        app.run()
+        
     def add_css(self, css):
         """  Add custom to file
         Docs::
