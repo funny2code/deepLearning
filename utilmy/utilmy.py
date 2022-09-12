@@ -147,7 +147,7 @@ def help_get_docstring(func):
 
 
 def help_get_funargs(func):
-    """ Extract Docstring  :  (a, b, x='blah') """
+    """ Extract Func args  :  (a, b, x='blah') """
     import inspect
     try:
         ll = str( inspect.signature(func) )
@@ -930,6 +930,8 @@ def test_all():
     test1()
     test2()
     test3()
+    test4()
+    test5()
 
 def test1():
     import utilmy as m
@@ -1016,9 +1018,67 @@ def test3():
 
 
 
+def test4():
+
+    def test_func(arg1, arg2):
+        """HELP doc string
+        """
+        return arg1 + arg2
+
+    import utilmy as m
+    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+        log("\n#############", name,"\n", m.help_create(name))
+        assert m.help_create(name), 'FAILED -> help_create'
+        log("\n#############", name,"\n", m.help_info(name))
+        assert m.help_create(name), 'FAILED -> help_info'
+
+    log("\n#############", m.help_get_codesource(func=test_func))
+    assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
+
+    log("\n#############", m.help_get_docstring(func=test_func))
+    assert m.help_get_docstring(func=test_func), 'FAILED -> help_get_docstring'
+
+    log("\n#############", m.help_get_funargs(func=test_func))
+    assert m.help_get_funargs(func=test_func), 'FAILED -> help_get_funargs'
+
+    log("\n#############", m.help_signature(f=test_func))
+    assert m.help_signature(f=test_func), 'FAILED -> help_signature'
+
+
+def test5():
+
+    import utilmy as m
+
+    log("\n#############", m.os_get_dirtmp())
+    assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
+
+    log("\n#############", m.os_get_dirtmp(subdir='test'))
+    assert m.os_get_dirtmp(subdir='test'), 'FAILED -> os_get_dirtmp'
+
+    log("\n#############", m.os_get_dirtmp(subdir='test', return_path=True))
+    assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
+
+    log("\n#############", m.os_module_name(filepath='utilmy/utilmy.py'))
+    assert m.os_module_name(filepath='utilmy/utilmy.py'), 'FAILED -> os_module_name'
+
+
+    log("\n#############", m.get_loggers())
+    log("\n#############", m.get_loggers(n_loggers=3))
+
+    log("\n#############", m.import_function(fun_name='test3', module_name='utilmy'))
+    assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
+
+
+    uri_name = "utilmy/utilmy.py:test2"
+    myclass = load_function_uri(uri_name)
+    log(myclass)
+    assert myclass, 'FAILED -> load_function_uri'
+
+
+
 ###################################################################################################
 if __name__ == "__main__":
-    import fire ;
+    import fire
     fire.Fire()
 
 
