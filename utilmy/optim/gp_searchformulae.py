@@ -80,7 +80,7 @@ from utilmy.utilmy import log as llog, log2 ### Conflict with numpy.log
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.optim.gp_searchformulae") )
+    print(help_create(__file__) )
 
 
 

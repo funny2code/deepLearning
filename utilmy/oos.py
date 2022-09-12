@@ -348,6 +348,23 @@ def test_globglob():
     glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
 
 
+def test_os2():
+    log(" os_copy")
+    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
+            dry=0
+            )
+
+
+
+
 
 
 ########################################################################################################

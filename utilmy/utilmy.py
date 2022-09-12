@@ -418,13 +418,8 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
             raise NameError(f"Module {pkg} notfound, {e1}, {e2}")
 
 
-def test_load_function_uri():
-    uri_name = "./testdata/ttorch/models.py:SuperResolutionNet"
-    myclass = load_function_uri(uri_name)
-    log(myclass)
 
-
-### Generic Date function
+### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
@@ -434,6 +429,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
+
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -476,7 +472,9 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
     elif returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
-### Generic Glob
+
+
+### Generic Glob  #################################################################################
 from utilmy.oos import  glob_glob
 
 
@@ -716,12 +714,6 @@ from utilmy.configs.util_config import (
 
 ######################################################################################################
 ######## External IO #################################################################################
-from utilmy.iio import (
- hdfs_put,
- hdfs_get,
- hdfs_walk
-)
-
 
 ######################################################################################################
 ###### Plot ##########################################################################################
@@ -937,22 +929,15 @@ def test_all():
 def test1():
     import utilmy as m
 
-    ###################################################################################
-    log("\n##### git_repo_root  ")
-    log(m.git_repo_root())
+    ###################################################################
+    log("\n##### git_repo_root  ", m.git_repo_root())
     assert not m.git_repo_root() == None, "err git repo"
 
-    log("\n##### git_current_hash  ")
-    log(m.git_current_hash())
+    log("\n##### git_current_hash  ", m.git_current_hash())
     assert not m.git_current_hash() == None, "err git hash"
 
-    log("\n##### Doc generator: help_create  ")
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
-        log("\n####", name,"\n", m.help_create(name))
-        log("\n####", name,"\n", m.help_info(name))
 
-
-    ###################################################################################
+    ####################################################################
     log("\n##### global_verbosity  ")
     log('verbosity', m.global_verbosity(__file__, "config.json", 40,))
     log('verbosity', m.global_verbosity('../', "config.json", 40,))
@@ -1058,6 +1043,20 @@ def test5():
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'
+
+
+
+def test6():
+    import utilmy as m
+
+    log("\n####", date_now)
+
+    assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
+    assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
+    assert m.date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
+    assert m.date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
+    assert m.date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
 
 
 
