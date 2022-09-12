@@ -974,16 +974,8 @@ def test2():
     index = m.Index0(file_name)
 
     # 2 save some data
-    data = [
-        "testestest",
-        2,
-        'for ii in rnage zz',
-        '#comment',
-    ]
-    output = [
-        'testestest',
-        'for ii in rnage zz',
-    ]
+    data = [ "testestest", 2, 'for ii in rnage zz', '#comment',]
+    output = [ 'testestest', 'for ii in rnage zz', ]
     index.save(data)
 
     assert index.read() == output, 'FAILED, -> get data wrong'
@@ -1015,7 +1007,7 @@ def test3():
 def test4():
     import utilmy as m
 
-    
+
     def test_func(arg1, arg2):
         """HELP doc string
         """
