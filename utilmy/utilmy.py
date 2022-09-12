@@ -1041,12 +1041,9 @@ def test5():
 
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
-
-    log("\n####", m.os_get_dirtmp )
     assert m.os_get_dirtmp(subdir='test'), 'FAILED -> os_get_dirtmp'
-
-    log("\n####", m.os_get_dirtmp(subdir='test', return_path=True))
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
+
 
     log("\n####", m.os_module_name(filepath='utilmy/utilmy.py'))
     assert m.os_module_name(filepath=drepo + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
