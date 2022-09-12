@@ -97,6 +97,7 @@ try:
     from sdv.tabular import TVAE, CTGAN
     from sdv.timeseries import PAR
     from sdv.evaluation import evaluate
+    from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
     import ctgan
     
     if ctgan.__version__ != '0.5.1':
@@ -150,6 +151,10 @@ try :
                         'SMOTETomek'    : SMOTETomek,
                         'NearMiss'      : NearMiss
                         }
+
+    ML_EFF_METRICS = { 'TSFClassifierEfficacy'   :TSFClassifierEfficacy, 
+                       'LSTMClassifierEfficacy'  :LSTMClassifierEfficacy
+                     }
 except : pass
 
 #################################################################################################
@@ -388,20 +393,22 @@ def test5(n_sample = 1000):
     """
     global model, session
     root  = "ztmp/"
-    from sdv.demo import load_timeseries_demo
-    from sdv.constraints import Unique
+    from sdv.metrics.demos import load_timeseries_demo
 
     #####################################################################
-    n_sample = 100
-    data = load_timeseries_demo()
-    entity_columns = ['Symbol']
-    context_columns = ['MarketCap', 'Sector', 'Industry']
+
+    data, _ , metadata = load_timeseries_demo()
+    entity_columns = ['store_id']
+    context_columns = ['region']
+    sequence_index  = 'date'
+
+    n_sample = 1
     data_col = {'cols':list(data.columns)}
     data_pars = {'n_sample': n_sample,
                 'cols_model_type2' : data_col }
     data_pars['gen_samp'] =   {'Xtrain': data}
-    data_pars['eval']     =   {'X': data, 'y': None}
 
+    data_pars['eval']     =   {'X': data, 'y': None}
 
     #####################################################################
     models = {
@@ -411,22 +418,22 @@ def test5(n_sample = 1000):
                      'epochs': 1,
                      'entity_columns':  entity_columns,
                      'context_columns': context_columns,
-                     'sequence_index': 'Date'
+                     'sequence_index':  sequence_index
                                 },
                 }
               }
 
     ###############################################################################
     compute_pars = { 'compute_pars' : {},
-                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
-                     'n_sample_generation' : 10
+                     'metadata' :  metadata,
+                     'metrics_pars' : {'metrics' :['TSFClassifierEfficacy','LSTMClassifierEfficacy']},
+                     'single-table': False,   # Time series metric
+                     'n_sample_generation' : n_sample
                    }
 
 
     #####################################################################
     test_helper(models['PAR'], data_pars, compute_pars, task_type = "gen_samp")
-
-
 
 def test6():
     """function test6.
@@ -522,10 +529,11 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = 
 
     log('Predict data..')
     Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    Xval, yval         = get_dataset(data_pars, task_type="eval")
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
+    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
 
     log('Saving model..')
     save(path= root + '/model_dir/')
@@ -586,7 +594,6 @@ def generator_train_save(dirin_or_df="", dirout="",
                        }
 
         generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
-        generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
     """
@@ -611,13 +618,20 @@ def generator_train_save(dirin_or_df="", dirout="",
     data_pars['n_sample']         =  n_sample
 
 
+
+
     model = Model(model_pars=model_pars, data_pars=data_pars, compute_pars=compute_pars)
 
     log('Train model')
     fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None, task_type='gen_samp')
 
-    log('Evaluate model..')
-    log(evaluate(data_pars=data_pars, compute_pars=compute_pars))
+    log('Predict data..')
+    Xnew = transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
+    Xval, yval         = get_dataset(data_pars, task_type="eval")
+    log(f'Xnew', Xnew)
+
+    log('Evaluating the model..')
+    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
 
     log('Save model..')
     save(path= dirout)
@@ -627,7 +641,6 @@ def generator_train_save(dirin_or_df="", dirout="",
 def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
-
 
         root   = "ztmp/"
         dirout = "ztmp/"
@@ -665,7 +678,7 @@ class Model(object):
                     Args:
                         model_pars:     
                         data_pars:     
-                        compute_pars:     
+                        compute_pars:      
                     Returns:
                        
         """
@@ -698,26 +711,38 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def evaluate(data_pars=None, compute_pars:dict=None, out_pars: dict=None, **kw):
+def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     """ Return metrics of the model when fitted.
     """
-    global model, session
+
     from sdv.evaluation import evaluate
 
-    Xval, yval         = get_dataset(data_pars, task_type="eval")
-
-    if model.model_pars['model_class'] in IMBLEARN_MODELS:
-        Xnew, ynew     = transform((Xval, yval), data_pars, compute_pars, out_pars)
-    else:
-        Xnew           = transform(Xval, data_pars, compute_pars, out_pars)
-    
     # log(data_pars)
     mpars = compute_pars.get("metrics_pars", {'aggregate': True})
+    single_table_met = compute_pars.get("single-table", True)
     if model.model_pars['model_class'] in SDV_MODELS:
-        evals = evaluate(Xnew, Xval, **mpars )
+        if single_table_met:
+            evals = evaluate(Xnew, Xval, **mpars )
+        else:
+            evals = time_series_evaluate(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])           
         return evals
     else:
         return None
+
+
+def time_series_evaluate(synthetic_data, real_data=None, metadata=None, metrics=None, target="region"):
+    """ Return metrics of the model for Time series data.
+    """
+
+    evals = []
+    for m in metrics:
+        metric = ML_EFF_METRICS[m]
+        evals.append(metric.compute(real_data, synthetic_data, metadata, target=target))
+    
+    df = pd.DataFrame(columns=['metrics','scores'])
+    df['metrics'] = metrics
+    df['scores']  = evals
+    return df
 
 
 def transform(Xpred=None, data_pars: dict=None, compute_pars: dict=None, out_pars: dict=None, **kw):
