@@ -80,7 +80,7 @@ from utilmy.utilmy import log as llog, log2 ### Conflict with numpy.log
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.parallel") )
+    print(help_create(__file__) )
 
 
 
@@ -89,6 +89,17 @@ def test_all():
     """function test_all
     """
     test1()
+    test2()
+    test3()
+    test4()
+    test5()
+    test6()
+    test7()
+
+    test1_parallel()
+    test1_parallel2()
+    test1_parallel_island()
+
 
 
 def test_pars_values():
@@ -652,7 +663,7 @@ class myProblem6:
 
 
 class myProblem_ranking:
-    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
+    def __init__(self,n_sample = 100,kk = 1.0,nsize = 100,ncorrect1 = 50,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
         Docs::
 
@@ -705,12 +716,13 @@ class myProblem_ranking:
             formulae_str            : Formulae String
 
         """
+        import scipy
         ##### True list
-        ltrue = [ str(i)  for i in range(0, 100) ]
+        ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
 
         #### Create noisy list
         ltrue_rank = {i:x for i,x in enumerate(ltrue)}
-        list_overlap =  ltrue[:70]  #### Common elements
+        list_overlap =  np.random.choice(ltrue, 80) #ltrue[:80]  #### Common elements
 
 
         correls = []
@@ -727,7 +739,7 @@ class myProblem_ranking:
             correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
 
         correlm = np.mean(correls)
-        return -correlm  ### minimize correlation val
+        return -abs(correlm)  ### minimize correlation val
 
 
     def rank_score(self, fornulae_str:str, rank1:list, rank2:list)-> list:
@@ -802,9 +814,9 @@ class myProblem_ranking:
         list2 = random_vals + list_overlap
 
         # shuffle nsize - ncorrect elements from list2
-        copy = list2[0:nsize - ncorrect]
-        random.shuffle(copy)
-        list2[0:nsize - ncorrect] = copy
+        copy1 = list2[0:nsize - ncorrect]
+        random.shuffle(copy1)
+        list2[0:nsize - ncorrect] = copy1
 
         # ensure there are ncorrect elements in correct places
         if ncorrect == 0:
