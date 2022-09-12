@@ -454,6 +454,10 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = now_utc.replace(day=force_dayofmonth)
 
     if force_dayofweek >0 :
+        # https://stackoverflow.com/questions/25426919/python-construct-datetime-having-weekday-with-other-time-parameters
+        #from datetime import timedelta
+        #monday = today - datetime.timedelta(days= now_utc.weekday())
+        #result = (monday + timedelta(days=weekday)).replace(hour=int(t), minutes=int((t - int(t)) * 60))
         pass
 
     if force_hourofday >0 :
