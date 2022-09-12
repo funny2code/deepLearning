@@ -419,7 +419,7 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
 
 
 
-### Generic Date function
+### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
@@ -429,6 +429,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
+
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -471,7 +472,9 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
     elif returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
-### Generic Glob
+
+
+### Generic Glob  #################################################################################
 from utilmy.oos import  glob_glob
 
 
@@ -711,12 +714,6 @@ from utilmy.configs.util_config import (
 
 ######################################################################################################
 ######## External IO #################################################################################
-from utilmy.iio import (
- hdfs_put,
- hdfs_get,
- hdfs_walk
-)
-
 
 ######################################################################################################
 ###### Plot ##########################################################################################
