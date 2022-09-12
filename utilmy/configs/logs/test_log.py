@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-
-python test.py  test1
-python test.py  test2
-
+""" Test for universal logger
 
 """
 import sys, os, logging
@@ -21,6 +17,9 @@ def test_all():
 def test1():
     """function test1.
     """
+    os.environ['log_verbosity']='10'
+    os.environ['log_type']='base'
+
     from util_log import log3, log2, log, logw, loge, logc, logr
     log3("debug2")
     log2("debug")
@@ -42,11 +41,10 @@ def test1():
 def test2():
     """function test2.
     """
+    os.environ['log_verbosity']='10'
+    os.environ['log_type']='loguru'
 
-    print("\n\n\n########## Test 2############################")
     import util_log
-
-
     from util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
@@ -71,6 +69,7 @@ def test2():
 def test_logging():
     os.environ['log_verbosity']='10'
     os.environ['log_type']='logging'
+
     from util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
     from util_log import FORMATTER_1,FORMATTER_2,FORMATTER_3,FORMATTER_4,FORMATTER_5
     
