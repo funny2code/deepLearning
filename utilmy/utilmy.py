@@ -1038,10 +1038,11 @@ def test5():
 
     drepo = direpo()
 
-    log("\n####", m.os_get_dirtmp())
+
+    log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
 
-    log("\n####", m.os_get_dirtmp(subdir='test'))
+    log("\n####", m.os_get_dirtmp )
     assert m.os_get_dirtmp(subdir='test'), 'FAILED -> os_get_dirtmp'
 
     log("\n####", m.os_get_dirtmp(subdir='test', return_path=True))
