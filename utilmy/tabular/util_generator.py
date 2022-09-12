@@ -712,21 +712,24 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
 def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     """ Return metrics of the model when fitted.
     """
-
     # log(data_pars)
-    mpars = compute_pars.get("metrics_pars", {'aggregate': True})
-    single_table_met = compute_pars.get("single-table", True)
+    mpars       = compute_pars.get("metrics_pars", {'aggregate': True})
+    metric_type = compute_pars.get("metric_type", 'base')
+
     if model.model_pars['model_class'] in SDV_MODELS:
-        if single_table_met:
-            evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
-        else:
+        if  metric_type == 'timeseries':
             evals = evaluate_timeseries(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])
+
+        else :
+            evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
+
         return evals
     else:
         return None
 
 
-def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="region"):
+
+def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="y"):
     """ Return metrics of the model for Time series data.
     """
     from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
