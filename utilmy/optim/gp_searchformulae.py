@@ -100,7 +100,7 @@ def test_all():
     test1_parallel2()
     test1_parallel_island()
 
-    
+
 
 def test_pars_values():
     """ return test params

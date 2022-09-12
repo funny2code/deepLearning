@@ -1033,11 +1033,9 @@ def test4():
 
 
 def test5():
-
     import utilmy as m
 
     drepo = direpo()
-
 
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
@@ -1056,7 +1054,7 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = dc + "utilmy/utilmy.py:test2"
+    uri_name = drepo + "utilmy/utilmy.py:test2"
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'
