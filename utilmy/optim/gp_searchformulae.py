@@ -663,7 +663,7 @@ class myProblem6:
 
 
 class myProblem_ranking:
-    def __init__(self,n_sample = 5,kk = 1.0,nsize = 100,ncorrect1 = 40,ncorrect2 = 50,adjust=1.0):
+    def __init__(self,n_sample = 100,kk = 1.0,nsize = 100,ncorrect1 = 50,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
         Docs::
 
@@ -716,12 +716,13 @@ class myProblem_ranking:
             formulae_str            : Formulae String
 
         """
+        import scipy
         ##### True list
-        ltrue = [ str(i)  for i in range(0, 100) ]
+        ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
 
         #### Create noisy list
         ltrue_rank = {i:x for i,x in enumerate(ltrue)}
-        list_overlap =  ltrue[:70]  #### Common elements
+        list_overlap =  np.random.choice(ltrue, 20) #ltrue[:80]  #### Common elements
 
 
         correls = []
@@ -813,9 +814,9 @@ class myProblem_ranking:
         list2 = random_vals + list_overlap
 
         # shuffle nsize - ncorrect elements from list2
-        copy = list2[0:nsize - ncorrect]
-        random.shuffle(copy)
-        list2[0:nsize - ncorrect] = copy
+        copy1 = list2[0:nsize - ncorrect]
+        random.shuffle(copy1)
+        list2[0:nsize - ncorrect] = copy1
 
         # ensure there are ncorrect elements in correct places
         if ncorrect == 0:
