@@ -12,13 +12,8 @@ import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as n
 #################################################################
 from utilmy.utilmy import log, log2
 
-
-#################################################################
 def help():
     """function help
-    Args:
-    Returns:
-
     """
     from utilmy import help_create
     ss = help_create(__file__)
@@ -30,8 +25,7 @@ def help():
 #################################################################
 ###### TEST #####################################################
 def test_all():
-    """
-    #### python test.py   test_oos
+    """ python  utilmy/oos.py test_all
     """
     test0()
     test1()
@@ -40,30 +34,18 @@ def test_all():
     test4()
     test5()
     test_os2()
-    test_log()
-    os_path_size_test()
-    os_path_split_test()
-    os_file_replacestring_test()
-    os_walk_test()
-    os_copy_safe_test()
-    z_os_search_fast_test()
-    os_search_content_test()
-    os_get_function_name_test()
-    os_variables_test()
-    os_system_list_test()
-    os_file_check_test()
-    os_utils_test()
+    test8()
+
 
 def test0():
     """function test0
-        os_makedirs
-        os_system
-        os_platform_os
-        os_removedirs
-    Args:
-    Returns:
-
     """
+
+    logfull("log2")
+    logfull2("log5")
+
+
+    #################
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
     os_makedirs('/tmp/one/two')
@@ -80,6 +62,8 @@ def test0():
     rev_stat = os_removedirs("ztmp/ztmp2")
     assert not rev_stat == False, "cannot delete root folder"
 
+
+    ############
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
@@ -88,10 +72,6 @@ def test0():
 
 def test1():
     """function test1
-
-    Args:
-    Returns:
-
     """
     from datetime import datetime
 
@@ -120,6 +100,7 @@ def test1():
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 
+
 def test_fileCache():
     fc = fileCache(dir_cache='test')
     data = [1,2 ,3, 4]
@@ -128,11 +109,9 @@ def test_fileCache():
     assert fc.get('test') == data, 'FAILED, file cache'
 
 
+
 def test2():
     """function test2
-    Args:
-    Returns:
-
     """
     size_ = os_path_size()
     log("total size", size_)
@@ -155,9 +134,6 @@ def test2():
 
 def test4():
     """function test4
-    Args:
-    Returns:
-
     """
     log(os_get_function_name())
     cwd = os.getcwd()
@@ -175,6 +151,39 @@ def test4():
 
     os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
     os_file_check("./testdata/tmp/test/file_test.txt")
+
+
+def test_globglob():
+    os_makedirs("folder/test/file1.txt")
+    os_makedirs("folder/test/tmp/1.txt")
+    os_makedirs("folder/test/tmp/myfile.txt")
+    os_makedirs("folder/test/tmp/record.txt")
+    os_makedirs("folder/test/tmp/part.parquet")
+    os_makedirs("folder/test/file2.txt")
+    os_makedirs("folder/test/file3.txt")
+
+    glob_glob(dirin="folder/**/*.txt")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    glob_glob(dirin="folder/**/*",nfiles=5)
+    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    glob_glob(dirin="folder/",npool=2)
+    glob_glob(dirin="folder/test/",npool=2)
+
+    flist = ['folder/test/file.txt',
+        'folder/test/file1.txt',
+        'folder/test/file2.txt',
+        'folder/test/file3.txt',
+        'folder/test/tmp/1.txt',
+        'folder/test/tmp/myfile.txt',
+        'folder/test/tmp/record.txt']
+    glob_glob(dirin="", file_list=flist)
+    glob_glob(file_list=flist)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
+
+
 
 
 def test5():
@@ -207,6 +216,113 @@ def test_os2():
 
             dry=0
             )
+
+
+def test8():
+    log("Testing os_path_size() ..")
+    size_ = os_path_size()
+    log("total size", size_)
+
+
+    log("Testing os_path_split() ..")
+    result_ = os_path_split("test/tmp/test.txt")
+    log("result", result_)
+
+
+    log("Testing os_file_replacestring() ..")
+
+
+
+    log("Testing os_walk() ..")
+    cwd = os.getcwd()
+    # log(os_walk(cwd))
+
+
+    log("Testing os_copy_safe() ..")
+    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+
+
+
+    log("Testing z_os_search_fast() ..")
+    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+        file.write("Dummy text to test fast search string")
+    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    print(res)
+
+
+
+    log("Testing os_search_content() ..")
+    from utilmy.oos import os_search_content
+    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+        file.write("Dummy text to test fast search string")
+
+    cwd = os.getcwd()
+    '''TODO: for f in list_all["fullpath"]:
+        KeyError: 'fullpath'
+    res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
+    log(res)
+    '''
+
+
+    log("Testing os_get_function_name() ..")
+    log(os_get_function_name())
+
+
+
+    log("Testing os_variables_test ..")
+    ll = ["test_var"]
+    globs = {}
+    os_variable_init(ll,globs)
+    os_variable_exist("test_var",globs)
+    os_variable_check("other_var",globs,do_terminate=False)
+    os_import(mod_name="pandas", globs=globs)
+    os_clean_memory(["test_var"], globs)
+    log(os_variable_exist("test_var",globs))
+
+
+    log("Testing os_system_list() ..")
+    cmd = ["pwd","whoami"]
+    os_system_list(cmd, sleep_sec=0)
+
+
+    log("Testing os_file_check()")
+    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
+    os_file_check("./testdata/tmp/test/file_test.txt")
+
+
+
+    from utilmy import pd_random
+
+    log("Testing os utils...")
+    from utilmy.oos import os_platform_os, os_cpu, os_memory,os_getcwd, os_sleep_cpu,os_copy,\
+            os_removedirs,os_sizeof, os_makedirs
+    log(os_platform_os())
+    log(os_cpu())
+    log(os_memory())
+    log(os_getcwd())
+    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
+    os_makedirs("./testdata/tmp/test")
+    with open("./testdata/tmp/test/os_utils_test.txt", 'w') as file:
+        file.write("Dummy file to test os utils")
+
+    os_makedirs("./testdata/tmp/test/os_test")
+
+    with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
+        file.write("Dummy text to test replace string")
+
+    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/os_test/")
+
+    #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
+    os_removedirs("./testdata/tmp/test/os_test")
+    pd_df = pd_random()
+    log(os_sizeof(pd_df, set()))
+
+
+    log("Testing os_system()...")
+    os_system("whoami", doprint=True)
+
+
+
 
 
 
@@ -1196,6 +1312,8 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
+
+
 ########################################################################################################
 ########################################################################################################
 def to_timeunix(datex="2018-01-16"):
@@ -1221,35 +1339,6 @@ def to_datetime(x) :
   """
   import pandas as pd
   return pd.to_datetime( str(x) )
-
-
-def np_list_intersection(l1, l2) :
-  """function np_list_intersection
-  Args:
-      l1:
-      l2:
-  Returns:
-
-  """
-  return [x for x in l1 if x in l2]
-
-
-def np_add_remove(set_, to_remove, to_add):
-    """function np_add_remove
-    Args:
-        set_:
-        to_remove:
-        to_add:
-    Returns:
-
-    """
-    # a function that removes list of elements and adds an element from a set
-    result_temp = set_.copy()
-    for element in to_remove:
-        if element in result_temp:
-            result_temp.remove(element)
-    result_temp.extend(to_add)
-    return result_temp
 
 
 def to_float(x):
@@ -1305,6 +1394,38 @@ def is_float(x):
     except :
         return False
 
+
+
+
+########################################################################################################
+########################################################################################################
+def np_list_intersection(l1, l2) :
+  """function np_list_intersection
+  Args:
+      l1:
+      l2:
+  Returns:
+
+  """
+  return [x for x in l1 if x in l2]
+
+
+def np_add_remove(set_, to_remove, to_add):
+    """function np_add_remove
+    Args:
+        set_:
+        to_remove:
+        to_add:
+    Returns:
+
+    """
+    # a function that removes list of elements and adds an element from a set
+    result_temp = set_.copy()
+    for element in to_remove:
+        if element in result_temp:
+            result_temp.remove(element)
+    result_temp.extend(to_add)
+    return result_temp
 
 
 class toFileSafe(object):
@@ -1391,7 +1512,7 @@ def print_everywhere():
     print("Decaorator @snoop ")
 
 
-def log10(*s, nmax=60):
+def logfull(*s, nmax=60):
     """ Display variable name, type when showing,  pip install varname
 
     """
@@ -1400,7 +1521,7 @@ def log10(*s, nmax=60):
         print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
 
 
-def log5(*s):
+def logfull2(*s):
     """    ### Equivalent of print, but more :  https://github.com/gruns/icecream
     pip install icrecream
     ic()  --->  ic| example.py:4 in foo()
@@ -1447,7 +1568,6 @@ def profiler_stop():
     global profiler
     profiler.stop()
     print(profiler.output_text(unicode=True, color=True))
-
 
 
 
@@ -1547,157 +1667,6 @@ def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10
 
 
 
-
-############################################################
-def test_log():
-    from utilmy.oos import log, log2, log5
-    log("Testing logs ...")
-    log2("log2")
-    log5("log5")
-
-def os_path_size_test():
-    log("Testing os_path_size() ..")
-    from utilmy.oos import os_path_size
-    size_ = os_path_size()
-    log("total size", size_)
-
-def os_path_split_test():
-    log("Testing os_path_split() ..")
-    from utilmy.oos import os_path_split
-    result_ = os_path_split("test/tmp/test.txt")
-    log("result", result_)
-
-
-def os_file_replacestring_test():
-    log("Testing os_file_replacestring() ..")
-
-
-def os_walk_test():
-    log("Testing os_walk() ..")
-    from utilmy.oos import os_walk
-    import os
-    cwd = os.getcwd()
-    # log(os_walk(cwd))
-
-def os_copy_safe_test():
-    log("Testing os_copy_safe() ..")
-    from utilmy.oos import os_copy_safe
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
-
-def z_os_search_fast_test():
-    log("Testing z_os_search_fast() ..")
-    from utilmy.oos import z_os_search_fast
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
-    print(res)
-
-def os_search_content_test():
-    log("Testing os_search_content() ..")
-    from utilmy.oos import os_search_content
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    import os
-    cwd = os.getcwd()
-    '''TODO: for f in list_all["fullpath"]:
-        KeyError: 'fullpath'
-    res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
-    log(res)
-    '''
-
-
-def test_globglob():
-    os_makedirs("folder/test/file1.txt")
-    os_makedirs("folder/test/tmp/1.txt")
-    os_makedirs("folder/test/tmp/myfile.txt")
-    os_makedirs("folder/test/tmp/record.txt")
-    os_makedirs("folder/test/tmp/part.parquet")
-    os_makedirs("folder/test/file2.txt")
-    os_makedirs("folder/test/file3.txt")
-
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=2)
-    glob_glob(dirin="folder/test/",npool=2)
-
-    flist = ['folder/test/file.txt',
-        'folder/test/file1.txt',
-        'folder/test/file2.txt',
-        'folder/test/file3.txt',
-        'folder/test/tmp/1.txt',
-        'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
-
-
-
-def os_get_function_name_test():
-    log("Testing os_get_function_name() ..")
-    from utilmy.oos import os_get_function_name
-    log(os_get_function_name())
-
-def os_variables_test():
-    log("Testing os_variables_test ..")
-    from utilmy.oos import os_variable_init, os_variable_check, os_variable_exist, os_import, os_clean_memory
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
-
-def os_system_list_test():
-    log("Testing os_system_list() ..")
-    from utilmy.oos import os_system_list
-    cmd = ["pwd","whoami"]
-    os_system_list(cmd, sleep_sec=0)
-
-def os_file_check_test():
-    log("Testing os_file_check()")
-    from utilmy.oos import os_to_file, os_file_check
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
-
-def os_utils_test():
-    from utilmy import pd_random
-    
-    log("Testing os utils...")
-    from utilmy.oos import os_platform_os, os_cpu, os_memory,os_getcwd, os_sleep_cpu,os_copy,\
-            os_removedirs,os_sizeof, os_makedirs
-    log(os_platform_os())
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    os_makedirs("./testdata/tmp/test")
-    with open("./testdata/tmp/test/os_utils_test.txt", 'w') as file:
-        file.write("Dummy file to test os utils")
-
-    os_makedirs("./testdata/tmp/test/os_test")
-    from utilmy.oos import os_file_replacestring
-    with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
-        file.write("Dummy text to test replace string")
-
-    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/os_test/")
-
-    #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-    os_removedirs("./testdata/tmp/test/os_test")
-    pd_df = pd_random()
-    log(os_sizeof(pd_df, set()))
-
-def os_system_test():
-    log("Testing os_system()...")
-    from utilmy.oos import os_system
-    os_system("whoami", doprint=True)
 
 
 
