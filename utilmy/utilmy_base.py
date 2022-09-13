@@ -1010,7 +1010,7 @@ def test4():
         return arg1 + arg2
 
 
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+    for name in [ 'utilmy.parallel', 'utilmy.utilmy_base',  ]:
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
