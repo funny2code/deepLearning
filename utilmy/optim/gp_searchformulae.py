@@ -691,7 +691,6 @@ class myProblem_ranking:
         self.adjust    = adjust
 
 
-
     def get_cost(self, expr:None, symbols):
         """ Cost Calculation, Objective to Maximize
         Docs::
@@ -723,7 +722,6 @@ class myProblem_ranking:
         #### Create noisy list
         ltrue_rank = {i:x for i,x in enumerate(ltrue)}
         list_overlap =  np.random.choice(ltrue, 80) #ltrue[:80]  #### Common elements
-
 
         correls = []
         for i in range(self.n_sample):
@@ -762,7 +760,6 @@ class myProblem_ranking:
 
         scores_new =  eval(fornulae_str)
         return scores_new
-
 
 
     def rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str):

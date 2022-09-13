@@ -26,6 +26,190 @@ def help():
 
 
 
+
+#################################################################
+###### TEST #####################################################
+def test_all():
+    """
+    #### python test.py   test_oos
+    """
+    test0()
+    test1()
+    test_fileCache()
+    test2()
+    test4()
+    test5()
+    test_os2()
+    test_log()
+    os_path_size_test()
+    os_path_split_test()
+    os_file_replacestring_test()
+    os_walk_test()
+    os_copy_safe_test()
+    z_os_search_fast_test()
+    os_search_content_test()
+    os_get_function_name_test()
+    os_variables_test()
+    os_system_list_test()
+    os_file_check_test()
+    os_utils_test()
+
+def test0():
+    """function test0
+        os_makedirs
+        os_system
+        os_platform_os
+        os_removedirs
+    Args:
+    Returns:
+
+    """
+    os_makedirs('ztmp/ztmp2/myfile.txt')
+    os_makedirs('ztmp/ztmp3/ztmp4')
+    os_makedirs('/tmp/one/two')
+    os_makedirs('/tmp/myfile')
+    os_makedirs('/tmp/one/../mydir/')
+    os_makedirs('./tmp/test')
+    os.system("ls ztmp")
+
+    path = ["/tmp/", "ztmp/ztmp3/ztmp4", "/tmp/", "./tmp/test","/tmp/one/../mydir/"]
+    for p in path:
+       f = os.path.exists(os.path.abspath(p))
+       assert  f == True, "path " + p
+
+    rev_stat = os_removedirs("ztmp/ztmp2")
+    assert not rev_stat == False, "cannot delete root folder"
+
+    res = os_system( f" ls . ",  doprint=True)
+    log(res)
+    res = os_system( f" ls . ",  doprint=False)
+    assert os_platform_os() == sys.platform
+
+
+def test1():
+    """function test1
+
+    Args:
+    Returns:
+
+    """
+    from datetime import datetime
+
+    int_ = 1
+    float_ = 1.1
+    log(is_int(int_))
+    assert is_int(int_) == True, 'Failed to convert'
+    log(is_float(float_))
+    assert is_float(float_) == True, 'Failed to convert'
+    log(to_float(int_))
+    assert to_float(int_) == 1.0, 'Failed to convert'
+    log(to_int(float_))
+    assert to_int(float_) == 1, 'Failed to convert'
+
+    log(to_timeunix(datex="2022-01-01"))
+    assert to_timeunix(datex="2022-01-01"), 'Failed to convert'
+
+    log(to_datetime(datetime.now()))
+    assert to_datetime(datetime.now()), 'Failed to convert'
+
+    # np_list_intersection
+    l1 = [1, 3, 5, 7 ,9]
+    l2 = [2, 3, 5, 6, 8]
+    log(np_list_intersection(l1,l2))
+    assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
+    log(np_add_remove(l1, [1, 2, 4], [5, 6]))
+
+
+def test_fileCache():
+    fc = fileCache(dir_cache='test')
+    data = [1,2 ,3, 4]
+    fc.set( 'test', data )
+    log(fc.get('test'))
+    assert fc.get('test') == data, 'FAILED, file cache'
+
+
+def test2():
+    """function test2
+    Args:
+    Returns:
+
+    """
+    size_ = os_path_size()
+    log("total size", size_)
+    result_ = os_path_split("test/tmp/test.txt")
+    log("result", result_)
+    with open("./testdata/tmp/test/os_file_test.txt", 'a') as file:
+        file.write("Dummy text to test replace string")
+
+    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
+    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+
+    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+        file.write("Dummy text to test fast search string")
+    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+
+    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+        file.write("Dummy text to test fast search string")
+
+
+
+def test4():
+    """function test4
+    Args:
+    Returns:
+
+    """
+    log(os_get_function_name())
+    cwd = os.getcwd()
+    log(os_walk(cwd))
+    cmd = ["pwd","whoami"]
+    os_system_list(cmd, sleep_sec=0)
+    ll = ["test_var"]
+    globs = {}
+    os_variable_init(ll,globs)
+    os_variable_exist("test_var",globs)
+    os_variable_check("other_var",globs,do_terminate=False)
+    os_import(mod_name="pandas", globs=globs)
+    os_clean_memory(["test_var"], globs)
+    log(os_variable_exist("test_var",globs))
+
+    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
+    os_file_check("./testdata/tmp/test/file_test.txt")
+
+
+def test5():
+    """function test5
+    Args:
+    Returns:
+
+    """
+    log("Testing os utils...")
+    from utilmy import pd_random
+    log(os_platform_os())
+    log(os_cpu())
+    log(os_memory())
+    log(os_getcwd())
+    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
+    pd_df = pd_random()
+    log(os_sizeof(pd_df, set()))
+
+
+def test_os2():
+    log(" os_copy")
+    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
+            dry=0
+            )
+
+
+
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
 class dict_to_namespace(object):
@@ -1361,187 +1545,6 @@ def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10
 
 
 
-
-#################################################################
-###### TEST #####################################################
-def test_all():
-    """
-    #### python test.py   test_oos
-    """
-    test0()
-    test1()
-    test_fileCache()
-    test2()
-    test4()
-    test5()
-    test_os2()
-    test_log()
-    os_path_size_test()
-    os_path_split_test()
-    os_file_replacestring_test()
-    os_walk_test()
-    os_copy_safe_test()
-    z_os_search_fast_test()
-    os_search_content_test()
-    os_get_function_name_test()
-    os_variables_test()
-    os_system_list_test()
-    os_file_check_test()
-    os_utils_test()
-
-def test0():
-    """function test0
-        os_makedirs
-        os_system
-        os_platform_os
-        os_removedirs
-    Args:
-    Returns:
-
-    """
-    os_makedirs('ztmp/ztmp2/myfile.txt')
-    os_makedirs('ztmp/ztmp3/ztmp4')
-    os_makedirs('/tmp/one/two')
-    os_makedirs('/tmp/myfile')
-    os_makedirs('/tmp/one/../mydir/')
-    os_makedirs('./tmp/test')
-    os.system("ls ztmp")
-
-    path = ["/tmp/", "ztmp/ztmp3/ztmp4", "/tmp/", "./tmp/test","/tmp/one/../mydir/"]
-    for p in path:
-       f = os.path.exists(os.path.abspath(p))
-       assert  f == True, "path " + p
-
-    rev_stat = os_removedirs("ztmp/ztmp2")
-    assert not rev_stat == False, "cannot delete root folder"
-
-    res = os_system( f" ls . ",  doprint=True)
-    log(res)
-    res = os_system( f" ls . ",  doprint=False)
-    assert os_platform_os() == sys.platform
-
-
-def test1():
-    """function test1
-    
-    Args:
-    Returns:
-
-    """
-    from datetime import datetime
-
-    int_ = 1
-    float_ = 1.1
-    log(is_int(int_))
-    assert is_int(int_) == True, 'Failed to convert'
-    log(is_float(float_))
-    assert is_float(float_) == True, 'Failed to convert'
-    log(to_float(int_))
-    assert to_float(int_) == 1.0, 'Failed to convert'
-    log(to_int(float_))
-    assert to_int(float_) == 1, 'Failed to convert'
-
-    log(to_timeunix(datex="2022-01-01"))
-    assert to_timeunix(datex="2022-01-01"), 'Failed to convert'
-
-    log(to_datetime(datetime.now()))
-    assert to_datetime(datetime.now()), 'Failed to convert'
-
-    # np_list_intersection
-    l1 = [1, 3, 5, 7 ,9]
-    l2 = [2, 3, 5, 6, 8]
-    log(np_list_intersection(l1,l2))
-    assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
-    log(np_add_remove(l1, [1, 2, 4], [5, 6]))
-
-
-def test_fileCache():
-    fc = fileCache(dir_cache='test')
-    data = [1,2 ,3, 4]
-    fc.set( 'test', data )
-    log(fc.get('test'))
-    assert fc.get('test') == data, 'FAILED, file cache'
-
-
-def test2():
-    """function test2
-    Args:
-    Returns:
-
-    """
-    size_ = os_path_size()
-    log("total size", size_)
-    result_ = os_path_split("test/tmp/test.txt")
-    log("result", result_)
-    with open("./testdata/tmp/test/os_file_test.txt", 'a') as file:
-        file.write("Dummy text to test replace string")
-
-    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
-
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
-
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-
-
-
-def test4():
-    """function test4
-    Args:
-    Returns:
-
-    """
-    log(os_get_function_name())
-    cwd = os.getcwd()
-    log(os_walk(cwd))
-    cmd = ["pwd","whoami"]
-    os_system_list(cmd, sleep_sec=0)
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
-
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
-
-
-def test5():
-    """function test5
-    Args:
-    Returns:
-
-    """
-    log("Testing os utils...")
-    from utilmy import pd_random
-    log(os_platform_os())
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    pd_df = pd_random()
-    log(os_sizeof(pd_df, set()))
-
-
-def test_os2():
-    log(" os_copy")
-    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            )
 
 
 
