@@ -23,38 +23,32 @@ def test_all():
     """#### python test.py   test_nnumpy
     """
     test1()
-    test2()
-    test3()
-    
+
+
 def test1():
-    """np_list_intersection test
-    
+    """
     """
     from utilmy import nnumpy as m
+
+
+    log("#############", m.np_list_intersection())
     l1 = [1,2,3]
     l2 = [3,4,1]
     result = m.np_list_intersection(l1,l2)
-    log("np_list_intersection",result)
+    log(result)
     assert set(result).issubset(set(l1)),"Intersection item(s) not in first list"
     assert set(result).issubset(set(l2)),"Intersection item(s) not in second list"
 
 
-def test2():
-    """np_add_remove test
-    
-    """
-    from utilmy import nnumpy as m
+    log("#############", m.np_add_remove)
     set_ = {1,2,3,4,5}
     add_element = 6
     remove_elements = [1,2]
     result = m.np_add_remove(set_,remove_elements,add_element)
-    log("np_add_remove",result)
     remove_elements = [1,2,3]
     assert set([add_element]).issubset(set(result)),"Added element not in revised set"
 
-def test3():
-    from utilmy import nnumpy as m
-    import datetime 
+
     res = m.to_dict(kw=[1,2,3])
     log("to_dict",res)
     assert isinstance(res,dict),"Return result not of dictionary type"
