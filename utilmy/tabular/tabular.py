@@ -17,16 +17,16 @@ Doc::
 
 """
 import os, sys, pandas as pd, numpy as np
-from utilmy.utilmy import pd_generate_data
+from utilmy.utilmy_base import pd_generate_data
 from utilmy.prepro.util_feature import  pd_colnum_tocat, pd_colnum_tocat_stat
 
 
 #################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     from utilmy import help_create
-    print( help_create("utilmy.tabular") )
+    print(help_create(__file__) )
 
     
     

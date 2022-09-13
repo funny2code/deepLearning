@@ -94,10 +94,10 @@ sys.path.append( os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "
 ### SDV
 try:
     #from sdv.demo import load_tabular_demo
+    import sdv
     from sdv.tabular import TVAE, CTGAN
     from sdv.timeseries import PAR
     from sdv.evaluation import evaluate
-    from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
     import ctgan
     
     if ctgan.__version__ != '0.5.1':
@@ -152,9 +152,7 @@ try :
                         'NearMiss'      : NearMiss
                         }
 
-    ML_EFF_METRICS = { 'TSFClassifierEfficacy'   :TSFClassifierEfficacy, 
-                       'LSTMClassifierEfficacy'  :LSTMClassifierEfficacy
-                     }
+
 except : pass
 
 #################################################################################################
@@ -425,9 +423,10 @@ def test5(n_sample = 1000):
 
     ###############################################################################
     compute_pars = { 'compute_pars' : {},
-                     'metadata' :  metadata,
+                     'metadata'     :  metadata,
+                     'target'       :  'region',
                      'metrics_pars' : {'metrics' :['TSFClassifierEfficacy','LSTMClassifierEfficacy']},
-                     'single-table': False,   # Time series metric
+                     'metric_type'  : 'timeseries',
                      'n_sample_generation' : n_sample
                    }
 
@@ -714,30 +713,36 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
 def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     """ Return metrics of the model when fitted.
     """
-
-    from sdv.evaluation import evaluate
-
     # log(data_pars)
-    mpars = compute_pars.get("metrics_pars", {'aggregate': True})
-    single_table_met = compute_pars.get("single-table", True)
+    mpars       = compute_pars.get("metrics_pars", {'aggregate': True})
+    metric_type = compute_pars.get("metric_type", 'tabular')
+
     if model.model_pars['model_class'] in SDV_MODELS:
-        if single_table_met:
-            evals = evaluate(Xnew, Xval, **mpars )
-        else:
-            evals = time_series_evaluate(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])           
+        if  metric_type == 'timeseries':
+            target = compute_pars.get("target", '')
+            assert(target is not None)
+            evals = evaluate_timeseries(Xnew, Xval,**mpars, metadata = compute_pars['metadata'], target=target)
+
+        else :
+            evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
+
         return evals
     else:
         return None
 
 
-def time_series_evaluate(synthetic_data, real_data=None, metadata=None, metrics=None, target="region"):
+
+def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="y"):
     """ Return metrics of the model for Time series data.
     """
-
+    from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
+    ML_EFF_METRICS = { 'TSFClassifierEfficacy'   :TSFClassifierEfficacy,
+                       'LSTMClassifierEfficacy'  :LSTMClassifierEfficacy
+                     }
     evals = []
     for m in metrics:
         metric = ML_EFF_METRICS[m]
-        evals.append(metric.compute(real_data, synthetic_data, metadata, target=target))
+        evals.append(metric.compute(real_data, synthetic_data, metadata=metadata, target=target))
     
     df = pd.DataFrame(columns=['metrics','scores'])
     df['metrics'] = metrics

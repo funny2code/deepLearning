@@ -256,7 +256,8 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 
 #### Universal config Loader
-from utilmy.configs.util_config import config_load
+#import utilmy.cconfigs.util_config
+#from utilmy.cconfigs.util_config import config_load
 
 
 ###################################################################################################
@@ -307,9 +308,6 @@ def import_function(fun_name=None, module_name=None, fuzzy_match=False):
     except Exception as e :
         msg = "Missing " + str(fun_name) + "," + str(dir(module1))
         raise Exception( msg )  
-
-
-from utilmy.oos import glob_glob
 
 
 
@@ -386,14 +384,23 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
     """
     import importlib, sys
     from pathlib import Path
+
+
+    uri_name = uri_name.replace("\\", "/")
+
     if ":" in uri_name :
         pkg = uri_name.split(":")
+        if ":/" in uri_name:  ### windows case
+           pkg = uri_name.split("/")[-1].split(":")
+
         assert len(pkg) > 1, "  Missing :   in  uri_name module_name:function_or_class "
         package, name = pkg[0], pkg[1]
+        package = package.replace(".py", "")
 
     else :
         pkg = uri_name.split(".")
-        package = ".".join(pkg[:-1])      
+        package = ".".join(pkg[:-1])
+        package = package.replace(".py", "")
         name    = pkg[-1]   
 
     
@@ -406,25 +413,22 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
             ### Add Folder to Path and Load absoluate path module
             path_parent = str(Path(package).parent.parent.absolute())
             sys.path.append(path_parent)
-            #log(path_parent)
+            log(path_parent)
 
             #### import Absolute Path model_tf.1_lstm
+            log(str(package))
             model_name   = Path(package).stem  # remove .py
             package_name = str(Path(package).parts[-2]) + "." + str(model_name)
-            #log(package_name, model_name)
+
+            log(package_name, model_name)
             return  getattr(importlib.import_module(package_name), name)
 
         except Exception as e2:
             raise NameError(f"Module {pkg} notfound, {e1}, {e2}")
 
 
-def test_load_function_uri():
-    uri_name = "./testdata/ttorch/models.py:SuperResolutionNet"
-    myclass = load_function_uri(uri_name)
-    log(myclass)
 
-
-### Generic Date function
+### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
@@ -434,6 +438,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
+
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -458,6 +463,10 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = now_utc.replace(day=force_dayofmonth)
 
     if force_dayofweek >0 :
+        # https://stackoverflow.com/questions/25426919/python-construct-datetime-having-weekday-with-other-time-parameters
+        #from datetime import timedelta
+        #monday = today - datetime.timedelta(days= now_utc.weekday())
+        #result = (monday + timedelta(days=weekday)).replace(hour=int(t), minutes=int((t - int(t)) * 60))
         pass
 
     if force_hourofday >0 :
@@ -476,7 +485,9 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
     elif returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
-### Generic Glob
+
+
+### Generic Glob  #################################################################################
 from utilmy.oos import  glob_glob
 
 
@@ -602,7 +613,7 @@ from utilmy.parallel import (
 
 
 from utilmy.ppandas import (
-    pd_random,
+    #pd_random,
     pd_merge,
     pd_plot_multi,
     pd_plot_histogram,
@@ -707,8 +718,8 @@ os_remove = os_removedirs
 ################################################################################################
 ########  Configuration  #######################################################################
 from utilmy.configs.util_config import (
- config_load,
- global_verbosity
+config_load,
+global_verbosity
 
 
 )
@@ -716,12 +727,6 @@ from utilmy.configs.util_config import (
 
 ######################################################################################################
 ######## External IO #################################################################################
-from utilmy.iio import (
- hdfs_put,
- hdfs_get,
- hdfs_walk
-)
-
 
 ######################################################################################################
 ###### Plot ##########################################################################################
@@ -932,27 +937,21 @@ def test_all():
     test3()
     test4()
     test5()
+    test7()
 
 
 def test1():
     import utilmy as m
 
-    ###################################################################################
-    log("\n##### git_repo_root  ")
-    log(m.git_repo_root())
+    ###################################################################
+    log("\n##### git_repo_root  ", m.git_repo_root())
     assert not m.git_repo_root() == None, "err git repo"
 
-    log("\n##### git_current_hash  ")
-    log(m.git_current_hash())
+    log("\n##### git_current_hash  ", m.git_current_hash())
     assert not m.git_current_hash() == None, "err git hash"
 
-    log("\n##### Doc generator: help_create  ")
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
-        log("\n####", name,"\n", m.help_create(name))
-        log("\n####", name,"\n", m.help_info(name))
 
-
-    ###################################################################################
+    ####################################################################
     log("\n##### global_verbosity  ")
     log('verbosity', m.global_verbosity(__file__, "config.json", 40,))
     log('verbosity', m.global_verbosity('../', "config.json", 40,))
@@ -1013,7 +1012,7 @@ def test4():
         return arg1 + arg2
 
 
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+    for name in [ 'utilmy.parallel', 'utilmy.utilmy_base',  ]:
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
@@ -1043,8 +1042,8 @@ def test5():
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
 
 
-    log("\n####", m.os_module_name(filepath='utilmy/utilmy.py'))
-    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
+    log("\n####", m.os_module_name(filepath='utilmy/utilmy_base.py'))
+    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy_base.py'), 'FAILED -> os_module_name'
 
 
     log("\n####", m.get_loggers())
@@ -1054,10 +1053,48 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = drepo + "utilmy/utilmy.py:test2"
-    myclass = load_function_uri(uri_name)
-    log(myclass)
-    assert myclass, 'FAILED -> load_function_uri'
+    log("\n####", m.load_function_uri )
+    ll = [ drepo + "utilmy/utilmy_base.py:test2"
+
+    ]
+    for uri_name in ll :
+        myclass = load_function_uri(uri_name=uri_name)
+        log(myclass)
+        assert myclass, 'FAILED -> load_function_uri'
+
+
+def test6():
+    import utilmy as m
+
+
+    log("\n####", m.date_now)
+    assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
+    assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
+    assert m.date_now('2021-10-05', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
+    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
+    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
+
+
+def test7():
+    import utilmy as m
+
+
+    log("\n####", m.pd_random)
+    df = m.pd_random(nrows=37, ncols=5)
+    assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "
+
+    log("\n####", m.pd_generate_data)
+    df = m.pd_generate_data(nrows=25, ncols=7)
+    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 125,7 "
+
+    log("\n####", m.pd_getdata)
+    files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
+    assert list(m.pd_getdata(verbose=False).keys()) == files, f"FAILED -> all the files are not read properly"
+    
+
+
+
 
 
 def test6():

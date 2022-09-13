@@ -46,7 +46,7 @@ import matplotlib.pyplot as plt
 try :
   import abra
 except :
-   from utilmy.utilmy import sys_install
+   from utilmy.utilmy_base import sys_install
    pkg = "  abracadabra   hypothesis  "
    print('Installing pip install ' + pkg) ; time.time(7)
    # sys_install(cmd= f"pip install {pkg}  --upgrade-strategy only-if-needed")

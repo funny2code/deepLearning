@@ -22,13 +22,8 @@ except Exception as e :
 from utilmy import log, log2
 
 def help():
-    """
-    Summary: Extract code source from test code
-    """
-
     from utilmy import help_create
-    ss = help_create("utilmy.deeplearning.keras.Loss_graph")
-    print(ss)
+    print(help_create(__file__) )
 
 
 

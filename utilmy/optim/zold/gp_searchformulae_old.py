@@ -85,7 +85,7 @@ from numpy import sin, cos
 np.seterr(all='ignore') 
 
 ####################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 # def log(*s):
 #     """Log/Print"""
@@ -94,7 +94,7 @@ from utilmy.utilmy import log, log2
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.parallel") )
+    print(help_create(__file__) )
 
 
 

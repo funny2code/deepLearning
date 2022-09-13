@@ -90,7 +90,7 @@ from pyspark.sql.window import Window
 
 sp_dataframe= pyspark.sql.DataFrame
 ##################################################################################
-from utilmy.utilmy import log, log2, os_module_name
+from utilmy.utilmy_base import log, log2, os_module_name
 MNAME = os_module_name(__file__)
 
 def help():
@@ -524,7 +524,7 @@ def spark_get_session_local(config:str="/default.yaml", keyfield='sparkconfig'):
             sparksession = spark_get_session_local('mypath/conffig.yaml)
 
     """
-    from utilmy.utilmy import direpo
+    from utilmy.utilmy_base import direpo
     # from utilmy.configs.util_config import config_load
 
     if config == "/default.yaml":
@@ -624,7 +624,7 @@ def spark_get_session(config:dict, config_key_name='spark_config', verbose=0):
     from pyspark import SparkConf
     from pyspark.sql import SparkSession
     if isinstance(config, str):
-        from utilmy.configs.util_config import config_load
+        from utilmy.cconfigs.util_config import config_load
         config_path = config
         config = config_load(config_path)  ### Universal config loader
     assert isinstance(config, dict),  'spark configuration is not a dictionary {}'.format(config)

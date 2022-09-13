@@ -14,7 +14,7 @@ from box import Box
 
 
 #############################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 def help():
     """function help        """
     from utilmy import help_create

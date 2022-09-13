@@ -34,6 +34,28 @@ def test_getdata(verbose=True):
     print(data.keys() )
     return data
 
+def test_serve(verbose=False):
+    """function test1.
+    Doc::
+            
+            Args:
+                verbose:   
+            Returns:
+                
+    """
+    ####  Test Datatable
+    doc = vi.htmlDoc(dir_out="", title="hello", format='myxxxx', cfg={})
+    # check add css
+    css = """.intro { background-color: yellow;} """
+    doc.add_css(css)
+    # test create table
+    df = test_getdata()['titanic.csv']
+    doc.h1(" Table test ")
+    doc.table(df, use_datatable=True, table_id="test", custom_css_class='intro')
+    if verbose: doc.print()
+    doc.save(dir_out="testdata/test_viz_table.html")
+    doc.serve_file()
+
 def test1(verbose=False):
     """function test1.
     Doc::

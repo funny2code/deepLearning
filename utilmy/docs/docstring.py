@@ -23,7 +23,7 @@ from attr import Factory
 
 ##########################################################################################################
 from utilmy.docs.code_parser import get_list_function_info, get_list_method_info
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     """function help"""

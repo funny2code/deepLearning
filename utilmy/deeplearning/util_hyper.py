@@ -349,7 +349,7 @@ if 'utils':
         return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
 
-    from utilmy.utilmy import load_function_uri
+    from utilmy.utilmy_base import load_function_uri
 
 
     def test_create_model_pytorch(dirsave=None, model_name=""):

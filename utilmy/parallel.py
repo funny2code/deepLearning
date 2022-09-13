@@ -14,12 +14,12 @@ from typing import Callable, Tuple, Union
 
 #################################################################################################
 verbose = os.environ.get('utilmy_verbose', 0)
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.parallel") )
+    print(help_create(__file__) )
 
 
 #################################################################################################

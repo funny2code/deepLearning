@@ -22,7 +22,7 @@ from torch import nn
 
 
 ####################################################################################################
-from utilmy.utilmy import global_verbosity, os_makedirs, log, log2, log3
+from utilmy.utilmy_base import global_verbosity, os_makedirs, log, log2, log3
 verbosity = global_verbosity(__file__, "/../../config.json" ,default= 5)
 
 
