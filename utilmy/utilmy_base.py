@@ -1075,13 +1075,11 @@ def test6():
 def test7():
     import utilmy as m
 
-    log("\n####", pd_random)
 
-    generated_dataframe = m.pd_random()
-    default_nrows = 100
-    default_ncols = 4
-    assert generated_dataframe.shape[0] == default_nrows, "FAILED -> pd_random does not have 100 rows"
-    assert generated_dataframe.shape[1] == default_ncols, "FAILED -> pd_random does not have 4 columns"
+    log("\n####", pd_random)
+    df = m.pd_random(nrows=37, ncols=5)
+    assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "
+
 
 
 
