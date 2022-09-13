@@ -937,6 +937,7 @@ def test_all():
     test3()
     test4()
     test5()
+    test_pd_random()
 
 
 def test1():
@@ -1059,7 +1060,6 @@ def test5():
     assert myclass, 'FAILED -> load_function_uri'
 
 
-
 def test6():
     import utilmy as m
 
@@ -1070,6 +1070,18 @@ def test6():
     assert m.date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
     assert m.date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
     assert m.date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
+
+def test_pd_random():
+    """Test pd_random method from utilmy.ppandas
+    """
+    import utilmy as m
+
+    log("\n####", pd_random)
+
+    generated_dataframe = m.pd_random()
+    assert generated_dataframe.shape[0] == 100, "FAILED -> pd_random does not have 100 rows"
+    assert generated_dataframe.shape[1] == 4, "FAILED -> pd_random does not have 4 columns"
 
 
 
