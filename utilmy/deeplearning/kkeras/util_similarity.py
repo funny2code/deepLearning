@@ -12,15 +12,8 @@ from typing import Tuple, Union, Iterable
 from tensorflow.python.framework.ops import EagerTensor, Tensor
 
 def help():
-    """function help
-    Args:
-    Returns:
-        
-    """
     from utilmy import help_create
-    ss = help_create("utilmy.deeplearning.keras.util_similarity") 
-    print(ss)
-
+    print(help_create(__file__) )
 
 ######################################################################################
 def test_all() -> None:

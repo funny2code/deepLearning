@@ -19,7 +19,7 @@ from utilmy.utilmy_base import log, log2
 
 def help():
     from utilmy import help_create
-    print(help_create("utilmy.parallel") )
+    print(help_create(__file__) )
 
 
 #################################################################################################
