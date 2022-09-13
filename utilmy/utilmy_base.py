@@ -613,7 +613,7 @@ from utilmy.parallel import (
 
 
 from utilmy.ppandas import (
-    pd_random,
+    #pd_random,
     pd_merge,
     pd_plot_multi,
     pd_plot_histogram,
@@ -1076,7 +1076,7 @@ def test7():
     import utilmy as m
 
 
-    log("\n####", pd_random)
+    log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
     assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "
 
