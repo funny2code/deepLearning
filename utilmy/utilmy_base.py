@@ -938,8 +938,13 @@ def test_all():
     test4()
     test5()
     test7()
-    test_save_and_load()
-    test_to_file()
+    test1()
+    test2()
+    test3()
+    test4()
+    test5()
+    test6()
+    test7()
 
 
 def test1():
@@ -1081,6 +1086,8 @@ def test6():
 def test7():
     import utilmy as m
 
+    d0 = os_get_dirtmp()
+
 
     log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
@@ -1095,25 +1102,24 @@ def test7():
     assert list(m.pd_getdata(verbose=False).keys()) == files, f"FAILED -> all the files are not read properly"
     
 
-def test_save_and_load():
-    import utilmy as m
-    log("\n####", m.save)
-    log("\n####", m.load)
+    log("\n####", m.save, m.load)
     data_for_save = "data_for_save"
     m.save(data_for_save, "./testfile")
     loaded_data = m.load("./testfile")
-    os.remove("./testfile")
     assert loaded_data == data_for_save, "FAILED -> save and load"
 
-def test_to_file():
-    import utilmy as m
+
     log("\n####", m.to_file)
     to_file("some_text_data","./testfile",mode="w")
-    file_content = None
     with open("./testfile", mode="r") as fp:
         file_content = fp.read()
-    os.remove("./testfile")
     assert file_content == "some_text_data", "FAILED -> to_file"
+
+    os.remove("./testfile")
+
+
+
+
 
 ###################################################################################################
 if __name__ == "__main__":
