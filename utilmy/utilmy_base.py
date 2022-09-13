@@ -1086,6 +1086,8 @@ def test6():
 def test7():
     import utilmy as m
 
+    d0 = os_get_dirtmp()
+
 
     log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
@@ -1113,8 +1115,9 @@ def test7():
         file_content = fp.read()
     assert file_content == "some_text_data", "FAILED -> to_file"
 
-
     os.remove("./testfile")
+
+
 
 
 
