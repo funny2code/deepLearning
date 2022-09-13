@@ -12,7 +12,7 @@ import numpy as np
 from tqdm import tqdm
 import math, glob
 
-from utilmy.utilmy import log
+from utilmy.utilmy_base import log
 
 
 def test_all():

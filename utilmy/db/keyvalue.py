@@ -31,11 +31,11 @@ try :
    import diskcache as dc
 except: pass
 
-from utilmy.utilmy import   pd_read_file, pd_to_file
+from utilmy.utilmy_base import   pd_read_file, pd_to_file
 
 
 #####################################################################################    
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     from utilmy import help_create

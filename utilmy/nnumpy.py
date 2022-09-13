@@ -8,7 +8,7 @@ import os, sys, time, datetime,inspect, json, yaml, gc
 from collections import OrderedDict
 
 ###################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     from utilmy import help_create

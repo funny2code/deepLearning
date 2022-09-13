@@ -9,15 +9,15 @@ Doc::
 
 
 """
-import importlib, os
+import importlib
+import os
 from pathlib import Path
 from typing import Union
+
 from box import Box
 
-
 #########################################################################################################
-from utilmy.utilmy import (log, log2, loge,  os_get_dirtmp)
-
+from utilmy.utilmy_base import (log, loge, os_get_dirtmp)
 
 
 #########################################################################################################
@@ -160,7 +160,6 @@ def to_file(txt, fpath, mode='a'):
 
 
 def test_create_file(dirout=None):
-    import tempfile
     import yaml, json, toml
 
     dir_cur = os_get_dirtmp() if dirout is None else dirout

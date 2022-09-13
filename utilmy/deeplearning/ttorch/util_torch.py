@@ -1182,7 +1182,7 @@ def torch_effective_dim(X, center = True):
 
 #############################################################################################
 ########### Utils  ##########################################################################
-from utilmy.utilmy import load_function_uri
+from utilmy.utilmy_base import load_function_uri
 
 
 def to_numpy(tensor):

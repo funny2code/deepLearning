@@ -17,7 +17,7 @@ from box import Box
 
 
 ################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 from tensorflow.python.keras.engine.functional import Functional
 from typing import List, Optional
 

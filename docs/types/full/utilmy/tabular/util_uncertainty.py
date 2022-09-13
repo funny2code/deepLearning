@@ -248,7 +248,7 @@ def test_data_classifier_digits() -> Tuple[ndarray, ndarray, ndarray, ndarray, L
     return X_train, X_test, y_train, y_test, feature_names
 
 
-from utilmy.utilmy import load_function_uri
+from utilmy.utilmy_base import load_function_uri
 
 
 

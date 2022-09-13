@@ -60,7 +60,7 @@ try :
    from highcharts import Highchart
    from pyvis import network as net
 except :
-   from utilmy.utilmy import sys_install
+   from utilmy.utilmy_base import sys_install
    sys_install(cmd= "pip install python-box python-highcharts matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed")      
    1/0  ### exit Gracefully !
 

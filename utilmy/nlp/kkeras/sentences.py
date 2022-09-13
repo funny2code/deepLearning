@@ -16,7 +16,7 @@ import tensorflow_hub as hub
 
 ###################################################################################
 from utilmy.parallel import pd_read_file, os_makedirs
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 
 def help():

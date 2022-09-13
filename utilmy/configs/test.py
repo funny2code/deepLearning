@@ -4,7 +4,7 @@ import pytest
 from box import Box
 from yamale import YamaleError
 
-from utilmy.configs.util_config import config_validate
+from utilmy.cconfigs.util_config import config_validate
 
 
 # in order to run tests install required packages:
