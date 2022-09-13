@@ -5,21 +5,14 @@ HELP= """
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc
-
 from collections import OrderedDict
 
 ###################################################################################################
-verbose = 0
-
-def log(*s):
-    print(*s, flush=True)
-
-def log2(*s):
-    if verbose >1 : print(*s, flush=True)
+from utilmy.utilmy import log, log2
 
 def help():
     from utilmy import help_create
-    ss  = help_create("utilmy.nnumpy", prefixs= [ 'test'])  #### Merge test code
+    ss  = help_create(__file__)  #### Merge test code
     ss += HELP
     print(ss)
 
@@ -29,21 +22,24 @@ def help():
 def test_all():
     """#### python test.py   test_nnumpy
     """
-    def test():
-        log("Testing nnumpy ...")
-        from utilmy.nnumpy import to_dict,to_timeunix,to_datetime,np_list_intersection,np_add_remove
-        to_dict(kw=[1,2,3])
-        to_timeunix(datex="2020-10-06")
-        to_datetime("10/05/2021")
-        l1 = [1,2,3]
-        l2 = [3,4,1]
-        result = np_list_intersection(l1,l2)
-        set_ = {1,2,3,4,5}
-        result = np_add_remove(set_,[1,2],6)
-        log("np_add_remove",result)
-    test()
+    test2()
     
-    
+
+
+def test2():
+    log("Testing nnumpy ...")
+    from utilmy.nnumpy import to_dict,to_timeunix,to_datetime,np_list_intersection,np_add_remove
+    to_dict(kw=[1,2,3])
+    to_timeunix(datex="2020-10-06")
+    to_datetime("10/05/2021")
+    l1 = [1,2,3]
+    l2 = [3,4,1]
+    result = np_list_intersection(l1,l2)
+    set_ = {1,2,3,4,5}
+    result = np_add_remove(set_,[1,2],6)
+    log("np_add_remove",result)
+
+
 def test0():
     """function test0.
     Doc::
@@ -78,9 +74,6 @@ def test1():
 
 ##############################################################################################################
 ####### Numpy, Dict, List compute related  ###################################################################
-from collections import OrderedDict
-
-
 class LRUCache(object):
     def __init__(self, max_size=4):
         """ LRUCache:__init__.
