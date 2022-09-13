@@ -22,52 +22,43 @@ def help():
 def test_all():
     """#### python test.py   test_nnumpy
     """
-    test2()
-    
-
-
-def test2():
-    log("Testing nnumpy ...")
-    from utilmy.nnumpy import to_dict,to_timeunix,to_datetime,np_list_intersection,np_add_remove
-    to_dict(kw=[1,2,3])
-    to_timeunix(datex="2020-10-06")
-    to_datetime("10/05/2021")
-    l1 = [1,2,3]
-    l2 = [3,4,1]
-    result = np_list_intersection(l1,l2)
-    set_ = {1,2,3,4,5}
-    result = np_add_remove(set_,[1,2],6)
-    log("np_add_remove",result)
-
-
-def test0():
-    """function test0.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    log("Testing nnumpy ...")
-    to_dict(kw=[1,2,3])
-    to_timeunix(datex="2020-10-06")
-    to_datetime("10/05/2021")
+    test1()
 
 
 def test1():
-    """function test1.
-    Doc::
-            
-            Args:
-            Returns:
-                
     """
+    """
+    from utilmy import nnumpy as m
+
+
+    log("#############", m.np_list_intersection())
     l1 = [1,2,3]
     l2 = [3,4,1]
-    result = np_list_intersection(l1,l2)
+    result = m.np_list_intersection(l1,l2)
+    log(result)
+    assert set(result).issubset(set(l1)),"Intersection item(s) not in first list"
+    assert set(result).issubset(set(l2)),"Intersection item(s) not in second list"
+
+
+    log("#############", m.np_add_remove)
     set_ = {1,2,3,4,5}
-    result = np_add_remove(set_,[1,2],6)
-    log("np_add_remove",result)
+    add_element = 6
+    remove_elements = [1,2]
+    result = m.np_add_remove(set_,remove_elements,add_element)
+    remove_elements = [1,2,3]
+    assert set([add_element]).issubset(set(result)),"Added element not in revised set"
+
+
+    res = m.to_dict(kw=[1,2,3])
+    log("to_dict",res)
+    assert isinstance(res,dict),"Return result not of dictionary type"
+    m.to_timeunix(datex="2020-10-06")
+    m.to_datetime("10/05/2021")
+
+
+
+
+
 
 
 
@@ -276,11 +267,7 @@ def np_add_remove(set_, to_remove, to_add):
 def to_float(x, valdef=-1):
     """function to_float.
     Doc::
-            
-            Args:
-                x:   
-                valdef:   
-            Returns:
+
                 
     """
     try :
@@ -291,11 +278,7 @@ def to_float(x, valdef=-1):
 def to_int(x, valdef=-1):
     """function to_int.
     Doc::
-            
-            Args:
-                x:   
-                valdef:   
-            Returns:
+
                 
     """
     try :
@@ -307,11 +290,7 @@ def to_int(x, valdef=-1):
 def is_int(x):
     """function is_int.
     Doc::
-            
-            Args:
-                x:   
-            Returns:
-                
+
     """
     try :
         int(x)
@@ -323,10 +302,6 @@ def is_int(x):
 def is_float(x):
     """function is_float.
     Doc::
-            
-            Args:
-                x:   
-            Returns:
                 
     """
     try :

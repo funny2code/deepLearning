@@ -613,7 +613,7 @@ from utilmy.parallel import (
 
 
 from utilmy.ppandas import (
-    pd_random,
+    #pd_random,
     pd_merge,
     pd_plot_multi,
     pd_plot_histogram,
@@ -937,6 +937,9 @@ def test_all():
     test3()
     test4()
     test5()
+    test7()
+    test_save_and_load()
+    test_to_file()
 
 
 def test1():
@@ -1015,7 +1018,7 @@ def test4():
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
-        assert m.help_create(name), 'FAILED -> help_info'
+        assert m.help_info(name), 'FAILED -> help_info'
 
     log("\n####", m.help_get_codesource(func=test_func))
     assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
@@ -1052,26 +1055,65 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = drepo + "utilmy/utilmy_base.py:test2"
-    myclass = load_function_uri(uri_name)
-    log(myclass)
-    assert myclass, 'FAILED -> load_function_uri'
+    log("\n####", m.load_function_uri )
+    ll = [ drepo + "utilmy/utilmy_base.py:test2"
 
+    ]
+    for uri_name in ll :
+        myclass = load_function_uri(uri_name=uri_name)
+        log(myclass)
+        assert myclass, 'FAILED -> load_function_uri'
 
 
 def test6():
     import utilmy as m
 
-    log("\n####", date_now)
 
+    log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
     assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
-    assert m.date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
-    assert m.date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
-    assert m.date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+    assert m.date_now('2021-10-05', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
+    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
+    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
 
 
 
+def test7():
+    import utilmy as m
+
+
+    log("\n####", m.pd_random)
+    df = m.pd_random(nrows=37, ncols=5)
+    assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "
+
+    log("\n####", m.pd_generate_data)
+    df = m.pd_generate_data(nrows=25, ncols=7)
+    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 125,7 "
+
+    log("\n####", m.pd_getdata)
+    files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
+    assert list(m.pd_getdata(verbose=False).keys()) == files, f"FAILED -> all the files are not read properly"
+    
+
+def test_save_and_load():
+    import utilmy as m
+    log("\n####", m.save)
+    log("\n####", m.load)
+    data_for_save = "data_for_save"
+    m.save(data_for_save, "./testfile")
+    loaded_data = m.load("./testfile")
+    os.remove("./testfile")
+    assert loaded_data == data_for_save, "FAILED -> save and load"
+
+def test_to_file():
+    import utilmy as m
+    log("\n####", m.to_file)
+    to_file("some_text_data","./testfile",mode="w")
+    file_content = None
+    with open("./testfile", mode="r") as fp:
+        file_content = fp.read()
+    os.remove("./testfile")
+    assert file_content == "some_text_data", "FAILED -> to_file"
 
 ###################################################################################################
 if __name__ == "__main__":
