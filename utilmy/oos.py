@@ -41,8 +41,8 @@ def test0():
     """function test0
     """
 
-    logfull("log2")
-    logfull2("log5")
+    #logfull("log2")
+    #logfull2("log5")
 
 
     #################
