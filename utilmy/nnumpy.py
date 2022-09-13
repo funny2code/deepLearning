@@ -27,47 +27,18 @@ def test_all():
 
 
 def test2():
-    log("Testing nnumpy ...")
-    from utilmy.nnumpy import to_dict,to_timeunix,to_datetime,np_list_intersection,np_add_remove
-    to_dict(kw=[1,2,3])
-    to_timeunix(datex="2020-10-06")
-    to_datetime("10/05/2021")
+    from utilmy import nnumpy as m
+
+    m.to_dict(kw=[1,2,3])
+    m.to_timeunix(datex="2020-10-06")
+    m.to_datetime("10/05/2021")
     l1 = [1,2,3]
     l2 = [3,4,1]
-    result = np_list_intersection(l1,l2)
+    result = m.np_list_intersection(l1,l2)
     set_ = {1,2,3,4,5}
-    result = np_add_remove(set_,[1,2],6)
+    result = m.np_add_remove(set_,[1,2],6)
     log("np_add_remove",result)
 
-
-def test0():
-    """function test0.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    log("Testing nnumpy ...")
-    to_dict(kw=[1,2,3])
-    to_timeunix(datex="2020-10-06")
-    to_datetime("10/05/2021")
-
-
-def test1():
-    """function test1.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    l1 = [1,2,3]
-    l2 = [3,4,1]
-    result = np_list_intersection(l1,l2)
-    set_ = {1,2,3,4,5}
-    result = np_add_remove(set_,[1,2],6)
-    log("np_add_remove",result)
 
 
 
@@ -276,11 +247,7 @@ def np_add_remove(set_, to_remove, to_add):
 def to_float(x, valdef=-1):
     """function to_float.
     Doc::
-            
-            Args:
-                x:   
-                valdef:   
-            Returns:
+
                 
     """
     try :
@@ -291,11 +258,7 @@ def to_float(x, valdef=-1):
 def to_int(x, valdef=-1):
     """function to_int.
     Doc::
-            
-            Args:
-                x:   
-                valdef:   
-            Returns:
+
                 
     """
     try :
@@ -307,11 +270,7 @@ def to_int(x, valdef=-1):
 def is_int(x):
     """function is_int.
     Doc::
-            
-            Args:
-                x:   
-            Returns:
-                
+
     """
     try :
         int(x)
@@ -323,10 +282,6 @@ def is_int(x):
 def is_float(x):
     """function is_float.
     Doc::
-            
-            Args:
-                x:   
-            Returns:
                 
     """
     try :

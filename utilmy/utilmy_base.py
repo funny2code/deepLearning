@@ -613,7 +613,7 @@ from utilmy.parallel import (
 
 
 from utilmy.ppandas import (
-    pd_random,
+    #pd_random,
     pd_merge,
     pd_plot_multi,
     pd_plot_histogram,
@@ -1054,29 +1054,33 @@ def test5():
 
 
     log("\n####", m.load_function_uri )
-    uri_name = drepo + "utilmy/utilmy_base.py:test2"
-    myclass = load_function_uri(uri_name=uri_name)
-    log(myclass)
-    assert myclass, 'FAILED -> load_function_uri'
+    ll = [ drepo + "utilmy/utilmy_base.py:test2"
+
+    ]
+    for uri_name in ll :
+        myclass = load_function_uri(uri_name=uri_name)
+        log(myclass)
+        assert myclass, 'FAILED -> load_function_uri'
 
 
 def test6():
     import utilmy as m
 
-    log("\n####", date_now)
 
+    log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
     assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
-    assert m.date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
-    assert m.date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
-    assert m.date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+    assert m.date_now('2021-10-05', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
+    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
+    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
 
 
 def test7():
     import utilmy as m
 
 
-    log("\n####", pd_random)
+    log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
     assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "
 
