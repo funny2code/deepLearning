@@ -310,9 +310,6 @@ def import_function(fun_name=None, module_name=None, fuzzy_match=False):
         raise Exception( msg )  
 
 
-#from utilmy.oos import glob_glob
-
-
 
 
 def sys_exit(msg="exited",  err_int=0):
@@ -392,14 +389,18 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
     uri_name = uri_name.replace("\\", "/")
 
     if ":" in uri_name :
-        pkg = uri_name.split("/")[-1].split(":")
+        pkg = uri_name.split(":")
+        if ":/" in uri_name:  ### windows case
+           pkg = uri_name.split("/")[-1].split(":")
+
         assert len(pkg) > 1, "  Missing :   in  uri_name module_name:function_or_class "
         package, name = pkg[0], pkg[1]
         package = package.replace(".py", "")
 
     else :
         pkg = uri_name.split(".")
-        package = ".".join(pkg[:-1])      
+        package = ".".join(pkg[:-1])
+        package = package.replace(".py", "")
         name    = pkg[-1]   
 
     
@@ -418,6 +419,7 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
             log(str(package))
             model_name   = Path(package).stem  # remove .py
             package_name = str(Path(package).parts[-2]) + "." + str(model_name)
+
             log(package_name, model_name)
             return  getattr(importlib.import_module(package_name), name)
 
@@ -715,7 +717,6 @@ os_remove = os_removedirs
 
 ################################################################################################
 ########  Configuration  #######################################################################
-import utilmy.configs.util_config
 from utilmy.configs.util_config import (
 config_load,
 global_verbosity
