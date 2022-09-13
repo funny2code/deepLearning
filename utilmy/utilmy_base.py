@@ -937,7 +937,7 @@ def test_all():
     test3()
     test4()
     test5()
-    test_pd_random()
+    test7()
 
 
 def test1():
@@ -1072,16 +1072,16 @@ def test6():
     assert m.date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
 
 
-def test_pd_random():
-    """Test pd_random method from utilmy.ppandas
-    """
+def test7():
     import utilmy as m
 
     log("\n####", pd_random)
 
     generated_dataframe = m.pd_random()
-    assert generated_dataframe.shape[0] == 100, "FAILED -> pd_random does not have 100 rows"
-    assert generated_dataframe.shape[1] == 4, "FAILED -> pd_random does not have 4 columns"
+    default_nrows = 100
+    default_ncols = 4
+    assert generated_dataframe.shape[0] == default_nrows, "FAILED -> pd_random does not have 100 rows"
+    assert generated_dataframe.shape[1] == default_ncols, "FAILED -> pd_random does not have 4 columns"
 
 
 
