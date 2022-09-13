@@ -387,10 +387,15 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
     """
     import importlib, sys
     from pathlib import Path
+
+
+    uri_name = uri_name.replace("\\", "/")
+
     if ":" in uri_name :
-        pkg = uri_name.split(":")
+        pkg = uri_name.split("/")[-1].split(":")
         assert len(pkg) > 1, "  Missing :   in  uri_name module_name:function_or_class "
         package, name = pkg[0], pkg[1]
+        package = package.replace(".py", "")
 
     else :
         pkg = uri_name.split(".")
@@ -407,12 +412,13 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
             ### Add Folder to Path and Load absoluate path module
             path_parent = str(Path(package).parent.parent.absolute())
             sys.path.append(path_parent)
-            #log(path_parent)
+            log(path_parent)
 
             #### import Absolute Path model_tf.1_lstm
+            log(str(package))
             model_name   = Path(package).stem  # remove .py
             package_name = str(Path(package).parts[-2]) + "." + str(model_name)
-            #log(package_name, model_name)
+            log(package_name, model_name)
             return  getattr(importlib.import_module(package_name), name)
 
         except Exception as e2:
