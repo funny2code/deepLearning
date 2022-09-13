@@ -4477,52 +4477,52 @@ Repo: ./
 | <a name='utilmy/util_zip.py' href='.//utilmy/util_zip.py'>utilmy/util_zip.py</a> | function | <a href='.//utilmy/util_zip.py#L114'>os_extract_archive</a> | isinstance<br>is_match_fn<br>open_fn<br>archive.extractall<br>os.remove<br>shutil.rmtree<br> |
 | <a name='utilmy/util_zip.py' href='.//utilmy/util_zip.py'>utilmy/util_zip.py</a> | function | <a href='.//utilmy/util_zip.py#L163'>to_file</a> | open<br>fp.write<br> |
 | <a name='utilmy/util_zip.py' href='.//utilmy/util_zip.py'>utilmy/util_zip.py</a> | function | <a href='.//utilmy/util_zip.py#L11'>unzip</a> | zipfile.ZipFile<br>zip_ref.extractall<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L427'>date_now</a> | isinstance<br>len<br>now_utc.replace<br>now_utc.astimezone<br>datetime.timedelta<br>int<br>time.mktime<br>now_new.strftime<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L43'>direpo</a> |  |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L267'>find_fuzzy</a> | SM<br>str<br>max<br>Exception<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L238'>get_loggers</a> | get_verbosity<br>ttuple.append<br>tuple<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L34'>get_verbosity</a> |  |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L764'>git_current_hash</a> | subprocess.check_output<br>label.decode<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L749'>git_repo_root</a> | os_system<br>mout.split<br>len<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L69'>help</a> | help_create<br>print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L194'>help_create</a> | os_module_name<br>importlib.import_module<br>dir<br>import_function<br>help_get_codesource<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L127'>help_get_codesource</a> | len<br>inspect.getsourcelines<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L138'>help_get_docstring</a> |  |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L148'>help_get_funargs</a> | str<br>inspect.signature<br>t.strip<br>ll.split<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L78'>help_info</a> | fun_name.strip<br>fun_name.replace<br>fun_name.split<br>import_function<br>Box<br>help_get_funargs<br>help_get_docstring<br>help_get_codesource<br>l.split<br>len<br>print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L161'>help_signature</a> | inspect.signature<br>namedtuple<br>argspec<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L287'>import_function</a> | isinstance<br>importlib.import_module<br>find_fuzzy<br>dir<br>getattr<br>globals<br>str<br>Exception<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L901'>load</a> | pickle.load<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L376'>load_function_uri</a> | uri_name.split<br>len<br>getattr<br>str<br>Path<br>NameError<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L56'>log</a> | print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L59'>log2</a> | print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L62'>log3</a> | print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L65'>loge</a> | print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L215'>os_get_dirtmp</a> | tempfile.gettempdir<br>os.makedirs<br>Path<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L227'>os_module_name</a> | dir1.split<br>direpo<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L500'>pd_generate_data</a> | random.random<br>range<br>pd.DataFrame<br>np.where<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L513'>pd_getdata</a> | url.split<br>print<br>pd.read_csv<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L486'>pd_random</a> | random.random<br>range<br>pd.DataFrame<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L347'>pip_install</a> | pkg_str.split<br>log<br>subprocess.check_call<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L886'>save</a> | os.makedirs<br>pickle.dump<br>open<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L316'>sys_exit</a> | print<br>open<br>sys.exit<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L332'>sys_install</a> | print<br>time.sleep<br>os.system<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L363'>sys_path_append</a> | range<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L925'>test1</a> | log<br>m.git_repo_root<br>m.help_create<br>m.help_info<br>print<br>m.global_verbosity<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L919'>test_all</a> | test1<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L420'>test_load_function_uri</a> | load_function_uri<br>log<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | function | <a href='.//utilmy/utilmy.py#L262'>to_file</a> | open<br>fp.write<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | class | <a href='.//utilmy/utilmy.py#L540'>Index0</a> |  |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | class | <a href='.//utilmy/utilmy.py#L782'>Session</a> |  |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L544'>Index0:__init__</a> | os.makedirs<br>open<br>fp.write<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L557'>Index0:read</a> | open<br>fp.readlines<br>len<br>flist2.append<br>t.strip<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L574'>Index0:save</a> | len<br>open<br>fp.write<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L788'>Session:__init__</a> | os.makedirs<br>print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L825'>Session:load</a> | print<br>self.load_session<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L871'>Session:load_session</a> | print<br>os.walk<br>x.replace<br>load<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L811'>Session:save</a> | os.makedirs<br>self.save_session<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L840'>Session:save_session</a> | os.makedirs<br>globs.items<br>x.startswith<br>str<br>pd.to_pickle<br>save<br>print<br> |
-| <a name='utilmy/utilmy.py' href='.//utilmy/utilmy.py'>utilmy/utilmy.py</a> | method | <a href='.//utilmy/utilmy.py#L801'>Session:show</a> | glob.glob<br>print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L427'>date_now</a> | isinstance<br>len<br>now_utc.replace<br>now_utc.astimezone<br>datetime.timedelta<br>int<br>time.mktime<br>now_new.strftime<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L43'>direpo</a> |  |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L267'>find_fuzzy</a> | SM<br>str<br>max<br>Exception<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L238'>get_loggers</a> | get_verbosity<br>ttuple.append<br>tuple<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L34'>get_verbosity</a> |  |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L764'>git_current_hash</a> | subprocess.check_output<br>label.decode<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L749'>git_repo_root</a> | os_system<br>mout.split<br>len<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L69'>help</a> | help_create<br>print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L194'>help_create</a> | os_module_name<br>importlib.import_module<br>dir<br>import_function<br>help_get_codesource<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L127'>help_get_codesource</a> | len<br>inspect.getsourcelines<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L138'>help_get_docstring</a> |  |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L148'>help_get_funargs</a> | str<br>inspect.signature<br>t.strip<br>ll.split<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L78'>help_info</a> | fun_name.strip<br>fun_name.replace<br>fun_name.split<br>import_function<br>Box<br>help_get_funargs<br>help_get_docstring<br>help_get_codesource<br>l.split<br>len<br>print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L161'>help_signature</a> | inspect.signature<br>namedtuple<br>argspec<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L287'>import_function</a> | isinstance<br>importlib.import_module<br>find_fuzzy<br>dir<br>getattr<br>globals<br>str<br>Exception<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L901'>load</a> | pickle.load<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L376'>load_function_uri</a> | uri_name.split<br>len<br>getattr<br>str<br>Path<br>NameError<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L56'>log</a> | print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L59'>log2</a> | print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L62'>log3</a> | print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L65'>loge</a> | print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L215'>os_get_dirtmp</a> | tempfile.gettempdir<br>os.makedirs<br>Path<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L227'>os_module_name</a> | dir1.split<br>direpo<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L500'>pd_generate_data</a> | random.random<br>range<br>pd.DataFrame<br>np.where<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L513'>pd_getdata</a> | url.split<br>print<br>pd.read_csv<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L486'>pd_random</a> | random.random<br>range<br>pd.DataFrame<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L347'>pip_install</a> | pkg_str.split<br>log<br>subprocess.check_call<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L886'>save</a> | os.makedirs<br>pickle.dump<br>open<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L316'>sys_exit</a> | print<br>open<br>sys.exit<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L332'>sys_install</a> | print<br>time.sleep<br>os.system<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L363'>sys_path_append</a> | range<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L925'>test1</a> | log<br>m.git_repo_root<br>m.help_create<br>m.help_info<br>print<br>m.global_verbosity<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L919'>test_all</a> | test1<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L420'>test_load_function_uri</a> | load_function_uri<br>log<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | function | <a href='.//utilmy/utilmy_base.py#L262'>to_file</a> | open<br>fp.write<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | class | <a href='.//utilmy/utilmy_base.py#L540'>Index0</a> |  |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | class | <a href='.//utilmy/utilmy_base.py#L782'>Session</a> |  |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L544'>Index0:__init__</a> | os.makedirs<br>open<br>fp.write<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L557'>Index0:read</a> | open<br>fp.readlines<br>len<br>flist2.append<br>t.strip<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L574'>Index0:save</a> | len<br>open<br>fp.write<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L788'>Session:__init__</a> | os.makedirs<br>print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L825'>Session:load</a> | print<br>self.load_session<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L871'>Session:load_session</a> | print<br>os.walk<br>x.replace<br>load<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L811'>Session:save</a> | os.makedirs<br>self.save_session<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L840'>Session:save_session</a> | os.makedirs<br>globs.items<br>x.startswith<br>str<br>pd.to_pickle<br>save<br>print<br> |
+| <a name='utilmy/utilmy_base.py' href='.//utilmy/utilmy_base.py'>utilmy/utilmy_base.py</a> | method | <a href='.//utilmy/utilmy_base.py#L801'>Session:show</a> | glob.glob<br>print<br> |
 | <a name='utilmy/utils.py' href='.//utilmy/utils.py'>utilmy/utils.py</a> | function | <a href='.//utilmy/utils.py#L265'>config_load</a> | str<br>logw<br>log2<br>yaml.load<br>log<br>os.makedirs<br>open<br>json.dump<br> |
 | <a name='utilmy/utils.py' href='.//utilmy/utils.py'>utilmy/utils.py</a> | function | <a href='.//utilmy/utils.py#L315'>dataset_donwload</a> | log<br>os.makedirs<br>wget.download<br>url.split<br>os_extract_archive<br>log2<br> |
 | <a name='utilmy/utils.py' href='.//utilmy/utils.py'>utilmy/utils.py</a> | function | <a href='.//utilmy/utils.py#L99'>load_callable_from_dict</a> | function_dict.copy<br>function_dict.pop<br>load_callable_from_uri<br>assert<br>TypeError<br> |

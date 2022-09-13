@@ -1034,8 +1034,8 @@ def test5():
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
 
 
-    log("\n####", m.os_module_name(filepath='utilmy/utilmy.py'))
-    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
+    log("\n####", m.os_module_name(filepath='utilmy/utilmy_base.py'))
+    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy_base.py'), 'FAILED -> os_module_name'
 
 
     log("\n####", m.get_loggers())
@@ -1045,7 +1045,7 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = drepo + "utilmy/utilmy.py:test2"
+    uri_name = drepo + "utilmy/utilmy_base.py:test2"
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'

@@ -90,7 +90,7 @@ def test_utilmy():
     m.test_all()
 
 
-    #####  Bug of globals() in utilmy.py #################################################
+    #####  Bug of globals() in utilmy_base.py #################################################
     log("\n##### Session  ")
     sess = m.Session("ztmp/session")
 
