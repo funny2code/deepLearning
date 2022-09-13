@@ -1052,8 +1052,9 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
+    log("\n####", m.load_function_uri )
     uri_name = drepo + "utilmy/utilmy_base.py:test2"
-    myclass = load_function_uri(uri_name)
+    myclass = load_function_uri(uri_name=uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'
 
