@@ -1493,18 +1493,22 @@ def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 
 ###################################################################################################
 ###### Debug ######################################################################################
-def print_everywhere():
-    """
-    https://github.com/alexmojaki/snoop
+def log_debug_everywhere():
+    """  Debug printer
+    Docs ::
+
+        https://github.com/alexmojaki/snoop
+        import snoop; snoop.install()  ### can be used anywhere
+
+        @snoop
+        def myfun():
+
+        from snoop import pp
+        pp(myvariable)
+
+
     """
     txt ="""
-    import snoop; snoop.install()  ### can be used anywhere
-    
-    @snoop
-    def myfun():
-    
-    from snoop import pp
-    pp(myvariable)
         
     """
     import snoop
