@@ -938,6 +938,8 @@ def test_all():
     test4()
     test5()
     test7()
+    test_save_and_load()
+    test_to_file()
 
 
 def test1():
@@ -1093,11 +1095,7 @@ def test7():
     assert list(m.pd_getdata(verbose=False).keys()) == files, f"FAILED -> all the files are not read properly"
     
 
-
-
-
-
-def test6():
+def test_save_and_load():
     import utilmy as m
     log("\n####", m.save)
     log("\n####", m.load)
@@ -1107,7 +1105,7 @@ def test6():
     os.remove("./testfile")
     assert loaded_data == data_for_save, "FAILED -> save and load"
 
-def test7():
+def test_to_file():
     import utilmy as m
     log("\n####", m.to_file)
     to_file("some_text_data","./testfile",mode="w")
