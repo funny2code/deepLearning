@@ -12,13 +12,8 @@ import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as n
 #################################################################
 from utilmy.utilmy import log, log2
 
-
-#################################################################
 def help():
     """function help
-    Args:
-    Returns:
-
     """
     from utilmy import help_create
     ss = help_create(__file__)
@@ -1317,6 +1312,8 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
+
+
 ########################################################################################################
 ########################################################################################################
 def to_timeunix(datex="2018-01-16"):
@@ -1342,35 +1339,6 @@ def to_datetime(x) :
   """
   import pandas as pd
   return pd.to_datetime( str(x) )
-
-
-def np_list_intersection(l1, l2) :
-  """function np_list_intersection
-  Args:
-      l1:
-      l2:
-  Returns:
-
-  """
-  return [x for x in l1 if x in l2]
-
-
-def np_add_remove(set_, to_remove, to_add):
-    """function np_add_remove
-    Args:
-        set_:
-        to_remove:
-        to_add:
-    Returns:
-
-    """
-    # a function that removes list of elements and adds an element from a set
-    result_temp = set_.copy()
-    for element in to_remove:
-        if element in result_temp:
-            result_temp.remove(element)
-    result_temp.extend(to_add)
-    return result_temp
 
 
 def to_float(x):
@@ -1426,6 +1394,38 @@ def is_float(x):
     except :
         return False
 
+
+
+
+########################################################################################################
+########################################################################################################
+def np_list_intersection(l1, l2) :
+  """function np_list_intersection
+  Args:
+      l1:
+      l2:
+  Returns:
+
+  """
+  return [x for x in l1 if x in l2]
+
+
+def np_add_remove(set_, to_remove, to_add):
+    """function np_add_remove
+    Args:
+        set_:
+        to_remove:
+        to_add:
+    Returns:
+
+    """
+    # a function that removes list of elements and adds an element from a set
+    result_temp = set_.copy()
+    for element in to_remove:
+        if element in result_temp:
+            result_temp.remove(element)
+    result_temp.extend(to_add)
+    return result_temp
 
 
 class toFileSafe(object):
@@ -1568,7 +1568,6 @@ def profiler_stop():
     global profiler
     profiler.stop()
     print(profiler.output_text(unicode=True, color=True))
-
 
 
 
