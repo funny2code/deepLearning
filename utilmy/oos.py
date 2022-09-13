@@ -105,12 +105,14 @@ def test1():
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 
+
 def test_fileCache():
     fc = fileCache(dir_cache='test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
     log(fc.get('test'))
     assert fc.get('test') == data, 'FAILED, file cache'
+
 
 
 def test2():
