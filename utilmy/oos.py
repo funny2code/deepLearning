@@ -223,13 +223,11 @@ def test_os2():
 
 def test8():
     log("Testing os_path_size() ..")
-    from utilmy.oos import os_path_size
     size_ = os_path_size()
     log("total size", size_)
 
 
     log("Testing os_path_split() ..")
-    from utilmy.oos import os_path_split
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
 
@@ -239,20 +237,16 @@ def test8():
 
 
     log("Testing os_walk() ..")
-    from utilmy.oos import os_walk
-    import os
     cwd = os.getcwd()
     # log(os_walk(cwd))
 
 
     log("Testing os_copy_safe() ..")
-    from utilmy.oos import os_copy_safe
     os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
 
 
 
     log("Testing z_os_search_fast() ..")
-    from utilmy.oos import z_os_search_fast
     with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
     res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
@@ -264,7 +258,7 @@ def test8():
     from utilmy.oos import os_search_content
     with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    import os
+
     cwd = os.getcwd()
     '''TODO: for f in list_all["fullpath"]:
         KeyError: 'fullpath'
@@ -274,13 +268,11 @@ def test8():
 
 
     log("Testing os_get_function_name() ..")
-    from utilmy.oos import os_get_function_name
     log(os_get_function_name())
 
 
 
     log("Testing os_variables_test ..")
-    from utilmy.oos import os_variable_init, os_variable_check, os_variable_exist, os_import, os_clean_memory
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -292,13 +284,11 @@ def test8():
 
 
     log("Testing os_system_list() ..")
-    from utilmy.oos import os_system_list
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
 
 
     log("Testing os_file_check()")
-    from utilmy.oos import os_to_file, os_file_check
     os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
     os_file_check("./testdata/tmp/test/file_test.txt")
 
@@ -319,7 +309,7 @@ def test8():
         file.write("Dummy file to test os utils")
 
     os_makedirs("./testdata/tmp/test/os_test")
-    from utilmy.oos import os_file_replacestring
+
     with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
 
@@ -332,7 +322,6 @@ def test8():
 
 
     log("Testing os_system()...")
-    from utilmy.oos import os_system
     os_system("whoami", doprint=True)
 
 
