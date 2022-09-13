@@ -1017,7 +1017,7 @@ def test4():
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
-        assert m.help_create(name), 'FAILED -> help_info'
+        assert m.help_info(name), 'FAILED -> help_info'
 
     log("\n####", m.help_get_codesource(func=test_func))
     assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
@@ -1060,6 +1060,25 @@ def test5():
     assert myclass, 'FAILED -> load_function_uri'
 
 
+def test6():
+    import utilmy as m
+    log("\n####", m.save)
+    log("\n####", m.load)
+    data_for_save = "data_for_save"
+    m.save(data_for_save, "./testfile")
+    loaded_data = m.load("./testfile")
+    os.remove("./testfile")
+    assert loaded_data == data_for_save, "FAILED -> save and load"
+
+def test7():
+    import utilmy as m
+    log("\n####", m.to_file)
+    to_file("some_text_data","./testfile",mode="w")
+    file_content = None
+    with open("./testfile", mode="r") as fp:
+        file_content = fp.read()
+    os.remove("./testfile")
+    assert file_content == "some_text_data", "FAILED -> to_file"
 
 ###################################################################################################
 if __name__ == "__main__":
