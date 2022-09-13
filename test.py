@@ -61,7 +61,7 @@ def test_import():
     import utilmy.deeplearning.ttorch.util_torch
     import utilmy.deeplearning.ttorch.util_model
     import utilmy.deeplearning.ttorch.model_ensemble
-    import utilmy.utilmy
+    import utilmy.utilmy_base
     import utilmy.ppandas
     # import utilmy.nlp.ttorch.sentences
     import utilmy.distributed
@@ -76,7 +76,7 @@ def test_import_all():
     import utilmy.deeplearning.ttorch.util_torch
     import utilmy.deeplearning.ttorch.util_model
     import utilmy.deeplearning.ttorch.model_ensemble
-    import utilmy.utilmy
+    import utilmy.utilmy_base
     import utilmy.ppandas
     # import utilmy.nlp.ttorch.sentences
     import utilmy.distributed
@@ -86,11 +86,11 @@ def test_import_all():
 
 
 def test_utilmy():
-    from utilmy import utilmy as m
+    from utilmy import utilmy_base as m
     m.test_all()
 
 
-    #####  Bug of globals() in utilmy.py #################################################
+    #####  Bug of globals() in utilmy_base.py #################################################
     log("\n##### Session  ")
     sess = m.Session("ztmp/session")
 
@@ -255,7 +255,7 @@ import utilmy as  uu
 
 #######################################################################################
 def test_util_log():
-    from utilmy.configs.logs import util_log as util_log
+    from utilmy.cconfigs.logs import util_log as util_log
     util_log.test_all()
 
 #######################################################################################

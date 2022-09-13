@@ -256,7 +256,8 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 
 #### Universal config Loader
-from utilmy.configs.util_config import config_load
+#import utilmy.cconfigs.util_config
+#from utilmy.cconfigs.util_config import config_load
 
 
 ###################################################################################################
@@ -307,9 +308,6 @@ def import_function(fun_name=None, module_name=None, fuzzy_match=False):
     except Exception as e :
         msg = "Missing " + str(fun_name) + "," + str(dir(module1))
         raise Exception( msg )  
-
-
-from utilmy.oos import glob_glob
 
 
 
@@ -386,14 +384,23 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
     """
     import importlib, sys
     from pathlib import Path
+
+
+    uri_name = uri_name.replace("\\", "/")
+
     if ":" in uri_name :
         pkg = uri_name.split(":")
+        if ":/" in uri_name:  ### windows case
+           pkg = uri_name.split("/")[-1].split(":")
+
         assert len(pkg) > 1, "  Missing :   in  uri_name module_name:function_or_class "
         package, name = pkg[0], pkg[1]
+        package = package.replace(".py", "")
 
     else :
         pkg = uri_name.split(".")
-        package = ".".join(pkg[:-1])      
+        package = ".".join(pkg[:-1])
+        package = package.replace(".py", "")
         name    = pkg[-1]   
 
     
@@ -406,12 +413,14 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
             ### Add Folder to Path and Load absoluate path module
             path_parent = str(Path(package).parent.parent.absolute())
             sys.path.append(path_parent)
-            #log(path_parent)
+            log(path_parent)
 
             #### import Absolute Path model_tf.1_lstm
+            log(str(package))
             model_name   = Path(package).stem  # remove .py
             package_name = str(Path(package).parts[-2]) + "." + str(model_name)
-            #log(package_name, model_name)
+
+            log(package_name, model_name)
             return  getattr(importlib.import_module(package_name), name)
 
         except Exception as e2:
@@ -709,8 +718,8 @@ os_remove = os_removedirs
 ################################################################################################
 ########  Configuration  #######################################################################
 from utilmy.configs.util_config import (
- config_load,
- global_verbosity
+config_load,
+global_verbosity
 
 
 )
@@ -1002,7 +1011,7 @@ def test4():
         return arg1 + arg2
 
 
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy',  ]:
+    for name in [ 'utilmy.parallel', 'utilmy.utilmy_base',  ]:
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
@@ -1032,8 +1041,8 @@ def test5():
     assert m.os_get_dirtmp(subdir='test', return_path=True), 'FAILED -> os_get_dirtmp'
 
 
-    log("\n####", m.os_module_name(filepath='utilmy/utilmy.py'))
-    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy.py'), 'FAILED -> os_module_name'
+    log("\n####", m.os_module_name(filepath='utilmy/utilmy_base.py'))
+    assert m.os_module_name(filepath=drepo + 'utilmy/utilmy_base.py'), 'FAILED -> os_module_name'
 
 
     log("\n####", m.get_loggers())
@@ -1043,7 +1052,7 @@ def test5():
     assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
 
 
-    uri_name = drepo + "utilmy/utilmy.py:test2"
+    uri_name = drepo + "utilmy/utilmy_base.py:test2"
     myclass = load_function_uri(uri_name)
     log(myclass)
     assert myclass, 'FAILED -> load_function_uri'

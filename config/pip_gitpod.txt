@@ -50,6 +50,7 @@ Fiona==1.8.21
 fire==0.4.0
 flair==0.9
 flake8==4.0.1
+Flask==2.2.2
 flatbuffers==2.0
 fonttools==4.29.1
 ftfy==6.1.1

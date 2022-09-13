@@ -74,7 +74,7 @@ def batch_format_file2():
          format_imports,
          format_assignments
      ]
-     in_file ="utilmy/utilmy.py"
+     in_file ="utilmy/utilmy_base.py"
      dirout = "ztest/"
      batch_format_file(in_file, dirout, format_list)
 

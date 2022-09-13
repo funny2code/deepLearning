@@ -423,9 +423,10 @@ def test5(n_sample = 1000):
 
     ###############################################################################
     compute_pars = { 'compute_pars' : {},
-                     'metadata' :  metadata,
+                     'metadata'     :  metadata,
+                     'target'       :  'region',
                      'metrics_pars' : {'metrics' :['TSFClassifierEfficacy','LSTMClassifierEfficacy']},
-                     'single-table': False,   # Time series metric
+                     'metric_type'  : 'timeseries',
                      'n_sample_generation' : n_sample
                    }
 
@@ -714,11 +715,13 @@ def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     """
     # log(data_pars)
     mpars       = compute_pars.get("metrics_pars", {'aggregate': True})
-    metric_type = compute_pars.get("metric_type", 'base')
+    metric_type = compute_pars.get("metric_type", 'tabular')
 
     if model.model_pars['model_class'] in SDV_MODELS:
         if  metric_type == 'timeseries':
-            evals = evaluate_timeseries(Xnew, Xval, **mpars, metadata = compute_pars['metadata'])
+            target = compute_pars.get("target", '')
+            assert(target is not None)
+            evals = evaluate_timeseries(Xnew, Xval,**mpars, metadata = compute_pars['metadata'], target=target)
 
         else :
             evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
@@ -739,7 +742,7 @@ def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=N
     evals = []
     for m in metrics:
         metric = ML_EFF_METRICS[m]
-        evals.append(metric.compute(real_data, synthetic_data, metadata, target=target))
+        evals.append(metric.compute(real_data, synthetic_data, metadata=metadata, target=target))
     
     df = pd.DataFrame(columns=['metrics','scores'])
     df['metrics'] = metrics

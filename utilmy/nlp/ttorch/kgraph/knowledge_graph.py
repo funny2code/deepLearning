@@ -504,13 +504,13 @@ class KGEmbedder:
                                             relation_to_id= self.training.relation_to_id)
 
 
-    def setup_embeddings(self, ):
+    def model_init(self, dirmodel_in=None, do_train=False ):
         """set up the training pipeline for pykeen or load the trained model
         """
         # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
 
-        if os.path.exists(self.dirout +'/trained_model.pkl'):
-            self.model = torch.load(self.dirout +'/trained_model.pkl')
+        if dirmodel_in is not None:
+            self.model = torch.loadd(dirmodel_in +'/trained_model.pkl')
             self.trained = True
         else:
             self.model = ERModel(triples_factory=self.training,
@@ -537,7 +537,7 @@ class KGEmbedder:
                 path_to_embeddings: PathLike
                 batch_size        : int, batch_size for the pykeen nn
         """
-        self.setup_embeddings()
+        self.model_init()
         if not self.trained:
             losses = self.training_loop.train(
                                 triples_factory=self.training,

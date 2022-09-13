@@ -26,8 +26,7 @@ from utilmy import log, log2
 
 def help():
     from utilmy import help_create
-    ss = help_create("utilmy.deeplearning.keras.util_layers")
-    print(ss)
+    print(help_create(__file__) )
 
 
 ###################################################################################################    

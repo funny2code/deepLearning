@@ -5,7 +5,7 @@ from utilmy.tabular import *
 from utilmy.dates import *
 
 
-from utilmy.utilmy import *
+from utilmy.utilmy_base import *
 
 
 #### Typing ######################################################################################

@@ -800,7 +800,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     from box import Box
     import pyaudi 
     import pickle 
-    from utilmy.utilmy import log as llog, log2
+    from utilmy.utilmy_base import log as llog, log2
     ######### Problem definition and Cost calculation
 
 

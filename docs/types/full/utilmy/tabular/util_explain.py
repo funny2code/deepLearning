@@ -476,7 +476,7 @@ def test_data_classifier_diabetes() -> Tuple[ndarray, ndarray, ndarray, ndarray,
     return X_train, X_test, y_train, y_test, feature_names
     
 
-from utilmy.utilmy import load_function_uri
+from utilmy.utilmy_base import load_function_uri
 
 
 

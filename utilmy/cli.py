@@ -25,7 +25,7 @@ Commands:
 import fire, argparse, os, sys
 
 #############################################################################################
-from utilmy.utilmy import log, os_system   
+from utilmy.utilmy_base import log, os_system
 
 #############################################################################################
 try :
@@ -105,7 +105,7 @@ def run_cli_utilmy():
 
 
     if "utilmy." in do or "utilmy/" in do :
-        from utilmy.utilmy import load_function_uri
+        from utilmy.utilmy_base import load_function_uri
         uri = do.replace(".", "/")  ### "utilmy.ppandas::test"
         dirfile  = "utilmy/" + do if 'utilmy/' not in do else do
         fun_name = args.task
