@@ -504,7 +504,7 @@ class KGEmbedder:
                                             relation_to_id= self.training.relation_to_id)
 
 
-    def model_init(self, dirmodel_in=None ):
+    def model_init(self, dirmodel_in=None, do_train=False ):
         """set up the training pipeline for pykeen or load the trained model
         """
         # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
