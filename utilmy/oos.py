@@ -20,8 +20,6 @@ def help():
     print(ss)
 
 
-
-
 #################################################################
 ###### TEST #####################################################
 def test_all():
@@ -117,19 +115,27 @@ def test2():
     log("total size", size_)
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
-    with open("./testdata/tmp/test/os_file_test.txt", 'a') as file:
+
+    assert os.path.exists("../testdata/tmp/test/"),"Directory doesn't exist"
+
+    os_file_check("../testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
+    with open("../testdata/tmp/test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
+    os_file_check("../testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
 
     os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe("../testdata/tmp/test", "./testdata/tmp/test_copy/")
 
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+    
+    with open("../testdata/tmp/test/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    res = z_os_search_fast("../testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    os_file_check("../testdata/tmp/test/os_search_test.txt"),"File or directory doesn't exist"
 
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    
+    with open("../testdata/tmp/test/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-
+    os_file_check("../testdata/tmp/test/os_search_content_test.txt"),"File or directory doesn't exist"
 
 
 def test4():
@@ -148,12 +154,13 @@ def test4():
     os_import(mod_name="pandas", globs=globs)
     os_clean_memory(["test_var"], globs)
     log(os_variable_exist("test_var",globs))
-
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
+    assert os.path.exists("../testdata/tmp/test/"),"Directory doesn't exist"
+    os_to_file(txt="test text to write to file",filename="../testdata/tmp/test/file_test.txt", mode="a")
+    os_file_check("../testdata/tmp/test/file_test.txt")
 
 
 def test_globglob():
+    assert os.path.exists("folder/test/"),"Directory doesn't exist"
     os_makedirs("folder/test/file1.txt")
     os_makedirs("folder/test/tmp/1.txt")
     os_makedirs("folder/test/tmp/myfile.txt")
@@ -161,7 +168,13 @@ def test_globglob():
     os_makedirs("folder/test/tmp/part.parquet")
     os_makedirs("folder/test/file2.txt")
     os_makedirs("folder/test/file3.txt")
+    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
+                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
+                "folder/test/file3.txt"]:
+        assert os.path.exists(path),"File doesn't exist"
 
+    
+    
     glob_glob(dirin="folder/**/*.txt")
     glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
     glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
@@ -194,12 +207,16 @@ def test5():
     """
     log("Testing os utils...")
     from utilmy import pd_random
+    import sys
     log(os_platform_os())
+    assert os_platform_os() == sys.platform,"Platform mismatch"
     log(os_cpu())
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
     pd_df = pd_random()
+    assert pd_df.shape[0]>0,"No rows present in the dataframe"
+    assert pd_df.shape[1]>0,"No columns present in the dataframe"
     log(os_sizeof(pd_df, set()))
 
 
