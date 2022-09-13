@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 #################################################################################################
-from utilmy.utilmy import log
+from utilmy.utilmy_base import log
 from typing import Tuple, Union, Iterable
 from tensorflow.python.framework.ops import EagerTensor, Tensor
 

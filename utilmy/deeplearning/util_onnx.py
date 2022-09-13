@@ -627,7 +627,7 @@ def onnx_optimize(dirmodel:str, model_type='bert', **kw):
 #############################################################################################
 #############################################################################################
 if 'utils':
-    from utilmy.utilmy import load_function_uri
+    from utilmy.utilmy_base import load_function_uri
 
 
     def to_numpy(tensor):

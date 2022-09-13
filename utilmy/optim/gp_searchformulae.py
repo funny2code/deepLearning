@@ -76,7 +76,7 @@ from numpy import (sin, cos, log, exp, sqrt )
 
 
 ####################################################################################################
-from utilmy.utilmy import log as llog, log2 ### Conflict with numpy.log
+from utilmy.utilmy_base import log as llog, log2 ### Conflict with numpy.log
 
 def help():
     from utilmy import help_create
@@ -1319,7 +1319,7 @@ def search_formulae_dcgpy_newton(problem=None, pars_dict:dict=None, verbose=1, )
     from box import Box
     import pyaudi 
     import pickle 
-    from utilmy.utilmy import log as llog, log2 ### Conflicting with numpy.log
+    from utilmy.utilmy_base import log as llog, log2 ### Conflicting with numpy.log
 
 
     #### Formulae GP Search params   #################

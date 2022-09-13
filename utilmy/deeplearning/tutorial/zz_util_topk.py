@@ -14,7 +14,7 @@ try :
    import faiss
 except: pass
 
-from utilmy.utilmy import   pd_read_file, pd_to_file
+from utilmy.utilmy_base import   pd_read_file, pd_to_file
 
 #####################################################################################
 verbose = 0

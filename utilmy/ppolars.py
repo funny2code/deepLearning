@@ -196,7 +196,7 @@ import polars as pl
 
 
 ###################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     """function help.
@@ -474,7 +474,7 @@ def pivot_table_polars(df_or_path, columns:list, index:list, values:list, aggfun
 
 
 #############################################################################################
-from utilmy.utilmy import load_function_uri
+from utilmy.utilmy_base import load_function_uri
 
 
 

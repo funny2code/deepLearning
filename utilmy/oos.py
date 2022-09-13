@@ -10,7 +10,7 @@ import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as n
 
 
 #################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     """function help

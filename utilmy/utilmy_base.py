@@ -256,7 +256,8 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 
 #### Universal config Loader
-from utilmy.configs.util_config import config_load
+#import utilmy.cconfigs.util_config
+#from utilmy.cconfigs.util_config import config_load
 
 
 ###################################################################################################
@@ -309,7 +310,7 @@ def import_function(fun_name=None, module_name=None, fuzzy_match=False):
         raise Exception( msg )  
 
 
-from utilmy.oos import glob_glob
+#from utilmy.oos import glob_glob
 
 
 
@@ -708,9 +709,10 @@ os_remove = os_removedirs
 
 ################################################################################################
 ########  Configuration  #######################################################################
+import utilmy.configs.util_config
 from utilmy.configs.util_config import (
- config_load,
- global_verbosity
+config_load,
+global_verbosity
 
 
 )

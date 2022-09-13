@@ -433,7 +433,7 @@ from scipy import stats
 from box import Box
 
 
-from utilmy.utilmy import pd_generate_data
+from utilmy.utilmy_base import pd_generate_data
 from utilmy.prepro.util_feature import  pd_colnum_tocat, pd_colnum_tocat_stat
 import utilmy.stats.hypothesis as test
 
@@ -441,7 +441,7 @@ import utilmy.stats.hypothesis as test
 
 
 #################################################################################################
-from utilmy.utilmy import log, log2
+from utilmy.utilmy_base import log, log2
 
 def help():
     """
