@@ -12,17 +12,8 @@ import os, sys, socket, platform, time, gc,logging, random
 from utilmy.utilmy_base import log, log2
 
 def help():
-    """function help.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
     from utilmy import help_create
-    ss  = help_create("utilmy.distributed", prefixs= [ 'test'])  #### Merge test code
-    ss += HELP
-    print(ss)
+    print(help_create(__file__) )
 
 
 #########################################################################################################

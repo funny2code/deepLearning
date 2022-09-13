@@ -199,16 +199,8 @@ import polars as pl
 from utilmy.utilmy_base import log, log2
 
 def help():
-    """function help.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
     from utilmy import help_create
-    ss = help_create("utilmy.ppolars") 
-    print(ss)
+    print(help_create(__file__) )
 
 
 ###################################################################################

@@ -39,10 +39,7 @@ from utilmy.utilmy_base import log, log2
 
 def help():
     from utilmy import help_create
-    ss  = ""
-    ss += HELP
-    ss += help_create("utilmy.keyvalue")
-    print(ss)
+    print(help_create(__file__) )
 
 
 

@@ -30,13 +30,8 @@ from utilmy.prepro.util_feature import  pd_colnum_tocat, pd_colnum_tocat_stat
 from utilmy.utilmy_base import log, log2
 
 def help():
-    """function help
-    Args:
-    Returns:
-        
-    """
     from utilmy import help_create
-    print( help_create("utilmy.tabular") )
+    print(help_create(__file__) )
 
     
 #################################################################################################

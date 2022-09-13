@@ -22,12 +22,8 @@ from tensorflow.python.keras.engine.functional import Functional
 from typing import List, Optional
 
 def help():
-    """
-    Summary: Extract code source from test code
-    """
     from utilmy import help_create
-    ss = help_create("utilmy.deeplearning.keras.util_layers")
-    print(ss)
+    print(help_create(__file__) )
 
 
 ################################################################################################
