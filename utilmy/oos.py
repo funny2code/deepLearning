@@ -167,9 +167,9 @@ def test2():
     """function test2
     """
 
-    from utilmy import direpo
-    d0 = direpo()
-    log(d0)
+    import utilmy
+    drepo = utilmy.direpo()
+    log(drepo)
 
     test_create_testfiles()
 
@@ -179,31 +179,34 @@ def test2():
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
 
-    assert os.path.exists(d0 + "/testdata/tmp/test/")
+    assert os.path.exists(drepo + "/testdata/tmp/test/")
 
-    os_file_check(d0 + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
-    with open(d0 + "/testdata/tmp/test/os_file_test.txt", 'a') as file:
+    os_file_check(drepo + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
+    with open(drepo + "/testdata/tmp/test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
-    os_file_check(d0 + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
+    os_file_check(drepo + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
 
     os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe(d0 + "/testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe(drepo + "/testdata/tmp/test", "./testdata/tmp/test_copy/")
 
     
-    with open( d0 + "/testdata/tmp/test/os_search_test.txt", 'a') as file:
+    with open( drepo + "/testdata/tmp/test/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(d0 + "/testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
-    os_file_check(d0 + "/testdata/tmp/test/os_search_test.txt"),"File or directory doesn't exist"
+    res = z_os_search_fast(drepo + "/testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    os_file_check(drepo + "/testdata/tmp/test/os_search_test.txt"),"File or directory doesn't exist"
 
     
-    with open(d0 + "/testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    with open(drepo + "/testdata/tmp/test/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    os_file_check(d0 + "/testdata/tmp/test/os_search_content_test.txt"),"File or directory doesn't exist"
+    os_file_check(drepo + "/testdata/tmp/test/os_search_content_test.txt"),"File or directory doesn't exist"
 
 
 def test4():
     """function test4
     """
+    import utilmy
+    drepo = utilmy.direpo()
+
     log(os_get_function_name())
     cwd = os.getcwd()
     log(os_walk(cwd))
@@ -216,10 +219,12 @@ def test4():
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
     os_clean_memory(["test_var"], globs)
+
     log(os_variable_exist("test_var",globs))
-    assert os.path.exists("../testdata/tmp/test/"),"Directory doesn't exist"
-    os_to_file(txt="test text to write to file",filename="../testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("../testdata/tmp/test/file_test.txt")
+    assert os.path.exists(drepo + "/testdata/tmp/test/"),"Directory doesn't exist"
+
+    os_to_file(txt="test text to write to file",filename= drepo + "/testdata/tmp/test/file_test.txt", mode="a")
+    os_file_check( drepo + "/testdata/tmp/test/file_test.txt")
 
 
 def test5_os():
