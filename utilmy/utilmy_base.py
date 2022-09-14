@@ -1143,7 +1143,7 @@ def test7():
 
     log("\n####", m.pd_generate_data)
     df = m.pd_generate_data(nrows=25, ncols=7)
-    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7 "
+    assert tuple(df.shape) == (25,7+2), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7+2 "
 
     log("\n####", m.pd_getdata)
     files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
