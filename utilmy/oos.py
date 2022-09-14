@@ -179,7 +179,7 @@ def test2():
     log("result", result_)
     
 
-    
+
     d0 = drepo + "/testdata/tmp/test/"
     assert os.path.exists(d0)
 
