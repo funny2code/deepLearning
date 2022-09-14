@@ -30,7 +30,7 @@ def test_all():
 
     test0()
     test1()
-    test2()
+    # test2()
     test4()
     test5_os()
     test6_os()
@@ -141,7 +141,7 @@ def test1():
     assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
-def test_create_files():
+def test_create_testfiles():
     from utilmy import to_file, os_get_dirtmp, direpo
 
     d0 = os_get_dirtmp()
@@ -169,16 +169,17 @@ def test2():
 
     from utilmy import direpo
     d0 = direpo()
+    log(d0)
 
-    test_create_files()
+    test_create_testfiles()
 
-    
+
     size_ = os_path_size()
     log("total size", size_)
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
 
-    assert os.path.exists(d0 + "/testdata/tmp/test/"),"Directory doesn't exist"
+    assert os.path.exists(d0 + "/testdata/tmp/test/")
 
     os_file_check(d0 + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
     with open(d0 + "/testdata/tmp/test/os_file_test.txt", 'a') as file:
