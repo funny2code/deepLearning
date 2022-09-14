@@ -34,6 +34,7 @@ def test_all():
     test4()
     test5_os()
     test6_os()
+    test7()
 
 
 
@@ -372,7 +373,46 @@ def test6_os():
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
+def test7():
+    import utilmy 
+    import datetime
+    drepo, dtmp = utilmy.dir_testinfo()
 
+    log("####### os_monkeypatch_help")
+    log(os_monkeypatch_help())
+
+    # log("####### profiler_start")
+    # profiler_start()
+    # x = [item**2 for item in range(0,100)]
+    # y = [item**0.5 for item in x]
+    # log(y)
+    # log("####### profiler_stop")
+    # profiler_stop()
+
+    #log("####### log_trace")
+    #x = set_tracelog_trace(test1())
+
+    log("####### os_process_list")
+    res = os_process_list()
+    assert len(res)>0,"Atleast 1 process should be running!!!"
+
+    # log("####### os_file_date_modified")
+    # res1 = str(os.path.getmtime(dtmp))
+    # log(res1)
+    # res = str(float(res1)+1.0)
+    # log(res)
+    # os_file_date_modified(dtmp,res)
+    # res2 = str(os.path.getmtime(dtmp))
+    # log(res2)
+
+    # log("####### log_trace")
+    # msg = "Hello There"
+    # log_trace(msg)
+
+    log("####### logfull")
+    logfull("Hello")
+    
+    pass 
 
 
 ########################################################################################################
