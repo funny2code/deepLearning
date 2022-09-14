@@ -256,9 +256,8 @@ def test6_os():
 
     #from utilmy import oos as m
     import utilmy 
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
-    assert os.path.exists(dtmp),"Directory not found"
     log("#######   os utils...")
     from utilmy import pd_random
     import sys
