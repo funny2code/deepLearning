@@ -39,17 +39,11 @@ def test_all():
 
 def test_globglob():
 
-    assert os.path.exists("folder/test/"),"Directory doesn't exist"
-    os_makedirs("folder/test/file1.txt")
-    os_makedirs("folder/test/tmp/1.txt")
-    os_makedirs("folder/test/tmp/myfile.txt")
-    os_makedirs("folder/test/tmp/record.txt")
-    os_makedirs("folder/test/tmp/part.parquet")
-    os_makedirs("folder/test/file2.txt")
-    os_makedirs("folder/test/file3.txt")
     for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
                 "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
                 "folder/test/file3.txt"]:
+
+        os_makedirs(path)
         assert os.path.exists(path),"File doesn't exist"
 
 
