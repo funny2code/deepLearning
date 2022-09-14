@@ -280,7 +280,7 @@ def test6_os():
     log("#######   os_path_split() ..")
     result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
-    assert os.path.exists(dtmp+"/test.txt"),"File not found"
+
 
     log("#######   os_file_replacestring() ..")
 
