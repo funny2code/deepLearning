@@ -52,8 +52,8 @@ def test_globglob():
     glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
     glob_glob(dirin="folder/**/*",nfiles=5)
     glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=2)
-    glob_glob(dirin="folder/test/",npool=2)
+    glob_glob(dirin="folder/",npool=1)
+    glob_glob(dirin="folder/test/",npool=1)
 
     flist = ['folder/test/file.txt',
         'folder/test/file1.txt',
