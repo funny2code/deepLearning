@@ -206,10 +206,11 @@ def test4():
     """
     import utilmy
     drepo = utilmy.direpo()
+    log(drepo)
 
     log(os_get_function_name())
     cwd = os.getcwd()
-    log(os_walk(cwd))
+    #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
     ll = ["test_var"]
