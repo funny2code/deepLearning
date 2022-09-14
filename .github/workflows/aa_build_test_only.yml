@@ -95,38 +95,38 @@ jobs:
       run: |
           python test.py test_import_all
 
-    #################################################################
-    - name: utilmy/deeplearning/util_topk.py
-      continue-on-error: true
-      run: |
-          python utilmy/deeplearning/util_topk.py test_all
-
-
-    - name: utilmy/deeplearning/ttorch/model_ensemble.py  
-      # continue-on-error: true 
-      run: |
-          python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
-          
-
-    - name: utilmy/deeplearning/ttorch/util_torch.py  
-      # continue-on-error: true 
-      run: |
-          python utilmy/deeplearning/ttorch/util_torch.py   test_all
 
 
 
-    - name: utilmy/deeplearning/ttorch/util_model.py
-      # continue-on-error: true 
-      run: |
-          python utilmy/deeplearning/ttorch/util_model.py     test_all
+    - name: test_oos
+      run: python test.py test_oos
 
+    - name: test_utils
+      run: python test.py test_utils
 
-    #################################################################
-    - name: utilmy/deeplearning/util_embedding.py
-      # continue-on-error: true
-      run: |
-          python utilmy/deeplearning/util_embedding.py test_all
+    - name: test_tabular
+      run: python test.py test_tabular
 
+    - name: test_adatasets
+      run: python test.py test_adatasets
+
+    - name: test_nnumpy
+      run: python test.py test_nnumpy
+
+    - name: test_dates
+      run: python test.py test_dates
+
+    - name: test_decorators
+      run: python test.py test_decorators
+
+    - name: test_utilmy
+      run: python test.py test_utilmy
+
+    - name: test_viz_vizhtml
+      run:  python test.py   test_viz_vizhtml
+
+    - name: test_parallel
+      run:  python test.py   test_parallel
 
 
 
@@ -135,7 +135,6 @@ jobs:
       continue-on-error: true
       run: |
           python utilmy/cli.py help
-
 
 
     - name:  sspark/src/util_spark.py
@@ -176,40 +175,45 @@ jobs:
 
 
 
-    - name: test_oos
-      run: python test.py test_oos
 
-    - name: test_utils
-      run: python test.py test_utils
+    #################################################################
+    - name: utilmy/deeplearning/util_topk.py
+      continue-on-error: true
+      run: |
+          python utilmy/deeplearning/util_topk.py test_all
 
-    - name: test_tabular
-      run: python test.py test_tabular
 
-    - name: test_adatasets
-      run: python test.py test_adatasets
+    - name: utilmy/deeplearning/ttorch/model_ensemble.py
+      # continue-on-error: true
+      run: |
+          python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
 
-    - name: test_nnumpy
-      run: python test.py test_nnumpy
 
-    - name: test_dates
-      run: python test.py test_dates
-
-    - name: test_decorators
-      run: python test.py test_decorators
-
-    - name: test_utilmy
-      run: python test.py test_utilmy
-
-    - name: test_viz_vizhtml
-      run:  python test.py   test_viz_vizhtml
-
-    - name: test_parallel
-      run:  python test.py   test_parallel
+    - name: utilmy/deeplearning/ttorch/util_torch.py
+      # continue-on-error: true
+      run: |
+          python utilmy/deeplearning/ttorch/util_torch.py   test_all
 
 
 
+    - name: utilmy/deeplearning/ttorch/util_model.py
+      # continue-on-error: true
+      run: |
+          python utilmy/deeplearning/ttorch/util_model.py     test_all
 
- 
+
+    #################################################################
+    - name: utilmy/deeplearning/util_embedding.py
+      # continue-on-error: true
+      run: |
+          python utilmy/deeplearning/util_embedding.py test_all
+
+
+
+
+
+
+
   ############################################## 
   create-pull-request:
     needs : [build] # List of dependent Jobs
