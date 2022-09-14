@@ -38,6 +38,8 @@ def test_all():
 
 
 def test_globglob():
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
                 "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
@@ -71,6 +73,9 @@ def test_globglob():
 
 
 def test_filecache():
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    
     fc = fileCache(dir_cache='test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
@@ -82,6 +87,8 @@ def test_filecache():
 def test0():
     """function test0
     """
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     #logfull("log2")
     #logfull2("log5")
@@ -142,23 +149,22 @@ def test1():
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 def test_create_testfiles():
-    from utilmy import to_file, os_get_dirtmp, direpo
-
-    d0 = os_get_dirtmp()
-    dr = direpo()
+    import utilmy
+    from utilmy import to_file
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     ss= """
     
     
     """
-    to_file(ss,d0 + "/test.txt" )
+    to_file(ss,dtmp + "/test.txt" )
 
 
 
     ss ="""
     
     """
-    to_file(ss,d0 + "/test.txt" )
+    to_file(ss,dtmp + "/test.txt" )
 
 
 
@@ -167,7 +173,7 @@ def test2():
     """function test2
     """
     import utilmy
-    drepo = utilmy.direpo()
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
 
     test_create_testfiles()
@@ -208,7 +214,7 @@ def test4():
     """function test4
     """
     import utilmy
-    drepo = utilmy.direpo()
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
 
     log(os_get_function_name())
@@ -225,10 +231,10 @@ def test4():
     os_clean_memory(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
-    assert os.path.exists(d0 + "/"),"Directory doesn't exist"
+    assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
-    os_to_file(txt="test text to write to file",filename= d0 + "/file_test.txt", mode="a")
-    os_file_check( d0 + "/file_test.txt")
+    os_to_file(txt="test text to write to file",filename= dtmp + "/file_test.txt", mode="a")
+    os_file_check( dtmp + "/file_test.txt")
 
 
 def test5_os():
