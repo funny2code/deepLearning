@@ -39,7 +39,7 @@ def test_all():
 
 def test_globglob():
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
     for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
                 "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
@@ -88,7 +88,7 @@ def test0():
     """function test0
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
     #logfull("log2")
     #logfull2("log5")
@@ -150,8 +150,10 @@ def test1():
 
 def test_create_testfiles():
     import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
     from utilmy import to_file
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+
 
     ss= """
     
@@ -173,7 +175,7 @@ def test2():
     """function test2
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
 
     test_create_testfiles()
@@ -214,7 +216,7 @@ def test4():
     """function test4
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
 
     log(os_get_function_name())
@@ -254,31 +256,29 @@ def test5_os():
 
 def test6_os():
 
-    from utilmy import oos as m
-
+    #from utilmy import oos as m
+    import utilmy 
+    drepo, dtmp = utilmy.dir_testinfo()
 
     log("#######   os utils...")
-    from utilmy import pd_random
-    import sys
     log(os_platform_os())
     assert os_platform_os() == sys.platform,"Platform mismatch"
     log(os_cpu())
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    pd_df = pd_random()
-    assert pd_df.shape[0]>0,"No rows present in the dataframe"
-    assert pd_df.shape[1]>0,"No columns present in the dataframe"
-    log(os_sizeof(pd_df, set()))
+
+    c = {1, 3, "sdsfsdf"}
+    log(os_sizeof(c, set()))
 
 
     log("#######   os_path_size() ..")
-    size_ = os_path_size()
-    log("total size", size_)
+    size_ = os_path_size(drepo)
+    assert not log("total size", size_) and size_> 10 , f"error {size_}"
 
 
     log("#######   os_path_split() ..")
-    result_ = os_path_split("test/tmp/test.txt")
+    result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
 
 
@@ -292,21 +292,23 @@ def test6_os():
 
 
     log("#######   os_copy_safe() ..")
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe(dtmp+"/test", dtmp+"/test_copy/")
 
 
 
     log("#######   z_os_search_fast() ..")
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+    with open(dtmp+"/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
     print(res)
+    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
 
 
 
     log("#######   os_search_content() ..")
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    with open(dtmp+"/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
+    assert os.path.exists(dtmp+"/os_search_content_test.txt"),"File not found"
 
     cwd = os.getcwd()
     '''TODO: for f in list_all["fullpath"]:
@@ -339,8 +341,8 @@ def test6_os():
 
 
     log("#######   os_file_check()")
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
+    os_to_file(txt="test text to write to file",filename=dtmp+"/file_test.txt", mode="a")
+    os_file_check(dtmp+"/file_test.txt")
 
 
 
@@ -350,22 +352,24 @@ def test6_os():
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    os_makedirs("./testdata/tmp/test")
-    with open("./testdata/tmp/test/os_utils_test.txt", 'w') as file:
+    #os_makedirs(dtmp+"/test")
+    with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
+    assert os.path.exists(dtmp+"/os_utils_test.txt"),"File not found"
 
-    os_makedirs("./testdata/tmp/test/os_test")
+    os_makedirs(dtmp+"/os_test")
+    assert os.path.exists(dtmp+"/os_test"),"Folder not found"
 
-    with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
+    with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
+    assert os.path.exists(dtmp+"/os_test/os_file_test.txt"),"File not found"
 
-    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/os_test/")
+    os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-    os_removedirs("./testdata/tmp/test/os_test")
+    os_removedirs(dtmp+"/os_test")
+    assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
-
-
 
 
 

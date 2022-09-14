@@ -72,7 +72,7 @@ def dirpackage(show=0):
     return dir_repo1
 
 
-def dir_testinfo():
+def dir_testinfo(verbose=1):
     """ Print - Return Info for test writing
     Docs::
 
@@ -80,13 +80,19 @@ def dir_testinfo():
 
 
     """
-
+    log("\n--------------------------------------")
     drepo = direpo()
-    dtmp = os_get_dirtmp()
-    log(drepo)
-    log(dtmp)
+    dtmp  = os_get_dirtmp()
+    assert os.path.exists(dtmp), f"Directory not found {dtmp}"
+
+    if verbose>0 :
+        import inspect
+        print( inspect.stack()[1].filename,"::", inspect.stack()[1].function,)
 
 
+    log('repo: ',drepo)
+    log('tmp: ', dtmp)
+    log("\n")
     return drepo, dtmp
 
 
@@ -1053,6 +1059,9 @@ def test4():
     import utilmy as m
 
 
+    drepo, dirtmp = dir_testinfo()
+
+
     def test_func(arg1, arg2):
         """HELP doc string
         """
@@ -1117,9 +1126,16 @@ def test6():
     log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
     assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
-    assert m.date_now('2021-10-05', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
-    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
-    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
+    x = m.date_now('2020-12-10', fmt='%Y%m%d', add_days=-5, returnval='int')
+    assert not log( x ) and x == 20201205, x   #-->  20201205
+
+    x = m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')
+    assert   not log(x ) and  int(x)  > 1603424400, x  #-->  1634324632848
+
+    x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
+    assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
+
 
 
 
@@ -1135,7 +1151,7 @@ def test7():
 
     log("\n####", m.pd_generate_data)
     df = m.pd_generate_data(nrows=25, ncols=7)
-    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7 "
+    assert tuple(df.shape) == (25,7+2), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7+2 "
 
     log("\n####", m.pd_getdata)
     files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
