@@ -208,7 +208,7 @@ def test4():
     """function test4
     """
     import utilmy
-    drepo = utilmy.direpo()
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
 
     log(os_get_function_name())
@@ -225,10 +225,10 @@ def test4():
     os_clean_memory(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
-    assert os.path.exists(d0 + "/"),"Directory doesn't exist"
+    assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
-    os_to_file(txt="test text to write to file",filename= d0 + "/file_test.txt", mode="a")
-    os_file_check( d0 + "/file_test.txt")
+    os_to_file(txt="test text to write to file",filename= dtmp + "/file_test.txt", mode="a")
+    os_file_check( dtmp + "/file_test.txt")
 
 
 def test5_os():
