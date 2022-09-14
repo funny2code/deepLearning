@@ -41,12 +41,18 @@ def get_verbosity(verbose:int=None):
 verbose = get_verbosity()   ### Global setting
 
 
-def direpo():
+def direpo(show=0):
+    """ Root folder of the repo in Unix / format
+
+    """
     try :
        import utilmy
-       dir_repo1 =  utilmy.__path__[0].replace("\\","/")  + "/"
+       dir_repo1 = os.path.dirname( utilmy.__path__[0].replace("\\","/")  ).replace("\\","/") + "/"
     except:
-       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/") + "/"
+       dir_repo1 = os.path.dirname( os.path.dirname(os.path.abspath(__file__))).replace("\\","/") + "/"
+
+    if show>0 :
+        log(dir_repo1)
     return dir_repo1
 
 
