@@ -31,7 +31,7 @@ def test1():
     from utilmy import nnumpy as m
 
 
-    log("#############", m.np_list_intersection())
+    log("#############", m.np_list_intersection)
     l1 = [1,2,3]
     l2 = [3,4,1]
     result = m.np_list_intersection(l1,l2)
@@ -55,8 +55,30 @@ def test1():
     m.to_timeunix(datex="2020-10-06")
     m.to_datetime("10/05/2021")
 
+    lrc = LRUCache()
+    key = 'check'
+    value = [1,2,3,4,5]
+    lrc[key] = value
+    res = lrc[key]
+    log("#############",m.LRUCache)
+    assert res==value,"Item mismatch in getting and setting items"
+    log(res)
 
-
+    od = OrderedDict()
+    key = 'check'
+    value = [1,2,3,4,5]
+    od[key] = value
+    fxd = fixedDict(od)
+    key2 = 'check2'
+    value2 = [9,7]
+    fxd[key2] = value2
+    res2 = fxd[key2]
+    res = fxd[key]
+    log("#############",m.fixedDict)
+    log(res)
+    log(res2)
+    assert res == value,"Item mismatch in getting and setting items"
+    assert res2 == value2,"Item mismatch in getting and setting items"
 
 
 
@@ -147,7 +169,7 @@ class fixedDict(OrderedDict):
                        
         """
         self.size_limit = kwds.pop("limit", None)
-        Dict.__init__(self, *args, **kwds)
+        OrderedDict.__init__(self, *args, **kwds)
         self._check_size_limit()
 
     def __setitem__(self, key, value):
