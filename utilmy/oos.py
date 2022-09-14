@@ -66,7 +66,7 @@ def test_globglob():
     glob_glob(file_list=flist)
     glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
     glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
 
 
 
@@ -458,18 +458,19 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             nfiles, verbose,npool)
 
     else :
-        from utilmy import parallel as par
-        input_fixed = {'exclude': exclude, 'include_only': include_only,
-                       'npool':1,
-                      }
-        if dirin and not file_list:
-            fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        if file_list:
-            fdir = file_list
-        res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
-                npool=npool)
-        res  = sum(res) ### merge
-        return res
+        raise Exception('no working with npool>1')
+        # from utilmy import parallel as par
+        # input_fixed = {'exclude': exclude, 'include_only': include_only,
+        #                'npool':1,
+        #               }
+        # if dirin and not file_list:
+        #     fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
+        # if file_list:
+        #     fdir = file_list
+        # res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
+        #         npool=npool)
+        # res  = sum(res) ### merge
+        # return res
 
 
 
