@@ -259,18 +259,15 @@ def test6_os():
     drepo, dtmp = utilmy.dir_testinfo()
 
     log("#######   os utils...")
-    from utilmy import pd_random
-    import sys
     log(os_platform_os())
     assert os_platform_os() == sys.platform,"Platform mismatch"
     log(os_cpu())
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    pd_df = pd_random()
-    assert pd_df.shape[0]>0,"No rows present in the dataframe"
-    assert pd_df.shape[1]>0,"No columns present in the dataframe"
-    log(os_sizeof(pd_df, set()))
+
+    c = {1, 3, "sdsfsdf"}
+    log(os_sizeof(c, set()))
 
 
     log("#######   os_path_size() ..")
