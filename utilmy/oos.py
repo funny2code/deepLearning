@@ -38,6 +38,8 @@ def test_all():
 
 
 def test_globglob():
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
                 "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
@@ -71,6 +73,9 @@ def test_globglob():
 
 
 def test_filecache():
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    
     fc = fileCache(dir_cache='test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
@@ -82,6 +87,8 @@ def test_filecache():
 def test0():
     """function test0
     """
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     #logfull("log2")
     #logfull2("log5")
