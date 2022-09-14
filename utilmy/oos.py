@@ -142,23 +142,22 @@ def test1():
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 def test_create_testfiles():
-    from utilmy import to_file, os_get_dirtmp, direpo
-
-    d0 = os_get_dirtmp()
-    dr = direpo()
+    import utilmy
+    from utilmy import to_file
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
     ss= """
     
     
     """
-    to_file(ss,d0 + "/test.txt" )
+    to_file(ss,dtmp + "/test.txt" )
 
 
 
     ss ="""
     
     """
-    to_file(ss,d0 + "/test.txt" )
+    to_file(ss,dtmp + "/test.txt" )
 
 
 
@@ -167,7 +166,7 @@ def test2():
     """function test2
     """
     import utilmy
-    drepo = utilmy.direpo()
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
 
 
     test_create_testfiles()
