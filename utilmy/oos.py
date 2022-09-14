@@ -39,7 +39,7 @@ def test_all():
 
 def test_globglob():
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
     for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
                 "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
@@ -88,7 +88,7 @@ def test0():
     """function test0
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
     #logfull("log2")
     #logfull2("log5")
@@ -150,8 +150,10 @@ def test1():
 
 def test_create_testfiles():
     import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
     from utilmy import to_file
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+
 
     ss= """
     
@@ -173,7 +175,7 @@ def test2():
     """function test2
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
 
     test_create_testfiles()
@@ -214,7 +216,7 @@ def test4():
     """function test4
     """
     import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    drepo, dtmp = utilmy.dir_testinfo()
 
 
     log(os_get_function_name())
