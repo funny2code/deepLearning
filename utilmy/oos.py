@@ -25,14 +25,64 @@ def help():
 def test_all():
     """ python  utilmy/oos.py test_all
     """
+    test_filecache()
+    test_globglob()
+
     test0()
     test1()
-    test_fileCache()
     test2()
     test4()
-    test5()
-    test_os2()
-    test8()
+    test5_os()
+    test6_os()
+
+
+
+def test_globglob():
+
+    assert os.path.exists("folder/test/"),"Directory doesn't exist"
+    os_makedirs("folder/test/file1.txt")
+    os_makedirs("folder/test/tmp/1.txt")
+    os_makedirs("folder/test/tmp/myfile.txt")
+    os_makedirs("folder/test/tmp/record.txt")
+    os_makedirs("folder/test/tmp/part.parquet")
+    os_makedirs("folder/test/file2.txt")
+    os_makedirs("folder/test/file3.txt")
+    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
+                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
+                "folder/test/file3.txt"]:
+        assert os.path.exists(path),"File doesn't exist"
+
+
+    glob_glob(dirin="folder/**/*.txt")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    glob_glob(dirin="folder/**/*",nfiles=5)
+    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    glob_glob(dirin="folder/",npool=2)
+    glob_glob(dirin="folder/test/",npool=2)
+
+    flist = ['folder/test/file.txt',
+        'folder/test/file1.txt',
+        'folder/test/file2.txt',
+        'folder/test/file3.txt',
+        'folder/test/tmp/1.txt',
+        'folder/test/tmp/myfile.txt',
+        'folder/test/tmp/record.txt']
+    glob_glob(dirin="", file_list=flist)
+    glob_glob(file_list=flist)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
+
+
+
+def test_filecache():
+    fc = fileCache(dir_cache='test')
+    data = [1,2 ,3, 4]
+    fc.set( 'test', data )
+    log(fc.get('test'))
+    assert fc.get('test') == data, 'FAILED, file cache'
+
 
 
 def test0():
@@ -98,16 +148,6 @@ def test1():
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 
-
-def test_fileCache():
-    fc = fileCache(dir_cache='test')
-    data = [1,2 ,3, 4]
-    fc.set( 'test', data )
-    log(fc.get('test'))
-    assert fc.get('test') == data, 'FAILED, file cache'
-
-
-
 def test2():
     """function test2
     """
@@ -159,68 +199,7 @@ def test4():
     os_file_check("../testdata/tmp/test/file_test.txt")
 
 
-def test_globglob():
-    assert os.path.exists("folder/test/"),"Directory doesn't exist"
-    os_makedirs("folder/test/file1.txt")
-    os_makedirs("folder/test/tmp/1.txt")
-    os_makedirs("folder/test/tmp/myfile.txt")
-    os_makedirs("folder/test/tmp/record.txt")
-    os_makedirs("folder/test/tmp/part.parquet")
-    os_makedirs("folder/test/file2.txt")
-    os_makedirs("folder/test/file3.txt")
-    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
-                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
-                "folder/test/file3.txt"]:
-        assert os.path.exists(path),"File doesn't exist"
-
-    
-    
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=2)
-    glob_glob(dirin="folder/test/",npool=2)
-
-    flist = ['folder/test/file.txt',
-        'folder/test/file1.txt',
-        'folder/test/file2.txt',
-        'folder/test/file3.txt',
-        'folder/test/tmp/1.txt',
-        'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
-
-
-
-
-def test5():
-    """function test5
-    Args:
-    Returns:
-
-    """
-    log("Testing os utils...")
-    from utilmy import pd_random
-    import sys
-    log(os_platform_os())
-    assert os_platform_os() == sys.platform,"Platform mismatch"
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    pd_df = pd_random()
-    assert pd_df.shape[0]>0,"No rows present in the dataframe"
-    assert pd_df.shape[1]>0,"No columns present in the dataframe"
-    log(os_sizeof(pd_df, set()))
-
-
-def test_os2():
+def test5_os():
     log(" os_copy")
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
 
@@ -235,32 +214,51 @@ def test_os2():
             )
 
 
-def test8():
-    log("Testing os_path_size() ..")
+def test6_os():
+
+    from utilmy import oos as m
+
+
+    log("#######   os utils...")
+    from utilmy import pd_random
+    import sys
+    log(os_platform_os())
+    assert os_platform_os() == sys.platform,"Platform mismatch"
+    log(os_cpu())
+    log(os_memory())
+    log(os_getcwd())
+    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
+    pd_df = pd_random()
+    assert pd_df.shape[0]>0,"No rows present in the dataframe"
+    assert pd_df.shape[1]>0,"No columns present in the dataframe"
+    log(os_sizeof(pd_df, set()))
+
+
+    log("#######   os_path_size() ..")
     size_ = os_path_size()
     log("total size", size_)
 
 
-    log("Testing os_path_split() ..")
+    log("#######   os_path_split() ..")
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
 
 
-    log("Testing os_file_replacestring() ..")
+    log("#######   os_file_replacestring() ..")
 
 
 
-    log("Testing os_walk() ..")
+    log("#######   os_walk() ..")
     cwd = os.getcwd()
     # log(os_walk(cwd))
 
 
-    log("Testing os_copy_safe() ..")
+    log("#######   os_copy_safe() ..")
     os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
 
 
 
-    log("Testing z_os_search_fast() ..")
+    log("#######   z_os_search_fast() ..")
     with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
     res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
@@ -268,8 +266,7 @@ def test8():
 
 
 
-    log("Testing os_search_content() ..")
-    from utilmy.oos import os_search_content
+    log("#######   os_search_content() ..")
     with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
 
@@ -281,12 +278,12 @@ def test8():
     '''
 
 
-    log("Testing os_get_function_name() ..")
+    log("#######   os_get_function_name() ..")
     log(os_get_function_name())
 
 
 
-    log("Testing os_variables_test ..")
+    log("#######   os_variables_test ..")
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -297,22 +294,19 @@ def test8():
     log(os_variable_exist("test_var",globs))
 
 
-    log("Testing os_system_list() ..")
+    log("#######   os_system_list() ..")
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
+    os_system("whoami", doprint=True)
 
 
-    log("Testing os_file_check()")
+    log("#######   os_file_check()")
     os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
     os_file_check("./testdata/tmp/test/file_test.txt")
 
 
 
-    from utilmy import pd_random
-
-    log("Testing os utils...")
-    from utilmy.oos import os_platform_os, os_cpu, os_memory,os_getcwd, os_sleep_cpu,os_copy,\
-            os_removedirs,os_sizeof, os_makedirs
+    log("#######   os utils...")
     log(os_platform_os())
     log(os_cpu())
     log(os_memory())
@@ -331,12 +325,8 @@ def test8():
 
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs("./testdata/tmp/test/os_test")
-    pd_df = pd_random()
-    log(os_sizeof(pd_df, set()))
+    log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
 
-
-    log("Testing os_system()...")
-    os_system("whoami", doprint=True)
 
 
 
