@@ -273,8 +273,8 @@ def test6_os():
 
 
     log("#######   os_path_size() ..")
-    size_ = os_path_size()
-    log("total size", size_)
+    size_ = os_path_size(drepo)
+    assert log("total size", size_) and size_> 10 , f"error {size_}"
 
 
     log("#######   os_path_split() ..")
