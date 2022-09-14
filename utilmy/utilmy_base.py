@@ -72,7 +72,7 @@ def dirpackage(show=0):
     return dir_repo1
 
 
-def dir_testinfo():
+def dir_testinfo(verbose=1):
     """ Print - Return Info for test writing
     Docs::
 
@@ -80,13 +80,18 @@ def dir_testinfo():
 
 
     """
-
+    log("\n--------------------------------------")
     drepo = direpo()
-    dtmp = os_get_dirtmp()
-    log(drepo)
-    log(dtmp)
+    dtmp  = os_get_dirtmp()
+
+    if verbose>0 :
+        import inspect
+        print( inspect.stack()[1].filename,"::", inspect.stack()[1].function,)
 
 
+    log('repo: ',drepo)
+    log('tmp: ', dtmp)
+    log("\n")
     return drepo, dtmp
 
 
@@ -1051,6 +1056,9 @@ def test3():
 
 def test4():
     import utilmy as m
+
+
+    drepo, dirtmp = dir_testinfo()
 
 
     def test_func(arg1, arg2):
