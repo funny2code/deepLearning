@@ -166,10 +166,9 @@ def test_create_testfiles():
 def test2():
     """function test2
     """
-
     import utilmy
     drepo = utilmy.direpo()
-    log(drepo)
+
 
     test_create_testfiles()
 
@@ -206,7 +205,7 @@ def test4():
     """
     import utilmy
     drepo = utilmy.direpo()
-    log(drepo)
+
 
     log(os_get_function_name())
     cwd = os.getcwd()

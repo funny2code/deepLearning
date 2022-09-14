@@ -55,15 +55,18 @@ def test1():
     m.to_timeunix(datex="2020-10-06")
     m.to_datetime("10/05/2021")
 
+
+    log("#############",m.LRUCache)
     lrc = LRUCache()
     key = 'check'
     value = [1,2,3,4,5]
     lrc[key] = value
     res = lrc[key]
-    log("#############",m.LRUCache)
     assert res==value,"Item mismatch in getting and setting items"
     log(res)
 
+
+    log("#############",m.fixedDict)
     od = OrderedDict()
     key = 'check'
     value = [1,2,3,4,5]
@@ -74,7 +77,6 @@ def test1():
     fxd[key2] = value2
     res2 = fxd[key2]
     res = fxd[key]
-    log("#############",m.fixedDict)
     log(res)
     log(res2)
     assert res == value,"Item mismatch in getting and setting items"
