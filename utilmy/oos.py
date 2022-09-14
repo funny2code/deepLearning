@@ -141,35 +141,63 @@ def test1():
     assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
+def test_create_files():
+    from utilmy import to_file, os_get_dirtmp, direpo
+
+    d0 = os_get_dirtmp()
+    dr = direpo()
+
+    ss= """
+    
+    
+    """
+    to_file(ss,d0 + "/test.txt" )
+
+
+
+    ss ="""
+    
+    """
+    to_file(ss,d0 + "/test.txt" )
+
+
+
 
 def test2():
     """function test2
     """
+
+    from utilmy import direpo
+    d0 = direpo()
+
+    test_create_files()
+
+    
     size_ = os_path_size()
     log("total size", size_)
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
 
-    assert os.path.exists("../testdata/tmp/test/"),"Directory doesn't exist"
+    assert os.path.exists(d0 + "/testdata/tmp/test/"),"Directory doesn't exist"
 
-    os_file_check("../testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
-    with open("../testdata/tmp/test/os_file_test.txt", 'a') as file:
+    os_file_check(d0 + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
+    with open(d0 + "/testdata/tmp/test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
-    os_file_check("../testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
+    os_file_check(d0 + "/testdata/tmp/test/os_file_test.txt"),"File or directory doesn't exist"
 
     os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe("../testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe(d0 + "/testdata/tmp/test", "./testdata/tmp/test_copy/")
 
     
-    with open("../testdata/tmp/test/os_search_test.txt", 'a') as file:
+    with open( d0 + "/testdata/tmp/test/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("../testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
-    os_file_check("../testdata/tmp/test/os_search_test.txt"),"File or directory doesn't exist"
+    res = z_os_search_fast(d0 + "/testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    os_file_check(d0 + "/testdata/tmp/test/os_search_test.txt"),"File or directory doesn't exist"
 
     
-    with open("../testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    with open(d0 + "/testdata/tmp/test/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    os_file_check("../testdata/tmp/test/os_search_content_test.txt"),"File or directory doesn't exist"
+    os_file_check(d0 + "/testdata/tmp/test/os_search_content_test.txt"),"File or directory doesn't exist"
 
 
 def test4():
