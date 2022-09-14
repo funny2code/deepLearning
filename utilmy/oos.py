@@ -75,7 +75,7 @@ def test_globglob():
 def test_filecache():
     import utilmy
     drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
-    
+
     fc = fileCache(dir_cache='test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
