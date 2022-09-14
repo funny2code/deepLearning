@@ -1125,9 +1125,15 @@ def test6():
     log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
     assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
-    assert m.date_now('2020-12-10', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20201205   #-->  20201205
-    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
-    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
+    x = m.date_now('2020-12-10', fmt='%Y%m%d', add_days=-5, returnval='int')
+    assert not log( x ) and x == 20201205, x   #-->  20201205
+
+    x = m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')
+    assert   not log(x ) and  int(x)  == 1633359600, x  #-->  1634324632848
+
+    x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
+    assert   not log(x ) and  x  == '2021-10-05' , x                              #-->  1634324632848
 
 
 
