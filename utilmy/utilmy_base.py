@@ -47,7 +47,7 @@ def direpo(show=0):
     """
     try :
        import utilmy
-       dir_repo1 = os.path.dirname( utilmy.__path__[0].replace("\\","/")  ).replace("\\","/") + "/"
+       dir_repo1 = os.path.dirname( utilmy.__path__[0] ).replace("\\","/") + "/"
     except:
        dir_repo1 = os.path.dirname( os.path.dirname(os.path.abspath(__file__))).replace("\\","/") + "/"
 
@@ -56,6 +56,20 @@ def direpo(show=0):
     return dir_repo1
 
 
+
+def dirpackage(show=0):
+    """ dirname of the file  utilmy_base.py  (ie site-packages/utilmy/ )
+
+    """
+    try :
+       import utilmy
+       dir_repo1 = os.path.abspath(utilmy.__path__[0]).replace("\\","/")
+    except:
+       dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/") + "/"
+
+    if show>0 :
+        log(dir_repo1)
+    return dir_repo1
 
 
 
@@ -1025,7 +1039,7 @@ def test4():
         return arg1 + arg2
 
 
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy_base',  ]:
+    for name in [ 'utilmy.parallel', 'utilmy.nnumpy',  ]:
         log("\n####", name,"\n", m.help_create(name))
         assert m.help_create(name), 'FAILED -> help_create'
         log("\n####", name,"\n", m.help_info(name))
@@ -1101,7 +1115,7 @@ def test7():
 
     log("\n####", m.pd_generate_data)
     df = m.pd_generate_data(nrows=25, ncols=7)
-    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 125,7 "
+    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7 "
 
     log("\n####", m.pd_getdata)
     files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
