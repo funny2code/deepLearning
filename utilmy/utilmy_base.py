@@ -1131,7 +1131,7 @@ def test6():
     assert not log( x ) and x == 20201205, x   #-->  20201205
 
     x = m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')
-    assert   not log(x ) and  int(x)  == 1633359600, x  #-->  1634324632848
+    assert   not log(x ) and  int(x)  > 1603424400, x  #-->  1634324632848
 
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
