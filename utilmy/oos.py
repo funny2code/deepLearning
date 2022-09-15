@@ -386,6 +386,7 @@ def test7_os():
     to_file(ss2,dirtmp + "/test2.txt" )
 
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
+    os_remove(dirin=dirtmp+'/test1.txt', ndays_past=-1)
 
 
 
@@ -738,7 +739,7 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
 def os_remove(dirin="folder/**/*.parquet",
               min_size_mb=0, max_size_mb=1,
               exclude="", include_only="",
-              ndays_past=1000, start_date='1970-01-01', end_date='2050-01-01',
+              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
               nfiles=99999999,
               dry=0):
 
