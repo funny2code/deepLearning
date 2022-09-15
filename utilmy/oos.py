@@ -34,6 +34,7 @@ def test_all():
     test4()
     test5_os()
     test6_os()
+    test7_os()
 
 
 
@@ -365,6 +366,30 @@ def test6_os():
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
+
+
+def test7_os():
+    import utilmy
+    from utilmy import to_file
+    drepo, dirtmp = utilmy.dir_testinfo()
+
+    ss1= """
+    test input1
+    
+    """
+    to_file(ss1,dirtmp + "/test1.txt" )
+
+    ss2= """
+    test input2
+    
+    """
+    to_file(ss2,dirtmp + "/test2.txt" )
+
+    os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
+
+
+
+
 
 
 
