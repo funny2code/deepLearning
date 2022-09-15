@@ -368,15 +368,15 @@ def test7_os():
 
 
     log("\n#######", os_merge_safe)
-    ss1= """test input1
-    """
+    ss1= """test input1"""
     uu.to_file(ss1,dirtmp + "/test1.txt" )
-
-    ss2= """test input2
-    """
+    ss2= """test input2"""
     uu.to_file(ss2,dirtmp + "/test2.txt" )
+
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
-    os_remove(dirin=dirtmp+'/test1.txt', ndays_past=-1)
+    os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
+    flist = glob_glob(dirtmp)
+    assert len(flist) < 2, flist
 
 
 
@@ -415,6 +415,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     ):
     """ Advanced Glob filtering.
     Docs::
+
         dirin="": get the files in path dirin, works when file_list=[]
         file_list=[]: if file_list works, dirin will not work
         exclude=""   :
