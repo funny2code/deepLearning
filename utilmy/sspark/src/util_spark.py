@@ -524,11 +524,11 @@ def spark_get_session_local(config:str="/default.yaml", keyfield='sparkconfig'):
             sparksession = spark_get_session_local('mypath/conffig.yaml)
 
     """
-    from utilmy.utilmy_base import direpo
+    from utilmy.utilmy_base import dirpackage
     # from utilmy.configs.util_config import config_load
 
     if config == "/default.yaml":
-        dir1 = direpo() + "/sspark/config/config_local.yaml"
+        dir1 = dirpackage() + "/sspark/config/config_local.yaml"
     else :
         dir1  = config
 

@@ -41,13 +41,59 @@ def get_verbosity(verbose:int=None):
 verbose = get_verbosity()   ### Global setting
 
 
-def direpo():
+def direpo(show=0):
+    """ Root folder of the repo in Unix / format
+
+    """
     try :
        import utilmy
-       dir_repo1 =  utilmy.__path__[0].replace("\\","/")  + "/"
+       dir_repo1 = os.path.dirname( utilmy.__path__[0] ).replace("\\","/") + "/"
+    except:
+       dir_repo1 = os.path.dirname( os.path.dirname(os.path.abspath(__file__))).replace("\\","/") + "/"
+
+    if show>0 :
+        log(dir_repo1)
+    return dir_repo1
+
+
+
+def dirpackage(show=0):
+    """ dirname of the file  utilmy_base.py  (ie site-packages/utilmy/ )
+
+    """
+    try :
+       import utilmy
+       dir_repo1 = os.path.abspath(utilmy.__path__[0]).replace("\\","/")
     except:
        dir_repo1 = os.path.dirname(os.path.abspath(__file__)).replace("\\","/") + "/"
+
+    if show>0 :
+        log(dir_repo1)
     return dir_repo1
+
+
+def dir_testinfo(verbose=1):
+    """ Print - Return Info for test writing
+    Docs::
+
+        https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
+
+
+    """
+    log("\n--------------------------------------")
+    drepo = direpo()
+    dtmp  = os_get_dirtmp()
+    assert os.path.exists(dtmp), f"Directory not found {dtmp}"
+
+    if verbose>0 :
+        import inspect
+        print( inspect.stack()[1].filename,"::", inspect.stack()[1].function,)
+
+
+    log('repo: ',drepo)
+    log('tmp: ', dtmp)
+    log("\n")
+    return drepo, dtmp
 
 
 
@@ -938,8 +984,13 @@ def test_all():
     test4()
     test5()
     test7()
-    test_save_and_load()
-    test_to_file()
+    test1()
+    test2()
+    test3()
+    test4()
+    test5()
+    test6()
+    test7()
 
 
 def test1():
@@ -1008,17 +1059,20 @@ def test4():
     import utilmy as m
 
 
+    drepo, dirtmp = dir_testinfo()
+
+
     def test_func(arg1, arg2):
         """HELP doc string
         """
         return arg1 + arg2
 
 
-    for name in [ 'utilmy.parallel', 'utilmy.utilmy_base',  ]:
+    for name in [ 'utilmy.parallel', 'utilmy.nnumpy',  ]:
         log("\n####", name,"\n", m.help_create(name))
-        assert m.help_create(name), 'FAILED -> help_create'
+        # assert m.help_create(name), f'FAILED -> help_create {name}'
         log("\n####", name,"\n", m.help_info(name))
-        assert m.help_info(name), 'FAILED -> help_info'
+        # assert m.help_info(name), f'FAILED -> help_info {name}'
 
     log("\n####", m.help_get_codesource(func=test_func))
     assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
@@ -1072,14 +1126,23 @@ def test6():
     log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
     assert m.date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
-    assert m.date_now('2021-10-05', fmt='%Y%m%d', add_days=-5, returnval='int')  == 20211001   #-->  20211001
-    assert m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str') == '2021-10-05'    #-->  '2021-10-05'
-    assert m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')   == 1634324632848  #-->  1634324632848
+
+    x = m.date_now('2020-12-10', fmt='%Y%m%d', add_days=-5, returnval='int')
+    assert not log( x ) and x == 20201205, x   #-->  20201205
+
+    x = m.date_now(20211005,     fmt_input='%Y%m%d', returnval='unix')
+    assert   not log(x ) and  int(x)  > 1603424400, x  #-->  1634324632848
+
+    x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
+    assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
+
 
 
 
 def test7():
     import utilmy as m
+
+    d0 = os_get_dirtmp()
 
 
     log("\n####", m.pd_random)
@@ -1088,32 +1151,31 @@ def test7():
 
     log("\n####", m.pd_generate_data)
     df = m.pd_generate_data(nrows=25, ncols=7)
-    assert tuple(df.shape) == (25,7), f"FAILED -> Current shape: {df.shape}  vs True Shape 125,7 "
+    assert tuple(df.shape) == (25,7+2), f"FAILED -> Current shape: {df.shape}  vs True Shape 25,7+2 "
 
     log("\n####", m.pd_getdata)
     files = ['titanic.csv', 'housing.csv', 'stock_data.csv', 'cars.csv', 'sales.csv', 'weatherdata.csv']
     assert list(m.pd_getdata(verbose=False).keys()) == files, f"FAILED -> all the files are not read properly"
     
 
-def test_save_and_load():
-    import utilmy as m
-    log("\n####", m.save)
-    log("\n####", m.load)
+    log("\n####", m.save, m.load)
     data_for_save = "data_for_save"
     m.save(data_for_save, "./testfile")
     loaded_data = m.load("./testfile")
-    os.remove("./testfile")
     assert loaded_data == data_for_save, "FAILED -> save and load"
 
-def test_to_file():
-    import utilmy as m
+
     log("\n####", m.to_file)
     to_file("some_text_data","./testfile",mode="w")
-    file_content = None
     with open("./testfile", mode="r") as fp:
         file_content = fp.read()
-    os.remove("./testfile")
     assert file_content == "some_text_data", "FAILED -> to_file"
+
+    os.remove("./testfile")
+
+
+
+
 
 ###################################################################################################
 if __name__ == "__main__":

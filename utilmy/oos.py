@@ -20,26 +20,75 @@ def help():
     print(ss)
 
 
-
-
 #################################################################
 ###### TEST #####################################################
 def test_all():
     """ python  utilmy/oos.py test_all
     """
+    test_filecache()
+    test_globglob()
+
     test0()
     test1()
-    test_fileCache()
-    test2()
+    # test2()
     test4()
-    test5()
-    test_os2()
-    test8()
+    test5_os()
+    test6_os()
+
+
+
+def test_globglob():
+    import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
+    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
+                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
+                "folder/test/file3.txt"]:
+
+        os_makedirs(path)
+        assert os.path.exists(path),"File doesn't exist"
+
+
+    glob_glob(dirin="folder/**/*.txt")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    glob_glob(dirin="folder/**/*",nfiles=5)
+    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    glob_glob(dirin="folder/",npool=1)
+    glob_glob(dirin="folder/test/",npool=1)
+
+    flist = ['folder/test/file.txt',
+        'folder/test/file1.txt',
+        'folder/test/file2.txt',
+        'folder/test/file3.txt',
+        'folder/test/tmp/1.txt',
+        'folder/test/tmp/myfile.txt',
+        'folder/test/tmp/record.txt']
+    glob_glob(dirin="", file_list=flist)
+    glob_glob(file_list=flist)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+
+
+
+def test_filecache():
+    import utilmy
+    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+
+    fc = fileCache(dir_cache='test')
+    data = [1,2 ,3, 4]
+    fc.set( 'test', data )
+    log(fc.get('test'))
+    assert fc.get('test') == data, 'FAILED, file cache'
+
 
 
 def test0():
     """function test0
     """
+    import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
 
     #logfull("log2")
     #logfull2("log5")
@@ -99,45 +148,80 @@ def test1():
     assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
+def test_create_testfiles():
+    import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
+    from utilmy import to_file
 
 
-def test_fileCache():
-    fc = fileCache(dir_cache='test')
-    data = [1,2 ,3, 4]
-    fc.set( 'test', data )
-    log(fc.get('test'))
-    assert fc.get('test') == data, 'FAILED, file cache'
+    ss= """
+    
+    
+    """
+    to_file(ss,dtmp + "/test.txt" )
+
+
+
+    ss ="""
+    
+    """
+    to_file(ss,dtmp + "/test.txt" )
+
 
 
 
 def test2():
     """function test2
     """
+    import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
+
+    test_create_testfiles()
+
+
     size_ = os_path_size()
     log("total size", size_)
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
-    with open("./testdata/tmp/test/os_file_test.txt", 'a') as file:
+    
+
+
+    d0 = drepo + "/testdata/tmp/test/"
+    assert os.path.exists(d0)
+
+    os_file_check(d0 + "/os_file_test.txt"),"File or directory doesn't exist"
+    with open(d0 + "/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
+    os_file_check(d0 + "/os_file_test.txt"),"File or directory doesn't exist"
 
     os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe(drepo + "/testdata/tmp/test", "./testdata/tmp/test_copy/")
 
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+    
+    with open( d0 + "/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    res = z_os_search_fast(d0 + "/os_search_test.txt", ["Dummy"],mode="regex")
+    os_file_check(d0 + "/os_search_test.txt"),"File or directory doesn't exist"
 
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    
+    with open(d0 + "/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
+    os_file_check(d0 + "/os_search_content_test.txt"),"File or directory doesn't exist"
 
 
 
 def test4():
     """function test4
     """
+    import utilmy
+    drepo, dtmp = utilmy.dir_testinfo()
+
+
     log(os_get_function_name())
     cwd = os.getcwd()
-    log(os_walk(cwd))
+    #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
     ll = ["test_var"]
@@ -147,63 +231,15 @@ def test4():
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
     os_clean_memory(["test_var"], globs)
+
     log(os_variable_exist("test_var",globs))
+    assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
-
-
-def test_globglob():
-    os_makedirs("folder/test/file1.txt")
-    os_makedirs("folder/test/tmp/1.txt")
-    os_makedirs("folder/test/tmp/myfile.txt")
-    os_makedirs("folder/test/tmp/record.txt")
-    os_makedirs("folder/test/tmp/part.parquet")
-    os_makedirs("folder/test/file2.txt")
-    os_makedirs("folder/test/file3.txt")
-
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=2)
-    glob_glob(dirin="folder/test/",npool=2)
-
-    flist = ['folder/test/file.txt',
-        'folder/test/file1.txt',
-        'folder/test/file2.txt',
-        'folder/test/file3.txt',
-        'folder/test/tmp/1.txt',
-        'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=2)
+    os_to_file(txt="test text to write to file",filename= dtmp + "/file_test.txt", mode="a")
+    os_file_check( dtmp + "/file_test.txt")
 
 
-
-
-def test5():
-    """function test5
-    Args:
-    Returns:
-
-    """
-    log("Testing os utils...")
-    from utilmy import pd_random
-    log(os_platform_os())
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    pd_df = pd_random()
-    log(os_sizeof(pd_df, set()))
-
-
-def test_os2():
+def test5_os():
     log(" os_copy")
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
 
@@ -218,43 +254,61 @@ def test_os2():
             )
 
 
-def test8():
-    log("Testing os_path_size() ..")
-    size_ = os_path_size()
-    log("total size", size_)
+def test6_os():
+
+    #from utilmy import oos as m
+    import utilmy 
+    drepo, dtmp = utilmy.dir_testinfo()
+
+    log("#######   os utils...")
+    log(os_platform_os())
+    assert os_platform_os() == sys.platform,"Platform mismatch"
+    log(os_cpu())
+    log(os_memory())
+    log(os_getcwd())
+    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
+
+    c = {1, 3, "sdsfsdf"}
+    log(os_sizeof(c, set()))
 
 
-    log("Testing os_path_split() ..")
-    result_ = os_path_split("test/tmp/test.txt")
+    log("#######   os_path_size() ..")
+    size_ = os_path_size(drepo)
+    assert not log("total size", size_) and size_> 10 , f"error {size_}"
+
+
+    log("#######   os_path_split() ..")
+    result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
 
 
-    log("Testing os_file_replacestring() ..")
+    log("#######   os_file_replacestring() ..")
 
 
 
-    log("Testing os_walk() ..")
+    log("#######   os_walk() ..")
     cwd = os.getcwd()
     # log(os_walk(cwd))
 
 
-    log("Testing os_copy_safe() ..")
-    os_copy_safe("./testdata/tmp/test", "./testdata/tmp/test_copy/")
+    log("#######   os_copy_safe() ..")
+    os_copy_safe(dtmp+"/test", dtmp+"/test_copy/")
 
 
 
-    log("Testing z_os_search_fast() ..")
-    with open("./testdata/tmp/test/os_search_test.txt", 'a') as file:
+    log("#######   z_os_search_fast() ..")
+    with open(dtmp+"/os_search_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
-    res = z_os_search_fast("./testdata/tmp/test/os_search_test.txt", ["Dummy"],mode="regex")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
     print(res)
+    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
 
 
 
-    log("Testing os_search_content() ..")
-    from utilmy.oos import os_search_content
-    with open("./testdata/tmp/test/os_search_content_test.txt", 'a') as file:
+    log("#######   os_search_content() ..")
+    with open(dtmp+"/os_search_content_test.txt", 'a') as file:
         file.write("Dummy text to test fast search string")
+    assert os.path.exists(dtmp+"/os_search_content_test.txt"),"File not found"
 
     cwd = os.getcwd()
     '''TODO: for f in list_all["fullpath"]:
@@ -264,12 +318,12 @@ def test8():
     '''
 
 
-    log("Testing os_get_function_name() ..")
+    log("#######   os_get_function_name() ..")
     log(os_get_function_name())
 
 
 
-    log("Testing os_variables_test ..")
+    log("#######   os_variables_test ..")
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -280,49 +334,42 @@ def test8():
     log(os_variable_exist("test_var",globs))
 
 
-    log("Testing os_system_list() ..")
+    log("#######   os_system_list() ..")
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
+    os_system("whoami", doprint=True)
 
 
-    log("Testing os_file_check()")
-    os_to_file(txt="test text to write to file",filename="./testdata/tmp/test/file_test.txt", mode="a")
-    os_file_check("./testdata/tmp/test/file_test.txt")
+    log("#######   os_file_check()")
+    os_to_file(txt="test text to write to file",filename=dtmp+"/file_test.txt", mode="a")
+    os_file_check(dtmp+"/file_test.txt")
 
 
 
-    from utilmy import pd_random
-
-    log("Testing os utils...")
-    from utilmy.oos import os_platform_os, os_cpu, os_memory,os_getcwd, os_sleep_cpu,os_copy,\
-            os_removedirs,os_sizeof, os_makedirs
+    log("#######   os utils...")
     log(os_platform_os())
     log(os_cpu())
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
-    os_makedirs("./testdata/tmp/test")
-    with open("./testdata/tmp/test/os_utils_test.txt", 'w') as file:
+    #os_makedirs(dtmp+"/test")
+    with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
+    assert os.path.exists(dtmp+"/os_utils_test.txt"),"File not found"
 
-    os_makedirs("./testdata/tmp/test/os_test")
+    os_makedirs(dtmp+"/os_test")
+    assert os.path.exists(dtmp+"/os_test"),"Folder not found"
 
-    with open("./testdata/tmp/test/os_test/os_file_test.txt", 'a') as file:
+    with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
+    assert os.path.exists(dtmp+"/os_test/os_file_test.txt"),"File not found"
 
-    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/os_test/")
+    os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-    os_removedirs("./testdata/tmp/test/os_test")
-    pd_df = pd_random()
-    log(os_sizeof(pd_df, set()))
-
-
-    log("Testing os_system()...")
-    os_system("whoami", doprint=True)
-
-
-
+    os_removedirs(dtmp+"/os_test")
+    assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+    log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
 
@@ -457,18 +504,19 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             nfiles, verbose,npool)
 
     else :
-        from utilmy import parallel as par
-        input_fixed = {'exclude': exclude, 'include_only': include_only,
-                       'npool':1,
-                      }
-        if dirin and not file_list:
-            fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
-        if file_list:
-            fdir = file_list
-        res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
-                npool=npool)
-        res  = sum(res) ### merge
-        return res
+        raise Exception('no working with npool>1')
+        # from utilmy import parallel as par
+        # input_fixed = {'exclude': exclude, 'include_only': include_only,
+        #                'npool':1,
+        #               }
+        # if dirin and not file_list:
+        #     fdir = [item for item in os.walk(dirin)] # os.walk(dirin, topdown=False)
+        # if file_list:
+        #     fdir = file_list
+        # res  = par.multithread_run(fun_glob, input_list=fdir, input_fixed= input_fixed,
+        #         npool=npool)
+        # res  = sum(res) ### merge
+        # return res
 
 
 
