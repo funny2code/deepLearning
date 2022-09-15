@@ -258,8 +258,8 @@ def test5_os():
 def test6_os():
 
     #from utilmy import oos as m
-    import utilmy 
-    drepo, dtmp = utilmy.dir_testinfo()
+    import utilmy as uu
+    drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
     log(os_platform_os())
@@ -307,9 +307,9 @@ def test6_os():
 
 
     log("#######   os_search_content() ..")
-    with open(dtmp+"/os_search_content_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    assert os.path.exists(dtmp+"/os_search_content_test.txt"),"File not found"
+    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
+    os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
+
 
     cwd = os.getcwd()
     '''TODO: for f in list_all["fullpath"]:
@@ -351,14 +351,10 @@ def test6_os():
     #os_makedirs(dtmp+"/test")
     with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
-    assert os.path.exists(dtmp+"/os_utils_test.txt"),"File not found"
 
     os_makedirs(dtmp+"/os_test")
-    assert os.path.exists(dtmp+"/os_test"),"Folder not found"
-
     with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
-    assert os.path.exists(dtmp+"/os_test/os_file_test.txt"),"File not found"
 
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 

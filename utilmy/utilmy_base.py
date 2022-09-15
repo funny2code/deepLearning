@@ -308,6 +308,7 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 ###################################################################################################
 def to_file(txt, fpath, mode='a'):
+    os_makedirs(fpath) ### create folder
     with open(fpath, mode=mode) as fp:
         fp.write(txt)
 
