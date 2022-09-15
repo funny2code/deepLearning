@@ -1468,8 +1468,10 @@ def np_add_remove(set_, to_remove, to_add):
 
 class toFileSafe(object):
    def __init__(self,fpath):
-      """ Thread Safe file writer
-        tofile = toFileSafe('mylog.log)
+      """ Thread Safe file writer Class
+      Docs::
+
+        tofile = toFileSafe('mylog.log')
         tofile.w("msg")
       """
       import logging
