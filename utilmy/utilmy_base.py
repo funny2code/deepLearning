@@ -599,17 +599,29 @@ def pd_getdata(verbose=True):
 
 
 class Index0(object):
+    """ Class Maintain global index,
+    Docs::
+
+        file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
+        index = m.Index0(file_name, min_chars=8)
+
+
+        ### 2 save some data
+        data   = [ "testestest", 'duplicate', '5char', '### comment line, so skipped',]
+        output = [ 'testestest', 'duplicate',  ]
+        index.save(data)
+        assert set(index.read()) == set(output), f"{output} , {index.read()}"
+
     """
-    ### to maintain global index, flist = index.read()  index.save(flist)
-    """
-    def __init__(self, findex:str="ztmp_file.txt"):
+    def __init__(self, findex:str="ztmp_file.txt", min_chars=5):
         """ Index0:__init__
         Args:
             findex (function["arg_type"][i]) :     
         Returns:
            
         """
-        self.findex = findex
+        self.findex        = findex
+        self.min_chars = min_chars
         log(os.path.dirname(self.findex))
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
         if not os.path.isfile(self.findex):
@@ -629,7 +641,7 @@ class Index0(object):
         if len(flist) < 1 : return []    
         flist2 = []
         for t  in flist :
-            if len(t) > 5 and t[0] != "#"  :
+            if len(t) >= self.min_chars and t[0] != "#"  :
               flist2.append( t.strip() )
         return flist2    
 
@@ -1024,18 +1036,17 @@ def test1():
 
 def test2():
     import utilmy as m
+    drepo, dtmp = dir_testinfo()
 
-    log('#### Index0')
-    d0 = os_get_dirtmp()    
-    file_name = f"{d0}/test_file_{int(time.time())}.txt"
-    index = m.Index0(file_name)
 
-    # 2 save some data
-    data = [ "testestest", 2, 'for ii in rnage zz', '#comment',]
-    output = [ 'testestest', 'for ii in rnage zz', ]
+    file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
+    index = m.Index0(file_name, min_chars=8)
+    data  = [ "testestest", 'duplicate', '5char', '8charlong', '### comment line, so skipped',]
+    xtrue = [ 'testestest', 'duplicate', '8charlong'  ]
     index.save(data)
+    x = set(index.read())
+    assert not log(x) and x  == set(xtrue), f"{xtrue} <> {x}"
 
-    assert index.read() == output, 'FAILED, -> get data wrong'
 
 
 def test3():
