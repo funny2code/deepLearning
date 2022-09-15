@@ -1025,17 +1025,17 @@ def test1():
 def test2():
     import utilmy as m
 
-    log('#### Index0')
-    d0 = os_get_dirtmp()    
-    file_name = f"{d0}/test_file_{int(time.time())}.txt"
+    drepo, dtmp = dir_testinfo()
+
+    file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name)
 
     # 2 save some data
-    data = [ "testestest", 2, 'for ii in rnage zz', '#comment',]
-    output = [ 'testestest', 'for ii in rnage zz', ]
+    data = [ "testestest",   'duplicate', 'ok', 'duplicate',]
+    output = [ 'testestest', 'ok', ]
     index.save(data)
+    assert set(index.read()) == set(output), output
 
-    assert index.read() == output, 'FAILED, -> get data wrong'
 
 
 def test3():

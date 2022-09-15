@@ -175,41 +175,30 @@ def test_create_testfiles():
 def test2():
     """function test2
     """
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
-
+    import utilmy as uu
+    drepo, dtmp = uu.dir_testinfo()
 
     test_create_testfiles()
 
 
     size_ = os_path_size()
     log("total size", size_)
+
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
     
 
 
-    d0 = drepo + "/testdata/tmp/test/"
-    assert os.path.exists(d0)
+    uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
+    os_file_check(dtmp + "/os_file_test.txt")
+    res = z_os_search_fast(dtmp + "/os_file_test.txt", ["Dummy"],mode="regex")
 
-    os_file_check(d0 + "/os_file_test.txt"),"File or directory doesn't exist"
-    with open(d0 + "/os_file_test.txt", 'a') as file:
-        file.write("Dummy text to test replace string")
-    os_file_check(d0 + "/os_file_test.txt"),"File or directory doesn't exist"
+    os_file_replacestring(findstr="text",replacestr="text_replace",
+                          some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
 
-    os_file_replacestring("text", "text_replace", "./testdata/tmp/test/")
-    os_copy_safe(drepo + "/testdata/tmp/test", "./testdata/tmp/test_copy/")
+    os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
-    
-    with open( d0 + "/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(d0 + "/os_search_test.txt", ["Dummy"],mode="regex")
-    os_file_check(d0 + "/os_search_test.txt"),"File or directory doesn't exist"
 
-    
-    with open(d0 + "/os_search_content_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    os_file_check(d0 + "/os_search_content_test.txt"),"File or directory doesn't exist"
 
 
 
@@ -346,14 +335,8 @@ def test6_os():
 
 
     log("#######   os utils...")
-    #os_makedirs(dtmp+"/test")
-    with open(dtmp+"/os_utils_test.txt", 'w') as file:
-        file.write("Dummy file to test os utils")
-
-    os_makedirs(dtmp+"/os_test")
-    with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
-        file.write("Dummy text to test replace string")
-
+    uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
+    uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
@@ -368,10 +351,8 @@ def test7_os():
 
 
     log("\n#######", os_merge_safe)
-    ss1= """test input1"""
-    uu.to_file(ss1,dirtmp + "/test1.txt" )
-    ss2= """test input2"""
-    uu.to_file(ss2,dirtmp + "/test2.txt" )
+    uu.to_file("""test input1""", dirtmp + "/test1.txt" )
+    uu.to_file("""test input2""", dirtmp + "/test2.txt" )
 
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
     os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
@@ -1476,8 +1457,10 @@ def np_add_remove(set_, to_remove, to_add):
 
 class toFileSafe(object):
    def __init__(self,fpath):
-      """ Thread Safe file writer
-        tofile = toFileSafe('mylog.log)
+      """ Thread Safe file writer Class
+      Docs::
+
+        tofile = toFileSafe('mylog.log')
         tofile.w("msg")
       """
       import logging
