@@ -80,7 +80,7 @@ def dir_testinfo(verbose=1):
 
 
     """
-    log("\n--------------------------------------")
+    log("\n---------------------------------------------------------------------")
     drepo = direpo()
     dtmp  = os_get_dirtmp()
     assert os.path.exists(dtmp), f"Directory not found {dtmp}"
