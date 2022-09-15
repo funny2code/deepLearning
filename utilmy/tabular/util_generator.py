@@ -532,7 +532,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = 
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
+    log(evaluate(Xnew=Xnew, Xtrue=Xval, compute_pars=compute_pars))
 
     log('Saving model..')
     save(path= root + '/model_dir/')
@@ -547,20 +547,12 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = 
 ############### Wrapper #######################################################################
 def generator_train_save(dirin_or_df="", dirout="",
 
-
-                         model_pars:dict=None,
-                         model_class = 'CTGAN',
-                         model_class_pars = None,
-
+                         model_pars:dict=None,  model_class = 'CTGAN',  model_class_pars = None,
                          compute_pars:dict=None,
-
                          metrics_pars =None,
-
 
                          n_sample=1000,
                          cols = None,
-
-
                          ):
     """ Data Generator Wrapper to train/save
     Docs::
@@ -630,7 +622,7 @@ def generator_train_save(dirin_or_df="", dirout="",
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
+    log(evaluate(Xnew=Xnew, Xtrue=Xval, compute_pars=compute_pars))
 
     log('Save model..')
     save(path= dirout)
@@ -710,29 +702,80 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
+def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, metric_type=None):
     """ Return metrics of the model when fitted.
+    Docs::
+
+        Single Table Metrics
+        https://github.com/sdv-dev/SDMetrics/tree/master/sdmetrics/single_table
+
+        from sdmetrics.single_table import SingleTableMetric
+        SingleTableMetric.get_subclasses()
+        {'BNLogLikelihood'                 : sdmetrics.single_table.bayesian_network.BNLogLikelihood,
+        'LogisticDetection'                : sdmetrics.single_table.detection.sklearn.LogisticDetection,
+        'SVCDetection'                     : sdmetrics.single_table.detection.sklearn.SVCDetection,
+        'BinaryDecisionTreeClassifier'     : sdmetrics.single_table.efficacy.binary.BinaryDecisionTreeClassifier,
+        'BinaryAdaBoostClassifier'         : sdmetrics.single_table.efficacy.binary.BinaryAdaBoostClassifier,
+        'BinaryLogisticRegression'         : sdmetrics.single_table.efficacy.binary.BinaryLogisticRegression,
+        'BinaryMLPClassifier'              : sdmetrics.single_table.efficacy.binary.BinaryMLPClassifier,
+        'MulticlassDecisionTreeClassifier' : sdmetrics.single_table.efficacy.multiclass.MulticlassDecisionTreeClassifier,
+        'MulticlassMLPClassifier'          : sdmetrics.single_table.efficacy.multiclass.MulticlassMLPClassifier,
+        'LinearRegression'                 : sdmetrics.single_table.efficacy.regression.LinearRegression,
+        'MLPRegressor'                     : sdmetrics.single_table.efficacy.regression.MLPRegressor,
+        'GMLogLikelihood'                  : sdmetrics.single_table.gaussian_mixture.GMLogLikelihood,
+        'CSTest'                           : sdmetrics.single_table.multi_single_column.CSTest,
+        'KSComplement'                     : sdmetrics.single_table.multi_single_column.KSComplement,
+        'ContinuousKLDivergence'           : sdmetrics.single_table.multi_column_pairs.ContinuousKLDivergence,
+        'DiscreteKLDivergence'             : sdmetrics.single_table.multi_column_pairs.DiscreteKLDivergence,
+        'CategoricalCAP'                   : sdmetrics.single_table.privacy.cap,
+        'CategoricalGeneralizedCAP'        : sdmetrics.single_table.privacy.cap,
+        'CategoricalZeroCAP'               : sdmetrics.single_table.privacy.cap,
+        'CategoricalKNN'                   : sdmetrics.single_table.privacy.cap,
+        'CategoricalNB'                    : sdmetrics.single_table.privacy.cap,
+        'CategoricalRF'                    : sdmetrics.single_table.privacy.cap,
+        'CategoricalEnsemble'              : sdmetrics.single_table.privacy.ensemble,
+        'NumericalLR'                      : sdmetrics.single_table.privacy.numerical_sklearn,
+        'NumericalMLP'                     : sdmetrics.single_table.privacy.numerical_sklearn,
+        'NumericalSVR'                     : sdmetrics.single_table.privacy.numerical_sklearn,
+        'NumericalRadiusNearestNeighbor'   : sdmetrics.single_table.privacy.radius_nearest_neighbor}
+
+
+
+        -------------------------------------------------------------------------------------
+        https://github.com/sdv-dev/SDMetrics/tree/master/sdmetrics/timeseries
+        from sdmetrics.timeseries import TimeSeriesMetric
+        TimeSeriesMetric.get_subclasses()
+        {'LSTMDetection': sdmetrics.timeseries.detection.LSTMDetection}
+
+
+        -------------------------------------------------------------------------------------
+        In [13]: evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
+        Out[13]:
+           metric         name  raw_score  normalized_score  min_value  max_value      goal error
+        0  CSTest  Chi-Squared   0.948027          0.948027        0.0        1.0  MAXIMIZE  None
+
     """
-    # log(data_pars)
-    mpars       = compute_pars.get("metrics_pars", {'aggregate': True})
-    metric_type = compute_pars.get("metric_type", 'tabular')
+    compute_pars = {} if compute_pars is None else compute_pars
 
-    if model.model_pars['model_class'] in SDV_MODELS:
-        if  metric_type == 'timeseries':
-            target = compute_pars.get("target", '')
-            assert(target is not None)
-            evals = evaluate_timeseries(Xnew, Xval,**mpars, metadata = compute_pars['metadata'], target=target)
-
-        else :
-            evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
-
-        return evals
-    else:
-        return None
+    mpars            = compute_pars.get("metrics_pars", {'aggregate': False, 'metrics': [ 'CSTest' ]  })
+    mpars['metrics'] = metrics if metrics is not None else mpars['metrics']
+    metric_type      = compute_pars.get("metric_type", 'tabular') if metric_type is None else metric_type
+    metadata         = compute_pars.get('metadata', {})
 
 
+    if  metric_type == 'timeseries':
+        target = compute_pars.get("target", None)
+        evals = evaluate_timeseries(Xnew, Xtrue, metadata = metadata, target=target, **mpars, )
 
-def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="y"):
+    else :
+        ###
+        evals = sdv.evaluation.evaluate(Xnew, Xtrue, **mpars)
+
+    return evals
+
+
+
+def evaluate_timeseries(synthetic_data, real_data=None, metadata=None, metrics=None, target="y", **kw):
     """ Return metrics of the model for Time series data.
     """
     from sdv.metrics.timeseries import TSFClassifierEfficacy, LSTMClassifierEfficacy
