@@ -347,11 +347,6 @@ def test6_os():
 
 
     log("#######   os utils...")
-    log(os_platform_os())
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
     #os_makedirs(dtmp+"/test")
     with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
