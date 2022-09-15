@@ -72,7 +72,7 @@ def dirpackage(show=0):
     return dir_repo1
 
 
-def dir_testinfo(verbose=1):
+def dir_testinfo(tag="", verbose=1, ):
     """ Print - Return Info for test writing
     Docs::
 
@@ -85,16 +85,18 @@ def dir_testinfo(verbose=1):
     dtmp  = os_get_dirtmp()
     assert os.path.exists(dtmp), f"Directory not found {dtmp}"
 
+    import inspect
+    fun_name = inspect.stack()[1].function
     if verbose>0 :
-        import inspect
-        print( inspect.stack()[1].filename,"::", inspect.stack()[1].function,)
+        print( inspect.stack()[1].filename,"::", fun_name,)
 
+    dtmp  = dtmp + "/{tag}/"  if len(tag)  > 0  else dtmp + f"/{fun_name}/"
+    os_makedirs(dtmp)
 
-    log('repo: ',drepo)
-    log('tmp: ', dtmp)
+    log('repo: ', drepo)
+    log('tmp_: ', dtmp)
     log("\n")
     return drepo, dtmp
-
 
 
 
