@@ -324,10 +324,12 @@ class NERExtractor:
                  model_name="ro_core_news_sm"
                  ):
         """NERExtractor: named entity extractor
-        This class applies a language model from spacy to parse the text searching for 
-        entities and relations between them. The objective is to parse the corpus of questions to get said relations.
-        Basic NLP techniques such as cleaning the text are applied by it's methods.
-        Docs:
+        Docs::
+
+            This class applies a language model from spacy to parse the text searching for
+            entities and relations between them. The objective is to parse the corpus of questions to get said relations.
+            Basic NLP techniques such as cleaning the text are applied by it's methods.
+
 
                 data    : pd.DataFrame, with the corpus of text from which to extract entities
                 dirin   : where to load the input data. Where the corpus of text is stored
@@ -489,11 +491,12 @@ class KGEmbedder:
                  )->None:
 
         """KGEmbedder: produces the KG embeddings using pyKeen:
-        Several changes to the pyKeen pipeline could be made. Experimentation with the current
-        dataset found out that the chosen elements (mainly the training loop and optimizer) are
-        the most performant.
 
         Docs:
+
+                Several changes to the pyKeen pipeline could be made. Experimentation with the current
+                dataset found out that the chosen elements (mainly the training loop and optimizer) are
+                the most performant.
 
                 https://pykeen.readthedocs.io/en/stable/
                 graph           : ntx.MultiDiGraph the knowledge graph itself
