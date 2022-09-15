@@ -149,6 +149,7 @@ def test1():
     assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
+
 def test_create_testfiles():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
@@ -168,7 +169,6 @@ def test_create_testfiles():
     
     """
     to_file(ss,dtmp + "/test.txt" )
-
 
 
 
@@ -1237,19 +1237,20 @@ def os_system_list(ll, logfile=None, sleep_sec=10):
             log(e)
 
 
-def os_file_check(fp):
-   """function os_file_check
-   Args:
-       fp:
-   Returns:
-
+def os_file_check(fpath:str):
+   """Check file stat info
    """
    import os, time
-   try :
-       log(fp,  os.stat(fp).st_size*0.001, time.ctime(os.path.getmtime(fp)) )
-   except :
-       log(fp, "Error File Not exist")
 
+   flist = glob_glob(fpath)
+   flag = True
+   for fi in flist :
+       try :
+           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
+       except :
+           log(fi, "Error File Not exist")
+           flag = False
+   return flag
 
 
 def os_platform_os():
