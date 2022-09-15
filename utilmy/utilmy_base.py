@@ -740,7 +740,7 @@ from utilmy.oos import(
     os_variable_check,
     os_clean_memory,
     os_system_list,
-    os_to_file,
+    #os_to_file,
     os_platform_os,
     os_platform_ip,
     os_memory,
