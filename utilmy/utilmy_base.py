@@ -1033,7 +1033,7 @@ def test2():
 
     ### 2 save some data
     data   = [ "testestest", 'duplicate', 'ok', 'duplicate',]
-    output = [ 'testestest', 'ok', ]
+    output = [ 'testestest', 'duplicate', 'ok', ]
     index.save(data)
     assert set(index.read()) == set(output), f"{output} , {index.read()}"
 
