@@ -369,22 +369,18 @@ def test6_os():
 
 
 def test7_os():
-    import utilmy
-    from utilmy import to_file
-    drepo, dirtmp = utilmy.dir_testinfo()
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-    ss1= """
-    test input1
-    
+
+    log("\n#######", os_merge_safe)
+    ss1= """test input1
     """
-    to_file(ss1,dirtmp + "/test1.txt" )
+    uu.to_file(ss1,dirtmp + "/test1.txt" )
 
-    ss2= """
-    test input2
-    
+    ss2= """test input2
     """
-    to_file(ss2,dirtmp + "/test2.txt" )
-
+    uu.to_file(ss2,dirtmp + "/test2.txt" )
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
 
 
