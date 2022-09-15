@@ -188,9 +188,9 @@ def test2():
     log("result", result_)
     
 
-
     d0 = drepo + "/testdata/tmp/test/"
     assert os.path.exists(d0)
+
 
     os_file_check(d0 + "/os_file_test.txt"),"File or directory doesn't exist"
     with open(d0 + "/os_file_test.txt", 'a') as file:
