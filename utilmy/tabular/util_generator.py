@@ -702,7 +702,7 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None):
+def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, metric_type=None):
     """ Return metrics of the model when fitted.
     Docs::
 
@@ -740,16 +740,28 @@ def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None):
         'NumericalRadiusNearestNeighbor'   : sdmetrics.single_table.privacy.radius_nearest_neighbor}
 
 
+
+        -------------------------------------------------------------------------------------
+        https://github.com/sdv-dev/SDMetrics/tree/master/sdmetrics/timeseries
+        from sdmetrics.timeseries import TimeSeriesMetric
+        TimeSeriesMetric.get_subclasses()
+        {'LSTMDetection': sdmetrics.timeseries.detection.LSTMDetection}
+
+
+        -------------------------------------------------------------------------------------
         In [13]: evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
         Out[13]:
            metric         name  raw_score  normalized_score  min_value  max_value      goal error
         0  CSTest  Chi-Squared   0.948027          0.948027        0.0        1.0  MAXIMIZE  None
 
     """
-    # log(data_pars)
-    mpars       = compute_pars.get("metrics_pars", {'aggregate': False, 'metrics': [ 'CSTest' ]  })
-    metric_type = compute_pars.get("metric_type", 'tabular')
-    metadata    = compute_pars.get('metadata', {})
+    compute_pars = {} if compute_pars is None else compute_pars
+
+    mpars            = compute_pars.get("metrics_pars", {'aggregate': False, 'metrics': [ 'CSTest' ]  })
+    mpars['metrics'] = metrics if metrics is not None else mpars['metrics']
+    metric_type      = compute_pars.get("metric_type", 'tabular') if metric_type is None else metric_type
+    metadata         = compute_pars.get('metadata', {})
+
 
     if  metric_type == 'timeseries':
         target = compute_pars.get("target", None)
