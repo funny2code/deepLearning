@@ -306,7 +306,7 @@ def test6_os():
 
     log("#######   os_search_content() ..")
     uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
-    os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
+    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
 
 
     cwd = os.getcwd()
