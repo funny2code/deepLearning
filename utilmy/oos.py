@@ -149,6 +149,7 @@ def test1():
     assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
     log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
+
 def test_create_testfiles():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
@@ -168,7 +169,6 @@ def test_create_testfiles():
     
     """
     to_file(ss,dtmp + "/test.txt" )
-
 
 
 
@@ -236,8 +236,6 @@ def test4():
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
-    os_to_file(txt="test text to write to file",filename= dtmp + "/file_test.txt", mode="a")
-    os_file_check( dtmp + "/file_test.txt")
 
 
 def test5_os():
@@ -258,8 +256,8 @@ def test5_os():
 def test6_os():
 
     #from utilmy import oos as m
-    import utilmy 
-    drepo, dtmp = utilmy.dir_testinfo()
+    import utilmy as uu
+    drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
     log(os_platform_os())
@@ -307,9 +305,9 @@ def test6_os():
 
 
     log("#######   os_search_content() ..")
-    with open(dtmp+"/os_search_content_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    assert os.path.exists(dtmp+"/os_search_content_test.txt"),"File not found"
+    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
+    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
+
 
     cwd = os.getcwd()
     '''TODO: for f in list_all["fullpath"]:
@@ -342,7 +340,7 @@ def test6_os():
 
 
     log("#######   os_file_check()")
-    os_to_file(txt="test text to write to file",filename=dtmp+"/file_test.txt", mode="a")
+    uu.to_file("test text to write to file", dtmp+"/file_test.txt", mode="a")
     os_file_check(dtmp+"/file_test.txt")
 
 
@@ -351,14 +349,10 @@ def test6_os():
     #os_makedirs(dtmp+"/test")
     with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
-    assert os.path.exists(dtmp+"/os_utils_test.txt"),"File not found"
 
     os_makedirs(dtmp+"/os_test")
-    assert os.path.exists(dtmp+"/os_test"),"Folder not found"
-
     with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
         file.write("Dummy text to test replace string")
-    assert os.path.exists(dtmp+"/os_test/os_file_test.txt"),"File not found"
 
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
@@ -374,14 +368,15 @@ def test7_os():
 
 
     log("\n#######", os_merge_safe)
-    ss1= """test input1
-    """
+    ss1= """test input1"""
     uu.to_file(ss1,dirtmp + "/test1.txt" )
-
-    ss2= """test input2
-    """
+    ss2= """test input2"""
     uu.to_file(ss2,dirtmp + "/test2.txt" )
+
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
+    os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
+    flist = glob_glob(dirtmp)
+    assert len(flist) < 2, flist
 
 
 
@@ -420,6 +415,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     ):
     """ Advanced Glob filtering.
     Docs::
+
         dirin="": get the files in path dirin, works when file_list=[]
         file_list=[]: if file_list works, dirin will not work
         exclude=""   :
@@ -734,7 +730,7 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
 def os_remove(dirin="folder/**/*.parquet",
               min_size_mb=0, max_size_mb=1,
               exclude="", include_only="",
-              ndays_past=1000, start_date='1970-01-01', end_date='2050-01-01',
+              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
               nfiles=99999999,
               dry=0):
 
@@ -800,12 +796,9 @@ def os_removedirs(path, verbose=False):
 
 
 def os_getcwd():
-    """function os_getcwd
-    Args:
-    Returns:
+    """  os.getcwd() This is for Windows Path normalized As Linux path /
 
     """
-    ## This is for Windows Path normalized As Linux /
     root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
     return  root
 
@@ -1246,31 +1239,20 @@ def os_system_list(ll, logfile=None, sleep_sec=10):
             log(e)
 
 
-def os_file_check(fp):
-   """function os_file_check
-   Args:
-       fp:
-   Returns:
-
+def os_file_check(fpath:str):
+   """Check file stat info
    """
    import os, time
-   try :
-       log(fp,  os.stat(fp).st_size*0.001, time.ctime(os.path.getmtime(fp)) )
-   except :
-       log(fp, "Error File Not exist")
 
-
-def os_to_file( txt="", filename="ztmp.txt",  mode='a'):
-    """function os_to_file
-    Args:
-        txt:
-        filename:
-        mode:
-    Returns:
-
-    """
-    with open(filename, mode=mode) as fp:
-        fp.write(txt + "\n")
+   flist = glob_glob(fpath)
+   flag = True
+   for fi in flist :
+       try :
+           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
+       except :
+           log(fi, "Error File Not exist")
+           flag = False
+   return flag
 
 
 def os_platform_os():
