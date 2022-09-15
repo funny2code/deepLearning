@@ -236,8 +236,6 @@ def test4():
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
-    os_to_file(txt="test text to write to file",filename= dtmp + "/file_test.txt", mode="a")
-    os_file_check( dtmp + "/file_test.txt")
 
 
 def test5_os():
@@ -342,7 +340,7 @@ def test6_os():
 
 
     log("#######   os_file_check()")
-    os_to_file(txt="test text to write to file",filename=dtmp+"/file_test.txt", mode="a")
+    uu.to_file("test text to write to file", dtmp+"/file_test.txt", mode="a")
     os_file_check(dtmp+"/file_test.txt")
 
 
@@ -796,12 +794,9 @@ def os_removedirs(path, verbose=False):
 
 
 def os_getcwd():
-    """function os_getcwd
-    Args:
-    Returns:
+    """  os.getcwd() This is for Windows Path normalized As Linux path /
 
     """
-    ## This is for Windows Path normalized As Linux /
     root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
     return  root
 
@@ -1255,18 +1250,6 @@ def os_file_check(fp):
    except :
        log(fp, "Error File Not exist")
 
-
-def os_to_file( txt="", filename="ztmp.txt",  mode='a'):
-    """function os_to_file
-    Args:
-        txt:
-        filename:
-        mode:
-    Returns:
-
-    """
-    with open(filename, mode=mode) as fp:
-        fp.write(txt + "\n")
 
 
 def os_platform_os():
