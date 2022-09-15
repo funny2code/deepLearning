@@ -1030,11 +1030,12 @@ def test2():
     file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name)
 
-    # 2 save some data
-    data = [ "testestest",   'duplicate', 'ok', 'duplicate',]
+
+    ### 2 save some data
+    data   = [ "testestest", 'duplicate', 'ok', 'duplicate',]
     output = [ 'testestest', 'ok', ]
     index.save(data)
-    assert set(index.read()) == set(output), output
+    assert set(index.read()) == set(output), f"{output} , {index.read()}"
 
 
 
