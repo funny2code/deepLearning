@@ -346,14 +346,8 @@ def test6_os():
 
 
     log("#######   os utils...")
-    #os_makedirs(dtmp+"/test")
-    with open(dtmp+"/os_utils_test.txt", 'w') as file:
-        file.write("Dummy file to test os utils")
-
-    os_makedirs(dtmp+"/os_test")
-    with open(dtmp+"/os_test/os_file_test.txt", 'a') as file:
-        file.write("Dummy text to test replace string")
-
+    uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
+    uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
@@ -368,10 +362,8 @@ def test7_os():
 
 
     log("\n#######", os_merge_safe)
-    ss1= """test input1"""
-    uu.to_file(ss1,dirtmp + "/test1.txt" )
-    ss2= """test input2"""
-    uu.to_file(ss2,dirtmp + "/test2.txt" )
+    uu.to_file("""test input1""", dirtmp + "/test1.txt" )
+    uu.to_file("""test input2""", dirtmp + "/test2.txt" )
 
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
     os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
