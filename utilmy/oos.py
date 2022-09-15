@@ -415,6 +415,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     ):
     """ Advanced Glob filtering.
     Docs::
+
         dirin="": get the files in path dirin, works when file_list=[]
         file_list=[]: if file_list works, dirin will not work
         exclude=""   :
