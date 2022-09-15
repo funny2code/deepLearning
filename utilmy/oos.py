@@ -34,6 +34,7 @@ def test_all():
     test4()
     test5_os()
     test6_os()
+    test7_os()
 
 
 
@@ -347,11 +348,6 @@ def test6_os():
 
 
     log("#######   os utils...")
-    log(os_platform_os())
-    log(os_cpu())
-    log(os_memory())
-    log(os_getcwd())
-    os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
     #os_makedirs(dtmp+"/test")
     with open(dtmp+"/os_utils_test.txt", 'w') as file:
         file.write("Dummy file to test os utils")
@@ -370,6 +366,26 @@ def test6_os():
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
+
+
+def test7_os():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    log("\n#######", os_merge_safe)
+    ss1= """test input1
+    """
+    uu.to_file(ss1,dirtmp + "/test1.txt" )
+
+    ss2= """test input2
+    """
+    uu.to_file(ss2,dirtmp + "/test2.txt" )
+    os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
+
+
+
+
 
 
 

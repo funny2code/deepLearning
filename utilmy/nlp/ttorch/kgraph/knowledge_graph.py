@@ -3,7 +3,14 @@ Docs::
 
     -- Separate in 3 parts  (classes)
         raw text --> NER extraction
+        The dataset consisting of Questions, Answers and metadata gets processed entirely and
+        the individual entities and relations are extracted.
+
         NER  --> KGraph training + embedding generation/
+        The next step is to produce the embeddings from the entities and relations from the
+        graph provided by ntx. Other properties such as centers and means of centers may be
+        computed in the knowledge_grapher class. This might be useful for different applications
+
         KG Embedding Losses
 
         Reason :
@@ -22,9 +29,15 @@ Docs::
             os.makedirs(dname)
 
         log('##### NER extraction from text ')
+
+        # Check the model_name param since the appropriate spacy model
+        # should be loaded when changing the language of the dataset
+
         extractor = NERExtractor(dirin_or_df=df, dirout=dname, model_name="ro_core_news_sm")
         extractor.extract_triples(max_text=-1)
         extractor.export_data()
+        # If the data_kgf.csv isn't present in the data folder then
+        # run the line below
         # data_kgf  = extractor.extractTriples(max_text=-1)
         # extractor.export_data(data_kgf)
 
@@ -42,7 +55,7 @@ Docs::
         log('##### Build KG Embeddings')
         dirout_emb = dname
         embedder = KGEmbedder(graph= grapher.graph, dirin=dname, embedding_dim=10, dirout= dirout_emb)
-        # If you have the trained model to be saved then pass a non existing dir to load_embeddings()
+        # If you have the trained model to be saved then pass a non existing dir to compute_embeddings()
         embedder.compute_embeddings('none', batch_size=1024)
         embedder.save_embeddings()
 
@@ -62,19 +75,11 @@ from box import Box
 import networkx as ntx
 import spacy
 from spacy.matcher import Matcher
-#from node2vec import Node2Vec as n2v
 
 import torch
 
 #####
 import pykeen as pyk
-from pykeen.triples import TriplesFactory
-from pykeen.pipeline import pipeline
-from pykeen.models import TransE,ERModel
-from torch.optim import Adam
-from pykeen.training import SLCWATrainingLoop, LCWATrainingLoop
-from pykeen.evaluation import RankBasedEvaluator
-from pykeen.nn.representation import LabelBasedTransformerRepresentation
 
 ### pip install python-box
 from utilmy import (log,log2, pd_to_file, pd_read_file)
@@ -192,10 +197,17 @@ class knowledge_grapher():
         """knowledge_grapher:
         Docs:
 
+                This class wraps around the ntx library to produce a graph from the extracted entities and relations
+                coming from NERExtractor. Outputs the graph the pykeen will then take as an input.
+
                 data_kgf     :      pd.DataFrame, dataframe with triples entity, relation, entity
                 embedding_dim:      int, number of dimensions in the embedding space
-                dirin        :      PathLike, where to read input data
-                dirout       :      PathLike, where to store results
+                dirin        :      PathLike, where to read input data from in the form of a tsv file containing 
+                                    entitie and relation triples
+                dirout       :      PathLike, where to store results. Currently no output. Methods for saving
+                                    centrality or means could be implemented if required
+
+                
         """
         self.embedding_dim = embedding_dim
         self.dirin = dirin
@@ -248,7 +260,7 @@ class knowledge_grapher():
             self.data_kgf  = df
 
         except Exception as e:
-            log(e.msg)
+            log(e)
             log('Data format may be incorrect')
 
         cols =['source', 'target', 'edge']
@@ -312,11 +324,17 @@ class NERExtractor:
                  model_name="ro_core_news_sm"
                  ):
         """NERExtractor: named entity extractor
-        Docs:
+        Docs::
+
+            This class applies a language model from spacy to parse the text searching for
+            entities and relations between them. The objective is to parse the corpus of questions to get said relations.
+            Basic NLP techniques such as cleaning the text are applied by it's methods.
+
 
                 data    : pd.DataFrame, with the corpus of text from which to extract entities
-                dirin   : where to load the input data
-                dirout  : where to save the output
+                dirin   : where to load the input data. Where the corpus of text is stored
+                dirout  : where to save the output. The resulting data_kgf file containing the triples 
+                          that then will constitute the knowledge_graph built by knowledge_grapher.
 
         """
 
@@ -450,13 +468,13 @@ class NERExtractor:
         # pd_to_file(val_df,     dirout + '/val_data.parquet',   )
         # pd_to_file(self.data_kgf,   dirout + '/data_kgf.parquet',   )
 
+        #Pykeen Requires data to be loaded in csv format!
         pd_to_file(train_df,   dirout + '/train_data.csv', sep="\t")
         pd_to_file(test_df,    dirout + '/test_data.csv', sep="\t" )
         pd_to_file(val_df,     dirout + '/validation_data.csv',  sep="\t" )
         pd_to_file(self.data_kgf,   dirout + '/data_kgf.csv',  sep="\t" )
 
 
-        #Pykeen Requires data to be loaded in csv format!
         # train_df.to_csv(self.dirout +"/"+'train_data.tsv'), sep="\t")
         # test_df.to_csv(self.dirout +'/test_data.tsv'), sep="\t")
         # val_df.to_csv(self.dirout +"/"+  'validation_data.tsv'), sep="\t")
@@ -476,11 +494,17 @@ class KGEmbedder:
 
         Docs:
 
+                Several changes to the pyKeen pipeline could be made. Experimentation with the current
+                dataset found out that the chosen elements (mainly the training loop and optimizer) are
+                the most performant.
+
                 https://pykeen.readthedocs.io/en/stable/
-                graph           : ntx.MultiDiGraph the knowledge itself
+                graph           : ntx.MultiDiGraph the knowledge graph itself
                 embedding_dim   : int, number of dimensions of the embedding space
-                dirin           : where to load the input data
-                dirout          : where to save the output
+                dirin           : where to load the input data. No input data required, only
+                                  value to load is the NN model for the embedding which should be provided separately.
+                dirout          : where to save the output. This being the weights from the model representing the knowledge graph
+                                  embeddings 
 
         """
         self.graph = graph
@@ -493,13 +517,13 @@ class KGEmbedder:
 
         self.dirin  = dirin
         self.dirout = dirout
-        self.training = TriplesFactory.from_path(train_path)
+        self.training = pyk.triples.TriplesFactory.from_path(train_path)
 
-        self.testing = TriplesFactory.from_path(test_path,
+        self.testing = pyk.triples.TriplesFactory.from_path(test_path,
                                             entity_to_id  = self.training.entity_to_id,
                                             relation_to_id= self.training.relation_to_id)
 
-        self.validation = TriplesFactory.from_path(val_path,
+        self.validation = pyk.triples.TriplesFactory.from_path(val_path,
                                             entity_to_id  = self.training.entity_to_id,
                                             relation_to_id= self.training.relation_to_id)
 
@@ -507,29 +531,29 @@ class KGEmbedder:
     def model_init(self, dirmodel_in=None, do_train=False ):
         """set up the training pipeline for pykeen or load the trained model
         """
-        # entity_representations = LabelBasedTransformerRepresentation.from_triples_factory(training)
+        # entity_representations = pyk.nn.representation.LabelBasedTransformerRepresentation.from_triples_factory(training)
 
         if dirmodel_in is not None:
             self.model = torch.loadd(dirmodel_in +'/trained_model.pkl')
             self.trained = True
         else:
-            self.model = ERModel(triples_factory=self.training,
+            self.model = pyk.models.ERModel(triples_factory=self.training,
                                  interaction='distmult',
                                  # entity_representations=entity_representations
                                  entity_representations_kwargs   = dict(embedding_dim=self.embed_dim, dropout=0.1),
                                  relation_representations_kwargs = dict(embedding_dim=self.embed_dim, dropout=0.1)
                                  )
 
-            self.optimizer = Adam(params=self.model.get_grad_params())
+            self.optimizer = torch.optim.Adam(params=self.model.get_grad_params())
 
-            self.training_loop = LCWATrainingLoop(
+            self.training_loop = pyk.training.LCWATrainingLoop(
                 model=self.model,
                 triples_factory=self.training,
                 optimizer=self.optimizer,
             )
             self.trained = False
 
-    def compute_embeddings(self,  batch_size=64, n_epochs=8)->Tuple:
+    def compute_embeddings(self, path_to_embeddings, batch_size, n_epochs=8)->Tuple:
 
         """set up the training pipeline for pykeen or load the trained model
         Docs:
@@ -537,7 +561,7 @@ class KGEmbedder:
                 path_to_embeddings: PathLike
                 batch_size        : int, batch_size for the pykeen nn
         """
-        self.model_init()
+        self.model_init(dirmodel_in=path_to_embeddings)
         if not self.trained:
             losses = self.training_loop.train(
                                 triples_factory=self.training,
@@ -551,7 +575,7 @@ class KGEmbedder:
             losses = None
 
         # Pick an evaluator
-        evaluator = RankBasedEvaluator()
+        evaluator = pyk.evaluation.RankBasedEvaluator()
         
         # Get triples to test
         mapped_triples = self.testing.mapped_triples
