@@ -532,7 +532,7 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = 
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
+    log(evaluate(Xnew=Xnew, Xtrue=Xval, compute_pars=compute_pars))
 
     log('Saving model..')
     save(path= root + '/model_dir/')
@@ -622,7 +622,7 @@ def generator_train_save(dirin_or_df="", dirout="",
     log(f'Xnew', Xnew)
 
     log('Evaluating the model..')
-    log(evaluate(Xnew=Xnew, Xval=Xval, compute_pars=compute_pars))
+    log(evaluate(Xnew=Xnew, Xtrue=Xval, compute_pars=compute_pars))
 
     log('Save model..')
     save(path= dirout)
@@ -702,7 +702,7 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
        model.model.fit(Xtrain_tuple, **cpars)
 
 
-def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
+def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None):
     """ Return metrics of the model when fitted.
     Docs::
 
@@ -749,15 +749,15 @@ def evaluate(Xnew = None, Xval = None, compute_pars:dict=None):
     # log(data_pars)
     mpars       = compute_pars.get("metrics_pars", {'aggregate': False, 'metrics': [ 'CSTest' ]  })
     metric_type = compute_pars.get("metric_type", 'tabular')
+    metadata    = compute_pars.get('metadata', {})
 
     if  metric_type == 'timeseries':
-        target = compute_pars.get("target", '')
-        assert(target is not None)
-        evals = evaluate_timeseries(Xnew, Xval, metadata = compute_pars['metadata'], target=target, **mpars,)
+        target = compute_pars.get("target", None)
+        evals = evaluate_timeseries(Xnew, Xtrue, metadata = metadata, target=target, **mpars, )
 
     else :
         ###
-        evals = sdv.evaluation.evaluate(Xnew, Xval, **mpars )
+        evals = sdv.evaluation.evaluate(Xnew, Xtrue, **mpars)
 
     return evals
 
