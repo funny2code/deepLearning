@@ -80,7 +80,7 @@ def dir_testinfo(verbose=1):
 
 
     """
-    log("\n--------------------------------------")
+    log("\n---------------------------------------------------------------------")
     drepo = direpo()
     dtmp  = os_get_dirtmp()
     assert os.path.exists(dtmp), f"Directory not found {dtmp}"
@@ -308,6 +308,7 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 ###################################################################################################
 def to_file(txt, fpath, mode='a'):
+    os_makedirs(fpath) ### create folder
     with open(fpath, mode=mode) as fp:
         fp.write(txt)
 
@@ -739,7 +740,7 @@ from utilmy.oos import(
     os_variable_check,
     os_clean_memory,
     os_system_list,
-    os_to_file,
+    #os_to_file,
     os_platform_os,
     os_platform_ip,
     os_memory,
