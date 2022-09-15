@@ -197,10 +197,17 @@ class knowledge_grapher():
         """knowledge_grapher:
         Docs:
 
+                This class wraps around the ntx library to produce a graph from the extracted entities and relations
+                coming from NERExtractor. Outputs the graph the pykeen will then take as an input.
+
                 data_kgf     :      pd.DataFrame, dataframe with triples entity, relation, entity
                 embedding_dim:      int, number of dimensions in the embedding space
-                dirin        :      PathLike, where to read input data
-                dirout       :      PathLike, where to store results
+                dirin        :      PathLike, where to read input data from in the form of a tsv file containing 
+                                    entitie and relation triples
+                dirout       :      PathLike, where to store results. Currently no output. Methods for saving
+                                    centrality or means could be implemented if required
+
+                
         """
         self.embedding_dim = embedding_dim
         self.dirin = dirin
@@ -317,11 +324,15 @@ class NERExtractor:
                  model_name="ro_core_news_sm"
                  ):
         """NERExtractor: named entity extractor
+        This class applies a language model from spacy to parse the text searching for 
+        entities and relations between them. The objective is to parse the corpus of questions to get said relations.
+        Basic NLP techniques such as cleaning the text are applied by it's methods.
         Docs:
 
                 data    : pd.DataFrame, with the corpus of text from which to extract entities
-                dirin   : where to load the input data
-                dirout  : where to save the output
+                dirin   : where to load the input data. Where the corpus of text is stored
+                dirout  : where to save the output. The resulting data_kgf file containing the triples 
+                          that then will constitute the knowledge_graph built by knowledge_grapher.
 
         """
 
@@ -478,14 +489,19 @@ class KGEmbedder:
                  )->None:
 
         """KGEmbedder: produces the KG embeddings using pyKeen:
+        Several changes to the pyKeen pipeline could be made. Experimentation with the current
+        dataset found out that the chosen elements (mainly the training loop and optimizer) are
+        the most performant.
 
         Docs:
 
                 https://pykeen.readthedocs.io/en/stable/
-                graph           : ntx.MultiDiGraph the knowledge itself
+                graph           : ntx.MultiDiGraph the knowledge graph itself
                 embedding_dim   : int, number of dimensions of the embedding space
-                dirin           : where to load the input data
-                dirout          : where to save the output
+                dirin           : where to load the input data. No input data required, only
+                                  value to load is the NN model for the embedding which should be provided separately.
+                dirout          : where to save the output. This being the weights from the model representing the knowledge graph
+                                  embeddings 
 
         """
         self.graph = graph
