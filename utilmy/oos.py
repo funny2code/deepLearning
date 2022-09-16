@@ -387,26 +387,35 @@ def test_os_module_uncache():
 
 
 def test8():
-    import  utilmy as uu
+    import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
-    obj_dir = "folder/**/*.parquet"
+    obj_dir = "folder/**/x*.parquet"
     total_files = []
-    for name in ("x", "y", "z"):
+    for name in ("x1", "x2", "x3"):
         with open("folder/test/tmp/{}.parquet".format(name), "w") as f:
             f.write(name)
             total_files.append(f.name)
 
     # test dry remove
     before_files = glob.glob(obj_dir, recursive=True)
-    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
+    os_remove(dirin=obj_dir,
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=0, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=1)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert before_files == cur_files
 
-
     # test exclude
-    excludes = ["folder/test/tmp/x.parquet", "folder/test/tmp/y.parquet"]
-    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
+    excludes = ["folder/test/tmp/x1.parquet", "folder/test/tmp/x2.parquet"]
+    os_remove(dirin=obj_dir,
+              min_size_mb=0, max_size_mb=1,
+              exclude=','.join(excludes), include_only="",
+              ndays_past=0, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     for file in total_files:
         if file in excludes:
@@ -416,9 +425,25 @@ def test8():
 
     # test file num limit
     before_files = glob.glob(obj_dir, recursive=True)
-    os_remove(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
+    os_remove(dirin=obj_dir,
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=0, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=1,
+              dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files)-len(cur_files) == 1
+
+    # test file size
+    before_files = glob.glob(obj_dir, recursive=True)
+    os_remove(dirin=obj_dir,
+              min_size_mb=1, max_size_mb=2,
+              exclude="", include_only="",
+              ndays_past=0, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=1,
+              dry=0)
+    cur_files = glob.glob(obj_dir, recursive=True)
+    assert len(before_files) == len(cur_files)
 
 
 
@@ -1718,7 +1743,6 @@ def aaa_bash_help():
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
 
 
 
