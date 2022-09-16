@@ -72,7 +72,6 @@ def test_globglob():
     glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
 
 
-
 def test_filecache():
     import utilmy
     drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
@@ -200,8 +199,6 @@ def test2():
 
 
 
-
-
 def test4():
     """function test4
     """
@@ -240,6 +237,7 @@ def test5_os():
 
             dry=0
             )
+
 
 
 def test6_os():
@@ -345,6 +343,7 @@ def test6_os():
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
+
 def test7_os():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -360,7 +359,11 @@ def test7_os():
     assert len(flist) < 2, flist
 
 
+
 def test_os_module_uncache():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
     import sys
     old_modules = sys.modules.copy()
     exclude_mods = {"json.decoder"}
@@ -382,7 +385,11 @@ def test_os_module_uncache():
     log("Successfully kept: ", ", ".join(kept))
 
 
-def test_zz_os_remove_file_past():
+
+def test8():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
     obj_dir = "folder/**/*.parquet"
     total_files = []
     for name in ("x", "y", "z"):
@@ -392,13 +399,14 @@ def test_zz_os_remove_file_past():
 
     # test dry remove
     before_files = glob.glob(obj_dir, recursive=True)
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
+    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert before_files == cur_files
 
+
     # test exclude
     excludes = ["folder/test/tmp/x.parquet", "folder/test/tmp/y.parquet"]
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
+    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     for file in total_files:
         if file in excludes:
@@ -408,9 +416,11 @@ def test_zz_os_remove_file_past():
 
     # test file num limit
     before_files = glob.glob(obj_dir, recursive=True)
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
+    os_remove(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files)-len(cur_files) == 1
+
+
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
@@ -1699,6 +1709,19 @@ def aaa_bash_help():
 
 
 
+
+
+
+
+
+###################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+
+
+
 def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
     """  Delete files older than ndays.
 
@@ -1742,19 +1765,6 @@ def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10
 
     if dry :  print('dry mode only')
     else :    print('deleted', jj)
-
-
-
-
-
-
-
-
-###################################################################################################
-if __name__ == "__main__":
-    import fire
-    fire.Fire()
-
 
 
 
