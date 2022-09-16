@@ -360,10 +360,57 @@ def test7_os():
     assert len(flist) < 2, flist
 
 
+def test_os_module_uncache():
+    import sys
+    old_modules = sys.modules.copy()
+    exclude_mods = {"json.decoder"}
+    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
+    os_module_uncache(exclude_mods)
+    new_modules = sys.modules.copy()
+    removed = []
+    kept = []
+    for module_name in old_modules:
+        module_prefix = module_name.split('.', 1)[0]
+        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
+            assert module_name not in new_modules
+            removed.append(module_name)
+        else:
+            assert module_name in new_modules
+            if module_name in exclude_mods:
+                kept.append(module_name)
+    log("Successfully remove module cache: ", ", ".join(removed))
+    log("Successfully kept: ", ", ".join(kept))
 
 
+def test_zz_os_remove_file_past():
+    obj_dir = "folder/**/*.parquet"
+    total_files = []
+    for name in ("x", "y", "z"):
+        with open("folder/test/tmp/{}.parquet".format(name), "w") as f:
+            f.write(name)
+            total_files.append(f.name)
 
+    # test dry remove
+    before_files = glob.glob(obj_dir, recursive=True)
+    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
+    cur_files = glob.glob(obj_dir, recursive=True)
+    assert before_files == cur_files
 
+    # test exclude
+    excludes = ["folder/test/tmp/x.parquet", "folder/test/tmp/y.parquet"]
+    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
+    cur_files = glob.glob(obj_dir, recursive=True)
+    for file in total_files:
+        if file in excludes:
+            assert file in cur_files
+        else:
+            assert file not in cur_files
+
+    # test file num limit
+    before_files = glob.glob(obj_dir, recursive=True)
+    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
+    cur_files = glob.glob(obj_dir, recursive=True)
+    assert len(before_files)-len(cur_files) == 1
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
