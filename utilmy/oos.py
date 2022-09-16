@@ -392,13 +392,13 @@ def test_zz_os_remove_file_past():
 
     # test dry remove
     before_files = glob.glob(obj_dir, recursive=True)
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
+    os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert before_files == cur_files
 
     # test exclude
     excludes = ["folder/test/tmp/x.parquet", "folder/test/tmp/y.parquet"]
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
+    os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     for file in total_files:
         if file in excludes:
@@ -408,9 +408,11 @@ def test_zz_os_remove_file_past():
 
     # test file num limit
     before_files = glob.glob(obj_dir, recursive=True)
-    zz_os_remove_file_past(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
+    os_remove_file_past(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files)-len(cur_files) == 1
+
+
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
@@ -1699,6 +1701,19 @@ def aaa_bash_help():
 
 
 
+
+
+
+
+
+###################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+
+
+
 def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
     """  Delete files older than ndays.
 
@@ -1742,19 +1757,6 @@ def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=10
 
     if dry :  print('dry mode only')
     else :    print('deleted', jj)
-
-
-
-
-
-
-
-
-###################################################################################################
-if __name__ == "__main__":
-    import fire
-    fire.Fire()
-
 
 
 

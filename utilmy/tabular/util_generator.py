@@ -749,10 +749,11 @@ def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, me
 
 
         -------------------------------------------------------------------------------------
-        In [13]: evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
+        In [13]: sdv.evaluation.evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
         Out[13]:
            metric         name  raw_score  normalized_score  min_value  max_value      goal error
         0  CSTest  Chi-Squared   0.948027          0.948027        0.0        1.0  MAXIMIZE  None
+
 
     """
     compute_pars = {} if compute_pars is None else compute_pars

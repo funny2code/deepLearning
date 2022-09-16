@@ -27,9 +27,6 @@ except ImportError:
 
 
 
-
-
-
 ###################################################################################################
 global verbose
 def get_verbosity(verbose:int=None):
@@ -54,7 +51,6 @@ def direpo(show=0):
     if show>0 :
         log(dir_repo1)
     return dir_repo1
-
 
 
 def dirpackage(show=0):
