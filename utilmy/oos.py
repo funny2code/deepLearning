@@ -385,10 +385,10 @@ def test_os_module_uncache():
     log("Successfully kept: ", ", ".join(kept))
 
 
-def test_zz_os_remove_file_past():
+def test8():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
-    
+
     obj_dir = "folder/**/*.parquet"
     total_files = []
     for name in ("x", "y", "z"):
