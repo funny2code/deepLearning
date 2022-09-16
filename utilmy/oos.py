@@ -390,10 +390,10 @@ def test8():
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
-    obj_dir = "folder/**/x*.parquet"
+    obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
-    for name in ("x1", "x2", "x3"):
-        with open("folder/test/tmp/{}.parquet".format(name), "w") as f:
+    for name in ("xtest1", "xtest2", "xtest3"):
+        with open(dirtmp+"/{}.txt".format(name), "w") as f:
             f.write(name)
             total_files.append(f.name)
 
@@ -409,7 +409,8 @@ def test8():
     assert before_files == cur_files
 
     # test exclude
-    excludes = ["folder/test/tmp/x1.parquet", "folder/test/tmp/x2.parquet"]
+    excludes = [dirtmp+"xtest1.txt", dirtmp+"xtest2.txt"]
+    print(excludes)
     os_remove(dirin=obj_dir,
               min_size_mb=0, max_size_mb=1,
               exclude=','.join(excludes), include_only="",
