@@ -72,7 +72,6 @@ def test_globglob():
     glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
 
 
-
 def test_filecache():
     import utilmy
     drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
@@ -200,8 +199,6 @@ def test2():
 
 
 
-
-
 def test4():
     """function test4
     """
@@ -240,6 +237,7 @@ def test5_os():
 
             dry=0
             )
+
 
 
 def test6_os():
@@ -345,6 +343,7 @@ def test6_os():
     log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
+
 def test7_os():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -358,6 +357,7 @@ def test7_os():
     os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
     flist = glob_glob(dirtmp)
     assert len(flist) < 2, flist
+
 
 
 def test_os_module_uncache():
@@ -383,6 +383,7 @@ def test_os_module_uncache():
                 kept.append(module_name)
     log("Successfully remove module cache: ", ", ".join(removed))
     log("Successfully kept: ", ", ".join(kept))
+
 
 
 def test8():
