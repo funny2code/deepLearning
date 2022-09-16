@@ -361,6 +361,9 @@ def test7_os():
 
 
 def test_os_module_uncache():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
     import sys
     old_modules = sys.modules.copy()
     exclude_mods = {"json.decoder"}
@@ -383,6 +386,9 @@ def test_os_module_uncache():
 
 
 def test_zz_os_remove_file_past():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+    
     obj_dir = "folder/**/*.parquet"
     total_files = []
     for name in ("x", "y", "z"):
@@ -392,13 +398,14 @@ def test_zz_os_remove_file_past():
 
     # test dry remove
     before_files = glob.glob(obj_dir, recursive=True)
-    os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
+    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude="", dry=1)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert before_files == cur_files
 
+
     # test exclude
     excludes = ["folder/test/tmp/x.parquet", "folder/test/tmp/y.parquet"]
-    os_remove_file_past(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
+    os_remove(obj_dir, ndays_past=0, nfiles=10, exclude=",".join(excludes), dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     for file in total_files:
         if file in excludes:
@@ -408,7 +415,7 @@ def test_zz_os_remove_file_past():
 
     # test file num limit
     before_files = glob.glob(obj_dir, recursive=True)
-    os_remove_file_past(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
+    os_remove(obj_dir, ndays_past=0, nfiles=1, exclude="", dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files)-len(cur_files) == 1
 
