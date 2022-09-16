@@ -353,6 +353,28 @@ def test7():
 
     search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=False, )
 
+def test8(): 
+    """Test the myProblem7 class,
+
+    """
+    myproblem       = myProblem7()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 3  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "diff"]
+    p.symbols       = ["x0", "x1", "x2"]
+
+    p.n_exp         = 20
+    p.max_step      = 1000
+    p.offsprings    = 10
+
+    search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=1)
 
 def test1_parallel():
     """Test of search_formulae_dcgpy_v1_parallel
@@ -660,6 +682,53 @@ class myProblem6:
         cost = (y-self.yt)**2
         return cost
 
+
+class myProblem7:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            Finding PID values of a controller function. Given true values of 
+            controller, calculate Kp, Kd and Ki values for the PID controller.
+            Here true values are calculated using some specific PID values.  
+            In real life true values could be values from manual control. 
+        """
+        import numpy as np
+        x0 = np.random.random(50) # errors of the controller
+        x0 = -np.sort(-x0) # it is more sensible if they are descending
+        x1 = [0] + [(x - px) for (x, px) in zip(x0[1:], x0[:-1])] # derivatives of errors
+        x1 = np.array(x1) 
+        x2 = [np.sum(x0[:i + 1]) for i in range(len(x0))] # integral of errors
+        x2 = np.array(x2)
+
+        self.x0 = x0
+        self.x1 = x1
+        self.x2 = x2
+        Kp, Kd, Ki = 0.1, 0.01, 0.5
+        self.ytrue = Kp * x0 + Kd * x1 + Ki * x2  #This is the true value of controller output.
+
+
+    def get_cost(self, dCGP, symbols):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            dCGP            : dCGP expression whose cost has to be minimized
+            symbols         : Symbols
+
+        """
+        #These needs to be defined to be used in eval function. 
+        x0 = self.x0
+        x1 = self.x1
+        x2 = self.x2
+        y     = eval(dCGP(symbols)[0])
+        cost  = np.sum((self.ytrue-y)**2)
+
+        check = 3
+        return cost, check
 
 
 class myProblem_ranking:
