@@ -66,7 +66,106 @@ def test1():
     pass
 
 
+def test_get_amazon():
+     # https://drive.google.com/file/d/1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2/view?usp=sharing
+     file_id = '1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2' #<-- You add in here the id from you google drive file, you can find it
+
+
+     download = drive.CreateFile({'id': file_id})
+
+
+    # # Download the file to a local disc
+     download.GetContentFile('amazon0302.txt')
+
+
+def test_pd_create_dag(nrows=1000, n_nodes=100):
+    aval = np.random.choice([ str(i) for i in range(n_nodes)], nrows )
+    bval = np.random.choice([ str(i) for i in range(n_nodes)], nrows )
+
+    w    = np.random.random(nrows )
+
+    d = {'a': aval, 'b': bval, 'w': w }
+    df = pd.DataFrame(d )
+    return df
+
+
+
 ############################################################################################################################
+"""
+class  GraphData
+
+   Load/save/convert data into parquet, pandas dataframe
+
+     mygraph242423/
+         edges.parquet
+         vertex.parquet
+         meta.json
+         
+         
+
+   load(dirin,  )
+      -->  edges: pd.Dataframe ( 'node_a', 'node_b' 'weight', 'edge_type' ] 
+           verteex :  pd.daframe('node_id'  , 'node_int',  'col1', 'col2' ]
+           meta : dict of metatada
+                      
+           
+   save(dirout)
+      os.makedirs
+
+
+   convert
+      (edget, vertex, meta) --->   networkit or networkx
+      
+      
+      
+
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################################################################
+def test_networkit(net):
+    """Compute PageRank as a measure of node centrality by receiving a NetworkKit graph.
+
+
+    Docs::
+        net  :   NetworkKit graph
+
+        https://networkit.github.io/dev-docs/notebooks/Centrality.html
+
+
+    """
+    import networkit as nk
+
+
+    df = test_pd_dag_create()
+
+    G, imap = dag_create_(df)
+
+    dag_save(G,imap)
+    G = dag_networkit_load('sample_data')
+    nk.overview(G)
+    dag_networkit_save(G, dirout='./sample_data/', format='parquet', n_vertex=1000)
+
+    G = dag_load()
+
+    pr = nk.centrality.PageRank(net)
+    pr.run()
+    print( pr.ranking())
+
+
+
 def dag_create_network(df_or_file: Union[str,pd.DataFrame], cola, colb, colvertex=""):
     """Convert a panadas dataframe into a NetworKit graph
     Docs::
@@ -97,19 +196,175 @@ def dag_create_network(df_or_file: Union[str,pd.DataFrame], cola, colb, colverte
 
 
 
-def dag_pagerank(net):
-   pass
+def dag_networkit_convert(df_or_file: pd.DataFrame, cola='cola', colb='colb', colvertex="", nrows=1000):
+  """Convert a panadas dataframe into a NetworKit graph
+      and return a NetworKit graph.
+
+
+  Docs::
+                    df   :    dataframe[[ cola, colb, colvertex ]]
+      cola='col_node1'  :  column name of node1
+      colb='col_node2'  :  column name of node2
+      colvertex=""      :  column name of weight
+
+      https://networkit.github.io/dev-docs/notebooks/User-Guide.html#The-Graph-Object
+
+
+  """
+  import networkit as nk, gc
+  from utilmy import pd_read_file
+
+  if isinstance(df_or_file, str):
+      df = pd_read_file(df_or_file)
+  else :
+      df = df_or_file
+      del df_or_file
+
+  #### Init Graph
+  # nodes   = set(df[cola].unique()) + set(df[colb].unique())
+  nodes   = set(df[cola].unique()).union(set(df[colb].unique()))
+  n_nodes = len(nodes)
+
+  graph = nk.Graph(n_nodes, edgesIndexed=False, weighted = True )
+  if colvertex != "":
+      weights = df[colvertex].values
+  else :
+      weights = np.ones(len(df))
+
+  #### Add to Graph
+  dfGraph = df[[cola, colb]].values
+
+  # print(df[cola])
+
+  #### Map string ---> Integer, save memory
+  # print(str(df))
+  if 'int' not in str(df[cola].dtypes):
+      index_map = { hash(x):x for x in nodes }
+      # for i in range(len(df)):
+
+      for i in range(len(df[[cola, colb]].values)):
+          ai = df.iloc[i, 0]
+          bi = df.iloc[i, 1]
+          graph.addEdge( int(index_map.get( ai, ai)), int(index_map.get( bi, bi)), weights[i])
+  else :
+      index_map = {   }
+      for i in range(len(df)):
+          ai = df.iloc[i, 0]
+          bi = df.iloc[i, 1]
+          graph.addEdge( ai, bi, weights[i])
+
+  return graph, index_map
 
 
 
 
-def dag_save(net, dirout):
-   pass
+def dag_networkit_save(net, dirout, format='metis/gml/parquet', tag="", cols= None, index_map=None,n_vertex=1000):
+    """Save a NetworkKit graph.
+
+
+    Docs::
+        net     :   NetworkKit graph
+        dirout  :   output folder
+        format  :   file format 'metis/gml/parquet'
+        tag     :   folder suffix
+
+        https://networkit.github.io/dev-docs/notebooks/IONotebook.html
+
+
+    """
+    import json, os, pandas as pd
+    dirout = dirout if tag == "" else dirout + "/" + tag + "/"
+    os.makedirs(dirout, exist_ok=True)
+
+    ##### Metadata in json  ########################################
+    dinfo = {}
+    try :
+        nodes   = set(df[cola].unique()).union(set(df[colb].unique()))
+        n_nodes = len(nodes)
+        dinfo = { 'cola':  cola, 'colb': colb, 'colvertex':colvertex, 'n_rows': nrows, 'n_nodes': n_nodes}
+    except : pass
+    json.dump(dinfo, open(dirout + "/network_meta.json", mode='w'), )
+
+
+    #####  Main data     ##########################################
+    if 'parquet' in format:
+          df = np.zeros((n_vertex,2) )
+          for i,edge in enumerate(net) :
+              df[i,0] = edge[0]
+              df[i,1] = edge[1]
+              df[i,2] = edge[2]
+          cols = cols if cols is not None else ['a', 'b', 'weight']
+          df   = pd.DataFrame(df, columns=cols)
+
+          if isinstance(index_map, dict):
+
+            df[cols[0]] = df[cols[0]].apply(lambda x : index_map.get(x, x) )
+            df[cols[1]] = df[cols[1]].apply(lambda x : index_map.get(x, x) )
+          from utilmy import pd_to_file
+          pd_to_file(df, dirout + "/network_data.parquet", show=1)
+
+    else :
+        import networkit as nk
+        ddict = { 'metis': nk.Format.METIS, 'gml': nk.Format.GML }
+        nk.graphio.writeGraph(net, dirout + f'/network_data.{format}' ,  ddict.get(format, 'metis') )
+
+    return dirout
+
+
+def dag_networkit_load(dirin="", model_target='networkit', nrows=1000, cola='cola', colb='colb', colvertex=''):
+    """  Load into network data INTO a framework
+
+    Docs::
+            dirin  :   input folder
+
+            https://networkit.github.io/dev-docs/notebooks/IONotebook.html
+
+    """
+    import pandas as pd, glob, json
+    ddict = { 'metis',  'gml', 'parquet' }
+
+    def is_include(fi, dlist):
+        for ext in dlist :
+            if ext in fi : return True
+        return False
+    print(dirin)
+    flist0 = glob.glob(dirin, recursive= True)
+    print(flist0)
+    flist  = [ fi for fi in flist0 if   is_include(fi, ddict )  ]
+
+    if len(flist) == 0 : return None
+
+    if ".parquet" in  flist[0] :
+        djson = {}
+        try :
+           fjson = [fi for fi in flist0 if ".json" in flist0]
+           djson = json.load(open(fjson[0], mode='r') )
+        except : pass
+
+        cola      = djson.get('cola', cola)
+        colb      = djson.get('colb', cola)
+        colvertex = djson.get('colvertex', colvertex)
+
+
+        if model_target == 'networkit':
+           net = dag_create_networkit(df_or_file= flist, cola=cola, colb=colb, colvertex=colvertex, nrows=nrows)
+        print("return")
+        return net
+
+    elif model_target == 'networkit':
+        import networkit as nk
+        ddict = { 'metis': nk.Format.METIS, 'gml': nk.Format.GML  }
+        ext =   flist[0].split("/")[-1].split(".")[-1]
+        net = nk.readGraph(dirin, ddict[ext])
+        print("return1")
+        return net
+    else :
+      print("return2")
+      raise Exception('not supported')
 
 
 
-def dag_load(dirin=""):
-   pass
+
 
 
 

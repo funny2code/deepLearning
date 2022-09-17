@@ -828,7 +828,7 @@ class myProblem_ranking:
             ### Eval with True Rank              #We can also use kendmall equation
             c2 = stats.spearmanr(ltrue,  lnew).correlation
 
-            ### diff- 0 IF formulae is symettric
+            ### diff=0  IF formulae is symettric
             diff.append( abs(c1-c2) )
 
 
