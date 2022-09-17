@@ -838,7 +838,7 @@ class myProblem_ranking:
         diffsum = np.sum( diff )
 
         ###
-        cost  = 10.0*(1-correlm) + 60.0 * diffsum
+        cost  = 10.0*(1-correlm) + 100.0 * 1e4 * diffsum
 
 
         ### minimize cost
@@ -859,9 +859,33 @@ class myProblem_ranking:
             (item has new scores)
 
         """
+        ### Check if formulae had number of x1 and x05
+        """
+        rlist  = np.random.random(5)
+        rlist2 = np.random.random(5)
+
+        difflist  = []
+        for i in range(10):
+           x0 = rlist[i]
+           x1 = rlist2[i]
+           s1 =  eval(fornulae_str)
+
+           x0 = rlist2[i]
+           x1 = rlist[i]
+           s2 =  eval(fornulae_str)
+           difflist.append(abs(s1-s2))
+
+
+        if np.sum(difflist) > 0.1 :
+             scores_new = 0.99 + np.zeros(len(rank1))
+             return scores_new
+        """
+
         x0 = 1/(self.kk + rank1)
         x1 = 1/(self.kk + rank2*self.adjust)
         scores_new =  eval(fornulae_str)
+
+
         return scores_new
 
 
