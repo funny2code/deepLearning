@@ -760,7 +760,9 @@ class myProblem_ranking:
         self.ncorrect1 = ncorrect1
         self.ncorrect2 = ncorrect2
         self.adjust    = adjust
-        self.x0        = np.array([randomize.randint(0,100) for _ in range(101)])
+
+        self.x0_list        = np.array([randomize.randint(0,100) for _ in range(101)])
+        self.x1_list        = np.array([randomize.randint(0,100) for _ in range(101)])
 
 
     def get_cost(self, expr:None, symbols):
@@ -797,8 +799,12 @@ class myProblem_ranking:
 
         correls = []
         for i in range(self.n_sample):
-            ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
-            ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+            #ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
+            #ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+
+            ll1 = self.x0_list[i]
+            ll2 = self.x1_list[i]
+
 
             #### Merge them using rank_score
             lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
