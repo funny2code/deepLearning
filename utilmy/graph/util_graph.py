@@ -67,15 +67,14 @@ def test1():
 
 
 def test_get_amazon():
-     # https://drive.google.com/file/d/1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2/view?usp=sharing
-     file_id = '1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2' #<-- You add in here the id from you google drive file, you can find it
+    # https://drive.google.com/file/d/1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2/view?usp=sharing
+    file_id = '1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2' #<-- You add in here the id from you google drive file, you can find it
 
 
-     download = drive.CreateFile({'id': file_id})
+    from utilmy.util_download import google_download
+    google_download(url_or_id= file_id , fielout='amazon0302.txt')
 
 
-    # # Download the file to a local disc
-     download.GetContentFile('amazon0302.txt')
 
 
 def test_pd_create_dag(nrows=1000, n_nodes=100):
@@ -158,18 +157,14 @@ def test_networkit(net):
     """
     import networkit as nk
 
+    df = test_pd_create_dag()
 
-    df = test_pd_dag_create()
+    G, imap = dag_networkit_convert(df_or_file=df, cola='a', colb='b')
+    dag_networkit_save(G)
 
-    G, imap = dag_create_(df)
-
-    dag_save(G,imap)
-    G = dag_networkit_load('sample_data')
     nk.overview(G)
-    dag_networkit_save(G, dirout='./sample_data/', format='parquet', n_vertex=1000)
 
-    G = dag_load()
-
+    ### PgeRank
     pr = nk.centrality.PageRank(net)
     pr.run()
     print( pr.ranking())
