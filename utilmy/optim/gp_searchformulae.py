@@ -292,8 +292,8 @@ def test5():
     p.symbols       = ["x0","x1"]
 
     p.n_exp         = 10
-    p.max_step      = 5000  ## per expriemnet
-    p.offsprings    = 200
+    p.max_step      = 100  ## per expriemnet
+    p.offsprings    = 5
 
     p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
 
@@ -817,19 +817,20 @@ class myProblem_ranking:
 
 
             #### Symmetric Condiution   ############################################
-            ll1 = self.x1_list[i]
-            ll2 = self.x0_list[i]
+            if i < 3:
+                ll1 = self.x1_list[i]
+                ll2 = self.x0_list[i]
 
-            #### Merge them using rank_score
-            lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
-            lnew = lnew[:100]
-            # llog(lnew)
+                #### Merge them using rank_score
+                lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
+                lnew = lnew[:100]
+                # llog(lnew)
 
-            ### Eval with True Rank              #We can also use kendmall equation
-            c2 = stats.spearmanr(ltrue,  lnew).correlation
+                ### Eval with True Rank              #We can also use kendmall equation
+                c2 = stats.spearmanr(ltrue,  lnew).correlation
 
-            ### diff- 0 IF formulae is symettric
-            diff.append( abs(c1-c2) )
+                ### diff=0  IF formulae is symettric
+                diff.append( abs(c1-c2) )
 
 
 
@@ -837,7 +838,7 @@ class myProblem_ranking:
         diffsum = np.sum( diff )
 
         ###
-        cost  = 10.0*(1-correlm) + 1.0 * diffsum
+        cost  = 10.0*(1-correlm) + 60.0 * diffsum
 
 
         ### minimize cost
