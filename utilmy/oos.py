@@ -348,13 +348,14 @@ def test7_os():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
-
     log("\n#######", os_merge_safe)
-    uu.to_file("""test input1""", dirtmp + "/test1.txt" )
-    uu.to_file("""test input2""", dirtmp + "/test2.txt" )
+    uu.to_file("""test input1""", dirtmp + "test1.txt" )
+    uu.to_file("""test input2""", dirtmp + "test2.txt" )
 
-    os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"/merge.txt")
-    os_remove(    dirin=dirtmp+'/test1.txt', ndays_past=-1)
+    os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"merge.txt")
+    os_remove(    dirin=dirtmp+'test1.txt', ndays_past=-1)
+    log(os_file_date_modified(dirin=dirtmp+'merge.txt'))
+
     flist = glob_glob(dirtmp)
     assert len(flist) < 2, flist
 
@@ -957,25 +958,25 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     import datetime
     from pytz import timezone as tzone
     try :
-      mtime  = os.path.getmtime(dirin)
-      mtime2 = datetime.datetime.utcfromtimestamp(mtime)
-      mtime2 = mtime2.astimezone(tzone(timezone))
-      return mtime2.strftime(fmt)
+        mtime  = os.path.getmtime(dirin)
+        mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+        mtime2 = mtime2.astimezone(tzone(timezone))
+        return mtime2.strftime(fmt)
     except:
-      return ""
+        return ""
 
 
 def os_process_list():
-     """  List of processes
-     #ll = os_process_list()
-     #ll = [t for t in ll if 'root' in t and 'python ' in t ]
-     ### root   ....  python run
-     """
-     import subprocess
-     ps = subprocess.Popen('ps -ef', shell=True, stdout=subprocess.PIPE)
-     ll = ps.stdout.readlines()
-     ll = [ t.decode().replace("\n", "") for t in ll ]
-     return ll
+    """  List of processes
+    #ll = os_process_list()
+    #ll = [t for t in ll if 'root' in t and 'python ' in t ]
+    ### root   ....  python run
+    """
+    import subprocess
+    ps = subprocess.Popen('ps -ef', shell=True, stdout=subprocess.PIPE)
+    ll = ps.stdout.readlines()
+    ll = [ t.decode().replace("\n", "") for t in ll ]
+    return ll
 
 
 def os_wait_processes(nhours=7):

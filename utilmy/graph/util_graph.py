@@ -36,7 +36,7 @@ import os, glob, sys, math, time, json, functools, random, yaml, gc, copy, panda
 import datetime
 from box import Box
 from typing import Union
-import warnings ;warnings.filterwarnings("ignore")
+import warnings
 from warnings import simplefilter  ; simplefilter(action='ignore', category=FutureWarning)
 with warnings.catch_warnings():
     pass
@@ -67,15 +67,14 @@ def test1():
 
 
 def test_get_amazon():
-     # https://drive.google.com/file/d/1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2/view?usp=sharing
-     file_id = '1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2' #<-- You add in here the id from you google drive file, you can find it
+    # https://drive.google.com/file/d/1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2/view?usp=sharing
+    file_id = '1WuLFU595Bh2kd9lEWX_Tv43FYWW5BUW2' #<-- You add in here the id from you google drive file, you can find it
 
 
-     download = drive.CreateFile({'id': file_id})
+    from utilmy.util_download import google_download
+    google_download(url_or_id= file_id , fielout='amazon0302.txt')
 
 
-    # # Download the file to a local disc
-     download.GetContentFile('amazon0302.txt')
 
 
 def test_pd_create_dag(nrows=1000, n_nodes=100):
@@ -92,15 +91,25 @@ def test_pd_create_dag(nrows=1000, n_nodes=100):
 
 ############################################################################################################################
 """
-class  GraphData
+class  GraphDataLoader()
 
    Load/save/convert data into parquet, pandas dataframe
 
      mygraph242423/
          edges.parquet
-         vertex.parquet
+         nodes.parquet
          meta.json
          
+         
+     self.edges = pd.DafraFrame
+     self.nodes = pd.datarFrame
+     #self.nodes_dict = node_idint --> infos
+     
+         
+   def get_node_info(id_list):
+   
+   def set_node_info(id_list):
+            
          
 
    load(dirin,  )
@@ -114,7 +123,7 @@ class  GraphData
 
 
    convert
-      (edget, vertex, meta) --->   networkit or networkx
+      (edget, node, meta) --->   networkit or networkx
       
       
       
@@ -148,18 +157,14 @@ def test_networkit(net):
     """
     import networkit as nk
 
+    df = test_pd_create_dag()
 
-    df = test_pd_dag_create()
+    G, imap = dag_networkit_convert(df_or_file=df, cola='a', colb='b')
+    dag_networkit_save(G)
 
-    G, imap = dag_create_(df)
-
-    dag_save(G,imap)
-    G = dag_networkit_load('sample_data')
     nk.overview(G)
-    dag_networkit_save(G, dirout='./sample_data/', format='parquet', n_vertex=1000)
 
-    G = dag_load()
-
+    ### PgeRank
     pr = nk.centrality.PageRank(net)
     pr.run()
     print( pr.ranking())
@@ -197,11 +202,11 @@ def dag_create_network(df_or_file: Union[str,pd.DataFrame], cola, colb, colverte
 
 
 def dag_networkit_convert(df_or_file: pd.DataFrame, cola='cola', colb='colb', colvertex="", nrows=1000):
-  """Convert a panadas dataframe into a NetworKit graph
+    """Convert a panadas dataframe into a NetworKit graph
       and return a NetworKit graph.
 
 
-  Docs::
+    Docs::
                     df   :    dataframe[[ cola, colb, colvertex ]]
       cola='col_node1'  :  column name of node1
       colb='col_node2'  :  column name of node2
@@ -210,35 +215,35 @@ def dag_networkit_convert(df_or_file: pd.DataFrame, cola='cola', colb='colb', co
       https://networkit.github.io/dev-docs/notebooks/User-Guide.html#The-Graph-Object
 
 
-  """
-  import networkit as nk, gc
-  from utilmy import pd_read_file
+    """
+    import networkit as nk, gc
+    from utilmy import pd_read_file
 
-  if isinstance(df_or_file, str):
+    if isinstance(df_or_file, str):
       df = pd_read_file(df_or_file)
-  else :
+    else :
       df = df_or_file
       del df_or_file
 
-  #### Init Graph
-  # nodes   = set(df[cola].unique()) + set(df[colb].unique())
-  nodes   = set(df[cola].unique()).union(set(df[colb].unique()))
-  n_nodes = len(nodes)
+    #### Init Graph
+    # nodes   = set(df[cola].unique()) + set(df[colb].unique())
+    nodes   = set(df[cola].unique()).union(set(df[colb].unique()))
+    n_nodes = len(nodes)
 
-  graph = nk.Graph(n_nodes, edgesIndexed=False, weighted = True )
-  if colvertex != "":
+    graph = nk.Graph(n_nodes, edgesIndexed=False, weighted = True )
+    if colvertex != "":
       weights = df[colvertex].values
-  else :
+    else :
       weights = np.ones(len(df))
 
-  #### Add to Graph
-  dfGraph = df[[cola, colb]].values
+    #### Add to Graph
+    dfGraph = df[[cola, colb]].values
 
-  # print(df[cola])
+    # print(df[cola])
 
-  #### Map string ---> Integer, save memory
-  # print(str(df))
-  if 'int' not in str(df[cola].dtypes):
+    #### Map string ---> Integer, save memory
+    # print(str(df))
+    if 'int' not in str(df[cola].dtypes):
       index_map = { hash(x):x for x in nodes }
       # for i in range(len(df)):
 
@@ -246,14 +251,14 @@ def dag_networkit_convert(df_or_file: pd.DataFrame, cola='cola', colb='colb', co
           ai = df.iloc[i, 0]
           bi = df.iloc[i, 1]
           graph.addEdge( int(index_map.get( ai, ai)), int(index_map.get( bi, bi)), weights[i])
-  else :
+    else :
       index_map = {   }
       for i in range(len(df)):
           ai = df.iloc[i, 0]
           bi = df.iloc[i, 1]
           graph.addEdge( ai, bi, weights[i])
 
-  return graph, index_map
+    return graph, index_map
 
 
 
