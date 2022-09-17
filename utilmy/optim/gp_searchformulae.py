@@ -761,8 +761,8 @@ class myProblem_ranking:
         self.ncorrect2 = ncorrect2
         self.adjust    = adjust
 
-        self.x0_list        = np.array([randomize.randint(0,100) for _ in range(101)])
-        self.x1_list        = np.array([randomize.randint(0,100) for _ in range(101)])
+        self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
 
 
     def get_cost(self, expr:None, symbols):
@@ -858,7 +858,7 @@ class myProblem_ranking:
             (item has new scores)
 
         """
-        x0 = 1/(self.kk + self.x0)
+        x0 = 1/(self.kk + rank1)
         x1 = 1/(self.kk + rank2*self.adjust)
         scores_new =  eval(fornulae_str)
         return scores_new
