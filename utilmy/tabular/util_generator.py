@@ -533,7 +533,7 @@ def test8():
 
     assert(os.path.exists(fname) == True)
     df      = pd.read_csv(fname)
-    data    = df.loc[0:10000]
+    data    = df.loc[0:5000]
 
     #####################################################################
     colid = 'Unnamed: 0'   #Column Name 
@@ -557,7 +557,6 @@ def test8():
     generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
     Xnew = generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=None)
     log(evaluate(Xnew=Xnew, Xtrue=data, compute_pars=compute_pars))    
-    print()
 
 
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = "train"):
