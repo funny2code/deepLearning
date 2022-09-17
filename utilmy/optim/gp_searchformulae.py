@@ -752,12 +752,15 @@ class myProblem_ranking:
             Goal is to find a formulae, which make merge_list as much sorted as possible
 
         """
+        import random as randomize
+        randomize.seed(100000)
         self.n_sample  = n_sample
         self.kk        = kk
         self.nsize     = nsize
         self.ncorrect1 = ncorrect1
         self.ncorrect2 = ncorrect2
         self.adjust    = adjust
+        self.x0        = np.array([randomize.randint(0,100) for _ in range(101)])
 
 
     def get_cost(self, expr:None, symbols):
@@ -768,10 +771,10 @@ class myProblem_ranking:
             symbols         : Symbols
 
         """
-        try:
-            correlm = self.get_correlm(formulae_str=expr(symbols)[0])
-        except:
-            correlm = 1.0
+        #try:
+        correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        #except:
+            #correlm = 1.0
         check = 3
         return correlm,check
 
@@ -784,7 +787,7 @@ class myProblem_ranking:
             formulae_str            : Formulae String
 
         """
-        import scipy
+        from scipy import stats
         ##### True list
         ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
 
@@ -803,10 +806,12 @@ class myProblem_ranking:
             # llog(lnew)
 
             ### Eval with True Rank
-            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
-
+            correls.append(stats.spearmanr(ltrue,  lnew).correlation)
+            #We can also use kendmall equation
+            #
+            #
         correlm = np.mean(correls)
-        return -abs(correlm)  ### minimize correlation val
+        return 1 - correlm  ### minimize correlation val
 
 
     def rank_score(self, fornulae_str:str, rank1:list, rank2:list)-> list:
@@ -823,10 +828,8 @@ class myProblem_ranking:
             (item has new scores)
 
         """
-
-        x0 = 1/(self.kk + rank1)
+        x0 = 1/(self.kk + self.x0)
         x1 = 1/(self.kk + rank2*self.adjust)
-
         scores_new =  eval(fornulae_str)
         return scores_new
 
@@ -870,27 +873,30 @@ class myProblem_ranking:
         """
         # first randomly sample nsize - len(list_overlap) elements from dict_full
         # of those, ncorrect of them must be correctly ranked
+        import random as randomize
         random_vals = []
         while len(random_vals) <= nsize - len(list_overlap):
-            rand = random.sample(list(dict_full), 1)
+            rand = randomize.sample(list(dict_full), 1)
             if (rand not in random_vals and rand not in list_overlap):
                 random_vals.append(rand[0])
 
         # next create list as aggregate of random_vals and list_overlap
+        list_overlap = list(list_overlap)
         list2 = random_vals + list_overlap
 
         # shuffle nsize - ncorrect elements from list2
         copy1 = list2[0:nsize - ncorrect]
-        random.shuffle(copy1)
+        randomize.shuffle(copy1)
         list2[0:nsize - ncorrect] = copy1
 
         # ensure there are ncorrect elements in correct places
         if ncorrect == 0:
             return list2
-        rands = random.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
+        rands = randomize.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
         for r in rands:
             list2[r] = list(dict_full)[r]
         return list2
+
 
 
 
