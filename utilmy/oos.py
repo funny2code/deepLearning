@@ -187,7 +187,7 @@ def test4():
     os_variable_exist("test_var",globs)
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
+    os_variable_del(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
@@ -220,7 +220,7 @@ def test6_os():
     log(os_get_os())
     assert os_get_os() == sys.platform, "Platform mismatch"
     log(os_cpu_info())
-    log(os_memory())
+    log(os_ram_info())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
@@ -286,7 +286,7 @@ def test6_os():
     os_variable_exist("test_var",globs)
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
+    os_variable_del(["test_var"], globs)
     log(os_variable_exist("test_var",globs))
 
 
@@ -581,6 +581,23 @@ def os_remove(dirin="folder/**/*.parquet",
     else :    print('deleted', jj)
 
 
+def os_system(cmd, doprint=False):
+  """ get values
+       os_system( f"   ztmp ",  doprint=True)
+  """
+  import subprocess
+  try :
+    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
+    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
+    if doprint:
+      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
+      print(l)
+
+    return mout, merr
+  except Exception as e :
+    print( f"Error {cmd}, {e}")
+
+
 
 #####################################################################################################
 ##### File I-O ######################################################################################
@@ -620,7 +637,6 @@ class fileCache(object):
         ttl = ttl if isinstance(ttl, int)  else self.ttl
         path = path.replace("\\","/")
         self.db.set(path, flist, expire=float(ttl), retry=True)
-
 
 
 
@@ -774,9 +790,6 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
         fin.close()
 
 
-
-
-
 def os_removedirs(path, verbose=False):
     """  issues with no empty Folder
     # Delete everything reachable from the directory named in 'top',
@@ -809,31 +822,6 @@ def os_removedirs(path, verbose=False):
     return True
 
 
-def os_getcwd():
-    """  os.getcwd() This is for Windows Path normalized As Linux path /
-
-    """
-    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
-    return  root
-
-
-def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
-  """
-  import subprocess
-  try :
-    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
-    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
-    if doprint:
-      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
-      print(l)
-
-    return mout, merr
-  except Exception as e :
-    print( f"Error {cmd}, {e}")
-
-
 def os_makedirs(dir_or_file):
     """function os_makedirs
     Args:
@@ -847,6 +835,46 @@ def os_makedirs(dir_or_file):
         f.close()
     else :
         os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
+
+
+
+def os_getcwd():
+    """  os.getcwd() This is for Windows Path normalized As Linux path /
+
+    """
+    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
+    return  root
+
+
+def os_system_list(ll, logfile=None, sleep_sec=10):
+   """function os_system_list
+   Args:
+       ll:
+       logfile:
+       sleep_sec:
+   Returns:
+
+   """
+   ### Execute a sequence of cmd
+   import time, sys
+   n = len(ll)
+   for ii,x in enumerate(ll):
+        try :
+          log(x)
+          if sys.platform == 'win32' :
+             cmd = f" {x}   "
+          else :
+             cmd = f" {x}   2>&1 | tee -a  {logfile} " if logfile is not None else  x
+
+          os.system(cmd)
+
+          # tx= sum( [  ll[j][0] for j in range(ii,n)  ]  )
+          # log(ii, n, x,  "remaining time", tx / 3600.0 )
+          #log('Sleeping  ', x[0])
+          time.sleep(sleep_sec)
+        except Exception as e:
+            log(e)
+
 
 
 
@@ -897,6 +925,41 @@ def os_module_uncache(exclude='os.system'):
         del sys.modules[mod]
 
 
+def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
+    """function os_import
+    Args:
+        mod_name:
+        globs:
+        verbose:
+    Returns:
+
+    """
+    ### Import in Current Python Session a module   from module import *
+    ### from mod_name import *
+    module = __import__(mod_name, fromlist=['*'])
+    if hasattr(module, '__all__'):
+        all_names = module.__all__
+    else:
+        all_names = [name for name in dir(module) if not name.startswith('_')]
+
+    all_names2 = []
+    no_list    = ['os', 'sys' ]
+    for t in all_names :
+        if t not in no_list :
+          ### Mot yet loaded in memory  , so cannot use Global
+          #x = str( globs[t] )
+          #if '<class' not in x and '<function' not in x and  '<module' not in x :
+          all_names2.append(t)
+    all_names = all_names2
+
+    if verbose :
+      print("Importing: ")
+      for name in all_names :
+         print( f"{name}=None", end=";")
+      print("")
+    globs.update({name: getattr(module, name) for name in all_names})
+
+
 
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
@@ -923,22 +986,6 @@ def os_process_list():
     ll = ps.stdout.readlines()
     ll = [ t.decode().replace("\n", "") for t in ll ]
     return ll
-
-
-def os_wait_processes(nhours=7):
-    """function os_wait_processes
-    Args:
-        nhours:
-    Returns:
-
-    """
-    t0 = time.time()
-    while (time.time() - t0 ) < nhours * 3600 :
-       ll = os_process_list()
-       if len(ll) < 2 : break   ### Process are not running anymore
-       log("sleep 30min", ll)
-       time.sleep(3600* 0.5)
-
 
 
 def os_path_size(path = '.'):
@@ -1002,6 +1049,24 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
     list_file = list_file['file']
     for file1 in list_file:
         os_file_replacestring1(findstr, replacestr, file1)
+
+
+
+def os_file_check(fpath:str):
+   """Check file stat info
+   """
+   import os, time
+
+   flist = glob_glob(fpath)
+   flag = True
+   for fi in flist :
+       try :
+           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
+       except :
+           log(fi, "Error File Not exist")
+           flag = False
+   return flag
+
 
 
 def os_walk(path, pattern="*", dirlevel=50):
@@ -1117,42 +1182,41 @@ def os_get_function_name():
     return ss
 
 
-def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
-    """function os_import
-    Args:
-        mod_name:
-        globs:
-        verbose:
-    Returns:
+def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
+    """ Find the memory footprint of a Python object
+    Docs::
 
+        deep_getsizeof(df_pd, set())
+        The sys.getsizeof function does a shallow size of only. It counts each
+        object inside a container as pointer only regardless of how big it
     """
-    ### Import in Current Python Session a module   from module import *
-    ### from mod_name import *
-    module = __import__(mod_name, fromlist=['*'])
-    if hasattr(module, '__all__'):
-        all_names = module.__all__
-    else:
-        all_names = [name for name in dir(module) if not name.startswith('_')]
+    from collections import Mapping, Container
+    from sys import getsizeof
 
-    all_names2 = []
-    no_list    = ['os', 'sys' ]
-    for t in all_names :
-        if t not in no_list :
-          ### Mot yet loaded in memory  , so cannot use Global
-          #x = str( globs[t] )
-          #if '<class' not in x and '<function' not in x and  '<module' not in x :
-          all_names2.append(t)
-    all_names = all_names2
+    _ = hint
 
-    if verbose :
-      print("Importing: ")
-      for name in all_names :
-         print( f"{name}=None", end=";")
-      print("")
-    globs.update({name: getattr(module, name) for name in all_names})
+    d = os_sizeof
+    if id(o) in ids:
+        return 0
+
+    r = getsizeof(o)
+    ids.add(id(o))
+
+    if isinstance(o, str) or isinstance(0, str):
+        r = r
+
+    if isinstance(o, Mapping):
+        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
+
+    if isinstance(o, Container):
+        r = r + sum(d(x, ids) for x in o)
+
+    return r * 0.0000001
 
 
 
+
+###################################################################################################
 def os_variable_init(ll, globs):
     """function os_variable_init
     Args:
@@ -1206,9 +1270,7 @@ def os_variable_check(ll, globs=None, do_terminate=True):
                  sys.exit(0)
 
 
-
-
-def os_clean_memory( varlist , globx):
+def os_variable_del(varlist, globx):
   """function os_clean_memory
   Args:
       varlist:
@@ -1223,52 +1285,11 @@ def os_clean_memory( varlist , globx):
     except : pass
 
 
-def os_system_list(ll, logfile=None, sleep_sec=10):
-   """function os_system_list
-   Args:
-       ll:
-       logfile:
-       sleep_sec:
-   Returns:
-
-   """
-   ### Execute a sequence of cmd
-   import time, sys
-   n = len(ll)
-   for ii,x in enumerate(ll):
-        try :
-          log(x)
-          if sys.platform == 'win32' :
-             cmd = f" {x}   "
-          else :
-             cmd = f" {x}   2>&1 | tee -a  {logfile} " if logfile is not None else  x
-
-          os.system(cmd)
-
-          # tx= sum( [  ll[j][0] for j in range(ii,n)  ]  )
-          # log(ii, n, x,  "remaining time", tx / 3600.0 )
-          #log('Sleeping  ', x[0])
-          time.sleep(sleep_sec)
-        except Exception as e:
-            log(e)
 
 
-def os_file_check(fpath:str):
-   """Check file stat info
-   """
-   import os, time
-
-   flist = glob_glob(fpath)
-   flag = True
-   for fi in flist :
-       try :
-           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
-       except :
-           log(fi, "Error File Not exist")
-           flag = False
-   return flag
 
 
+###################################################################################################
 def os_get_os():
     """function os_platform_os
     Args:
@@ -1277,6 +1298,16 @@ def os_get_os():
     """
     #### get linux or windows
     return sys.platform
+
+
+def os_get_ip():
+    """function os_platform_ip
+    Args:
+    Returns:
+
+    """
+    ### IP
+    pass
 
 
 def os_cpu_info():
@@ -1295,19 +1326,7 @@ def os_cpu_info():
     cpu_usage = os_system(cmd)
 
 
-
-
-def os_get_ip():
-    """function os_platform_ip
-    Args:
-    Returns:
-
-    """
-    ### IP
-    pass
-
-
-def os_memory():
+def os_ram_info():
     """ Get total memory and memory usage in linux
     """
     with open('/proc/meminfo', 'r') as mem:
@@ -1347,36 +1366,21 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     return aux
 
 
-def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
-    """ Find the memory footprint of a Python object
-    Docs::
 
-        deep_getsizeof(df_pd, set())
-        The sys.getsizeof function does a shallow size of only. It counts each
-        object inside a container as pointer only regardless of how big it
+def os_wait_processes(nhours=7):
+    """function os_wait_processes
+    Args:
+        nhours:
+    Returns:
+
     """
-    from collections import Mapping, Container
-    from sys import getsizeof
+    t0 = time.time()
+    while (time.time() - t0 ) < nhours * 3600 :
+       ll = os_process_list()
+       if len(ll) < 2 : break   ### Process are not running anymore
+       log("sleep 30min", ll)
+       time.sleep(3600* 0.5)
 
-    _ = hint
-
-    d = os_sizeof
-    if id(o) in ids:
-        return 0
-
-    r = getsizeof(o)
-    ids.add(id(o))
-
-    if isinstance(o, str) or isinstance(0, str):
-        r = r
-
-    if isinstance(o, Mapping):
-        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
-
-    if isinstance(o, Container):
-        r = r + sum(d(x, ids) for x in o)
-
-    return r * 0.0000001
 
 
 
