@@ -514,6 +514,50 @@ def test7():
     generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
 
 
+def test8():
+    """function test8
+    Doc:: Generating synthetic samples of tabular OpneBadit DataSet 
+    """
+
+    #####################################################################
+    root   = "ztmp/"
+
+    dataset_url = "https://research.zozo.com/data_release/open_bandit_dataset.zip"
+    fname = "open_bandit_dataset/bts/men/men.csv"
+
+    if os.path.exists(fname) == False:
+       ###Downloading tabular dataset
+       from utilmy.deeplearning.ttorch import  util_torch as ut
+       dataset_path = ut.dataset_download(dataset_url, dirout='./')
+
+
+    assert(os.path.exists(fname) == True)
+    df      = pd.read_csv(fname)
+    data    = df.loc[0:5000]
+
+    #####################################################################
+    colid = 'Unnamed: 0'   #Column Name 
+
+    model_pars = {'model_class': 'CTGAN',
+                'model_pars': {
+                      ## CTGAN
+                     'primary_key': colid,
+                     'epochs': 1,
+                     'anonymize_fields': {},
+                     'batch_size' :100,
+                     'generator_dim' : (256, 256, 256),
+                     'discriminator_dim' : (256, 256, 256),
+                                 },
+                }
+
+    compute_pars = { 'compute_pars' : {},
+                     'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
+                   }
+
+    generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
+    Xnew = generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=None)
+    log(evaluate(Xnew=Xnew, Xtrue=data, compute_pars=compute_pars))    
+
 
 def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = "train"):
     """function RUN the model test_helper.
@@ -540,7 +584,6 @@ def test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type = 
     log('Load model..')
     model, session = load_model(path= root + "/model_dir/")
     log(model)
-
 
 
 ###############################################################################################
@@ -628,7 +671,6 @@ def generator_train_save(dirin_or_df="", dirout="",
     save(path= dirout)
 
 
-
 def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
@@ -656,9 +698,6 @@ def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None
         pd_to_file(Xnew, dirout, show=1)
     else :
         return Xnew
-
-
-
 
 ############### Model #########################################################################
 class Model(object):
@@ -749,10 +788,11 @@ def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, me
 
 
         -------------------------------------------------------------------------------------
-        In [13]: evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
+        In [13]: sdv.evaluation.evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
         Out[13]:
            metric         name  raw_score  normalized_score  min_value  max_value      goal error
         0  CSTest  Chi-Squared   0.948027          0.948027        0.0        1.0  MAXIMIZE  None
+
 
     """
     compute_pars = {} if compute_pars is None else compute_pars
@@ -1035,7 +1075,7 @@ if __name__ == "__main__":
     test5()
     test6()
     test7()
-
+    test8()
     
     
 

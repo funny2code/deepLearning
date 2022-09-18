@@ -84,6 +84,28 @@ def test1():
 
 
 
+def test1_convert():
+    """function test1
+    """
+    from datetime import datetime
+
+    int_ = 1
+    float_ = 1.1
+    log(is_int(int_))
+    assert is_int(int_) == True, 'Failed to convert'
+    log(is_float(float_))
+    assert is_float(float_) == True, 'Failed to convert'
+    log(to_float(int_))
+    assert to_float(int_) == 1.0, 'Failed to convert'
+    log(to_int(float_))
+    assert to_int(float_) == 1, 'Failed to convert'
+
+    log(to_timeunix(datex="2022-01-01"))
+    assert to_timeunix(datex="2022-01-01"), 'Failed to convert'
+
+    log(to_datetime(datetime.now()))
+    assert to_datetime(datetime.now()), 'Failed to convert'
+
 
 
 

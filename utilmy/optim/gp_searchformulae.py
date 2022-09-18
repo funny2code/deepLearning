@@ -292,8 +292,8 @@ def test5():
     p.symbols       = ["x0","x1"]
 
     p.n_exp         = 10
-    p.max_step      = 5000  ## per expriemnet
-    p.offsprings    = 200
+    p.max_step      = 100  ## per expriemnet
+    p.offsprings    = 5
 
     p.save_new_weights = f"ztmp/dcpy_weight_{int(time.time())}.pickle" ###To save new results
 
@@ -353,6 +353,28 @@ def test7():
 
     search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=False, )
 
+def test8(): 
+    """Test the myProblem7 class,
+
+    """
+    myproblem       = myProblem7()
+
+    p               = Box({})
+    p.log_file      = 'trace.log'
+    p.print_after   = 5
+    p.print_best    = True
+
+
+    p.nvars_in      = 3  ### nb of variables
+    p.nvars_out     = 1
+    p.operators     = ["sum", "mul", "diff"]
+    p.symbols       = ["x0", "x1", "x2"]
+
+    p.n_exp         = 20
+    p.max_step      = 1000
+    p.offsprings    = 10
+
+    search_formulae_dcgpy_v1(problem = myproblem, pars_dict=p, verbose=1)
 
 def test1_parallel():
     """Test of search_formulae_dcgpy_v1_parallel
@@ -661,6 +683,53 @@ class myProblem6:
         return cost
 
 
+class myProblem7:
+    def __init__(self):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            Finding PID values of a controller function. Given true values of 
+            controller, calculate Kp, Kd and Ki values for the PID controller.
+            Here true values are calculated using some specific PID values.  
+            In real life true values could be values from manual control. 
+        """
+        import numpy as np
+        x0 = np.random.random(50) # errors of the controller
+        x0 = -np.sort(-x0) # it is more sensible if they are descending
+        x1 = [0] + [(x - px) for (x, px) in zip(x0[1:], x0[:-1])] # derivatives of errors
+        x1 = np.array(x1) 
+        x2 = [np.sum(x0[:i + 1]) for i in range(len(x0))] # integral of errors
+        x2 = np.array(x2)
+
+        self.x0 = x0
+        self.x1 = x1
+        self.x2 = x2
+        Kp, Kd, Ki = 0.1, 0.01, 0.5
+        self.ytrue = Kp * x0 + Kd * x1 + Ki * x2  #This is the true value of controller output.
+
+
+    def get_cost(self, dCGP, symbols):
+        """ Cost Calculation, Objective to minimize Cost
+        Docs::
+
+            dCGP            : dCGP expression whose cost has to be minimized
+            symbols         : Symbols
+
+        """
+        #These needs to be defined to be used in eval function. 
+        x0 = self.x0
+        x1 = self.x1
+        x2 = self.x2
+        y     = eval(dCGP(symbols)[0])
+        cost  = np.sum((self.ytrue-y)**2)
+
+        check = 3
+        return cost, check
+
 
 class myProblem_ranking:
     def __init__(self,n_sample = 100,kk = 1.0,nsize = 100,ncorrect1 = 50,ncorrect2 = 50,adjust=1.0):
@@ -683,12 +752,17 @@ class myProblem_ranking:
             Goal is to find a formulae, which make merge_list as much sorted as possible
 
         """
+        import random as randomize
+        randomize.seed(100000)
         self.n_sample  = n_sample
         self.kk        = kk
         self.nsize     = nsize
         self.ncorrect1 = ncorrect1
         self.ncorrect2 = ncorrect2
         self.adjust    = adjust
+
+        self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
 
 
     def get_cost(self, expr:None, symbols):
@@ -699,10 +773,10 @@ class myProblem_ranking:
             symbols         : Symbols
 
         """
-        try:
-            correlm = self.get_correlm(formulae_str=expr(symbols)[0])
-        except:
-            correlm = 1.0
+        #try:
+        correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        #except:
+            #correlm = 1.0
         check = 3
         return correlm,check
 
@@ -715,7 +789,7 @@ class myProblem_ranking:
             formulae_str            : Formulae String
 
         """
-        import scipy
+        from scipy import stats
         ##### True list
         ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
 
@@ -724,20 +798,51 @@ class myProblem_ranking:
         list_overlap =  np.random.choice(ltrue, 80) #ltrue[:80]  #### Common elements
 
         correls = []
+        diff    = []
         for i in range(self.n_sample):
-            ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
-            ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+            #ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
+            #ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+
+            ll1 = self.x0_list[i]
+            ll2 = self.x1_list[i]
 
             #### Merge them using rank_score
             lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
             lnew = lnew[:100]
             # llog(lnew)
 
-            ### Eval with True Rank
-            correls.append(scipy.stats.spearmanr(ltrue,  lnew).correlation)
+            ### Eval with True Rank              #We can also use kendmall equation
+            c1 = stats.spearmanr(ltrue,  lnew).correlation
+            correls.append(c1)
+
+
+            #### Symmetric Condiution   ############################################
+            if i < 3:
+                ll1 = self.x1_list[i]
+                ll2 = self.x0_list[i]
+
+                #### Merge them using rank_score
+                lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
+                lnew = lnew[:100]
+                # llog(lnew)
+
+                ### Eval with True Rank              #We can also use kendmall equation
+                c2 = stats.spearmanr(ltrue,  lnew).correlation
+
+                ### diff=0  IF formulae is symettric
+                diff.append( abs(c1-c2) )
+
+
 
         correlm = np.mean(correls)
-        return -abs(correlm)  ### minimize correlation val
+        diffsum = np.sum( diff )
+
+        ###
+        cost  = 10.0*(1-correlm) + 100.0 * 1e4 * diffsum
+
+
+        ### minimize cost
+        return cost
 
 
     def rank_score(self, fornulae_str:str, rank1:list, rank2:list)-> list:
@@ -754,11 +859,33 @@ class myProblem_ranking:
             (item has new scores)
 
         """
+        ### Check if formulae had number of x1 and x05
+        """
+        rlist  = np.random.random(5)
+        rlist2 = np.random.random(5)
+
+        difflist  = []
+        for i in range(10):
+           x0 = rlist[i]
+           x1 = rlist2[i]
+           s1 =  eval(fornulae_str)
+
+           x0 = rlist2[i]
+           x1 = rlist[i]
+           s2 =  eval(fornulae_str)
+           difflist.append(abs(s1-s2))
+
+
+        if np.sum(difflist) > 0.1 :
+             scores_new = 0.99 + np.zeros(len(rank1))
+             return scores_new
+        """
 
         x0 = 1/(self.kk + rank1)
         x1 = 1/(self.kk + rank2*self.adjust)
-
         scores_new =  eval(fornulae_str)
+
+
         return scores_new
 
 
@@ -801,27 +928,30 @@ class myProblem_ranking:
         """
         # first randomly sample nsize - len(list_overlap) elements from dict_full
         # of those, ncorrect of them must be correctly ranked
+        import random as randomize
         random_vals = []
         while len(random_vals) <= nsize - len(list_overlap):
-            rand = random.sample(list(dict_full), 1)
+            rand = randomize.sample(list(dict_full), 1)
             if (rand not in random_vals and rand not in list_overlap):
                 random_vals.append(rand[0])
 
         # next create list as aggregate of random_vals and list_overlap
+        list_overlap = list(list_overlap)
         list2 = random_vals + list_overlap
 
         # shuffle nsize - ncorrect elements from list2
         copy1 = list2[0:nsize - ncorrect]
-        random.shuffle(copy1)
+        randomize.shuffle(copy1)
         list2[0:nsize - ncorrect] = copy1
 
         # ensure there are ncorrect elements in correct places
         if ncorrect == 0:
             return list2
-        rands = random.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
+        rands = randomize.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
         for r in rands:
             list2[r] = list(dict_full)[r]
         return list2
+
 
 
 

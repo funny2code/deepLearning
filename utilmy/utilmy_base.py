@@ -27,9 +27,6 @@ except ImportError:
 
 
 
-
-
-
 ###################################################################################################
 global verbose
 def get_verbosity(verbose:int=None):
@@ -54,7 +51,6 @@ def direpo(show=0):
     if show>0 :
         log(dir_repo1)
     return dir_repo1
-
 
 
 def dirpackage(show=0):
@@ -310,9 +306,66 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 ###################################################################################################
 def to_file(txt, fpath, mode='a'):
+    """  Write txt on Disk
+    Docs::
+
+          to_file(
+
+
+    """
     os_makedirs(fpath) ### create folder
-    with open(fpath, mode=mode) as fp:
-        fp.write(txt)
+    try :
+        with open(fpath, mode=mode) as fp:
+            fp.write(txt)
+    except Exception as e:
+        time.sleep(5)
+        with open(fpath, mode=mode) as fp:
+            fp.write(txt)
+
+
+class toFileSafe(object):
+   def __init__(self,fpath):
+      """ Thread Safe file writer Class
+      Docs::
+
+        tofile = toFileSafe('mylog.log')
+        tofile.w("msg")
+      """
+      import logging
+      logger = logging.getLogger('logsafe')
+      logger.setLevel(logging.INFO)
+      ch = logging.FileHandler(fpath)
+      ch.setFormatter(logging.Formatter('%(message)s'))
+      logger.addHandler(ch)
+      self.logger = logger
+
+   def write(self, *s):
+        """ toFileSafe:write
+        Args:
+            msg:
+        Returns:
+
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+   def log(self, *s):
+        """ toFileSafe:log
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+   def w(self, *s):
+        """ toFileSafe:w
+        Args:
+            msg:
+        Returns:
+
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+
 
 
 def find_fuzzy(word:str, wlist:list, threshold=0.0):
@@ -599,17 +652,29 @@ def pd_getdata(verbose=True):
 
 
 class Index0(object):
+    """ Class Maintain global index,
+    Docs::
+
+        file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
+        index = m.Index0(file_name, min_chars=8)
+
+
+        ### 2 save some data
+        data   = [ "testestest", 'duplicate', '5char', '### comment line, so skipped',]
+        output = [ 'testestest', 'duplicate',  ]
+        index.save(data)
+        assert set(index.read()) == set(output), f"{output} , {index.read()}"
+
     """
-    ### to maintain global index, flist = index.read()  index.save(flist)
-    """
-    def __init__(self, findex:str="ztmp_file.txt"):
+    def __init__(self, findex:str="ztmp_file.txt", min_chars=5):
         """ Index0:__init__
         Args:
             findex (function["arg_type"][i]) :     
         Returns:
            
         """
-        self.findex = findex
+        self.findex        = findex
+        self.min_chars = min_chars
         log(os.path.dirname(self.findex))
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
         if not os.path.isfile(self.findex):
@@ -629,7 +694,7 @@ class Index0(object):
         if len(flist) < 1 : return []    
         flist2 = []
         for t  in flist :
-            if len(t) > 5 and t[0] != "#"  :
+            if len(t) >= self.min_chars and t[0] != "#"  :
               flist2.append( t.strip() )
         return flist2    
 
@@ -740,22 +805,20 @@ from utilmy.oos import(
     os_variable_init,
     os_import,
     os_variable_check,
-    os_clean_memory,
+    os_variable_del,
     os_system_list,
     #os_to_file,
-    os_platform_os,
-    os_platform_ip,
-    os_memory,
+    os_get_os,
+    os_get_ip,
+    os_ram_info,
     os_sleep_cpu,
-    os_cpu,
+    os_cpu_info,
     # os_ram_object,
     os_copy,
     os_removedirs,
     os_getcwd,
     os_system,
     os_makedirs,
-    
-    toFileSafe
 )
 
 ### Alias
@@ -986,12 +1049,6 @@ def test_all():
     test3()
     test4()
     test5()
-    test7()
-    test1()
-    test2()
-    test3()
-    test4()
-    test5()
     test6()
     test7()
 
@@ -1024,17 +1081,16 @@ def test1():
 
 def test2():
     import utilmy as m
-
     drepo, dtmp = dir_testinfo()
 
-    file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
-    index = m.Index0(file_name)
 
-    # 2 save some data
-    data = [ "testestest",   'duplicate', 'ok', 'duplicate',]
-    output = [ 'testestest', 'ok', ]
+    file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
+    index = m.Index0(file_name, min_chars=8)
+    data  = [ "testestest", 'duplicate', '5char', '8charlong', '### comment line, so skipped',]
+    xtrue = [ 'testestest', 'duplicate', '8charlong'  ]
     index.save(data)
-    assert set(index.read()) == set(output), output
+    x = set(index.read())
+    assert not log(x) and x  == set(xtrue), f"{xtrue} <> {x}"
 
 
 
