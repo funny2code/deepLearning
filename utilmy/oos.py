@@ -876,20 +876,6 @@ def os_system_list(ll, logfile=None, sleep_sec=10):
             log(e)
 
 
-def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """last modified date
-    """
-    import datetime
-    from pytz import timezone as tzone
-    try :
-        mtime  = os.path.getmtime(dirin)
-        mtime2 = datetime.datetime.utcfromtimestamp(mtime)
-        mtime2 = mtime2.astimezone(tzone(timezone))
-        return mtime2.strftime(fmt)
-    except:
-        return ""
-
-
 def os_process_list():
     """  List of processes
     #ll = os_process_list()
@@ -967,6 +953,21 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
 
 
 
+
+def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
+    """last modified date
+    """
+    import datetime
+    from pytz import timezone as tzone
+    try :
+        mtime  = os.path.getmtime(dirin)
+        mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+        mtime2 = mtime2.astimezone(tzone(timezone))
+        return mtime2.strftime(fmt)
+    except:
+        return ""
+
+
 def os_file_check(fpath:str):
    """Check file stat info
    """
@@ -981,6 +982,31 @@ def os_file_check(fpath:str):
            log(fi, "Error File Not exist")
            flag = False
    return flag
+
+
+
+def os_file_info(dirin, fmt_output="%Y%m%d-%H:%M", timezone='Asia/Tokyo', returnval='list'):
+    """ Return file info
+    """
+    from utilmy import date_now
+    import datetime
+    from pytz import timezone as tzone
+
+    flist = glob_glob(dirin)
+    flist2 =[]
+    for fi in flist :
+        try :
+            mtime  = os.path.getmtime(fi)
+
+            mtime2 = date_now(mtime, fmt=fmt_output, timezone=timezone)
+            # mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+            # mtime2 = mtime2.astimezone(tzone(timezone))
+            # flist2.append( [ fi,  'mdate'  ]  )
+
+        except Exception as e :
+            log(e)
+
+    return flist2
 
 
 
