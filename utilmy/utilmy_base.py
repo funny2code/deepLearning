@@ -808,7 +808,7 @@ from utilmy.oos import(
     os_clean_memory,
     os_system_list,
     #os_to_file,
-    os_platform_os,
+    os_get_os,
     os_platform_ip,
     os_memory,
     os_sleep_cpu,
@@ -819,7 +819,7 @@ from utilmy.oos import(
     os_getcwd,
     os_system,
     os_makedirs,
-    
+
     toFileSafe
 )
 

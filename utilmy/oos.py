@@ -115,7 +115,7 @@ def test0():
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    assert os_platform_os() == sys.platform
+    assert os_get_os() == sys.platform
 
 
 
@@ -217,8 +217,8 @@ def test6_os():
     drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
-    log(os_platform_os())
-    assert os_platform_os() == sys.platform,"Platform mismatch"
+    log(os_get_os())
+    assert os_get_os() == sys.platform, "Platform mismatch"
     log(os_cpu())
     log(os_memory())
     log(os_getcwd())
@@ -1269,7 +1269,7 @@ def os_file_check(fpath:str):
    return flag
 
 
-def os_platform_os():
+def os_get_os():
     """function os_platform_os
     Args:
     Returns:
@@ -1289,7 +1289,7 @@ def os_cpu():
     return os.cpu_count()
 
 
-def os_platform_ip():
+def os_get_ip():
     """function os_platform_ip
     Args:
     Returns:
