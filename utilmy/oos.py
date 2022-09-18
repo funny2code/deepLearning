@@ -984,7 +984,7 @@ def os_file_check(fpath:str):
    return flag
 
 
-
+# TODO
 def os_file_info(dirin, fmt_output="%Y%m%d-%H:%M", timezone='Asia/Tokyo', returnval='list'):
     """ Return file info
     """
@@ -1040,6 +1040,7 @@ def os_walk(path, pattern="*", dirlevel=50):
 
 #######################################################################################################
 ##### OS, config ######################################################################################
+# TODO
 def os_monkeypatch_help():
     """function os_monkeypatch_help
     Args:
@@ -1332,7 +1333,7 @@ def os_get_os():
     #### get linux or windows
     return sys.platform
 
-
+# TODO
 def os_get_ip():
     """function os_platform_ip
     Args:
@@ -1419,6 +1420,7 @@ def os_wait_processes(nhours=7):
 
 ###################################################################################################
 ###### HELP ######################################################################################
+# TODO
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::
