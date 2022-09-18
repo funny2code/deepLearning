@@ -219,7 +219,7 @@ def test6_os():
     log("#######   os utils...")
     log(os_get_os())
     assert os_get_os() == sys.platform, "Platform mismatch"
-    log(os_cpu())
+    log(os_cpu_info())
     log(os_memory())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
@@ -1279,14 +1279,22 @@ def os_get_os():
     return sys.platform
 
 
-def os_cpu():
-    """function os_cpu
-    Args:
-    Returns:
+def os_cpu_info():
+    """ get info on CPU  : nb of cpu, usage
+    Docs:
 
+         https://stackoverflow.com/questions/9229333/how-to-get-overall-cpu-usage-e-g-57-on-linux
     """
-    ### Nb of cpus cores
-    return os.cpu_count()
+    ncpu= os.cpu_count()
+
+    cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
+    cpu_usage = os_system(cmd)
+
+
+    cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
+    cpu_usage = os_system(cmd)
+
+
 
 
 def os_get_ip():
