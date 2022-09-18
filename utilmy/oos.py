@@ -416,6 +416,71 @@ def test8():
     assert len(before_files) == len(cur_files)
 
 
+def test8_os():
+    from pytz import timezone
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    timezone_name = 'Asia/Tokyo'
+    datetime_format = '%Y%m%d-%H:%M'
+    file_dir = dirtmp + "/test.txt"
+
+
+    log("\n#######", os_file_date_modified)
+    uu.to_file("first line", file_dir)
+    created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
+    last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
+
+    time.sleep(3)
+
+    with open(file_dir, mode='a') as fp:
+        fp.write("\nsecond line")
+
+    updated_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
+    last_modified_updated = os_file_date_modified(file_dir, datetime_format, timezone_name)
+
+    log(created_time)
+    log(last_modified_created)
+    assert created_time == last_modified_created
+    log(updated_time)
+    log(last_modified_updated)
+    assert updated_time == last_modified_updated
+
+
+def test_utils():
+    from pytz import timezone
+    import requests
+    import json
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+    datetime_format = '%Y%m%d-%H:%M'
+
+    log("\n#######", to_timeunix)
+    log("Date: 2018-01-16")
+    log("Unix format:", to_timeunix())
+    assert 1516053600000 == to_timeunix()
+
+    log("\n#######", date_to_timezone)
+    test_datetime = datetime.datetime.now()
+    log("Datetime:", test_datetime.strftime(datetime_format))
+
+    log("Test with Asia/Tokyo timezone")
+    log("Datetime Asia/Tokyo timezone:", test_datetime.astimezone(timezone('Asia/Tokyo')).strftime(datetime_format))
+    assert test_datetime.astimezone(timezone('Asia/Tokyo')).strftime(datetime_format) == date_to_timezone(test_datetime, fmt=datetime_format, timezone='Asia/Tokyo')
+    
+    log("Test with US/Pacific timezone")
+    log("Datetime US/Pacific timezone:", test_datetime.astimezone(timezone('US/Pacific')).strftime(datetime_format))
+    assert test_datetime.astimezone(timezone('US/Pacific')).strftime(datetime_format) == date_to_timezone(test_datetime, fmt=datetime_format, timezone='US/Pacific')
+
+
+    log("\n#######", os_get_ip)
+    public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+    log("Public IP", public_ip)
+    assert public_ip == os_get_ip()
+
+
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
