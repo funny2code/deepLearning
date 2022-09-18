@@ -809,7 +809,7 @@ from utilmy.oos import(
     os_system_list,
     #os_to_file,
     os_get_os,
-    os_platform_ip,
+    os_get_ip,
     os_memory,
     os_sleep_cpu,
     os_cpu,
@@ -819,8 +819,6 @@ from utilmy.oos import(
     os_getcwd,
     os_system,
     os_makedirs,
-
-    toFileSafe
 )
 
 ### Alias
