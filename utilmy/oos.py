@@ -72,10 +72,10 @@ def test_globglob():
 
 
 def test_filecache():
-    import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-    fc = fileCache(dir_cache='test')
+    fc = fileCache(dir_cache= dirtmp + '/test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
     log(fc.get('test'))
@@ -84,8 +84,6 @@ def test_filecache():
 
 
 def test0():
-    """function test0
-    """
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
