@@ -29,7 +29,6 @@ def test_all():
     test_globglob()
 
     test0()
-    test1()
     # test2()
     test4()
     test5_os()
@@ -116,37 +115,8 @@ def test0():
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    assert os_platform_os() == sys.platform
+    assert os_get_os() == sys.platform
 
-
-def test1():
-    """function test1
-    """
-    from datetime import datetime
-
-    int_ = 1
-    float_ = 1.1
-    log(is_int(int_))
-    assert is_int(int_) == True, 'Failed to convert'
-    log(is_float(float_))
-    assert is_float(float_) == True, 'Failed to convert'
-    log(to_float(int_))
-    assert to_float(int_) == 1.0, 'Failed to convert'
-    log(to_int(float_))
-    assert to_int(float_) == 1, 'Failed to convert'
-
-    log(to_timeunix(datex="2022-01-01"))
-    assert to_timeunix(datex="2022-01-01"), 'Failed to convert'
-
-    log(to_datetime(datetime.now()))
-    assert to_datetime(datetime.now()), 'Failed to convert'
-
-    # np_list_intersection
-    l1 = [1, 3, 5, 7 ,9]
-    l2 = [2, 3, 5, 6, 8]
-    log(np_list_intersection(l1,l2))
-    assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
-    log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 
 def test_create_testfiles():
@@ -217,7 +187,7 @@ def test4():
     os_variable_exist("test_var",globs)
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
+    os_variable_del(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
@@ -247,10 +217,10 @@ def test6_os():
     drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
-    log(os_platform_os())
-    assert os_platform_os() == sys.platform,"Platform mismatch"
-    log(os_cpu())
-    log(os_memory())
+    log(os_get_os())
+    assert os_get_os() == sys.platform, "Platform mismatch"
+    log(os_cpu_info())
+    log(os_ram_info())
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
@@ -316,7 +286,7 @@ def test6_os():
     os_variable_exist("test_var",globs)
     os_variable_check("other_var",globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
-    os_clean_memory(["test_var"], globs)
+    os_variable_del(["test_var"], globs)
     log(os_variable_exist("test_var",globs))
 
 
@@ -451,28 +421,6 @@ def test8():
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
-class dict_to_namespace(object):
-    #### Dict to namespace
-    def __init__(self, d):
-        """ dict_to_namespace:__init__
-
-        """
-        self.__dict__ = d
-
-
-def to_dict(**kw):
-  """function to_dict
-  Args:
-      **kw:
-  Returns:
-
-  """
-  ## return dict version of the params
-  return kw
-
-
-
-
 def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
@@ -597,6 +545,58 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
 
 
 
+def os_remove(dirin="folder/**/*.parquet",
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=0):
+
+    """  Delete files bigger than some size
+
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry in {True, 1} else False
+
+    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
+
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi)
+        except Exception as e :
+            print(fi, e)
+
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
+
+
+def os_system(cmd, doprint=False):
+  """ get values
+       os_system( f"   ztmp ",  doprint=True)
+  """
+  import subprocess
+  try :
+    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
+    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
+    if doprint:
+      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
+      print(l)
+
+    return mout, merr
+  except Exception as e :
+    print( f"Error {cmd}, {e}")
+
 
 
 #####################################################################################################
@@ -637,7 +637,6 @@ class fileCache(object):
         ttl = ttl if isinstance(ttl, int)  else self.ttl
         path = path.replace("\\","/")
         self.db.set(path, flist, expire=float(ttl), retry=True)
-
 
 
 
@@ -791,43 +790,6 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
         fin.close()
 
 
-
-def os_remove(dirin="folder/**/*.parquet",
-              min_size_mb=0, max_size_mb=1,
-              exclude="", include_only="",
-              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
-              nfiles=99999999,
-              dry=0):
-
-    """  Delete files bigger than some size
-
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry in {True, 1} else False
-
-    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
-            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
-            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
-            nfiles=nfiles,)
-
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
-
-
 def os_removedirs(path, verbose=False):
     """  issues with no empty Folder
     # Delete everything reachable from the directory named in 'top',
@@ -860,31 +822,6 @@ def os_removedirs(path, verbose=False):
     return True
 
 
-def os_getcwd():
-    """  os.getcwd() This is for Windows Path normalized As Linux path /
-
-    """
-    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
-    return  root
-
-
-def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
-  """
-  import subprocess
-  try :
-    p          = subprocess.run( cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, )
-    mout, merr = p.stdout.decode('utf-8'), p.stderr.decode('utf-8')
-    if doprint:
-      l = mout  if len(merr) < 1 else mout + "\n\nbash_error:\n" + merr
-      print(l)
-
-    return mout, merr
-  except Exception as e :
-    print( f"Error {cmd}, {e}")
-
-
 def os_makedirs(dir_or_file):
     """function os_makedirs
     Args:
@@ -901,55 +838,42 @@ def os_makedirs(dir_or_file):
 
 
 
-
-
-
-
-#######################################################################################################
-##### OS, config ######################################################################################
-def os_monkeypatch_help():
-    """function os_monkeypatch_help
-    Args:
-    Returns:
+def os_getcwd():
+    """  os.getcwd() This is for Windows Path normalized As Linux path /
 
     """
-    print( """
-    https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    
-    
-    """)
+    root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
+    return  root
 
 
-def os_module_uncache(exclude='os.system'):
-    """Remove package modules from cache except excluded ones.
-       On next import they will be reloaded.  Useful for monkey patching
-    Args:
-        exclude (iter<str>): Sequence of module paths.
-        https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    """
-    import sys
-    pkgs = []
-    for mod in exclude:
-        pkg = mod.split('.', 1)[0]
-        pkgs.append(pkg)
+def os_system_list(ll, logfile=None, sleep_sec=10):
+   """function os_system_list
+   Args:
+       ll:
+       logfile:
+       sleep_sec:
+   Returns:
 
-    to_uncache = []
-    for mod in sys.modules:
-        if mod in exclude:
-            continue
+   """
+   ### Execute a sequence of cmd
+   import time, sys
+   n = len(ll)
+   for ii,x in enumerate(ll):
+        try :
+          log(x)
+          if sys.platform == 'win32' :
+             cmd = f" {x}   "
+          else :
+             cmd = f" {x}   2>&1 | tee -a  {logfile} " if logfile is not None else  x
 
-        if mod in pkgs:
-            to_uncache.append(mod)
-            continue
+          os.system(cmd)
 
-        for pkg in pkgs:
-            if mod.startswith(pkg + '.'):
-                to_uncache.append(mod)
-                break
-
-    for mod in to_uncache:
-        del sys.modules[mod]
-
+          # tx= sum( [  ll[j][0] for j in range(ii,n)  ]  )
+          # log(ii, n, x,  "remaining time", tx / 3600.0 )
+          #log('Sleeping  ', x[0])
+          time.sleep(sleep_sec)
+        except Exception as e:
+            log(e)
 
 
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
@@ -977,22 +901,6 @@ def os_process_list():
     ll = ps.stdout.readlines()
     ll = [ t.decode().replace("\n", "") for t in ll ]
     return ll
-
-
-def os_wait_processes(nhours=7):
-    """function os_wait_processes
-    Args:
-        nhours:
-    Returns:
-
-    """
-    t0 = time.time()
-    while (time.time() - t0 ) < nhours * 3600 :
-       ll = os_process_list()
-       if len(ll) < 2 : break   ### Process are not running anymore
-       log("sleep 30min", ll)
-       time.sleep(3600* 0.5)
-
 
 
 def os_path_size(path = '.'):
@@ -1058,6 +966,24 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
         os_file_replacestring1(findstr, replacestr, file1)
 
 
+
+def os_file_check(fpath:str):
+   """Check file stat info
+   """
+   import os, time
+
+   flist = glob_glob(fpath)
+   flag = True
+   for fi in flist :
+       try :
+           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
+       except :
+           log(fi, "Error File Not exist")
+           flag = False
+   return flag
+
+
+
 def os_walk(path, pattern="*", dirlevel=50):
     """ dirlevel=0 : root directory
         dirlevel=1 : 1 path below
@@ -1085,6 +1011,94 @@ def os_walk(path, pattern="*", dirlevel=50):
 
 
 
+
+#######################################################################################################
+##### OS, config ######################################################################################
+def os_monkeypatch_help():
+    """function os_monkeypatch_help
+    Args:
+    Returns:
+
+    """
+    print( """
+    https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
+    
+    
+    """)
+
+
+def os_module_uncache(exclude='os.system'):
+    """Remove package modules from cache except excluded ones.
+       On next import they will be reloaded.  Useful for monkey patching
+    Args:
+        exclude (iter<str>): Sequence of module paths.
+        https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
+    """
+    import sys
+    pkgs = []
+    for mod in exclude:
+        pkg = mod.split('.', 1)[0]
+        pkgs.append(pkg)
+
+    to_uncache = []
+    for mod in sys.modules:
+        if mod in exclude:
+            continue
+
+        if mod in pkgs:
+            to_uncache.append(mod)
+            continue
+
+        for pkg in pkgs:
+            if mod.startswith(pkg + '.'):
+                to_uncache.append(mod)
+                break
+
+    for mod in to_uncache:
+        del sys.modules[mod]
+
+
+def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
+    """function os_import
+    Args:
+        mod_name:
+        globs:
+        verbose:
+    Returns:
+
+    """
+    ### Import in Current Python Session a module   from module import *
+    ### from mod_name import *
+    module = __import__(mod_name, fromlist=['*'])
+    if hasattr(module, '__all__'):
+        all_names = module.__all__
+    else:
+        all_names = [name for name in dir(module) if not name.startswith('_')]
+
+    all_names2 = []
+    no_list    = ['os', 'sys' ]
+    for t in all_names :
+        if t not in no_list :
+          ### Mot yet loaded in memory  , so cannot use Global
+          #x = str( globs[t] )
+          #if '<class' not in x and '<function' not in x and  '<module' not in x :
+          all_names2.append(t)
+    all_names = all_names2
+
+    if verbose :
+      print("Importing: ")
+      for name in all_names :
+         print( f"{name}=None", end=";")
+      print("")
+    globs.update({name: getattr(module, name) for name in all_names})
+
+
+
+
+
+
+
+###################################################################################################
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
@@ -1153,24 +1167,13 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
     return df
 
 
-def os_get_function_name():
-    """function os_get_function_name
-    Args:
-    Returns:
-
-    """
-    ### Get ane,
-    import sys, socket
-    ss = str(os.getpid()) # + "-" + str( socket.gethostname())
-    ss = ss + "," + str(__name__)
-    try :
-        ss = ss + "," + __class__.__name__
-    except :
-        ss = ss + ","
-    ss = ss + "," + str(  sys._getframe(1).f_code.co_name)
-    return ss
 
 
+
+
+
+
+###################################################################################################
 def os_variable_init(ll, globs):
     """function os_variable_init
     Args:
@@ -1184,41 +1187,6 @@ def os_variable_init(ll, globs):
           globs[x]
         except :
           globs[x] = None
-
-
-def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
-    """function os_import
-    Args:
-        mod_name:
-        globs:
-        verbose:
-    Returns:
-
-    """
-    ### Import in Current Python Session a module   from module import *
-    ### from mod_name import *
-    module = __import__(mod_name, fromlist=['*'])
-    if hasattr(module, '__all__'):
-        all_names = module.__all__
-    else:
-        all_names = [name for name in dir(module) if not name.startswith('_')]
-
-    all_names2 = []
-    no_list    = ['os', 'sys' ]
-    for t in all_names :
-        if t not in no_list :
-          ### Mot yet loaded in memory  , so cannot use Global
-          #x = str( globs[t] )
-          #if '<class' not in x and '<function' not in x and  '<module' not in x :
-          all_names2.append(t)
-    all_names = all_names2
-
-    if verbose :
-      print("Importing: ")
-      for name in all_names :
-         print( f"{name}=None", end=";")
-      print("")
-    globs.update({name: getattr(module, name) for name in all_names})
 
 
 def os_variable_exist(x ,globs, msg="") :
@@ -1259,7 +1227,7 @@ def os_variable_check(ll, globs=None, do_terminate=True):
                  sys.exit(0)
 
 
-def os_clean_memory( varlist , globx):
+def os_variable_del(varlist, globx):
   """function os_clean_memory
   Args:
       varlist:
@@ -1274,53 +1242,62 @@ def os_clean_memory( varlist , globx):
     except : pass
 
 
-def os_system_list(ll, logfile=None, sleep_sec=10):
-   """function os_system_list
-   Args:
-       ll:
-       logfile:
-       sleep_sec:
-   Returns:
+def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
+    """ Find the memory footprint of a Python object
+    Docs::
 
-   """
-   ### Execute a sequence of cmd
-   import time, sys
-   n = len(ll)
-   for ii,x in enumerate(ll):
-        try :
-          log(x)
-          if sys.platform == 'win32' :
-             cmd = f" {x}   "
-          else :
-             cmd = f" {x}   2>&1 | tee -a  {logfile} " if logfile is not None else  x
+        deep_getsizeof(df_pd, set())
+        The sys.getsizeof function does a shallow size of only. It counts each
+        object inside a container as pointer only regardless of how big it
+    """
+    from collections import Mapping, Container
+    from sys import getsizeof
 
-          os.system(cmd)
+    _ = hint
 
-          # tx= sum( [  ll[j][0] for j in range(ii,n)  ]  )
-          # log(ii, n, x,  "remaining time", tx / 3600.0 )
-          #log('Sleeping  ', x[0])
-          time.sleep(sleep_sec)
-        except Exception as e:
-            log(e)
+    d = os_sizeof
+    if id(o) in ids:
+        return 0
 
+    r = getsizeof(o)
+    ids.add(id(o))
 
-def os_file_check(fpath:str):
-   """Check file stat info
-   """
-   import os, time
+    if isinstance(o, str) or isinstance(0, str):
+        r = r
 
-   flist = glob_glob(fpath)
-   flag = True
-   for fi in flist :
-       try :
-           log(fi,  os.stat(fi).st_size*0.001, time.ctime(os.path.getmtime(fi)) )
-       except :
-           log(fi, "Error File Not exist")
-           flag = False
-   return flag
+    if isinstance(o, Mapping):
+        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
+
+    if isinstance(o, Container):
+        r = r + sum(d(x, ids) for x in o)
+
+    return r * 0.0000001
 
 
-def os_platform_os():
+def os_get_function_name():
+    """function os_get_function_name
+    Args:
+    Returns:
+
+    """
+    ### Get ane,
+    import sys, socket
+    ss = str(os.getpid()) # + "-" + str( socket.gethostname())
+    ss = ss + "," + str(__name__)
+    try :
+        ss = ss + "," + __class__.__name__
+    except :
+        ss = ss + ","
+    ss = ss + "," + str(  sys._getframe(1).f_code.co_name)
+    return ss
+
+
+
+
+
+
+###################################################################################################
+def os_get_os():
     """function os_platform_os
     Args:
     Returns:
@@ -1330,17 +1307,7 @@ def os_platform_os():
     return sys.platform
 
 
-def os_cpu():
-    """function os_cpu
-    Args:
-    Returns:
-
-    """
-    ### Nb of cpus cores
-    return os.cpu_count()
-
-
-def os_platform_ip():
+def os_get_ip():
     """function os_platform_ip
     Args:
     Returns:
@@ -1350,7 +1317,23 @@ def os_platform_ip():
     pass
 
 
-def os_memory():
+def os_cpu_info():
+    """ get info on CPU  : nb of cpu, usage
+    Docs:
+
+         https://stackoverflow.com/questions/9229333/how-to-get-overall-cpu-usage-e-g-57-on-linux
+    """
+    ncpu= os.cpu_count()
+
+    cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
+    cpu_usage = os_system(cmd)
+
+
+    cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
+    cpu_usage = os_system(cmd)
+
+
+def os_ram_info():
     """ Get total memory and memory usage in linux
     """
     with open('/proc/meminfo', 'r') as mem:
@@ -1390,304 +1373,26 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     return aux
 
 
-def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
-    """ Find the memory footprint of a Python object
-    Docs::
 
-        deep_getsizeof(df_pd, set())
-        The sys.getsizeof function does a shallow size of only. It counts each
-        object inside a container as pointer only regardless of how big it
-    """
-    from collections import Mapping, Container
-    from sys import getsizeof
-
-    _ = hint
-
-    d = os_sizeof
-    if id(o) in ids:
-        return 0
-
-    r = getsizeof(o)
-    ids.add(id(o))
-
-    if isinstance(o, str) or isinstance(0, str):
-        r = r
-
-    if isinstance(o, Mapping):
-        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
-
-    if isinstance(o, Container):
-        r = r + sum(d(x, ids) for x in o)
-
-    return r * 0.0000001
-
-
-
-
-
-########################################################################################################
-########################################################################################################
-def to_timeunix(datex="2018-01-16"):
-  """function to_timeunix
-  Args:
-      datex:
-  Returns:
-
-  """
-  if isinstance(datex, str)  :
-     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
-
-  if isinstance(datex, datetime)  :
-     return int(time.mktime( datex.timetuple()) * 1000)
-
-
-def to_datetime(x) :
-  """function to_datetime
-  Args:
-      x:
-  Returns:
-
-  """
-  import pandas as pd
-  return pd.to_datetime( str(x) )
-
-
-def to_float(x):
-    """function to_float
+def os_wait_processes(nhours=7):
+    """function os_wait_processes
     Args:
-        x:
+        nhours:
     Returns:
 
     """
-    try :
-        return float(x)
-    except :
-        return float("NaN")
-
-
-def to_int(x):
-    """function to_int
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        return int(x)
-    except :
-        return float("NaN")
-
-
-def is_int(x):
-    """function is_int
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        int(x)
-        return True
-    except :
-        return False
-
-
-def is_float(x):
-    """function is_float
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        float(x)
-        return True
-    except :
-        return False
-
-
-
-
-########################################################################################################
-########################################################################################################
-def np_list_intersection(l1, l2) :
-  """function np_list_intersection
-  Args:
-      l1:
-      l2:
-  Returns:
-
-  """
-  return [x for x in l1 if x in l2]
-
-
-def np_add_remove(set_, to_remove, to_add):
-    """function np_add_remove
-    Args:
-        set_:
-        to_remove:
-        to_add:
-    Returns:
-
-    """
-    # a function that removes list of elements and adds an element from a set
-    result_temp = set_.copy()
-    for element in to_remove:
-        if element in result_temp:
-            result_temp.remove(element)
-    result_temp.extend(to_add)
-    return result_temp
-
-
-class toFileSafe(object):
-   def __init__(self,fpath):
-      """ Thread Safe file writer Class
-      Docs::
-
-        tofile = toFileSafe('mylog.log')
-        tofile.w("msg")
-      """
-      import logging
-      logger = logging.getLogger('logsafe')
-      logger.setLevel(logging.INFO)
-      ch = logging.FileHandler(fpath)
-      ch.setFormatter(logging.Formatter('%(message)s'))
-      logger.addHandler(ch)
-      self.logger = logger
-
-   def write(self, msg):
-        """ toFileSafe:write
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def log(self, msg):
-        """ toFileSafe:log
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def w(self, msg):
-        """ toFileSafe:w
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-
-def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """function date_to_timezone
-    Args:
-        tdate:
-        fmt="%Y%m%d-%H:
-        timezone:
-    Returns:
-
-    """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Convert to US/Pacific time zone
-    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
-    return now_pacific.strftime(fmt)
-
-
+    t0 = time.time()
+    while (time.time() - t0 ) < nhours * 3600 :
+       ll = os_process_list()
+       if len(ll) < 2 : break   ### Process are not running anymore
+       log("sleep 30min", ll)
+       time.sleep(3600* 0.5)
 
 
 
 
 ###################################################################################################
-###### Debug ######################################################################################
-def log_debug_everywhere():
-    """  Debug printer
-    Docs ::
-
-        https://github.com/alexmojaki/snoop
-        import snoop; snoop.install()  ### can be used anywhere
-
-        @snoop
-        def myfun():
-
-        from snoop import pp
-        pp(myvariable)
-
-
-    """
-    txt ="""
-        
-    """
-    import snoop
-    snoop.install()  ### can be used anywhere"
-    print("Decaorator @snoop ")
-
-
-def logfull(*s, nmax=60):
-    """ Display variable name, type when showing,  pip install varname
-
-    """
-    from varname import varname, nameof
-    for x in s :
-        print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
-
-
-def logfull2(*s):
-    """    ### Equivalent of print, but more :  https://github.com/gruns/icecream
-    pip install icrecream
-    ic()  --->  ic| example.py:4 in foo()
-    ic(var)  -->   ic| d['key'][1]: 'one'
-
-    """
-    from icecream import ic
-    return ic(*s)
-
-
-def log_trace(msg="", dump_path="", globs=None):
-    """function log_trace
-    Args:
-        msg:
-        dump_path:
-        globs:
-    Returns:
-
-    """
-    print(msg)
-    import pdb;
-    pdb.set_trace()
-
-
-def profiler_start():
-    """function profiler_start
-    Args:
-    Returns:
-
-    """
-    ### Code profiling
-    from pyinstrument import Profiler
-    global profiler
-    profiler = Profiler()
-    profiler.start()
-
-
-def profiler_stop():
-    """function profiler_stop
-    Args:
-    Returns:
-
-    """
-    global profiler
-    profiler.stop()
-    print(profiler.output_text(unicode=True, color=True))
-
-
-
+###### HELP ######################################################################################
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::
