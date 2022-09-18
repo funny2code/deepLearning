@@ -876,91 +876,6 @@ def os_system_list(ll, logfile=None, sleep_sec=10):
             log(e)
 
 
-
-
-
-#######################################################################################################
-##### OS, config ######################################################################################
-def os_monkeypatch_help():
-    """function os_monkeypatch_help
-    Args:
-    Returns:
-
-    """
-    print( """
-    https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    
-    
-    """)
-
-
-def os_module_uncache(exclude='os.system'):
-    """Remove package modules from cache except excluded ones.
-       On next import they will be reloaded.  Useful for monkey patching
-    Args:
-        exclude (iter<str>): Sequence of module paths.
-        https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    """
-    import sys
-    pkgs = []
-    for mod in exclude:
-        pkg = mod.split('.', 1)[0]
-        pkgs.append(pkg)
-
-    to_uncache = []
-    for mod in sys.modules:
-        if mod in exclude:
-            continue
-
-        if mod in pkgs:
-            to_uncache.append(mod)
-            continue
-
-        for pkg in pkgs:
-            if mod.startswith(pkg + '.'):
-                to_uncache.append(mod)
-                break
-
-    for mod in to_uncache:
-        del sys.modules[mod]
-
-
-def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
-    """function os_import
-    Args:
-        mod_name:
-        globs:
-        verbose:
-    Returns:
-
-    """
-    ### Import in Current Python Session a module   from module import *
-    ### from mod_name import *
-    module = __import__(mod_name, fromlist=['*'])
-    if hasattr(module, '__all__'):
-        all_names = module.__all__
-    else:
-        all_names = [name for name in dir(module) if not name.startswith('_')]
-
-    all_names2 = []
-    no_list    = ['os', 'sys' ]
-    for t in all_names :
-        if t not in no_list :
-          ### Mot yet loaded in memory  , so cannot use Global
-          #x = str( globs[t] )
-          #if '<class' not in x and '<function' not in x and  '<module' not in x :
-          all_names2.append(t)
-    all_names = all_names2
-
-    if verbose :
-      print("Importing: ")
-      for name in all_names :
-         print( f"{name}=None", end=";")
-      print("")
-    globs.update({name: getattr(module, name) for name in all_names})
-
-
-
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
     """
@@ -1096,6 +1011,94 @@ def os_walk(path, pattern="*", dirlevel=50):
 
 
 
+
+#######################################################################################################
+##### OS, config ######################################################################################
+def os_monkeypatch_help():
+    """function os_monkeypatch_help
+    Args:
+    Returns:
+
+    """
+    print( """
+    https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
+    
+    
+    """)
+
+
+def os_module_uncache(exclude='os.system'):
+    """Remove package modules from cache except excluded ones.
+       On next import they will be reloaded.  Useful for monkey patching
+    Args:
+        exclude (iter<str>): Sequence of module paths.
+        https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
+    """
+    import sys
+    pkgs = []
+    for mod in exclude:
+        pkg = mod.split('.', 1)[0]
+        pkgs.append(pkg)
+
+    to_uncache = []
+    for mod in sys.modules:
+        if mod in exclude:
+            continue
+
+        if mod in pkgs:
+            to_uncache.append(mod)
+            continue
+
+        for pkg in pkgs:
+            if mod.startswith(pkg + '.'):
+                to_uncache.append(mod)
+                break
+
+    for mod in to_uncache:
+        del sys.modules[mod]
+
+
+def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
+    """function os_import
+    Args:
+        mod_name:
+        globs:
+        verbose:
+    Returns:
+
+    """
+    ### Import in Current Python Session a module   from module import *
+    ### from mod_name import *
+    module = __import__(mod_name, fromlist=['*'])
+    if hasattr(module, '__all__'):
+        all_names = module.__all__
+    else:
+        all_names = [name for name in dir(module) if not name.startswith('_')]
+
+    all_names2 = []
+    no_list    = ['os', 'sys' ]
+    for t in all_names :
+        if t not in no_list :
+          ### Mot yet loaded in memory  , so cannot use Global
+          #x = str( globs[t] )
+          #if '<class' not in x and '<function' not in x and  '<module' not in x :
+          all_names2.append(t)
+    all_names = all_names2
+
+    if verbose :
+      print("Importing: ")
+      for name in all_names :
+         print( f"{name}=None", end=";")
+      print("")
+    globs.update({name: getattr(module, name) for name in all_names})
+
+
+
+
+
+
+
+###################################################################################################
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
@@ -1164,54 +1167,8 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
     return df
 
 
-def os_get_function_name():
-    """function os_get_function_name
-    Args:
-    Returns:
-
-    """
-    ### Get ane,
-    import sys, socket
-    ss = str(os.getpid()) # + "-" + str( socket.gethostname())
-    ss = ss + "," + str(__name__)
-    try :
-        ss = ss + "," + __class__.__name__
-    except :
-        ss = ss + ","
-    ss = ss + "," + str(  sys._getframe(1).f_code.co_name)
-    return ss
 
 
-def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
-    """ Find the memory footprint of a Python object
-    Docs::
-
-        deep_getsizeof(df_pd, set())
-        The sys.getsizeof function does a shallow size of only. It counts each
-        object inside a container as pointer only regardless of how big it
-    """
-    from collections import Mapping, Container
-    from sys import getsizeof
-
-    _ = hint
-
-    d = os_sizeof
-    if id(o) in ids:
-        return 0
-
-    r = getsizeof(o)
-    ids.add(id(o))
-
-    if isinstance(o, str) or isinstance(0, str):
-        r = r
-
-    if isinstance(o, Mapping):
-        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
-
-    if isinstance(o, Container):
-        r = r + sum(d(x, ids) for x in o)
-
-    return r * 0.0000001
 
 
 
@@ -1283,6 +1240,56 @@ def os_variable_del(varlist, globx):
        del globx[x]
        gc.collect()
     except : pass
+
+
+def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
+    """ Find the memory footprint of a Python object
+    Docs::
+
+        deep_getsizeof(df_pd, set())
+        The sys.getsizeof function does a shallow size of only. It counts each
+        object inside a container as pointer only regardless of how big it
+    """
+    from collections import Mapping, Container
+    from sys import getsizeof
+
+    _ = hint
+
+    d = os_sizeof
+    if id(o) in ids:
+        return 0
+
+    r = getsizeof(o)
+    ids.add(id(o))
+
+    if isinstance(o, str) or isinstance(0, str):
+        r = r
+
+    if isinstance(o, Mapping):
+        r = r + sum(d(k, ids) + d(v, ids) for k, v in o.items())
+
+    if isinstance(o, Container):
+        r = r + sum(d(x, ids) for x in o)
+
+    return r * 0.0000001
+
+
+def os_get_function_name():
+    """function os_get_function_name
+    Args:
+    Returns:
+
+    """
+    ### Get ane,
+    import sys, socket
+    ss = str(os.getpid()) # + "-" + str( socket.gethostname())
+    ss = ss + "," + str(__name__)
+    try :
+        ss = ss + "," + __class__.__name__
+    except :
+        ss = ss + ","
+    ss = ss + "," + str(  sys._getframe(1).f_code.co_name)
+    return ss
 
 
 
