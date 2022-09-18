@@ -29,7 +29,6 @@ def test_all():
     test_globglob()
 
     test0()
-    test1()
     # test2()
     test4()
     test5_os()
@@ -118,35 +117,6 @@ def test0():
     res = os_system( f" ls . ",  doprint=False)
     assert os_platform_os() == sys.platform
 
-
-def test1():
-    """function test1
-    """
-    from datetime import datetime
-
-    int_ = 1
-    float_ = 1.1
-    log(is_int(int_))
-    assert is_int(int_) == True, 'Failed to convert'
-    log(is_float(float_))
-    assert is_float(float_) == True, 'Failed to convert'
-    log(to_float(int_))
-    assert to_float(int_) == 1.0, 'Failed to convert'
-    log(to_int(float_))
-    assert to_int(float_) == 1, 'Failed to convert'
-
-    log(to_timeunix(datex="2022-01-01"))
-    assert to_timeunix(datex="2022-01-01"), 'Failed to convert'
-
-    log(to_datetime(datetime.now()))
-    assert to_datetime(datetime.now()), 'Failed to convert'
-
-    # np_list_intersection
-    l1 = [1, 3, 5, 7 ,9]
-    l2 = [2, 3, 5, 6, 8]
-    log(np_list_intersection(l1,l2))
-    assert np_list_intersection(l1,l2) == [3,5], 'Failed to intersection'
-    log(np_add_remove(l1, [1, 2, 4], [5, 6]))
 
 
 def test_create_testfiles():
@@ -451,28 +421,6 @@ def test8():
 
 ########################################################################################################
 ###### Fundamental functions ###########################################################################
-class dict_to_namespace(object):
-    #### Dict to namespace
-    def __init__(self, d):
-        """ dict_to_namespace:__init__
-
-        """
-        self.__dict__ = d
-
-
-def to_dict(**kw):
-  """function to_dict
-  Args:
-      **kw:
-  Returns:
-
-  """
-  ## return dict version of the params
-  return kw
-
-
-
-
 def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=0, max_size_mb=500000,
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
@@ -596,6 +544,41 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
         # return res
 
 
+
+def os_remove(dirin="folder/**/*.parquet",
+              min_size_mb=0, max_size_mb=1,
+              exclude="", include_only="",
+              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
+              nfiles=99999999,
+              dry=0):
+
+    """  Delete files bigger than some size
+
+    """
+    import os, sys, time, glob, datetime as dt
+
+    dry = True if dry in {True, 1} else False
+
+    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
+
+    print ('Nfiles', len(flist2))
+    jj = 0
+    for fi in flist2 :
+        try :
+            if not dry :
+               os.remove(fi)
+               jj = jj +1
+            else :
+               print(fi)
+        except Exception as e :
+            print(fi, e)
+
+    if dry :  print('dry mode only')
+    else :    print('deleted', jj)
 
 
 
@@ -792,40 +775,6 @@ def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**
 
 
 
-def os_remove(dirin="folder/**/*.parquet",
-              min_size_mb=0, max_size_mb=1,
-              exclude="", include_only="",
-              ndays_past=1000, start_date='1970-01-02', end_date='2050-01-01',
-              nfiles=99999999,
-              dry=0):
-
-    """  Delete files bigger than some size
-
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry in {True, 1} else False
-
-    flist2 = glob_glob(dirin, exclude=exclude, include_only=include_only,
-            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
-            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
-            nfiles=nfiles,)
-
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
 
 
 def os_removedirs(path, verbose=False):
@@ -898,9 +847,6 @@ def os_makedirs(dir_or_file):
         f.close()
     else :
         os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
-
-
-
 
 
 
@@ -1171,21 +1117,6 @@ def os_get_function_name():
     return ss
 
 
-def os_variable_init(ll, globs):
-    """function os_variable_init
-    Args:
-        ll:
-        globs:
-    Returns:
-
-    """
-    for x in ll :
-        try :
-          globs[x]
-        except :
-          globs[x] = None
-
-
 def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
     """function os_import
     Args:
@@ -1219,6 +1150,22 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
          print( f"{name}=None", end=";")
       print("")
     globs.update({name: getattr(module, name) for name in all_names})
+
+
+
+def os_variable_init(ll, globs):
+    """function os_variable_init
+    Args:
+        ll:
+        globs:
+    Returns:
+
+    """
+    for x in ll :
+        try :
+          globs[x]
+        except :
+          globs[x] = None
 
 
 def os_variable_exist(x ,globs, msg="") :
@@ -1257,6 +1204,8 @@ def os_variable_check(ll, globs=None, do_terminate=True):
           log("####### Vars Check,  Require: ", x  , "Terminating")
           if do_terminate:
                  sys.exit(0)
+
+
 
 
 def os_clean_memory( varlist , globx):
@@ -1423,271 +1372,8 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 
 
-
-
-########################################################################################################
-########################################################################################################
-def to_timeunix(datex="2018-01-16"):
-  """function to_timeunix
-  Args:
-      datex:
-  Returns:
-
-  """
-  if isinstance(datex, str)  :
-     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
-
-  if isinstance(datex, datetime)  :
-     return int(time.mktime( datex.timetuple()) * 1000)
-
-
-def to_datetime(x) :
-  """function to_datetime
-  Args:
-      x:
-  Returns:
-
-  """
-  import pandas as pd
-  return pd.to_datetime( str(x) )
-
-
-def to_float(x):
-    """function to_float
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        return float(x)
-    except :
-        return float("NaN")
-
-
-def to_int(x):
-    """function to_int
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        return int(x)
-    except :
-        return float("NaN")
-
-
-def is_int(x):
-    """function is_int
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        int(x)
-        return True
-    except :
-        return False
-
-
-def is_float(x):
-    """function is_float
-    Args:
-        x:
-    Returns:
-
-    """
-    try :
-        float(x)
-        return True
-    except :
-        return False
-
-
-
-
-########################################################################################################
-########################################################################################################
-def np_list_intersection(l1, l2) :
-  """function np_list_intersection
-  Args:
-      l1:
-      l2:
-  Returns:
-
-  """
-  return [x for x in l1 if x in l2]
-
-
-def np_add_remove(set_, to_remove, to_add):
-    """function np_add_remove
-    Args:
-        set_:
-        to_remove:
-        to_add:
-    Returns:
-
-    """
-    # a function that removes list of elements and adds an element from a set
-    result_temp = set_.copy()
-    for element in to_remove:
-        if element in result_temp:
-            result_temp.remove(element)
-    result_temp.extend(to_add)
-    return result_temp
-
-
-class toFileSafe(object):
-   def __init__(self,fpath):
-      """ Thread Safe file writer Class
-      Docs::
-
-        tofile = toFileSafe('mylog.log')
-        tofile.w("msg")
-      """
-      import logging
-      logger = logging.getLogger('logsafe')
-      logger.setLevel(logging.INFO)
-      ch = logging.FileHandler(fpath)
-      ch.setFormatter(logging.Formatter('%(message)s'))
-      logger.addHandler(ch)
-      self.logger = logger
-
-   def write(self, msg):
-        """ toFileSafe:write
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def log(self, msg):
-        """ toFileSafe:log
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-   def w(self, msg):
-        """ toFileSafe:w
-        Args:
-            msg:
-        Returns:
-
-        """
-        self.logger.info( msg)
-
-
-def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """function date_to_timezone
-    Args:
-        tdate:
-        fmt="%Y%m%d-%H:
-        timezone:
-    Returns:
-
-    """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Convert to US/Pacific time zone
-    now_pacific = tdate.astimezone(tzone('Asia/Tokyo'))
-    return now_pacific.strftime(fmt)
-
-
-
-
-
-
 ###################################################################################################
-###### Debug ######################################################################################
-def log_debug_everywhere():
-    """  Debug printer
-    Docs ::
-
-        https://github.com/alexmojaki/snoop
-        import snoop; snoop.install()  ### can be used anywhere
-
-        @snoop
-        def myfun():
-
-        from snoop import pp
-        pp(myvariable)
-
-
-    """
-    txt ="""
-        
-    """
-    import snoop
-    snoop.install()  ### can be used anywhere"
-    print("Decaorator @snoop ")
-
-
-def logfull(*s, nmax=60):
-    """ Display variable name, type when showing,  pip install varname
-
-    """
-    from varname import varname, nameof
-    for x in s :
-        print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
-
-
-def logfull2(*s):
-    """    ### Equivalent of print, but more :  https://github.com/gruns/icecream
-    pip install icrecream
-    ic()  --->  ic| example.py:4 in foo()
-    ic(var)  -->   ic| d['key'][1]: 'one'
-
-    """
-    from icecream import ic
-    return ic(*s)
-
-
-def log_trace(msg="", dump_path="", globs=None):
-    """function log_trace
-    Args:
-        msg:
-        dump_path:
-        globs:
-    Returns:
-
-    """
-    print(msg)
-    import pdb;
-    pdb.set_trace()
-
-
-def profiler_start():
-    """function profiler_start
-    Args:
-    Returns:
-
-    """
-    ### Code profiling
-    from pyinstrument import Profiler
-    global profiler
-    profiler = Profiler()
-    profiler.start()
-
-
-def profiler_stop():
-    """function profiler_stop
-    Args:
-    Returns:
-
-    """
-    global profiler
-    profiler.stop()
-    print(profiler.output_text(unicode=True, color=True))
-
-
-
+###### HELP ######################################################################################
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::

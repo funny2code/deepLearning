@@ -70,14 +70,6 @@ def logic(*s):
     return ic(*s)
 
 
-def log_trace(msg="", dump_path="", globs=None):
-    """function log_trace.
-    Doc::
-            
-    """
-    print(msg)
-    import pdb;
-    pdb.set_trace()
 
 
 def profiler_start():
@@ -111,6 +103,64 @@ def profiler_stop():
     profiler.stop()
     print(profiler.output_text(unicode=True, color=True))
 
+
+
+
+def log_debug_everywhere():
+    """  Debug printer
+    Docs ::
+
+        https://github.com/alexmojaki/snoop
+        import snoop; snoop.install()  ### can be used anywhere
+
+        @snoop
+        def myfun():
+
+        from snoop import pp
+        pp(myvariable)
+
+
+    """
+    txt ="""
+        
+    """
+    import snoop
+    snoop.install()  ### can be used anywhere"
+    print("Decaorator @snoop ")
+
+
+def logfull(*s, nmax=60):
+    """ Display variable name, type when showing,  pip install varname
+
+    """
+    from varname import varname, nameof
+    for x in s :
+        print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
+
+
+def logfull2(*s):
+    """    ### Equivalent of print, but more :  https://github.com/gruns/icecream
+    pip install icrecream
+    ic()  --->  ic| example.py:4 in foo()
+    ic(var)  -->   ic| d['key'][1]: 'one'
+
+    """
+    from icecream import ic
+    return ic(*s)
+
+
+def log_trace(msg="", dump_path="", globs=None):
+    """function log_trace
+    Args:
+        msg:
+        dump_path:
+        globs:
+    Returns:
+
+    """
+    print(msg)
+    import pdb;
+    pdb.set_trace()
 
 
 

@@ -306,9 +306,66 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 ###################################################################################################
 def to_file(txt, fpath, mode='a'):
+    """  Write txt on Disk
+    Docs::
+
+          to_file(
+
+
+    """
     os_makedirs(fpath) ### create folder
-    with open(fpath, mode=mode) as fp:
-        fp.write(txt)
+    try :
+        with open(fpath, mode=mode) as fp:
+            fp.write(txt)
+    except Exception as e:
+        time.sleep(5)
+        with open(fpath, mode=mode) as fp:
+            fp.write(txt)
+
+
+class toFileSafe(object):
+   def __init__(self,fpath):
+      """ Thread Safe file writer Class
+      Docs::
+
+        tofile = toFileSafe('mylog.log')
+        tofile.w("msg")
+      """
+      import logging
+      logger = logging.getLogger('logsafe')
+      logger.setLevel(logging.INFO)
+      ch = logging.FileHandler(fpath)
+      ch.setFormatter(logging.Formatter('%(message)s'))
+      logger.addHandler(ch)
+      self.logger = logger
+
+   def write(self, *s):
+        """ toFileSafe:write
+        Args:
+            msg:
+        Returns:
+
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+   def log(self, *s):
+        """ toFileSafe:log
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+   def w(self, *s):
+        """ toFileSafe:w
+        Args:
+            msg:
+        Returns:
+
+        """
+        msg = " ".join([ str(si) for si in s ])
+        self.logger.info( msg)
+
+
 
 
 def find_fuzzy(word:str, wlist:list, threshold=0.0):
