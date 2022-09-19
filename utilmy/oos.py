@@ -248,7 +248,7 @@ def test6_os():
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
     c = {1, 3, "sdsfsdf"}
-    log(os_sizeof(c, set()))
+    log(os_ram_sizeof(c, set()))
 
 
     log("#######   os_path_size() ..")
@@ -333,7 +333,7 @@ def test6_os():
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
-    log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
+    log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
 
@@ -1292,7 +1292,7 @@ def os_variable_del(varlist, globx):
     except : pass
 
 
-def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
+def os_ram_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
     """ Find the memory footprint of a Python object
     Docs::
 
@@ -1305,7 +1305,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
     _ = hint
 
-    d = os_sizeof
+    d = os_ram_sizeof
     if id(o) in ids:
         return 0
 
