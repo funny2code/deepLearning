@@ -173,7 +173,7 @@ def test2():
     test_create_testfiles()
 
 
-    size_ = os_path_size()
+    size_ = os_path_size("./")
     log("total size", size_)
 
     result_ = os_path_split("test/tmp/test.txt")
@@ -183,7 +183,9 @@ def test2():
 
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
-    res = z_os_search_fast(dtmp + "/os_file_test.txt", ["Dummy"],mode="regex")
+
+
+    res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
 
     os_file_replacestring(findstr="text",replacestr="text_replace",
                           some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
