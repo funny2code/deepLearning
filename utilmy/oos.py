@@ -28,7 +28,7 @@ def test_all():
     test_filecache()
     test_globglob()
 
-    test0()
+    test1()
     # test2()
     test4()
     test5_os()
@@ -72,20 +72,43 @@ def test_globglob():
 
 
 def test_filecache():
-    import utilmy
-    drepo, dtmp = utilmy.direpo() , utilmy.os_get_dirtmp()
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-    fc = fileCache(dir_cache='test')
+    fc = fileCache(dir_cache= dirtmp + '/test')
     data = [1,2 ,3, 4]
     fc.set( 'test', data )
     log(fc.get('test'))
     assert fc.get('test') == data, 'FAILED, file cache'
 
 
+def test_os_module_uncache():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-def test0():
-    """function test0
-    """
+    import sys
+    old_modules = sys.modules.copy()
+    exclude_mods = {"json.decoder"}
+    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
+    os_module_uncache(exclude_mods)
+    new_modules = sys.modules.copy()
+    removed = []
+    kept = []
+    for module_name in old_modules:
+        module_prefix = module_name.split('.', 1)[0]
+        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
+            assert module_name not in new_modules
+            removed.append(module_name)
+        else:
+            assert module_name in new_modules
+            if module_name in exclude_mods:
+                kept.append(module_name)
+    log("Successfully remove module cache: ", ", ".join(removed))
+    log("Successfully kept: ", ", ".join(kept))
+
+
+
+def test1():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
@@ -150,7 +173,7 @@ def test2():
     test_create_testfiles()
 
 
-    size_ = os_path_size()
+    size_ = os_path_size("./")
     log("total size", size_)
 
     result_ = os_path_split("test/tmp/test.txt")
@@ -160,7 +183,9 @@ def test2():
 
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
-    res = z_os_search_fast(dtmp + "/os_file_test.txt", ["Dummy"],mode="regex")
+
+
+    res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
 
     os_file_replacestring(findstr="text",replacestr="text_replace",
                           some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
@@ -225,7 +250,7 @@ def test6_os():
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
     c = {1, 3, "sdsfsdf"}
-    log(os_sizeof(c, set()))
+    log(os_ram_sizeof(c, set()))
 
 
     log("#######   os_path_size() ..")
@@ -310,7 +335,7 @@ def test6_os():
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
-    log(os_sizeof(["3434343", 343242, {3434, 343}], set()))
+    log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
 
@@ -328,33 +353,6 @@ def test7_os():
 
     flist = glob_glob(dirtmp)
     assert len(flist) < 2, flist
-
-
-
-def test_os_module_uncache():
-    import  utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-
-    import sys
-    old_modules = sys.modules.copy()
-    exclude_mods = {"json.decoder"}
-    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
-    os_module_uncache(exclude_mods)
-    new_modules = sys.modules.copy()
-    removed = []
-    kept = []
-    for module_name in old_modules:
-        module_prefix = module_name.split('.', 1)[0]
-        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
-            assert module_name not in new_modules
-            removed.append(module_name)
-        else:
-            assert module_name in new_modules
-            if module_name in exclude_mods:
-                kept.append(module_name)
-    log("Successfully remove module cache: ", ", ".join(removed))
-    log("Successfully kept: ", ", ".join(kept))
-
 
 
 def test8():
@@ -416,6 +414,38 @@ def test8():
               dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files) == len(cur_files)
+
+
+
+def test8_os():
+    from pytz import timezone
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    timezone_name = 'Asia/Tokyo'
+    datetime_format = '%Y%m%d-%H:%M'
+    file_dir = dirtmp + "/test.txt"
+
+
+    log("\n#######", os_file_date_modified)
+    uu.to_file("first line", file_dir)
+    created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
+    last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
+
+    log(created_time, last_modified_created)
+    assert created_time == last_modified_created
+
+
+
+    from pytz import timezone
+    import requests, json
+
+    log("\n#######", os_get_ip)
+    public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+    log("Public IP", public_ip)
+    assert public_ip == os_get_ip()
+
 
 
 
@@ -984,27 +1014,25 @@ def os_file_check(fpath:str):
    return flag
 
 
+# TODO
+def os_file_info(dirin, returnval='list', date_format='unix'):
+    """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
 
-def os_file_info(dirin, fmt_output="%Y%m%d-%H:%M", timezone='Asia/Tokyo', returnval='list'):
-    """ Return file info
+
     """
-    from utilmy import date_now
-    import datetime
-    from pytz import timezone as tzone
-
     flist = glob_glob(dirin)
     flist2 =[]
+    mbyte  =1 /( 1024*1014.0)
     for fi in flist :
         try :
-            mtime  = os.path.getmtime(fi)
+            st = os.stat(fi)
 
-            mtime2 = date_now(mtime, fmt=fmt_output, timezone=timezone)
-            # mtime2 = datetime.datetime.utcfromtimestamp(mtime)
-            # mtime2 = mtime2.astimezone(tzone(timezone))
-            # flist2.append( [ fi,  'mdate'  ]  )
+            ####  Size in mb,  Unix time (Epoch time, Posix time)
+            res =[ fi, st.st_size * mbyte  , st.st_mtime ]
+            flist2.append(res )
 
         except Exception as e :
-            log(e)
+            log(fi, e)
 
     return flist2
 
@@ -1040,16 +1068,16 @@ def os_walk(path, pattern="*", dirlevel=50):
 
 #######################################################################################################
 ##### OS, config ######################################################################################
+# TODO
 def os_monkeypatch_help():
     """function os_monkeypatch_help
     Args:
     Returns:
 
-    """
-    print( """
     https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    
-    
+
+    """
+    print( """    
     """)
 
 
@@ -1125,6 +1153,22 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 
 ###################################################################################################
+def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
+    """  search inside the files
+
+    """
+    import pandas as pd
+    if srch_pattern is None:
+        srch_pattern = ["from ", "import "]
+
+    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    ll = []
+    for f in list_all["fullpath"]:
+        ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
+    df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
+    return df
+
+
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
@@ -1174,24 +1218,6 @@ def z_os_search_fast(fname, texts=None, mode="regex/str"):
         print("invalid regular expression")
 
     return res
-
-
-
-def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
-    """  search inside the files
-
-    """
-    import pandas as pd
-    if srch_pattern is None:
-        srch_pattern = ["from ", "import "]
-
-    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
-    ll = []
-    for f in list_all["fullpath"]:
-        ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
-    df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
-    return df
-
 
 
 
@@ -1268,7 +1294,7 @@ def os_variable_del(varlist, globx):
     except : pass
 
 
-def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
+def os_ram_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
     """ Find the memory footprint of a Python object
     Docs::
 
@@ -1281,7 +1307,7 @@ def os_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
     _ = hint
 
-    d = os_sizeof
+    d = os_ram_sizeof
     if id(o) in ids:
         return 0
 
@@ -1323,6 +1349,16 @@ def os_get_function_name():
 
 
 ###################################################################################################
+def os_get_uniqueid(format="int"):
+    """  Unique INT64 ID:  OSname +ip + process ID + timeStamp
+         for distributed compute
+
+
+
+    """
+    pass
+
+
 def os_get_os():
     """function os_platform_os
     Args:
@@ -1332,7 +1368,7 @@ def os_get_os():
     #### get linux or windows
     return sys.platform
 
-
+# TODO
 def os_get_ip():
     """function os_platform_ip
     Args:
@@ -1343,6 +1379,7 @@ def os_get_ip():
     pass
 
 
+# TODO
 def os_cpu_info():
     """ get info on CPU  : nb of cpu, usage
     Docs:
@@ -1357,6 +1394,9 @@ def os_cpu_info():
 
     cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
     cpu_usage = os_system(cmd)
+
+    ddict= {'ncpu': ncpu, 'cpu_usage': cpu_usage}
+    return ddict
 
 
 def os_ram_info():
@@ -1419,6 +1459,7 @@ def os_wait_processes(nhours=7):
 
 ###################################################################################################
 ###### HELP ######################################################################################
+# TODO
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::

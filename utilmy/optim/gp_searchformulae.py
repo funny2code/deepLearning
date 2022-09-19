@@ -1,5 +1,6 @@
 """ Search  mathematical Formulae using Genetic Algorithm , Genetic Programming
 
+
 Docs::
 
     Install  DCGP
@@ -91,7 +92,7 @@ def test_all():
     test1()
     test2()
     test3()
-    test4()
+    test4_newton()
     test5()
     test6()
     test7()
@@ -241,8 +242,13 @@ def test3():
     #### Run Search
     res = search_formulae_dcgpy_Xy_regression_v1(myproblem, pars_dict=p, verbose=1)
 
-def test4():
+def test4_newton(x=5):
     """Test search_formulae_dcgpy_newton with 3 variables
+    Docs::
+
+        cd  myuutil/utilmy/optim
+        python  gp_searchformulae.py  test4  --x 10     ### pip install fire 
+
 
 
     """
@@ -274,6 +280,7 @@ def test4():
 
     #### Run Search
     res = search_formulae_dcgpy_newton(myproblem, pars_dict=p, verbose=1)
+
 
 def test5():
     """Test search_formulae_dcgpy_v1 with myProblem_ranking
@@ -659,6 +666,8 @@ class myProblem6:
         x0 = gdual(x0)
         x1 = gdual(x1)
         x2 = gdual(x2)
+
+        ### target function
         yt =  3*x0*x1 - np.pi*x1 + np.pi**2 *x2
 
         self.x  = [x0,x1,x2]
@@ -677,6 +686,10 @@ class myProblem6:
 
 
     def get_cost_symbolic(self,dCGP):
+        """  should pass the symbolic function DCGP 
+            and retur the cost.
+
+        """
         #y    = dCGP([self.x])[0]
         y    = dCGP([self.x[0],self.x[1],self.x[2]])[0]
         cost = (y-self.yt)**2
@@ -735,6 +748,46 @@ class myProblem_ranking:
     def __init__(self,n_sample = 100,kk = 1.0,nsize = 100,ncorrect1 = 50,ncorrect2 = 50,adjust=1.0):
         """  Define the problem and cost calculation using formulae_str
         Docs::
+
+            Problem
+
+            2 list of items,  out of  100 items.
+
+                 A = [ 'a1', 'a10',   'a7',  'a100']    paritally orderd  Rank 0 :  A[0] = 'a1'   ### measure, signal
+
+                 B = [ 'a7', 'a17',   'a29',  'a67']    paritally ordered  Rank 2   A[2] = 'a29'  ## measure
+
+
+                 #### Dependance.
+                 ScoreFormuale  = F( % of correct in A, % of correct in B,   Overlap between A and B,  ...)
+
+
+
+            Goal is to merge them into a single list    and BEST WAY. --> need to use a score
+            Cmerge = [ 'a1', 'a7',  ....  'a10',        ]
+
+
+            ### TO DO, use a score function  (heuristic manually)
+                score(item_k)  =  1/( 1+ rank_listA(item_k) )   + 1/(1 + rank_listB(item_k)   )  
+
+                score('a7')  =  1/( 1+ rank_listA('a7') )   + 1/(1 + rank_listB('a7')   )  
+                             =  1/(1 + 2)                         + 1/(1 + 0)
+
+                score('a10')  =  1/( 1+ rank_listA('a10') )   + 1/(1 + rank_listB('a10')   )  
+                             =  1/(1 + 1)                         + 1/(1 +  lenB)  
+
+
+           #### Find Formulae , what the below doing.
+              TrueList = [  ]
+              correlationSPEARMN(TrueList, NewSample_mergeList)  --->  1.0   Better                  
+
+            Conditions
+                 formulae is SYmeetric   rankA, rankB    CANNOT 1/rank1 - 1/rank2  --> not symentric
+                 Derivates negative in   Dformuale/drank < 0.0  
+
+                 test8()
+
+
 
             n_sample        : Number of Samples list to be generated, default = 5
             kk              : Change the fake generated list rank , default = 1.0
@@ -876,11 +929,13 @@ class myProblem_ranking:
            difflist.append(abs(s1-s2))
 
 
-        if np.sum(difflist) > 0.1 :
+        if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
              scores_new = 0.99 + np.zeros(len(rank1))
              return scores_new
+
         """
 
+        ### numpy vector :  take inverse of rank As PROXT.
         x0 = 1/(self.kk + rank1)
         x1 = 1/(self.kk + rank2*self.adjust)
         scores_new =  eval(fornulae_str)
@@ -1120,6 +1175,10 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
         for kstep in range(max_step):
             for i in range(offsprings):
                 check = 0
+
+
+                ##### Check is always=3,  Check documentation in DCGPY to remove it, a bit usless
+                ##### 
                 while(check < 1e-3):
                     dCGP.set(best_chromosome)
                     dCGP.mutate_active(i+1) #  we mutate a number of increasingly higher active genes
@@ -1137,7 +1196,8 @@ def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
             if best_fitness < 1e-3:
                 break
 
-        dCGP.set(best_chromosome)
+        #### Already done in the loop, can be remove MAYBE. check from DCPGY  
+        dCGP.set(best_chromosome)        
         return kstep, dCGP, best_fitness,best_weights,best_chromosome
 
 

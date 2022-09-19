@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Main entry
 
-
+dsfdsfsdfsdf
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, random
@@ -547,16 +547,28 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    -->  "2020-05-19"
         date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')    -->  20211001
         date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
-        date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->  1634324632848
+        date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->
+
+
+        date_now(1634324632848, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
+
     """
     from pytz import timezone as tzone
     import datetime, time
 
+
+    sdt = str(datenow)
+
     if isinstance(datenow, datetime.datetime):
         now_utc = datenow
 
-    elif len(str(datenow)) >7 :  ## Not None
-        now_utc = datetime.datetime.strptime(str(datenow), fmt_input)
+    elif isinstance(datenow, int)  and sdt[:2] == '16':  ### Unix time stamp
+        now_utc = datetime.datetime.utcfromtimestamp(datenow)
+
+    elif  len(sdt) >7 :  ## Not None
+        now_utc = datetime.datetime.strptime(sdt, fmt_input)
+
+
     else:
         now_utc = datetime.datetime.now(tzone('UTC'))  # Current time in UTC
 
