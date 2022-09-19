@@ -28,17 +28,68 @@ def test_all():
         
     """
     log("Testing dates.py ...")
+
+    df = pd.DataFrame(columns=[ 'Gender', 'Birthdate'])
+    df['Gender'] = random_genders(10)
+    df['Birthdate'] = random_dates(start=pd.to_datetime('2000-01-01'), end=pd.to_datetime('2022-01-01'), size=10)
+    
+    print(df)
+    assert not df.empty, 'FAILED, generate df data'
+
+
+    df2 = pd_date_split(df, coldate='Birthdate', sep='-')
+    print(df2)
+    assert not df2.empty, 'FAILED, pd_date_split'
+
+    import datetime
+    res =  date_to_timezone(datetime.datetime.now())
+    print(res)
+    assert res, 'FAILED, date_to_timezone'
+
+
+    res = date_now()
+    print(res)
+    assert res, 'FAILED, date_now'
+
+
+    res = date_is_holiday([pd.to_datetime('2000-01-01')])
+    print(res)
+    assert res, 'FAILED, date_is_holiday'
+
+    res = date_weekmonth2(datetime.datetime.now())
+    print(res)
+    assert res, 'FAILED, date_weekmonth2'
+
+    # date_weekyear2
+    res = date_weekyear2(datetime.datetime.now())
+    print(res)
+    assert res, 'FAILED, date_weekyear2'
+
+    # date_weekday_excel
+    res = date_weekday_excel("20220223")
+    print(res)
+    assert res, 'FAILED, date_weekday_excel'
+
+    # date_weekyear_excel
+    res = date_weekyear_excel("20220223")
+    print(res)
+    assert res, 'FAILED, date_weekyear_excel'
+
+
     date_ = date_generate(start='2021-01-01', ndays=100)
+    print(date_)
+    assert date_, 'FAILED, date_generate'
+
     date_weekyear_excel('20210317')
     date_weekday_excel('20210317')
+
+
     #TODO:
     #date_is_holiday([ pd.to_datetime("2015/1/1") ] * 10)
     #date_now(fmt="%Y-%m-%d %H:%M:%S %Z%z", add_days=0, timezone='Asia/Tokyo')
-    df = pd.DataFrame(columns=[ 'Gender', 'Birthdate'])
-    df['Gender'] = random_genders(10)
-    df['Birthdate'] = random_dates(start=pd.to_datetime('1940-01-01'), end=pd.to_datetime('2008-01-01'), size=10)
     # TODO:
     #pd_date_split(df,coldate="Birthdate")
+
 
 def random_dates(start, end, size):
     """function random_dates
@@ -53,7 +104,8 @@ def random_dates(start, end, size):
     start_u = start.value // divide_by
     end_u = end.value // divide_by
     return pd.to_datetime(np.random.randint(start_u, end_u, size), unit="D")
-    
+
+
 def random_genders(size, p=None):
     """function random_genders
     Args:
@@ -178,53 +230,53 @@ def date_weekmonth(date_value):
 
 
 def date_weekyear2(dt) :
- """function date_weekyear2
- Args:
-     dt:   
- Returns:
-     
- """
- return ((dt - datetime.datetime(dt.year,1,1)).days // 7) + 1
+    """function date_weekyear2
+    Args:
+        dt:   
+    Returns:
+        
+    """
+    return ((dt - datetime.datetime(dt.year,1,1)).days // 7) + 1
 
 
 def date_weekday_excel(x) :
- """function date_weekday_excel
- Args:
-     x:   
- Returns:
-     
- """
- import datetime
- date = datetime.datetime.strptime(x,"%Y%m%d")
- wday = date.weekday()
- if wday != 7 : return wday+1
- else :    return 1
+    """function date_weekday_excel
+    Args:
+        x:   
+    Returns:
+        
+    """
+    import datetime
+    date = datetime.datetime.strptime(x,"%Y%m%d")
+    wday = date.weekday()
+    if wday != 7 : return wday+1
+    else :    return 1
 
 
 def date_weekyear_excel(x) :
- """function date_weekyear_excel
- Args:
-     x:   
- Returns:
-     
- """
- import datetime
- date = datetime.datetime.strptime(x,"%Y%m%d")
- return date.isocalendar()[1]
+    """function date_weekyear_excel
+    Args:
+        x:   
+    Returns:
+        
+    """
+    import datetime
+    date = datetime.datetime.strptime(x,"%Y%m%d")
+    return date.isocalendar()[1]
 
 
 def date_generate(start='2018-01-01', ndays=100) :
- """function date_generate
- Args:
-     start:   
-     ndays:   
- Returns:
-     
- """
- from dateutil.relativedelta import relativedelta
- start0 = datetime.datetime.strptime(start, "%Y-%m-%d")
- date_list = [start0 + relativedelta(days=x) for x in range(0, ndays)]
- return date_list
+    """function date_generate
+    Args:
+        start:   
+        ndays:   
+    Returns:
+        
+    """
+    from dateutil.relativedelta import relativedelta
+    start0 = datetime.datetime.strptime(start, "%Y-%m-%d")
+    date_list = [start0 + relativedelta(days=x) for x in range(0, ndays)]
+    return date_list
 
 
 ###################################################################################################
