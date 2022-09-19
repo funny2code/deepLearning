@@ -961,8 +961,11 @@ def os_path_split(fpath:str=""):
 
 
 def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel=1):
-    """ #fil_replacestring_files("logo.png", "logonew.png", r"D:/__Alpaca__details/aiportfolio",
-        pattern="*.html", dirlevel=5  )
+    """  replace string into sub-files
+    Docs::
+
+         os_file_replacestring_files("logo.png", "logonew.png", r"D:/__Alpaca__details/aiportfolio",
+                                 pattern="*.html", dirlevel=5  )
     """
     def os_file_replacestring1(find_str, rep_str, file_path):
         """replaces all find_str by rep_str in file file_path"""
@@ -1039,8 +1042,13 @@ def os_file_info(dirin, returnval='list', date_format='unix'):
 
 
 def os_walk(path, pattern="*", dirlevel=50):
-    """ dirlevel=0 : root directory
+    """  Get files from  sub-folder, same than glob_glob
+    Doc ::
+
+        dirlevel=0 : root directory
         dirlevel=1 : 1 path below
+
+        return dict of  ['file'  , 'dir']
 
     """
     import fnmatch, os, numpy as np
