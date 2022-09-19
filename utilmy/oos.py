@@ -1014,26 +1014,24 @@ def os_file_check(fpath:str):
 
 
 # TODO
-def os_file_info(dirin, fmt_output="%Y%m%d-%H:%M", timezone='Asia/Tokyo', returnval='list'):
-    """ Return file info
-    """
-    from utilmy import date_now
-    import datetime
-    from pytz import timezone as tzone
+def os_file_info(dirin, returnval='list', date_format='unix'):
+    """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
 
+
+    """
     flist = glob_glob(dirin)
     flist2 =[]
+    mbyte  =1 /( 1024*1014.0)
     for fi in flist :
         try :
-            mtime  = os.path.getmtime(fi)
+            st = os.stat(fi)
 
-            mtime2 = date_now(mtime, fmt=fmt_output, timezone=timezone)
-            # mtime2 = datetime.datetime.utcfromtimestamp(mtime)
-            # mtime2 = mtime2.astimezone(tzone(timezone))
-            # flist2.append( [ fi,  'mdate'  ]  )
+            ####  Size in mb,  Unix time (Epoch time, Posix time)
+            res =[ fi, st.st_size * mbyte  , st.st_mtime ]
+            flist2.append(res )
 
         except Exception as e :
-            log(e)
+            log(fi, e)
 
     return flist2
 
@@ -1075,11 +1073,10 @@ def os_monkeypatch_help():
     Args:
     Returns:
 
-    """
-    print( """
     https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-    
-    
+
+    """
+    print( """    
     """)
 
 
@@ -1155,6 +1152,22 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 
 ###################################################################################################
+def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
+    """  search inside the files
+
+    """
+    import pandas as pd
+    if srch_pattern is None:
+        srch_pattern = ["from ", "import "]
+
+    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    ll = []
+    for f in list_all["fullpath"]:
+        ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
+    df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
+    return df
+
+
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
     Args:
@@ -1204,24 +1217,6 @@ def z_os_search_fast(fname, texts=None, mode="regex/str"):
         print("invalid regular expression")
 
     return res
-
-
-
-def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
-    """  search inside the files
-
-    """
-    import pandas as pd
-    if srch_pattern is None:
-        srch_pattern = ["from ", "import "]
-
-    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
-    ll = []
-    for f in list_all["fullpath"]:
-        ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
-    df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
-    return df
-
 
 
 
@@ -1353,6 +1348,16 @@ def os_get_function_name():
 
 
 ###################################################################################################
+def os_get_uniqueid(format="int"):
+    """  Unique INT64 ID:  OSname +ip + process ID + timeStamp
+         for distributed compute
+
+
+
+    """
+    pass
+
+
 def os_get_os():
     """function os_platform_os
     Args:
@@ -1373,6 +1378,7 @@ def os_get_ip():
     pass
 
 
+# TODO
 def os_cpu_info():
     """ get info on CPU  : nb of cpu, usage
     Docs:
