@@ -463,6 +463,17 @@ def test8_os():
     assert test_file_size == file_stats[0][1]
     assert test_file_modification_time == file_stats[0][2]
 
+    import inspect
+
+    log("\n#######", os_file_info)
+    _, file__name__, _, function_name = os_get_function_name().split(',')
+    
+    log("File __name__ value:", __name__)
+    log("Function name:", inspect.stack()[0][3])
+    assert file__name__ == __name__
+    assert function_name == inspect.stack()[0][3]
+
+
 
 
 ########################################################################################################
