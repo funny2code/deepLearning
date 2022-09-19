@@ -1,7 +1,59 @@
 # -*- coding: utf-8 -*-
-"""# 
+"""  Utilities related to OS : file in/out, System Infod, Memmory/Variables
 Doc::
 
+    utilmy/oos.py
+    -------------------------functions----------------------
+    aaa_bash_help()
+    glob_glob(dirin = "", file_list = [], exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, npool = 1)
+    help()
+    os_copy(dirfrom = "folder/**/*.parquet", dirto = "", mode = 'file', exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, dry = 0)
+    os_copy_safe(dirin:str = None, dirout:str = None, nlevel = 5, nfile = 5000, logdir = "./", pattern = "*", exclude = "", force = False, sleep = 0.5, cmd_fallback = "", verbose = Trueimport shutil, time, os, globflist = [] ; dirinj = dirinnlevel) =  [] ; dirinj = dirinnlevel):)
+    os_cpu_info()
+    os_file_check(fpath:str)
+    os_file_date_modified(dirin, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
+    os_file_info(dirin, returnval = 'list', date_format = 'unix')
+    os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel = 1)
+
+
+    os_get_function_name()
+    os_get_ip()
+    os_get_os()
+    os_get_uniqueid(format = "int")
+    os_getcwd()
+    os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
+    os_makedirs(dir_or_file)
+    os_merge_safe(dirin_list = None, dirout = None, nlevel = 5, nfile = 5000, nrows = 10**8, cmd_fallback  =  "umount /mydrive/  && mount /mydrive/  ", sleep = 0.3)
+    os_monkeypatch_help()
+    os_path_size(path  =  '.')
+    os_path_split(fpath:str = "")
+
+
+    os_process_list()
+    os_ram_info()
+    os_ram_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
+    os_remove(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", ndays_past = 1000, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
+    os_removedirs(path, verbose = False)
+    os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
+    os_sleep_cpu(cpu_min = 30, sleep = 10, interval = 5, msg =  "", verbose = True)
+    os_system(cmd, doprint = False)
+    os_system_list(ll, logfile = None, sleep_sec = 10)
+    os_variable_check(ll, globs = None, do_terminate = True)
+    os_variable_del(varlist, globx)
+    os_variable_exist(x, globs, msg = "")
+    os_variable_init(ll, globs)
+    os_wait_processes(nhours = 7)
+    os_walk(path, pattern = "*", dirlevel = 50)
+
+    z_os_search_fast(fname, texts = None, mode = "regex/str")
+    zz_os_remove_file_past(dirin = "folder/**/*.parquet", ndays_past = 20, nfiles = 1000000, exclude = "", dry = 1)
+
+    -------------------------methods----------------------
+    fileCache.__init__(self, dir_cache = None, ttl = None, size_limit = 10000000, verbose = 1)
+    fileCache.get(self, path)
+    fileCache.set(self, path:str, flist:list, ttl = None)
+
+    -------------------------------------------------------
     https://github.com/uqfoundation/pox/tree/master/pox
 
 
