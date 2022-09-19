@@ -28,7 +28,7 @@ def test_all():
     test_filecache()
     test_globglob()
 
-    test0()
+    test1()
     # test2()
     test4()
     test5_os()
@@ -82,8 +82,33 @@ def test_filecache():
     assert fc.get('test') == data, 'FAILED, file cache'
 
 
+def test_os_module_uncache():
+    import  utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-def test0():
+    import sys
+    old_modules = sys.modules.copy()
+    exclude_mods = {"json.decoder"}
+    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
+    os_module_uncache(exclude_mods)
+    new_modules = sys.modules.copy()
+    removed = []
+    kept = []
+    for module_name in old_modules:
+        module_prefix = module_name.split('.', 1)[0]
+        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
+            assert module_name not in new_modules
+            removed.append(module_name)
+        else:
+            assert module_name in new_modules
+            if module_name in exclude_mods:
+                kept.append(module_name)
+    log("Successfully remove module cache: ", ", ".join(removed))
+    log("Successfully kept: ", ", ".join(kept))
+
+
+
+def test1():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
@@ -328,33 +353,6 @@ def test7_os():
     assert len(flist) < 2, flist
 
 
-
-def test_os_module_uncache():
-    import  utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-
-    import sys
-    old_modules = sys.modules.copy()
-    exclude_mods = {"json.decoder"}
-    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
-    os_module_uncache(exclude_mods)
-    new_modules = sys.modules.copy()
-    removed = []
-    kept = []
-    for module_name in old_modules:
-        module_prefix = module_name.split('.', 1)[0]
-        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
-            assert module_name not in new_modules
-            removed.append(module_name)
-        else:
-            assert module_name in new_modules
-            if module_name in exclude_mods:
-                kept.append(module_name)
-    log("Successfully remove module cache: ", ", ".join(removed))
-    log("Successfully kept: ", ", ".join(kept))
-
-
-
 def test8():
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -445,6 +443,7 @@ def test8_os():
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
     assert public_ip == os_get_ip()
+
 
 
 
