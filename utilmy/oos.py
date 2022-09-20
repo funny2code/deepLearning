@@ -1429,22 +1429,37 @@ def os_get_uniqueid(format="int"):
 
 def os_get_os():
     """function os_platform_os
-    Args:
-    Returns:
-
     """
-    #### get linux or windows
-    return sys.platform
+    import platform
+    return platform.system()
 
-# TODO
+
+
 def os_get_ip():
-    """function os_platform_ip
-    Args:
-    Returns:
+    """Return primary ip adress
+    Docs::
+
+        Does NOT need routable net access or any connection at all.
+        Works even if all interfaces are unplugged from the network.
+        Does NOT need or even try to get anywhere else.
+        Works with NAT, public, private, external, and internal IP's
+        Pure Python 2 (or 3) with no external dependencies.
+        Works on Linux, Windows, and OSX.
 
     """
-    ### IP
-    pass
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
 
 
 # TODO
@@ -1456,8 +1471,8 @@ def os_cpu_info():
     """
     ncpu= os.cpu_count()
 
-    cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
-    cpu_usage = os_system(cmd)
+    # cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
+    # cpu_usage = os_system(cmd)
 
 
     cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
@@ -1526,66 +1541,7 @@ def os_wait_processes(nhours=7):
 
 
 ###################################################################################################
-###### HELP ######################################################################################
-# TODO
-
-
-
-
-
-
-
-
-###################################################################################################
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
-def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
-    """  Delete files older than ndays.
-
-
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry ==True or dry==1 else False
-
-    files = glob.glob(dirin, recursive=True)
-    files = sorted(files)
-    for exi in exclude.split(","):
-        if len(exi) > 0:
-           files = [  fi for fi in files if exi not in fi ]
-
-    now = time.time()
-    cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          t = os.stat( fi)
-          c = t.st_ctime
-          # delete file if older than 10 days
-          if c < cutoff:
-            flist2.append(fi)
-        except : pass
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
-
-
 
