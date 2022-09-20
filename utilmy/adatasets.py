@@ -53,6 +53,22 @@ def test1():
 
 
 ####################################################################################################
+def pd_generate_random_genders(size, p=None):
+    """function random_genders
+    Args:
+        size:   
+        p:   
+    Returns:
+        
+    """
+    if not p:
+        p = (0.49, 0.49, 0.01, 0.01)
+    gender = ("M", "F", "O", "")
+    return np.random.choice(gender, size=size, p=p)
+
+
+
+####################################################################################################
 def template_dataset_classifier_XXXXX(nrows=500, **kw):
     """.
     """
