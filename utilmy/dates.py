@@ -46,11 +46,20 @@ def test_all():
     print(res)
     assert res, 'FAILED, date_to_timezone'
 
-
+    # test date_now()
     res = date_now()
     print(res)
     assert res, 'FAILED, date_now'
 
+    # test date_now with add more days
+    res = date_now(add_days=5, timezone='Asia/Tokyo')
+    print(res)
+    assert res, 'FAILED, date_now'
+
+    # test date_now with new format
+    res = date_now(fmt="%d/%m/%Y", add_days=12)
+    print(res)
+    assert res, 'FAILED, date_now'
 
     res = date_is_holiday([pd.to_datetime('2000-01-01')])
     print(res)
