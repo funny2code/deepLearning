@@ -173,7 +173,7 @@ def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 
 
 ##def date_now(fmt="%Y-%m-%d %H:%M:%S %Z%z", add_days=0, timezone='Asia/Tokyo'):
-from utilmy_base import date_now
+from utilmy.utilmy_base import date_now
 
 
 
