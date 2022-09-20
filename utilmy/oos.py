@@ -194,26 +194,6 @@ def test1():
 
 
 
-def test_create_testfiles():
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
-
-    from utilmy import to_file
-
-
-    ss= """
-    
-    
-    """
-    to_file(ss,dtmp + "/test.txt" )
-
-
-
-    ss ="""
-    
-    """
-    to_file(ss,dtmp + "/test.txt" )
-
 
 
 def test2():
@@ -221,8 +201,6 @@ def test2():
     """
     import utilmy as uu
     drepo, dtmp = uu.dir_testinfo()
-
-    test_create_testfiles()
 
 
     size_ = os_path_size("./")
@@ -470,7 +448,6 @@ def test8():
 
 
 def test8_os():
-    from pytz import timezone
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -481,6 +458,7 @@ def test8_os():
 
 
     log("\n#######", os_file_date_modified)
+    from pytz import timezone
     uu.to_file("first line", file_dir)
     created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
     last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
@@ -490,10 +468,9 @@ def test8_os():
 
 
 
-    from pytz import timezone
-    import requests, json
 
     log("\n#######", os_get_ip)
+    import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
     assert public_ip == os_get_ip()
@@ -524,6 +501,11 @@ def test8_os():
     log("Function name:", inspect.stack()[0][3])
     assert file__name__ == __name__
     assert function_name == inspect.stack()[0][3]
+
+
+
+
+
 
 
 
@@ -1550,6 +1532,11 @@ def os_wait_processes(nhours=7):
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::
+    
+        ps aux  : Show all processe with sub-trees --> good to deliete extra bash in docker.
+
+        df -h   :  Disk space size
+
 
         ls                    : The most frequently used command in Linux to list directories
         pwd                   : Print working directory command in Linux
