@@ -128,9 +128,13 @@ class  GraphDataLoader(object):
         self.nodes = pd_read_file(dirin +"/nodes.parquet")
         self.edges = pd_read_file(dirin +"/edges.parquet")  ### graph        
         self.meta =  json_load(dirin    +"/meta.json")
-
-        
         self.nodes_index = {}  #node_idint --> infos
+
+
+        dd = {}
+        for x in self.nodex[ 'node_id' ].values :
+           dd[ hash(x) ] = x
+        self.nodes_index = dd  #node_idint --> infos
 
 
     def convert_from(self, graph, from='networkit/networkx'):
