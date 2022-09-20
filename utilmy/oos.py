@@ -86,6 +86,7 @@ def test_all():
     test5_os()
     test6_os()
     test7_os()
+    test8()
 
 
 
@@ -191,8 +192,6 @@ def test1():
     log(res)
     res = os_system( f" ls . ",  doprint=False)
     assert os_get_os() == sys.platform
-
-
 
 
 
