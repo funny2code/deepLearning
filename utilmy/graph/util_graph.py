@@ -99,17 +99,7 @@ class  GraphDataLoader(object):
                 edges.parquet
                 nodes.parquet
                 meta.json
-                
-                
-            self.edges = pd.DafraFrame
-            self.nodes = pd.datarFrame
-            #self.nodes_dict = node_idint --> infos
-            
-                
-        def get_node_info(id_list):
-
-        def set_node_info(id_list):
-                        
+                    
 
         load(dirin,  )
             -->  edges: pd.Dataframe ( 'node_a', 'node_b' 'weight', 'edge_type' ] 
@@ -127,7 +117,7 @@ class  GraphDataLoader(object):
         self.edges = pd.DafraFrame()
         self.nodes = pd.datarFrame()
         self.nodes_index = {}  #node_idint --> infos
-        self.meta = {}
+        self.meta = {'cola':  'cola', 'colb': 'cola', 'colvertex': 'colvertex'}
 
 
 
@@ -137,8 +127,9 @@ class  GraphDataLoader(object):
         """
         self.nodes = pd_read_file(dirin +"/nodes.parquet")
         self.edges = pd_read_file(dirin +"/edges.parquet")  ### graph        
-        self.meta =  json_load(dirin +"/meta.json")
+        self.meta =  json_load(dirin    +"/meta.json")
 
+        
         self.nodes_index = {}  #node_idint --> infos
 
 
@@ -158,7 +149,14 @@ class  GraphDataLoader(object):
 
 
     def convert_to(self, target='networkit/networkx'):
-       return Graph, index
+
+
+       if target == 'networkit':
+           graph, index = dag_networkit_convert(df_or_file= self.nodes, 
+                                 cola= self.meta['cola'], 
+                                 colb= self.meta['cola'], colvertex= self.meta['colvertex'], nrows=1000000000)
+
+       return graph, index
 
 
 
