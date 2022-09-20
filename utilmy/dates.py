@@ -23,7 +23,7 @@ def test_all():
     """function test_all        
     """
     test1()
-
+    test2()
 
 
 def test1():    
@@ -43,21 +43,6 @@ def test1():
     res =  date_to_timezone(datetime.datetime.now())
     print(res)
     assert res, 'FAILED, date_to_timezone'
-
-    # test date_now()
-    res = date_now()
-    print(res)
-    assert res, 'FAILED, date_now'
-
-    # test date_now with add more days
-    res = date_now(add_days=5, timezone='Asia/Tokyo')
-    print(res)
-    assert res, 'FAILED, date_now'
-
-    # test date_now with new format
-    res = date_now(fmt="%d/%m/%Y", add_days=12)
-    print(res)
-    assert res, 'FAILED, date_now'
 
     res = date_is_holiday([pd.to_datetime('2000-01-01')])
     print(res)
@@ -91,11 +76,33 @@ def test1():
     date_weekday_excel('20210317')
 
 
-    #TODO:
-    #date_is_holiday([ pd.to_datetime("2015/1/1") ] * 10)
-    #date_now(fmt="%Y-%m-%d %H:%M:%S %Z%z", add_days=0, timezone='Asia/Tokyo')
-    # TODO:
-    #pd_date_split(df,coldate="Birthdate")
+def test2():
+    # test date_now()
+    res = date_now()
+    log(res)
+    assert res, 'FAILED, date_now'
+
+    # test date_now with add more days
+    res = date_now(add_days=5, timezone='Asia/Tokyo')
+    log(res)
+    assert res, 'FAILED, date_now'
+
+    # test date_now with new format
+    res = date_now(fmt="%d/%m/%Y", add_days=12)
+    log(res)
+    assert res, 'FAILED, date_now'
+
+    assert date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
+    assert date_now(timezone='Asia/Tokyo', fmt='%Y-%m-%d')    #-->  "2020-05-19"
+
+    res = date_now('2020-12-10', fmt='%Y%m%d', add_days=-5, returnval='int')
+    log(res )
+    assert res == 20201205, 'FAILED, date_now'
+
+    res = date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
+    log(res )
+    assert res == '2021-10-05', 'FAILED, date_now'
+
 
 
 def pd_random_daterange(start, end, size):
