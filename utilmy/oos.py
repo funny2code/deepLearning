@@ -1532,6 +1532,11 @@ def os_wait_processes(nhours=7):
 def aaa_bash_help():
     """ Shorcuts for Bash
     Docs::
+    
+        ps aux  : Show all processe with sub-trees --> good to deliete extra bash in docker.
+
+        df -h   :  Disk space size
+
 
         ls                    : The most frequently used command in Linux to list directories
         pwd                   : Print working directory command in Linux
