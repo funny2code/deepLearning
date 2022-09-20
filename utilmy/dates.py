@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-MNAME= "utilmy.dates"
-"""# 
+"""  dates utilities
 Doc::
- dates utilities
+
+
+
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, numpy as np, pandas as pd
@@ -11,10 +12,7 @@ import os, sys, time, datetime,inspect, json, yaml, gc, numpy as np, pandas as p
 from utilmy.utilmy_base import log, log2
 
 def help():
-    """function help
-    Args:
-    Returns:
-        
+    """function help        
     """
     from utilmy import help_create
     print(  help_create(__file__) )
@@ -22,17 +20,17 @@ def help():
 
 ####################################################################################################
 def test_all():
-    """function test_all
-    Args:
-    Returns:
-        
+    """function test_all        
     """
+    test1()
+
+
+
+def test1():    
     log("Testing dates.py ...")
 
-    df = pd.DataFrame(columns=[ 'Gender', 'Birthdate'])
-    df['Gender'] = random_genders(10)
-    df['Birthdate'] = random_dates(start=pd.to_datetime('2000-01-01'), end=pd.to_datetime('2022-01-01'), size=10)
-    
+    df = pd.DataFrame(columns=['Birthdate'])
+    df['Birthdate'] = pd_random_daterange(start=pd.to_datetime('2000-01-01'), end=pd.to_datetime('2022-01-01'), size=10)
     print(df)
     assert not df.empty, 'FAILED, generate df data'
 
@@ -100,8 +98,8 @@ def test_all():
     #pd_date_split(df,coldate="Birthdate")
 
 
-def random_dates(start, end, size):
-    """function random_dates
+def pd_random_daterange(start, end, size):
+    """function pd_random_daterange
     Args:
         start:   
         end:   
@@ -115,18 +113,6 @@ def random_dates(start, end, size):
     return pd.to_datetime(np.random.randint(start_u, end_u, size), unit="D")
 
 
-def random_genders(size, p=None):
-    """function random_genders
-    Args:
-        size:   
-        p:   
-    Returns:
-        
-    """
-    if not p:
-        p = (0.49, 0.49, 0.01, 0.01)
-    gender = ("M", "F", "O", "")
-    return np.random.choice(gender, size=size, p=p)
 
 
 ####################################################################################################
@@ -186,24 +172,10 @@ def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     return now_pacific.strftime(fmt)
 
 
-def date_now(fmt="%Y-%m-%d %H:%M:%S %Z%z", add_days=0, timezone='Asia/Tokyo'):
-    """function date_now
-    Args:
-        fmt="%Y-%m-%d %H:   
-        add_days:   
-        timezone:   
-    Returns:
-        
-    """
-    from pytz import timezone as timz
-    import datetime
-    # Current time in UTC
-    now_utc = datetime.datetime.now(timz('UTC'))
-    now_new = now_utc+ datetime.timedelta(days=add_days)
+##def date_now(fmt="%Y-%m-%d %H:%M:%S %Z%z", add_days=0, timezone='Asia/Tokyo'):
+from utilmy_base import date_now
 
-    # Convert to US/Pacific time zone
-    now_pacific = now_new.astimezone(timz(timezone))
-    return now_pacific.strftime(fmt)
+
 
 
 def date_is_holiday(array):
