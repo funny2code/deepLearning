@@ -816,7 +816,17 @@ class myProblem_ranking:
 
         self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
         self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.check()
 
+    def check(self):
+        expr = 'x0 + x1'
+        correlm = self.get_correlm(expr)
+        print("Cost for expression 'x0+x1' is",correlm)
+
+        expr = 'log(x0) + log(x1)'
+        correlm = self.get_correlm(expr)
+        print("Cost for expression 'log(x0)+log(x1)' is",correlm)
+        
 
     def get_cost(self, expr:None, symbols):
         """ Cost Calculation, Objective to Maximize
