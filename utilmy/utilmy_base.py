@@ -1245,6 +1245,22 @@ def test7():
     os.remove("./testfile")
 
 
+def test8_load_save():
+    import utilmy as m
+
+    d0 = os_get_dirtmp()
+
+    test_object = {'hello': 'world'}
+    test_object_filename = '\\test_object.pkl'
+
+    log("\n####", save)
+    save(test_object, d0 + test_object_filename)
+    assert os.path.isfile(d0 + test_object_filename), "FAILED -> save"
+
+    log("\n####", load)
+    loaded_test_object = load(d0 + test_object_filename)
+    assert loaded_test_object == test_object, "FAILED -> load"
+
 
 
 
