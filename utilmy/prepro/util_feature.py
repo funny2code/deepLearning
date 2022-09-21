@@ -62,19 +62,8 @@ Docs::
 import os, sys, copy, re, numpy as np, pandas as pd
 from collections import OrderedDict
 #############################################################################################
+from utilmy import log, log2, log3
 verbosity = 5
-
-def log(*s, n=0, m=1, **kw):
-    sspace = "#" * n
-    sjump = "\n" * m
-    ### Implement Logging
-    print(sjump, sspace, s, sspace, flush=True, **kw)
-
-def log2(*s, **kw):
-    if verbosity >=2 : print(*s, flush=True, **kw)
-
-def log3(*s, **kw):
-    if verbosity >=2 : print(*s, flush=True, **kw)
 
 log2("os.getcwd", os.getcwd())
 
