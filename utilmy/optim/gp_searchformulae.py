@@ -883,9 +883,9 @@ class myProblem_ranking:
 
 
         if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
-            cost =  10.0 *(1 + 1)
+            cost =  10.0 *(1 + sum(difflist) )
             return cost
-            
+
             #scores_new = 0.99 + np.zeros(len(rank1))
             #return scores_new
         else:

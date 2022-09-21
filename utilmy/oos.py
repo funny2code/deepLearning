@@ -191,7 +191,7 @@ def test1():
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    assert os_get_os() == sys.platform
+    log( os_get_os() )
 
 
 
