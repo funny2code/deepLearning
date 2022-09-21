@@ -816,7 +816,17 @@ class myProblem_ranking:
 
         self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
         self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.check()
 
+    def check(self):
+        expr = 'x0 + x1'
+        correlm = self.get_correlm(expr)
+        print("Cost for  'x0+x1' is",correlm)
+
+        expr = 'log(x0) + log(x1)'
+        correlm = self.get_correlm(expr)
+        print("Cost for  'log(x0)+log(x1)' is",correlm)
+        
 
     def get_cost(self, expr:None, symbols):
         """ Cost Calculation, Objective to Maximize
@@ -828,13 +838,14 @@ class myProblem_ranking:
         """
         #try:
         correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        #correlm = self.get_correlm(formulae_str=str(expr.simplify(symbols)[0]))
         #except:
             #correlm = 1.0
         check = 3
         return correlm,check
 
 
-    def get_correlm(self, formulae_str:str):
+    def get_correlm(self, formulae_str):
         """  Compare 2 lists lnew, ltrue and output correlation.
              Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
 
@@ -842,6 +853,10 @@ class myProblem_ranking:
             formulae_str            : Formulae String
 
         """
+        #print("expression",formulae_str)
+        #formulae_str = str(formulae_str)
+
+        
         from scipy import stats
         ##### True list
         ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
@@ -852,27 +867,34 @@ class myProblem_ranking:
 
         correls = []
         diff    = []
-        for i in range(self.n_sample):
-            #ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
-            #ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+        difflist  = []
 
-            ll1 = self.x0_list[i]
-            ll2 = self.x1_list[i]
+        rlist  = [ 1.0,  17.6, 37.5  ]
+        rlist2 = [ 47.2,  4.7, 0.3  ]
+        for i in range(2):
+            x0 = rlist[i]
+            x1 = rlist2[i]
+            s1 =  eval(formulae_str)
 
-            #### Merge them using rank_score
-            lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
-            lnew = lnew[:100]
-            # llog(lnew)
-
-            ### Eval with True Rank              #We can also use kendmall equation
-            c1 = stats.spearmanr(ltrue,  lnew).correlation
-            correls.append(c1)
+            x0 = rlist2[i]
+            x1 = rlist[i]
+            s2 =  eval(formulae_str)
+            difflist.append(abs(s1-s2))
 
 
-            #### Symmetric Condiution   ############################################
-            if i < 3:
-                ll1 = self.x1_list[i]
-                ll2 = self.x0_list[i]
+        if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
+            cost =  10.0 *(1 + sum(difflist) )
+            return cost
+
+            #scores_new = 0.99 + np.zeros(len(rank1))
+            #return scores_new
+        else:
+            for i in range(self.n_sample):
+                #ll1  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect1)
+                #ll2  = self.rank_generate_fake(ltrue_rank, list_overlap,nsize=self.nsize, ncorrect=self.ncorrect2)
+
+                ll1 = self.x0_list[i]
+                ll2 = self.x1_list[i]
 
                 #### Merge them using rank_score
                 lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
@@ -880,18 +902,35 @@ class myProblem_ranking:
                 # llog(lnew)
 
                 ### Eval with True Rank              #We can also use kendmall equation
-                c2 = stats.spearmanr(ltrue,  lnew).correlation
+            
+                c1 = stats.spearmanr(ltrue,  lnew).correlation
+                correls.append(c1)
 
-                ### diff=0  IF formulae is symettric
-                diff.append( abs(c1-c2) )
+                '''
+                #### Symmetric Condiution   ############################################
+                if i < 3:
+                    ll1 = self.x1_list[i]
+                    ll2 = self.x0_list[i]
 
+                    #### Merge them using rank_score
+                    lnew = self.rank_merge_v5(ll1, ll2, formulae_str= formulae_str)
+                    lnew = lnew[:100]
+                    # llog(lnew)
 
+                    ### Eval with True Rank              #We can also use kendmall equation
+                    c2 = stats.spearmanr(ltrue,  lnew).correlation
+
+                    ### diff=0  IF formulae is symettric
+                    diff.append( abs(c1-c2) )
+                
+                '''
 
         correlm = np.mean(correls)
-        diffsum = np.sum( diff )
+        #diffsum = np.sum( diff )
 
         ###
-        cost  = 10.0*(1-correlm) + 100.0 * 1e4 * diffsum
+        #cost  = 10.0*(1-correlm) + 100.0 * 1e4 * diffsum
+        cost  = 10.0*(1-correlm)
 
 
         ### minimize cost
@@ -912,13 +951,16 @@ class myProblem_ranking:
             (item has new scores)
 
         """
+        import random as randomize
         ### Check if formulae had number of x1 and x05
-        """
+        '''
+        
+        
         rlist  = np.random.random(5)
         rlist2 = np.random.random(5)
 
         difflist  = []
-        for i in range(10):
+        for i in range(5):
            x0 = rlist[i]
            x1 = rlist2[i]
            s1 =  eval(fornulae_str)
@@ -930,10 +972,10 @@ class myProblem_ranking:
 
 
         if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
-             scores_new = 0.99 + np.zeros(len(rank1))
-             return scores_new
+            scores_new = 0.99 + np.zeros(len(rank1))
+            return scores_new
 
-        """
+        '''
 
         ### numpy vector :  take inverse of rank As PROXT.
         x0 = 1/(self.kk + rank1)
