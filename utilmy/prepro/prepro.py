@@ -8,41 +8,9 @@ import warnings, sys, gc, os, pandas as pd, json, copy, numpy as np
 warnings.filterwarnings('ignore')
 
 ####################################################################################################
-from utilmy import global_verbosity, os_makedirs
+from utilmy import global_verbosity, os_makedirs, log, log2, log3
 verbosity = global_verbosity(__file__, "/../config.json" ,default= 5)
 
-def log(*s):
-    """function log.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 1 : print(*s, flush=True)
-
-def log2(*s):
-    """function log2.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 2 : print(*s, flush=True)
-
-def log3(*s):
-    """function log3.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    if verbosity >= 3 : print(*s, flush=True)
 
 
 
