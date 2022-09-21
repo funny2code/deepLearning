@@ -686,7 +686,37 @@ def os_remove(dirin="folder/**/*.parquet",
               dry=0):
 
     """  Delete files bigger than some size
+    Args:
+        dirin (string): Path with wildcards to match with folder to remove all its content.
+            Defaults to "folder/**/*.parquet".
+        min_size_mb (int): Min size of the files to remove.
+            Defaults to 0.
+        max_size_mb (int): Max size of the files to remove.
+            Defaults to 1.
+        exclude (string): Paths separated by commas to exclude.
+            Defaults to ""
+        include_only (string): Paths to only include if they are matched by the function.
+            Defaults to ""
+        ndays_past (int): Number of days past that the file must be old to remove.
+            Defaults to 1000
+        start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
+            Defaults to '1970-01-02'
+        end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
+            Defaults to '2050-01-01'
+        nfiles (int): Max number of files to remove.
+            Defaults to 99999999
+        dry (Boolean): Flag to only show the files and not remove them.
+            Defaults to 0
+            
+    Example:
+        Deleting all files in a specified folder::
+            from utilmy import oos
+            
+            path = "/home/user/Desktop/example/*"
 
+            oos.os_remove(path, ndays_past=0)
+            #All the files in "example" are deleted
+    
     """
     import os, sys, time, glob, datetime as dt
 
