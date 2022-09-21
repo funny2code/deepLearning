@@ -505,6 +505,44 @@ def pd_col_bins(df, col:str, nbins:int=5):
   return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int16')
 
 
+def pd_colcat_toint(dfref, colname, colcat_map=None, suffix=None):
+
+    ### to ensure dataframe
+    colname = [colname] if isinstance(colname, str) else colname
+
+    df = dfref[colname]
+    # if colname is single value df will be series type not a dataframe so we convert it to dataframe to be sure it is a dataframe type
+    df = pd.DataFrame(df)
+
+    suffix = "" if suffix is None else suffix
+    colname_new = []
+
+    if colcat_map is not None:
+        for col in colname:
+            print(col, col + suffix)
+            ddict            = colcat_map[col]["encode"]
+            # print(ddict)
+            df[col + suffix] = df[col].apply(lambda x: ddict.get(x))
+            colname_new.append(col + suffix)
+
+        return df[colname_new], colcat_map
+
+    colcat_map = {}
+    
+    # old: for col in colname:
+    # update: for col in [colname] >> if colname is just single value it will loop through string not the list, so we convert to list before looping
+    for col in colname:
+        
+        colcat_map[col]           = {}
+        df[col + suffix], label   = df[col].factorize()
+        colcat_map[col]["decode"] = {i: t for i, t in enumerate(list(label))}
+        colcat_map[col]["encode"] = {t: i for i, t in enumerate(list(label))}
+        colname_new.append(col + suffix)
+
+    return df[colname_new], colcat_map
+
+
+
 def pd_dtype_reduce(dfm, int0 ='int32', float0 = 'float32') :
     """ Reduce dtype.
     Doc::
