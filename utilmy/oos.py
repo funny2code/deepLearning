@@ -94,34 +94,81 @@ def test_globglob():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
-    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
-                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
-                "folder/test/file3.txt"]:
+    tlist= [
+        "folder/test/file1.txt",
+        "folder/test/tmp/1.txt",
+        "folder/test/tmp/myfile.txt",
+        "folder/test/tmp/record.txt",
+        "folder/test/tmp/part.parquet",
+        "folder/test/file2.txt",
+        "folder/test/file3.txt"
+    ]
+        
+    for path in tlist:
 
         os_makedirs(path)
         assert os.path.exists(path),"File doesn't exist"
 
 
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=1)
-    glob_glob(dirin="folder/test/",npool=1)
+    res = glob_glob(dirin="folder/**/*.txt")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
 
-    flist = ['folder/test/file.txt',
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
+    assert "folder/test/file2.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/tmp/1.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/file1.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*",nfiles=5)
+    print(res)
+    assert len(res) == 5, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    print(res)
+
+    res = glob_glob(dirin="folder/",npool=1)
+    print(res)
+
+    res =     glob_glob(dirin="folder/test/",npool=1)
+    print(res)
+
+
+    flist = [
+        'folder/test/file.txt',
         'folder/test/file1.txt',
         'folder/test/file2.txt',
         'folder/test/file3.txt',
         'folder/test/tmp/1.txt',
         'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+        'folder/test/tmp/record.txt'
+    ]
+
+    res = glob_glob(dirin="", file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res =  glob_glob(file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
 
 
 def test_filecache():
@@ -272,7 +319,7 @@ def test6_os():
 
     log("#######   os utils...")
     log(os_get_os())
-    assert os_get_os() == sys.platform, "Platform mismatch"
+    assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
     log(os_cpu_info())
     log(os_ram_info())
     log(os_getcwd())
