@@ -532,7 +532,7 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
 
 ### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
-             add_days=0,  add_mins=0, add_hours=0, add_months=0,
+             add_days=0,  add_mins=0, add_hours=0, add_months=0,add_weeks=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
@@ -577,26 +577,25 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = now_utc.replace(day=force_dayofmonth)
 
     if force_dayofweek >0 :
-        # https://stackoverflow.com/questions/25426919/python-construct-datetime-having-weekday-with-other-time-parameters
-        #from datetime import timedelta
-        #monday = today - datetime.timedelta(days= now_utc.weekday())
-        #result = (monday + timedelta(days=weekday)).replace(hour=int(t), minutes=int((t - int(t)) * 60))
-        pass
+        actual_day = now_utc.weekday()
+        days_of_difference = force_dayofweek - actual_day
+        now_utc = now_utc + datetime.timedelta(minutes=24*60*days_of_difference)
 
     if force_hourofday >0 :
         now_utc = now_utc.replace(hour=force_hourofday)
 
 
     now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours, minutes=add_mins,)
+    now_new = now_new + datetime.timedelta(days=add_days + 7*add_weeks, hours=add_hours, minutes=add_mins,)
 
 
-    if add_months>0 :
-        pass
+    if add_months!=0 :
+        from dateutil.relativedelta import relativedelta
+        now_new = now_new + relativedelta(months=add_months)
 
-    if   returnval == 'datetime': return now_new ### datetime
-    elif returnval == 'int':      return int(now_new.strftime(fmt))
-    elif returnval == 'unix':     return time.mktime(now_new.timetuple())
+    if    returnval == 'datetime': return now_new ### datetime
+    elif  returnval == 'int':      return int(now_new.strftime(fmt))
+    elif  returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
 
@@ -1061,7 +1060,7 @@ def test_all():
     test3()
     test4()
     test5()
-    test6()
+    test6_datenow()
     test7()
 
 
@@ -1190,7 +1189,7 @@ def test5():
         assert myclass, 'FAILED -> load_function_uri'
 
 
-def test6():
+def test6_datenow():
     import utilmy as m
 
 
@@ -1207,6 +1206,16 @@ def test6():
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
 
+
+    assert date_now('2020-05-09', add_months=-2, fmt='%Y-%m-%d') == "2020-03-19" #Test adding -2 months
+
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_mins=20,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:20:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 20 minutes
+
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_hours=11,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 23:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 11 hours
+
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_days=5,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-11 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 5 days
+
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',force_dayofweek=3,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test forcing day 3 of the week
 
 
 
