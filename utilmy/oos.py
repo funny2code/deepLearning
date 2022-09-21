@@ -103,7 +103,7 @@ def test_globglob():
         "folder/test/file2.txt",
         "folder/test/file3.txt"
     ]
-        
+
     for path in tlist:
 
         os_makedirs(path)
@@ -254,7 +254,7 @@ def test2():
 
     result_ = os_path_split("test/tmp/test.txt")
     log("result", result_)
-    
+
 
 
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
@@ -542,7 +542,7 @@ def test8_os():
 
     log("\n#######", os_file_info)
     _, file__name__, _, function_name = os_get_function_name().split(',')
-    
+
     log("File __name__ value:", __name__)
     log("Function name:", inspect.stack()[0][3])
     assert file__name__ == __name__
@@ -589,11 +589,11 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=min_size_mb, max_size_mb=max_size_mb,
             ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
             nfiles=nfiles, verbose=verbose,npool=npool):
-        
+
         if dirin and not file_list:
             files = glob.glob(dirin, recursive=True)
             files = sorted(files)
-        
+
         if file_list:
             files = file_list
 
