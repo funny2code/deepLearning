@@ -816,7 +816,17 @@ class myProblem_ranking:
 
         self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
         self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.check()
 
+    def check(self):
+        expr = 'x0 + x1'
+        correlm = self.get_correlm(expr)
+        print("Cost for  'x0+x1' is",correlm)
+
+        expr = 'log(x0) + log(x1)'
+        correlm = self.get_correlm(expr)
+        print("Cost for  'log(x0)+log(x1)' is",correlm)
+        
 
     def get_cost(self, expr:None, symbols):
         """ Cost Calculation, Objective to Maximize
@@ -859,8 +869,8 @@ class myProblem_ranking:
         diff    = []
         difflist  = []
 
-        rlist  = np.random.random(5)
-        rlist2 = np.random.random(5)
+        rlist  = [ 1.0,  17.6, 37.5  ]
+        rlist2 = [ 47.2,  4.7, 0.3  ]
         for i in range(2):
             x0 = rlist[i]
             x1 = rlist2[i]
@@ -873,7 +883,9 @@ class myProblem_ranking:
 
 
         if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
-            c1 = -1.0
+            cost =  10.0 *(1 + sum(difflist) )
+            return cost
+
             #scores_new = 0.99 + np.zeros(len(rank1))
             #return scores_new
         else:

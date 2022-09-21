@@ -94,34 +94,81 @@ def test_globglob():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
-    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
-                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
-                "folder/test/file3.txt"]:
+    tlist= [
+        "folder/test/file1.txt",
+        "folder/test/tmp/1.txt",
+        "folder/test/tmp/myfile.txt",
+        "folder/test/tmp/record.txt",
+        "folder/test/tmp/part.parquet",
+        "folder/test/file2.txt",
+        "folder/test/file3.txt"
+    ]
+        
+    for path in tlist:
 
         os_makedirs(path)
         assert os.path.exists(path),"File doesn't exist"
 
 
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=1)
-    glob_glob(dirin="folder/test/",npool=1)
+    res = glob_glob(dirin="folder/**/*.txt")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
 
-    flist = ['folder/test/file.txt',
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
+    assert "folder/test/file2.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/tmp/1.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/file1.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*",nfiles=5)
+    print(res)
+    assert len(res) == 5, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    print(res)
+
+    res = glob_glob(dirin="folder/",npool=1)
+    print(res)
+
+    res =     glob_glob(dirin="folder/test/",npool=1)
+    print(res)
+
+
+    flist = [
+        'folder/test/file.txt',
         'folder/test/file1.txt',
         'folder/test/file2.txt',
         'folder/test/file3.txt',
         'folder/test/tmp/1.txt',
         'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+        'folder/test/tmp/record.txt'
+    ]
+
+    res = glob_glob(dirin="", file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res =  glob_glob(file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
 
 
 def test_filecache():
@@ -191,7 +238,7 @@ def test1():
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    assert os_get_os() == sys.platform
+    log( os_get_os() )
 
 
 
@@ -272,7 +319,7 @@ def test6_os():
 
     log("#######   os utils...")
     log(os_get_os())
-    assert os_get_os() == sys.platform, "Platform mismatch"
+    assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
     log(os_cpu_info())
     log(os_ram_info())
     log(os_getcwd())
@@ -1429,22 +1476,37 @@ def os_get_uniqueid(format="int"):
 
 def os_get_os():
     """function os_platform_os
-    Args:
-    Returns:
-
     """
-    #### get linux or windows
-    return sys.platform
+    import platform
+    return platform.system()
 
-# TODO
+
+
 def os_get_ip():
-    """function os_platform_ip
-    Args:
-    Returns:
+    """Return primary ip adress
+    Docs::
+
+        Does NOT need routable net access or any connection at all.
+        Works even if all interfaces are unplugged from the network.
+        Does NOT need or even try to get anywhere else.
+        Works with NAT, public, private, external, and internal IP's
+        Pure Python 2 (or 3) with no external dependencies.
+        Works on Linux, Windows, and OSX.
 
     """
-    ### IP
-    pass
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
+
 
 
 # TODO
@@ -1456,8 +1518,8 @@ def os_cpu_info():
     """
     ncpu= os.cpu_count()
 
-    cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
-    cpu_usage = os_system(cmd)
+    # cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
+    # cpu_usage = os_system(cmd)
 
 
     cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
@@ -1526,66 +1588,7 @@ def os_wait_processes(nhours=7):
 
 
 ###################################################################################################
-###### HELP ######################################################################################
-# TODO
-
-
-
-
-
-
-
-
-###################################################################################################
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
-def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
-    """  Delete files older than ndays.
-
-
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry ==True or dry==1 else False
-
-    files = glob.glob(dirin, recursive=True)
-    files = sorted(files)
-    for exi in exclude.split(","):
-        if len(exi) > 0:
-           files = [  fi for fi in files if exi not in fi ]
-
-    now = time.time()
-    cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          t = os.stat( fi)
-          c = t.st_ctime
-          # delete file if older than 10 days
-          if c < cutoff:
-            flist2.append(fi)
-        except : pass
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
-
-
 
