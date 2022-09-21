@@ -6,17 +6,12 @@ HELP= """ Utils for easy batching
 """
 import os, sys, socket, platform, time, gc,logging, random, datetime, logging
 
+from utilmy.utilmy_base import date_now
+
 ################################################################################################
 verbose = 3   ### Global setting
+from utilmy import log, log2
 
-def log(*s, **kw):
-    print(*s, flush=True, **kw)
-
-def log2(*s, **kw):
-    if verbose >=2 : print(*s, flush=True, **kw)
-
-def log3(*s, **kw):
-    if verbose >=3 : print(*s, flush=True, **kw)
 
 
 ################################################################################################
@@ -240,34 +235,6 @@ def now_daymonth_isin(day_month, timezone="jp"):
 
 
   
-# date_now = date_now_jp()  ### alias
-
-
-def date_now_jp(fmt="%Y%m%d", add_days=0, add_hours=0, timezone='jp'):
-    """function date_now_jp
-    Args:
-        fmt:   
-        add_days:   
-        add_hours:   
-        timezone:   
-    Returns:
-        
-    """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Current time in UTC
-    now_utc = datetime.datetime.now(tzone('UTC'))
-    now_new = now_utc+ datetime.timedelta(days=add_days, hours=add_hours)
-
-    if timezone == 'utc':
-       return now_new.strftime(fmt)
-      
-    else :
-       timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'jp') 
-       # Convert to US/Pacific time zone
-       now_pacific = now_new.astimezone(tzone(timezone))
-       return now_pacific.strftime(fmt)
 
       
         
@@ -298,7 +265,7 @@ def batchLog(object):
            dt\t prog_name\t name \t tag \t info
         
         """
-        today = date_now_jp("%Y%m%d")        
+        today = date_now(fmt="%Y%m%d")
         self.dirlog = dirlog + f"/batchlog_{tag}_{today}.log"
         
     
