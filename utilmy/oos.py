@@ -87,6 +87,7 @@ def test_all():
     test6_os()
     test7_os()
     test8()
+    test8_os()
 
 
 
@@ -170,7 +171,6 @@ def test_globglob():
     assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
 
 
-
 def test_filecache():
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -241,7 +241,6 @@ def test1():
     log( os_get_os() )
 
 
-
 def test2():
     """function test2
     """
@@ -269,7 +268,6 @@ def test2():
     os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
 
-
 def test4():
     """function test4
     """
@@ -294,7 +292,6 @@ def test4():
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
 
-
 def test5_os():
     log(" os_copy")
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
@@ -308,7 +305,6 @@ def test5_os():
 
             dry=0
             )
-
 
 
 def test6_os():
@@ -414,7 +410,6 @@ def test6_os():
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
-
 def test7_os():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -490,7 +485,6 @@ def test8():
               dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
     assert len(before_files) == len(cur_files)
-
 
 
 def test8_os():
