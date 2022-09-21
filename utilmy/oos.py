@@ -513,7 +513,7 @@ def test8_os():
     import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
-    assert public_ip == os_get_ip()
+    log('internal ip', os_get_ip() )
 
 
     import os
@@ -1476,7 +1476,7 @@ def os_get_os():
 
 
 
-def os_get_ip():
+def os_get_ip(mode='internal'):
     """Return primary ip adress
     Docs::
 
@@ -1488,19 +1488,26 @@ def os_get_ip():
         Works on Linux, Windows, and OSX.
 
     """
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.settimeout(0)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.254.254.254', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
 
+    if mode =='internal':
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.254.254.254', 1))
+            IP = s.getsockname()[0]
+        except Exception:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP
+
+
+    else :
+       import requests, json
+       public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+       return public_ip
 
 
 # TODO
