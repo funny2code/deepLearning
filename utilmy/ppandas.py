@@ -96,7 +96,8 @@ def test_all():
     pd_to_file(df1, "testdata/ppandas/file.csv")
     pd_sample_strat(df1, col="a", n=10)
 
-    bins = pd_col_bins(df1, "a", 5)
+    ## you int64
+    bins = pd_col_bins(df1, col="a", nbins= 5)
     assert len(np.unique(bins)) == 5, "bins not formed"
 
     pd_dtype_reduce(df1)
@@ -484,21 +485,24 @@ def pd_cartesian(df1, df2) :
   return df3
 
 
-def pd_col_bins(df, col, nbins=5):
+def pd_col_bins(df, col:str, nbins:int=5):
   """function pd_col_bins.
   Doc::
-          
-        Args:
-            df:   
-            col:   
-            nbins:   
-        Returns:
+
+    bins = pd_col_bins(df1, col="a", nbins= 5)
+    assert len(np.unique(bins)) == 5, "bins not formed"
+
+    Args:
+        df:
+        col:
+        nbins:   nb of bins
+    Returns:
             
   """
   ### Shortcuts for easy bin of numerical values
   import pandas as pd, numpy as np
-  assert nbins < 256, 'nbins< 255'
-  return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int8')
+  # assert nbins < 256, 'nbins< 255'
+  return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int16')
 
 
 def pd_colcat_toint(dfref, colname, colcat_map=None, suffix=None):
