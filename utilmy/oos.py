@@ -87,6 +87,7 @@ def test_all():
     test6_os()
     test7_os()
     test8()
+    test8_os()
 
 
 
@@ -170,7 +171,6 @@ def test_globglob():
     assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
 
 
-
 def test_filecache():
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -241,7 +241,6 @@ def test1():
     log( os_get_os() )
 
 
-
 def test2():
     """function test2
     """
@@ -269,7 +268,6 @@ def test2():
     os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
 
-
 def test4():
     """function test4
     """
@@ -294,7 +292,6 @@ def test4():
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
 
-
 def test5_os():
     log(" os_copy")
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
@@ -308,7 +305,6 @@ def test5_os():
 
             dry=0
             )
-
 
 
 def test6_os():
@@ -414,7 +410,6 @@ def test6_os():
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
-
 def test7_os():
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -492,7 +487,6 @@ def test8():
     assert len(before_files) == len(cur_files)
 
 
-
 def test8_os():
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
@@ -519,7 +513,7 @@ def test8_os():
     import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
-    assert public_ip == os_get_ip()
+    log('internal ip', os_get_ip() )
 
 
     import os
@@ -532,6 +526,7 @@ def test8_os():
     log("File Directory:", file_dir)
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
+
 
     file_stats = os_file_info(file_dir)
     assert file_dir == file_stats[0][0]
@@ -690,7 +685,37 @@ def os_remove(dirin="folder/**/*.parquet",
               dry=0):
 
     """  Delete files bigger than some size
+    Args:
+        dirin (string): Path with wildcards to match with folder to remove all its content.
+            Defaults to "folder/**/*.parquet".
+        min_size_mb (int): Min size of the files to remove.
+            Defaults to 0.
+        max_size_mb (int): Max size of the files to remove.
+            Defaults to 1.
+        exclude (string): Paths separated by commas to exclude.
+            Defaults to ""
+        include_only (string): Paths to only include if they are matched by the function.
+            Defaults to ""
+        ndays_past (int): Number of days past that the file must be old to remove.
+            Defaults to 1000
+        start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
+            Defaults to '1970-01-02'
+        end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
+            Defaults to '2050-01-01'
+        nfiles (int): Max number of files to remove.
+            Defaults to 99999999
+        dry (Boolean): Flag to only show the files and not remove them.
+            Defaults to 0
+            
+    Example:
+        Deleting all files in a specified folder::
+            from utilmy import oos
+            
+            path = "/home/user/Desktop/example/*"
 
+            oos.os_remove(path, ndays_past=0)
+            #All the files in "example" are deleted
+    
     """
     import os, sys, time, glob, datetime as dt
 
@@ -1132,7 +1157,7 @@ def os_file_info(dirin, returnval='list', date_format='unix'):
     """
     flist = glob_glob(dirin)
     flist2 =[]
-    mbyte  =1 /( 1024*1014.0)
+    mbyte  =1 /(1024*1024)
     for fi in flist :
         try :
             st = os.stat(fi)
@@ -1482,7 +1507,7 @@ def os_get_os():
 
 
 
-def os_get_ip():
+def os_get_ip(mode='internal'):
     """Return primary ip adress
     Docs::
 
@@ -1494,19 +1519,26 @@ def os_get_ip():
         Works on Linux, Windows, and OSX.
 
     """
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.settimeout(0)
-    try:
-        # doesn't even have to be reachable
-        s.connect(('10.254.254.254', 1))
-        IP = s.getsockname()[0]
-    except Exception:
-        IP = '127.0.0.1'
-    finally:
-        s.close()
-    return IP
 
+    if mode =='internal':
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.254.254.254', 1))
+            IP = s.getsockname()[0]
+        except Exception:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP
+
+
+    else :
+       import requests, json
+       public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+       return public_ip
 
 
 # TODO
