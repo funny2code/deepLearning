@@ -1207,8 +1207,7 @@ def test6_datenow():
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
 
-
-    assert date_now('2020-05-09', add_months=-2, fmt='%Y-%m-%d') == "2020-03-19" #Test adding -2 months
+    assert date_now('2020-05-09', add_months=-2, fmt='%Y-%m-%d') == "2020-03-09" #Test adding -2 months
 
     assert date_now('2012-12-06 12:00:00',returnval='datetime',add_mins=20,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:20:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 20 minutes
 
