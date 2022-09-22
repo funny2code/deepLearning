@@ -1062,6 +1062,7 @@ def test_all():
     test5()
     test6_datenow()
     test7()
+    test8_load_save()
 
 
 def test1():
