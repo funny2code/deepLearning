@@ -134,6 +134,21 @@ def test2():
     to_timeunix(datetime.datetime(2018,1,16))
     to_datetime("2018-01-16")
     
+def test_pd_col_bins():
+  import utilmy as uu
+  import pandas as pd
+  import numpy as np
+  np.random.seed(42)
+
+  normal_col = np.random.normal(loc=666, scale=10, size=1000)
+  geo_col = np.random.geometric(p=0.1, size=1000)
+  df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+
+  binned_norm = uu.pd_col_bins(df, 'norm', 10)
+  binned_geo = uu.pd_col_bins(df, 'geo', 10)
+
+  assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
+  assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
 
 ###################################################################################################
 ###### Pandas #####################################################################################
@@ -485,24 +500,33 @@ def pd_cartesian(df1, df2) :
   return df3
 
 
-def pd_col_bins(df, col:str, nbins:int=5):
-  """function pd_col_bins.
+def pd_col_bins(df, col: str, nbins: int = 5):
+  """Shortcut for easy binning of numerical values.
   Doc::
 
-    bins = pd_col_bins(df1, col="a", nbins= 5)
-    assert len(np.unique(bins)) == 5, "bins not formed"
+    np.random.seed(42)
+
+    normal_col = np.random.normal(loc=666, scale=10, size=1000)
+    geo_col = np.random.geometric(p=0.1, size=1000)
+    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+
+    binned_norm = uu.pd_col_bins(df, 'norm', 10)
+    binned_geo = uu.pd_col_bins(df, 'geo', 10)
+
+    assert len(binned_norm.unique()) == 10, "bins are not formed for normal distribution"
+    assert len(binned_geo.unique()) == 9, "bins are not formed for geometric distribution"
 
     Args:
-        df:
-        col:
-        nbins:   nb of bins
+        df (pandas.DataFrame):   The dataframe.
+        col (str):    The name of the column for cutting. Column should be of numeric type.
+        nbins (int):  The number of bins (default 5).
+
     Returns:
-            
+        pandas.Series of type int16.
   """
-  ### Shortcuts for easy bin of numerical values
-  import pandas as pd, numpy as np
+  import pandas as pd
   # assert nbins < 256, 'nbins< 255'
-  return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int16')
+  return pd.qcut(df[col], q=nbins, labels=False, duplicates='drop').astype('int16')
 
 
 def pd_colcat_toint(dfref, colname, colcat_map=None, suffix=None):
