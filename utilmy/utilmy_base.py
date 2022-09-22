@@ -1260,7 +1260,7 @@ def test8_load_save():
     d0 = os_get_dirtmp()
 
     test_object = {'hello': 'world'}
-    test_object_filename = '\\test_object.pkl'
+    test_object_filename = '/test_object.pkl'
 
     log("\n####", save)
     save(test_object, d0 + test_object_filename)
