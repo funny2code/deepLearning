@@ -1123,11 +1123,14 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
     """
     import datetime
-    from pytz import timezone as tzone
-    try :
+    from pytz import timezone as tzone, utc
+    try:
+
         mtime  = os.path.getmtime(dirin)
         mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+        mtime2 = mtime2.replace(tzinfo=utc)
         mtime2 = mtime2.astimezone(tzone(timezone))
+        
         return mtime2.strftime(fmt)
     except:
         return ""
