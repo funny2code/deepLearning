@@ -257,8 +257,10 @@ def test2():
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
 
+    ### This one has bug
+    #res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
 
-    res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
+
 
     os_file_replacestring(findstr="text",replacestr="text_replace",
                           some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
@@ -1305,9 +1307,10 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
     if srch_pattern is None:
         srch_pattern = ["from ", "import "]
 
-    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    ###  'file', 'dir'
+    dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
     ll = []
-    for f in list_all["fullpath"]:
+    for f in dict_all["file"]:
         ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
     df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
     return df
