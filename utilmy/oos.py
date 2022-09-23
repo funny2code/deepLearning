@@ -558,7 +558,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
     ):
-    """ Advanced Glob filtering.
+    """ Advanced glob.glob filtering.
     Docs::
 
         dirin="": get the files in path dirin, works when file_list=[]
@@ -684,8 +684,9 @@ def os_remove(dirin="folder/**/*.parquet",
               nfiles=99999999,
               dry=0):
 
-    """  Delete files bigger than some size
-    Args:
+    """  Delete files with criteria, using glob_glob
+    Docs::
+
         dirin (string): Path with wildcards to match with folder to remove all its content.
             Defaults to "folder/**/*.parquet".
         min_size_mb (int): Min size of the files to remove.
@@ -704,7 +705,7 @@ def os_remove(dirin="folder/**/*.parquet",
             Defaults to '2050-01-01'
         nfiles (int): Max number of files to remove.
             Defaults to 99999999
-        dry (Boolean): Flag to only show the files and not remove them.
+        dry (Boolean)=1: Flag to test only
             Defaults to 0
             
     Example:
@@ -744,8 +745,12 @@ def os_remove(dirin="folder/**/*.parquet",
 
 
 def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
+  """ Get stdout, stderr from Command Line into  a string varables  mout, merr
+  Docs::     
+       
+       out_txt, err_txt = os_system( f"   ztmp ",  doprint=True)
+
+
   """
   import subprocess
   try :
