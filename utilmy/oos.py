@@ -1296,7 +1296,36 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 ###################################################################################################
 def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
     """  search inside the files
+    Docs::
 
+        Args:
+            srch_pattern (:obj:`list` of :obj:'str'): List of strings to match with the content of the files.
+            Defaults to None.
+            mode (string): To search content using the srch.
+            Defaults to "str".
+            dir1 (str): Folder/Directory name to search its content.
+            Defaults to "".
+            file_pattern (str): File pattern to match with the content of the directory.
+            Defaults to "*.*".
+            dirlevel (int): Max dir level to search content.
+            Defaults to 1.
+
+        Returns:
+            Returns a panda dataframe with all the matches, the columns are the folllowing:
+            1.search: Word that was matched
+            2.filename: Directory where the match was found
+            3.lineno: Number of line where the match was found
+            4.pos: Position in the line where the match was found
+            5.line: The line where the match was found
+
+        Examples:
+        
+            from utilmy import oos
+
+            path = "/home/necromancer/Desktop/New"
+
+            content = oos.os_search_content(dir1=path,file_pattern="*")
+            # "content" is the dataframe
     """
     import pandas as pd
     if srch_pattern is None:
