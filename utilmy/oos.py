@@ -266,9 +266,9 @@ def test2():
                           some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
 
 
+    log(" os_copy")
     os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
-    log(" os_copy")
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
 
             mode='file',
@@ -280,6 +280,7 @@ def test2():
 
             dry=0
             )
+
 
 def test4():
     """function test4
