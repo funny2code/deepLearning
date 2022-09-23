@@ -247,28 +247,29 @@ def test2():
     drepo, dtmp = uu.dir_testinfo()
 
 
-    size_ = os_path_size("./")
-    log("total size", size_)
-
-    result_ = os_path_split("test/tmp/test.txt")
-    log("result", result_)
-
-
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
 
+
+    with open(dtmp+"/os_search_test.txt", 'a') as file:
+        file.write("Dummy text to test fast search string")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    print(res)
+    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
+
+
     ### This one has bug
+    log("#######   os_search_fast() ..")
     dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
     assert  not log(dfres) and len(dfres) >0, dfres
 
 
-    os_file_replacestring(findstr="text",replacestr="text_replace",
-                          some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
+
+    log("#######   os_copy_safe() ..")
+    os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
 
     log(" os_copy")
-    os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
-
     os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
 
             mode='file',
@@ -294,6 +295,19 @@ def test4():
     #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
+
+
+    log("#######   os_variables_test ..")
+    ll = ["test_var"]
+    globs = {}
+    os_variable_init(ll,globs)
+    os_variable_exist("test_var",globs)
+    os_variable_check("other_var",globs,do_terminate=False)
+    os_import(mod_name="pandas", globs=globs)
+    os_variable_del(["test_var"], globs)
+    log(os_variable_exist("test_var",globs))
+
+
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -343,18 +357,6 @@ def test6_os():
     # log(os_walk(cwd))
 
 
-    log("#######   os_copy_safe() ..")
-    os_copy_safe(dtmp+"/test", dtmp+"/test_copy/")
-
-
-
-    log("#######   z_os_search_fast() ..")
-    with open(dtmp+"/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
-    print(res)
-    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
-
 
 
     log("#######   os_search_content() ..")
@@ -375,15 +377,7 @@ def test6_os():
 
 
 
-    log("#######   os_variables_test ..")
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_variable_del(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
+
 
 
     log("#######   os_system_list() ..")
