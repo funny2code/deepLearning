@@ -258,8 +258,8 @@ def test2():
     os_file_check(dtmp + "/os_file_test.txt")
 
     ### This one has bug
-    #res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
-
+    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
+    assert  not log(dfres) and len(dfres) >0, dfres
 
 
     os_file_replacestring(findstr="text",replacestr="text_replace",
