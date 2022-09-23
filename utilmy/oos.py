@@ -251,16 +251,16 @@ def test2():
     os_file_check(dtmp + "/os_file_test.txt")
 
 
-    with open(dtmp+"/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
-    print(res)
-    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
 
-
-    ### This one has bug
     log("#######   os_search_fast() ..")
-    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
+    ###TODO This one has bug
+    uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    assert  not log(res) and len(res) >0, res
+
+
+    ###TODO This one has bug
+    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
     assert  not log(dfres) and len(dfres) >0, dfres
 
 
