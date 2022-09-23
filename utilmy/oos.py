@@ -81,9 +81,8 @@ def test_all():
     test_globglob()
 
     test1()
-    # test2()
+    test2()
     test4()
-    test5_os()
     test6_os()
     test7_os()
     test8()
@@ -255,7 +254,6 @@ def test2():
     log("result", result_)
 
 
-
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
 
@@ -265,8 +263,21 @@ def test2():
     os_file_replacestring(findstr="text",replacestr="text_replace",
                           some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
 
+
     os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
 
+    log(" os_copy")
+    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
+            dry=0
+            )
 
 def test4():
     """function test4
@@ -290,21 +301,6 @@ def test4():
 
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
-
-
-def test5_os():
-    log(" os_copy")
-    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            )
 
 
 def test6_os():
