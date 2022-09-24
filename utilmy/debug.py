@@ -6,6 +6,8 @@ Doc::
 
     pip install filprofiler
 
+    https://github.com/alexmojaki/snoop
+
 
 
 
@@ -56,7 +58,7 @@ def log10(*s, nmax=60):
         print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
 
 
-def logic(*s):
+def logvar(*s):
     """    ### Equivalent of print, but more :  https://github.com/gruns/icecream.
     Doc::
             

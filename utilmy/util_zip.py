@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+""" All about zipping files
+
+
+
+"""
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 import shutil, tarfile, zipfile
 from typing import Optional, Union

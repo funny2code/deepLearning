@@ -81,9 +81,8 @@ def test_all():
     test_globglob()
 
     test1()
-    # test2()
+    test2()
     test4()
-    test5_os()
     test6_os()
     test7_os()
     test8()
@@ -248,24 +247,40 @@ def test2():
     drepo, dtmp = uu.dir_testinfo()
 
 
-    size_ = os_path_size("./")
-    log("total size", size_)
-
-    result_ = os_path_split("test/tmp/test.txt")
-    log("result", result_)
-
-
-
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
 
 
-    res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
 
-    os_file_replacestring(findstr="text",replacestr="text_replace",
-                          some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
+    log("#######   os_search_fast() ..")
+    ###TODO This one has bug
+    uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    assert  not log(res) and len(res) >0, res
 
+
+    ###TODO This one has bug
+    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
+    assert  not log(dfres) and len(dfres) >0, dfres
+
+
+
+    log("#######   os_copy_safe() ..")
     os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
+
+
+    log(" os_copy")
+    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
+
+            mode='file',
+
+            exclude="", include_only="",
+            min_size_mb=0, max_size_mb=500000,
+            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+            nfiles=99999999, verbose=0,
+
+            dry=0
+            )
 
 
 def test4():
@@ -280,6 +295,19 @@ def test4():
     #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
+
+
+    log("#######   os_variables_test ..")
+    ll = ["test_var"]
+    globs = {}
+    os_variable_init(ll,globs)
+    os_variable_exist("test_var",globs)
+    os_variable_check("other_var",globs,do_terminate=False)
+    os_import(mod_name="pandas", globs=globs)
+    os_variable_del(["test_var"], globs)
+    log(os_variable_exist("test_var",globs))
+
+
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -290,21 +318,6 @@ def test4():
 
     log(os_variable_exist("test_var",globs))
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
-
-
-def test5_os():
-    log(" os_copy")
-    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            )
 
 
 def test6_os():
@@ -344,18 +357,6 @@ def test6_os():
     # log(os_walk(cwd))
 
 
-    log("#######   os_copy_safe() ..")
-    os_copy_safe(dtmp+"/test", dtmp+"/test_copy/")
-
-
-
-    log("#######   z_os_search_fast() ..")
-    with open(dtmp+"/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
-    print(res)
-    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
-
 
 
     log("#######   os_search_content() ..")
@@ -376,15 +377,7 @@ def test6_os():
 
 
 
-    log("#######   os_variables_test ..")
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_variable_del(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
+
 
 
     log("#######   os_system_list() ..")
@@ -558,7 +551,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
     ):
-    """ Advanced Glob filtering.
+    """ Advanced glob.glob filtering.
     Docs::
 
         dirin="": get the files in path dirin, works when file_list=[]
@@ -684,8 +677,9 @@ def os_remove(dirin="folder/**/*.parquet",
               nfiles=99999999,
               dry=0):
 
-    """  Delete files bigger than some size
-    Args:
+    """  Delete files with criteria, using glob_glob
+    Docs::
+
         dirin (string): Path with wildcards to match with folder to remove all its content.
             Defaults to "folder/**/*.parquet".
         min_size_mb (int): Min size of the files to remove.
@@ -704,7 +698,7 @@ def os_remove(dirin="folder/**/*.parquet",
             Defaults to '2050-01-01'
         nfiles (int): Max number of files to remove.
             Defaults to 99999999
-        dry (Boolean): Flag to only show the files and not remove them.
+        dry (Boolean)=1: Flag to test only
             Defaults to 0
             
     Example:
@@ -744,8 +738,12 @@ def os_remove(dirin="folder/**/*.parquet",
 
 
 def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
+  """ Get stdout, stderr from Command Line into  a string varables  mout, merr
+  Docs::     
+       
+       out_txt, err_txt = os_system( f"   ztmp ",  doprint=True)
+
+
   """
   import subprocess
   try :
@@ -1123,11 +1121,14 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
     """
     import datetime
-    from pytz import timezone as tzone
-    try :
+    from pytz import timezone as tzone, utc
+    try:
+
         mtime  = os.path.getmtime(dirin)
         mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+        mtime2 = mtime2.replace(tzinfo=utc)
         mtime2 = mtime2.astimezone(tzone(timezone))
+        
         return mtime2.strftime(fmt)
     except:
         return ""
@@ -1295,15 +1296,45 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 ###################################################################################################
 def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
     """  search inside the files
+    Docs::
 
+        Args:
+            srch_pattern (:obj:`list` of :obj:'str'): List of strings to match with the content of the files.
+            Defaults to None.
+            mode (string): To search content using the srch.
+            Defaults to "str".
+            dir1 (str): Folder/Directory name to search its content.
+            Defaults to "".
+            file_pattern (str): File pattern to match with the content of the directory.
+            Defaults to "*.*".
+            dirlevel (int): Max dir level to search content.
+            Defaults to 1.
+
+        Returns:
+            Returns a panda dataframe with all the matches, the columns are the folllowing:
+            1.search: Word that was matched
+            2.filename: Directory where the match was found
+            3.lineno: Number of line where the match was found
+            4.pos: Position in the line where the match was found
+            5.line: The line where the match was found
+
+        Examples:
+        
+            from utilmy import oos
+
+            path = "/home/necromancer/Desktop/New"
+
+            content = oos.os_search_content(dir1=path,file_pattern="*")
+            # "content" is the dataframe
     """
     import pandas as pd
     if srch_pattern is None:
         srch_pattern = ["from ", "import "]
 
-    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    ###  'file', 'dir'
+    dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
     ll = []
-    for f in list_all["fullpath"]:
+    for f in dict_all["file"]:
         ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
     df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
     return df

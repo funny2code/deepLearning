@@ -8,19 +8,13 @@ from utilmy.debug import log
 
 def test_all():
     """function test_all.
-    Doc::
-            
-            Args:
-            Returns:
-                
     """
     test_decorators()	
     test_decorators2()
 
 def test_decorators():
     """.
-    Doc::
-            
+    Doc::            
             #### python test.py   test_decorators
     """
     from utilmy.decorators import thread_decorator, timeout_decorator, profiler_context,profiler_decorator, profiler_decorator_base
@@ -47,10 +41,7 @@ def test_decorators():
 def test_decorators2():
     """function test_decorators2.
     Doc::
-            
-            Args:
-            Returns:
-                
+
     """
     from utilmy.decorators import profiler_decorator, profiler_context
 
