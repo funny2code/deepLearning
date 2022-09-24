@@ -1272,6 +1272,26 @@ def test8_load_save():
 
 
 
+def test9_find_fuzzy():
+    import utilmy as m
+
+    d0 = os_get_dirtmp()
+
+    score_word_dict = {}
+    word = 'Catherine M Gitau'
+    wlist = ['Catherine Gitau', 'Gitau Catherine']
+    
+
+    log("\n####", m.find_fuzzy)
+    log(f"Similarity score of '{word}' with:")
+    from difflib import SequenceMatcher as SM
+    for wlist_word, score in zip(wlist, [SM(None, str(word), str(s2) ).ratio() for s2 in wlist]):
+        score_word_dict[score] = wlist_word
+        log(f"'{wlist_word}' - {score}")
+    highest_score_word = score_word_dict[max(list(score_word_dict.keys()))]
+    assert highest_score_word == m.find_fuzzy(word, wlist), f"FAILED -> find_fuzzy. Word with highest score should be {highest_score_word}, got {m.find_fuzzy(word, wlist)}"
+
+
 
 ###################################################################################################
 if __name__ == "__main__":
