@@ -216,6 +216,7 @@ def test1():
 
 
     #################
+    log("####### os_makedirs() ..")
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
     os_makedirs('/tmp/one/two')
@@ -253,34 +254,30 @@ def test2():
 
 
     log("#######   os_search_fast() ..")
-    ###TODO This one has bug
     uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
     res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
     assert  not log(res) and len(res) >0, res
 
-
-    ###TODO This one has bug
+    log("#######   os_search_content() ..")
     dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
     assert  not log(dfres) and len(dfres) >0, dfres
 
+    log("###### os_walk() ..")
+    folders = os_walk(path=dtmp,pattern="*.txt")
+    assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
 
+    # TODO this test has a bug
+    #log("#######   os_copy_safe() ..")
+    #uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
+    #os_copy_safe(drepo + "/testdata/tmp/test/*", drepo + "/testdata/tmp/test_copy_safe")
+    #f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt.txt"))
+    #assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
 
-    log("#######   os_copy_safe() ..")
-    os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
-
-
-    log(" os_copy")
-    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            )
+    log("####### os_copy() ..")
+    uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_test.txt")
+    os_copy(drepo + "/testdata/tmp/test/os_copy_test.txt", drepo + "/testdata/tmp/test_copy")
+    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy/os_copy_test.txt"))
+    assert  f == True, "The file os_copy_test.txt doesn't exist"
 
 
 def test4():
@@ -680,36 +677,37 @@ def os_remove(dirin="folder/**/*.parquet",
     """  Delete files with criteria, using glob_glob
     Docs::
 
-        dirin (string): Path with wildcards to match with folder to remove all its content.
-            Defaults to "folder/**/*.parquet".
-        min_size_mb (int): Min size of the files to remove.
-            Defaults to 0.
-        max_size_mb (int): Max size of the files to remove.
-            Defaults to 1.
-        exclude (string): Paths separated by commas to exclude.
-            Defaults to ""
-        include_only (string): Paths to only include if they are matched by the function.
-            Defaults to ""
-        ndays_past (int): Number of days past that the file must be old to remove.
-            Defaults to 1000
-        start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
-            Defaults to '1970-01-02'
-        end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
-            Defaults to '2050-01-01'
-        nfiles (int): Max number of files to remove.
-            Defaults to 99999999
-        dry (Boolean)=1: Flag to test only
-            Defaults to 0
-            
-    Example:
-        Deleting all files in a specified folder::
-            from utilmy import oos
-            
-            path = "/home/user/Desktop/example/*"
+        Args:
+            dirin (string): Path with wildcards to match with folder to remove all its content.
+                Defaults to "folder/**/*.parquet".
+            min_size_mb (int): Min size of the files to remove.
+                Defaults to 0.
+            max_size_mb (int): Max size of the files to remove.
+                Defaults to 1.
+            exclude (string): Paths separated by commas to exclude.
+                Defaults to ""
+            include_only (string): Paths to only include if they are matched by the function.
+                Defaults to ""
+            ndays_past (int): Number of days past that the file must be old to remove.
+                Defaults to 1000
+            start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
+                Defaults to '1970-01-02'
+            end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
+                Defaults to '2050-01-01'
+            nfiles (int): Max number of files to remove.
+                Defaults to 99999999
+            dry (Boolean)=1: Flag to test only
+                Defaults to 0
+                
+        Example:
+            Deleting all files in a specified folder::
+                from utilmy import oos
+                
+                path = "/home/user/Desktop/example/*"
 
-            oos.os_remove(path, ndays_past=0)
-            #All the files in "example" are deleted
-    
+                oos.os_remove(path, ndays_past=0)
+                #All the files in "example" are deleted
+        
     """
     import os, sys, time, glob, datetime as dt
 
@@ -1176,12 +1174,30 @@ def os_file_info(dirin, returnval='list', date_format='unix'):
 
 def os_walk(path, pattern="*", dirlevel=50):
     """  Get files from  sub-folder, same than glob_glob
-    Doc ::
+    Docs::
+        Args:
+        path (string): Path of the file to get all its sub-folder paths.
+        pattern (string): Pattern with wildcards like used in Unix shells.
+            Defaults to "*".
+        dirlevel (int): Level of sub-folders or sub-directories to get.
+            Defaults to 50.
 
-        dirlevel=0 : root directory
-        dirlevel=1 : 1 path below
+            Example: 
+                dirlevel=0 : root directory
+                dirlevel=1 : 1 path below
+        Returns:
+            Returns dict of  ['file'  , 'dir'].
 
-        return dict of  ['file'  , 'dir']
+        Example:
+
+            from utilmy import oos
+
+            path = "/home/username/Desktop/example"
+
+            sub_folders = oos.os_walk(path=path)
+
+            print("Sub folders:",sub_folders)
+            # All the sub-folders of the folder named example
 
     """
     import fnmatch, os, numpy as np
@@ -1342,11 +1358,29 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
 
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
-    Args:
-        fname:
-        texts:
-        mode:
-    Returns:
+    Docs::
+        Args:
+            fname (string): Path of the file to search texts that match.
+            texts (:obj:`list` of :obj:'str'): List of words or regex to search in the file.
+            mode (string): To take the argument called "texts" as a list of text or a list of regex.
+                There are two allowed values:
+                - "regex"
+                - "str"
+        Returns:
+            Return a list of tuples that each tuple has the following values of each match:
+                1.First value: Word that was matched.
+                2.Second value: Directory where the match was found.
+                3.Third value: Number of line where the match was found.
+                4.Fourth value: Position in the line where the match was found.
+                5.Fifth value: The line where the match was found.
+        Examples:
+            from utilmy import oos
+
+            path = "/home/username/Desktop/example/test"
+
+            searching = oos.z_os_search_fast(fname=path,texts=["dummy"], mode="str")
+
+            print("Searching result:", searching)
 
     """
     import re
