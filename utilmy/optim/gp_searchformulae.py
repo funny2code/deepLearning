@@ -1181,14 +1181,21 @@ class myProblem_ranking_v2:
         l1  = [ 1.0,  17.6, 37.5  ]
         l2 = [ 47.2,  4.7, 0.3  ]
         diff = 0 
+        costSimple = len(formulae_str) * 0.003
         for i in range(2): 
             x0 = l1[i]
             x1 = l2[i]
-            s1 = eval(formulae_str)
+            try:
+                s1 = eval(formulae_str)
+            except:
+                s1 = 10000
 
             x0 = l2[i]
             x1 = l1[i]
-            s2 = eval(formulae_str)
+            try:
+                s2 = eval(formulae_str)
+            except:
+                s2 = 10000
             diff += abs(s1 - s2)
         if diff > 0.1: 
             return 1e4
@@ -1214,6 +1221,7 @@ class myProblem_ranking_v2:
 
         correlm = np.mean(correls)
         cost  = 10.0*(1-correlm)
+        cost = cost + costSimple
 
         ### minimize cost
         return cost
