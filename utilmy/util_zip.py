@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-""" All about zipping files
-
-
-
-"""
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 import shutil, tarfile, zipfile
 from typing import Optional, Union
@@ -183,3 +178,41 @@ def to_file(s, filep):
         
         
         
+        
+        
+##########################################################################################
+################### Logs Wrapper #########################################################
+"""
+from loguru import logger
+
+def log(*s):
+    logger.info(",".join([str(t) for t in s]))
+
+
+def log2(*s):
+    logger.debug(",".join([str(t) for t in s]))
+
+
+def logw(*s):
+    logger.warning(",".join([str(t) for t in s]))
+
+
+def loge(*s):
+    logger.error(",".join([str(t) for t in s]))
+
+
+def logger_setup():
+    config = {
+        "handlers": [
+            {
+                "sink": sys.stdout,
+                "format": "<level>{level: <8}</level>| <level>{message}</level>",
+            }
+        ]
+    }
+    logger.configure(**config)
+
+
+logger_setup()
+
+"""        
