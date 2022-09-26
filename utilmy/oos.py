@@ -370,9 +370,7 @@ def test6_os():
     log(res)
     '''
 
-    # TODO: Add test to this function here.
-    log("#######   os_get_function_name() ..")
-    log(os_get_function_name())
+   
 
 
     log("#######   os_system_list() ..")
