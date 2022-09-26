@@ -357,10 +357,6 @@ def test6_os():
     # TODO: Add test to this function here
     log("#######   os_file_replacestring() ..")
 
-    # TODO Add test to this function here
-    log("#######   os_search_content() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
-    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
 
 
     cwd = os.getcwd()
@@ -369,8 +365,6 @@ def test6_os():
     res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
     log(res)
     '''
-
-   
 
 
     log("#######   os_system_list() ..")
