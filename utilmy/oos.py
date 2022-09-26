@@ -319,7 +319,8 @@ def test4():
 
 
 def test6_os():
-
+    """function test6_os
+    """
     #from utilmy import oos as m
     import utilmy as uu
     drepo, dtmp = uu.dir_testinfo()
@@ -405,6 +406,8 @@ def test6_os():
 
 
 def test7_os():
+    """function test7_os
+    """
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -421,6 +424,8 @@ def test7_os():
 
 
 def test8():
+    """function test8
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
     
@@ -484,6 +489,8 @@ def test8():
 
 
 def test8_os():
+    """function test8_os
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -580,7 +587,24 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=min_size_mb, max_size_mb=max_size_mb,
             ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
             nfiles=nfiles, verbose=verbose,npool=npool):
+        """
+        Docs::
 
+            dirin=dirin
+            file_list=file_list
+            exclude=exclude
+            include_only=include_only
+            min_size_mb=min_size_mb
+            max_size_mb=max_size_mb
+            ndays_past=ndays_past
+            nmin_past=nmin_past
+            start_date=start_date
+            end_date=end_date
+            nfiles=nfiles
+            verbose=verbose
+            npool=npool
+
+        """
         if dirin and not file_list:
             files = glob.glob(dirin, recursive=True)
             files = sorted(files)
@@ -788,6 +812,12 @@ class fileCache(object):
 
 
     def get(self, path):
+        """ method get
+         Docs::
+
+              path: str
+
+         """
         path = path.replace("\\","/")
         return self.db.get(path, None)
 
@@ -820,8 +850,18 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
 
           mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
-
-
+          mode='file'
+          exclude=""
+          include_only=""
+          min_size_mb=0
+          max_size_mb=500000
+          ndays_past=-1
+          nmin_past=-1
+          start_date='1970-01-02'
+          end_date='2050-01-01'
+          nfiles=99999999
+          verbose=0
+          dry=0
 
     """
     import os, shutil
@@ -859,6 +899,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
     """ Copy safe, using callback command to re-connect network if broken
     Docs::
 
+        dirin:str=None
+        dirout:str=None
+        nlevel=5
+        nfile=5000
+        logdir="./"
+        pattern="*"
+        exclude=""
+        force=False
+        sleep=0.5
+        cmd_fallback=""
+        verbose=True
 
     """
     import shutil, time, os, glob
@@ -1123,6 +1174,12 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
 
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
+    Docs::
+
+    dirin:str -The time of last modification of the specified path
+    fmt:str="%Y%m%d-%H:%M" -Time format
+    timezone:str='Asia/Tokyo' -Timezone
+
     """
     import datetime
     from pytz import timezone as tzone, utc
@@ -1140,6 +1197,10 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 
 def os_file_check(fpath:str):
    """Check file stat info
+   Docs::
+
+        fpath: str
+
    """
    import os, time
 
@@ -1157,7 +1218,11 @@ def os_file_check(fpath:str):
 # TODO
 def os_file_info(dirin, returnval='list', date_format='unix'):
     """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
+    Docs::
 
+        dirin
+        returnval='list'
+        date_format='unix'
 
     """
     flist = glob_glob(dirin)
@@ -1571,7 +1636,7 @@ def os_get_uniqueid(format="int"):
 
 
 def os_get_os():
-    """function os_platform_os
+    """function os_get_os
     """
     import platform
     return platform.system()
