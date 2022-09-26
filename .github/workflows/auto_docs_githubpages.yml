@@ -84,14 +84,14 @@ jobs:
     ################################################################################
     #- name: Prereqs
     #  env:
-    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
     #  #run: |
     #  #  apt-get update
     #  #  apt-get install -y git
 
     - name: Execute script to build our documentation and update pages
       env:
-
+      
         #### Be careful than secrets exist
         GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
       run: |

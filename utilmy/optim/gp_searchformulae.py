@@ -1009,6 +1009,274 @@ class myProblem_ranking:
 
 
 
+class myProblem_ranking_v2:
+    def __init__(self,n_sample = 100,kk = 1.0,nsize = 100,ncorrect1 = 50,ncorrect2 = 50,adjust=1.0):
+        """  Define the problem and cost calculation using formulae_str
+        Docs::
+
+            Problem
+
+            2 list of items,  out of  100 items.
+
+                 A = [ 'a1', 'a10',   'a7',  'a100']    paritally orderd  Rank 0 :  A[0] = 'a1'   ### measure, signal
+
+                 B = [ 'a7', 'a17',   'a29',  'a67']    paritally ordered  Rank 2   A[2] = 'a29'  ## measure
+
+
+                 #### Dependance.
+                 ScoreFormuale  = F( % of correct in A, % of correct in B,   Overlap between A and B,  ...)
+
+
+
+            Goal is to merge them into a single list    and BEST WAY. --> need to use a score
+            Cmerge = [ 'a1', 'a7',  ....  'a10',        ]
+
+
+            ### TO DO, use a score function  (heuristic manually)
+                score(item_k)  =  1/( 1+ rank_listA(item_k) )   + 1/(1 + rank_listB(item_k)   )  
+
+                score('a7')  =  1/( 1+ rank_listA('a7') )   + 1/(1 + rank_listB('a7')   )  
+                             =  1/(1 + 2)                         + 1/(1 + 0)
+
+                score('a10')  =  1/( 1+ rank_listA('a10') )   + 1/(1 + rank_listB('a10')   )  
+                             =  1/(1 + 1)                         + 1/(1 +  lenB)  
+
+
+           #### Find Formulae , what the below doing.
+              TrueList = [  ]
+              correlationSPEARMN(TrueList, NewSample_mergeList)  --->  1.0   Better                  
+
+            Conditions
+                 formulae is SYmeetric   rankA, rankB    CANNOT 1/rank1 - 1/rank2  --> not symentric
+                 Derivates negative in   Dformuale/drank < 0.0  
+
+                 test8()
+
+
+
+            n_sample        : Number of Samples list to be generated, default = 5
+            kk              : Change the fake generated list rank , default = 1.0
+            ncorrect1       : the number of correctly ranked objects for first list , default = 40
+            ncorrect2       : the number of correctly ranked objects for second list , default = 50
+            adjust
+
+            myProblem.get_cost(   )
+
+            ---- My Problem
+            2)  list with scores (ie randomly generated)
+            We use 1 formulae to merge  2 list --> merge_list with score
+               Ojective to maximize  correlation(merge_list,  True_ordered_list)
+
+            Goal is to find a formulae, which make merge_list as much sorted as possible
+
+        """
+        import random as randomize
+        randomize.seed(100000)
+        self.n_sample  = n_sample
+        self.kk        = kk
+        self.nsize     = nsize
+        self.ncorrect1 = ncorrect1
+        self.ncorrect2 = ncorrect2
+        self.adjust    = adjust
+
+        self.x0_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
+        self.x0_rank_based_x1 = self.get_rank_based_other(self.x0_list, self.x1_list)
+        self.x1_rank_based_x0 = self.get_rank_based_other(self.x1_list, self.x0_list)
+
+
+    def get_cost(self, expr:None, symbols):
+        """ Cost Calculation, Objective to Maximize
+        Docs::
+
+            expr            : Expression whose cost has to be maximized
+            symbols         : Symbols
+
+        """
+        correlm = self.get_correlm(formulae_str=expr(symbols)[0])
+        check = 3
+        return correlm,check
+
+
+    def get_correlm(self, formulae_str:str):
+        """  Compare 2 lists lnew, ltrue and output correlation.
+             Goal is to find rank_score such Max(correl(lnew(rank_score), ltrue ))
+
+        Docs:
+            formulae_str            : Formulae String
+
+        """
+        l1  = [ 1.0,  17.6, 37.5  ]
+        l2 = [ 47.2,  4.7, 0.3  ]
+        diff = 0 
+        costSimple = len(formulae_str) * 0.003
+        for i in range(2): 
+            x0 = l1[i]
+            x1 = l2[i]
+            try:
+                s1 = eval(formulae_str)
+            except:
+                s1 = 10000
+
+            x0 = l2[i]
+            x1 = l1[i]
+            try:
+                s2 = eval(formulae_str)
+            except:
+                s2 = 10000
+            diff += abs(s1 - s2)
+        if diff > 0.1: 
+            return 1e4
+
+        from scipy import stats, signal
+        ##### True list
+        ltrue = np.arange(0,100, 1) #[ i  for i in range(0, 100) ]
+
+        correls = []
+        for i in range(self.n_sample):
+            ll1 = self.x0_list[i]
+            ll2 = self.x1_rank_based_x0[i]
+
+            #### Merge them using rank_score
+            lnew = self.rank_merge_v5(ll1, ll2, formulae_str=formulae_str)
+            lnew = lnew[:100]
+
+            ### Eval with True Rank              #We can also use kendmall equation
+            # c1 = stats.spearmanr(ltrue,  lnew).correlation
+            c1 = stats.kendalltau(ltrue, lnew).correlation
+            correls.append(c1)
+
+
+        correlm = np.mean(correls)
+        cost  = 10.0*(1-correlm)
+        cost = cost + costSimple
+
+        ### minimize cost
+        return cost
+
+
+    def rank_score(self, formulae_str:str, rank1:list, rank2:list)-> list:
+        """  ## Example of rank_scores0 = Formulae(list_ score1, list_score2)
+             ## Take 2 np.array and calculate one list of float (ie NEW scores for position)
+        Docs::
+
+            list of items:  a,b,c,d, ...
+            item      a,b,c,d,e
+            rank1 :   1,2,3,4 ,,n     (  a: 1,  b:2, ..)
+            rank2 :   5,7,2,1 ,,n     (  a: 5,  b:6, ..)
+
+            scores_new :   a: -7.999,  b:-2.2323
+            (item has new scores)
+
+        """
+        ### Check if formulae had number of x1 and x05
+        """
+        rlist  = np.random.random(5)
+        rlist2 = np.random.random(5)
+
+        difflist  = []
+        for i in range(10):
+           x0 = rlist[i]
+           x1 = rlist2[i]
+           s1 =  eval(fornulae_str)
+
+           x0 = rlist2[i]
+           x1 = rlist[i]
+           s2 =  eval(fornulae_str)
+           difflist.append(abs(s1-s2))
+
+
+        if np.sum(difflist) > 0.1 :  ###not symmetric --> put high cost, remove.
+             scores_new = 0.99 + np.zeros(len(rank1))
+             return scores_new
+
+        """
+
+        ### numpy vector :  take inverse of rank As PROXT.
+        x0 = 1/(self.kk + rank1)
+        x1 = 1/(self.kk + rank2*self.adjust)
+        scores_new =  eval(formulae_str)
+
+
+        return scores_new
+
+    def get_rank_based_other(self, l1: list, l2: list): 
+        """
+            Create the rank of all lists in l1 based on corresponding list in l2. 
+        """
+        rank_of_l1_based_l2 = []
+        for i in range(len(l1)): 
+            ll1, ll2 = l1[i], l2[i]
+            n1, n2 = len(ll1), len(ll2)
+
+            ll1 = dict(zip(ll1, range(len(ll1))))
+            # ll1 = {x:i for i,x in enumerate( ll1 )  }  ### Most costly op, 50% time.
+
+            mrank = n2
+            rank = np.array([ll1.get(sid, mrank) for sid in ll2])
+            rank_of_l1_based_l2.append(rank)
+        return rank_of_l1_based_l2
+
+    def rank_merge_v5(self, ll1:list, ll2:list, formulae_str):
+        """ ## Merge 2 list using a FORMULAE
+        Docs::
+
+        l1              : 1st generated list
+        l2:             : 2nd generated list
+        formulae_str    : string
+            Re-rank elements of list1 using ranking of list2
+            20k dataframe : 6 sec ,  4sec if dict is pre-build
+            Fastest possible in python
+        """
+        if len(ll2) < 1: return ll1
+        n1, n2 = len(ll1), len(ll2)
+
+        rank1 = np.arange(n1)
+        rank2 = ll2
+        rank3 = self.rank_score(formulae_str=formulae_str, rank1=rank1, rank2= rank2) ### Score
+
+        #### re-rank  based on NEW Scores.
+        v = np.array([ll1[i] for i in np.argsort(rank3)])
+        return v  #### for later preprocess
+
+
+    #### Generate fake list to be merged.
+    def rank_generate_fake(self,dict_full, list_overlap, nsize=100, ncorrect=20):
+        """  Returns a list of random rankings of size nsize where ncorrect elements have correct ranks
+        Docs::
+
+            dict_full    : a dictionary of 1000 objects and their ranks
+            list_overlap : list items common to all lists
+            nsize        : the total number of elements to be ranked
+            ncorrect     : the number of correctly ranked objects
+        """
+        # first randomly sample nsize - len(list_overlap) elements from dict_full
+        # of those, ncorrect of them must be correctly ranked
+        import random as randomize
+        random_vals = []
+        while len(random_vals) <= nsize - len(list_overlap):
+            rand = randomize.sample(list(dict_full), 1)
+            if (rand not in random_vals and rand not in list_overlap):
+                random_vals.append(rand[0])
+
+        # next create list as aggregate of random_vals and list_overlap
+        list_overlap = list(list_overlap)
+        list2 = random_vals + list_overlap
+
+        # shuffle nsize - ncorrect elements from list2
+        copy1 = list2[0:nsize - ncorrect]
+        randomize.shuffle(copy1)
+        list2[0:nsize - ncorrect] = copy1
+
+        # ensure there are ncorrect elements in correct places
+        if ncorrect == 0:
+            return list2
+        rands = randomize.sample(list(dict_full)[0:nsize + 1], ncorrect + 1)
+        for r in rands:
+            list2[r] = list(dict_full)[r]
+        return list2
+
+
 
 ###################################################################################################
 def search_formulae_dcgpy_v1(problem=None, pars_dict:dict=None, verbose=1, ):
