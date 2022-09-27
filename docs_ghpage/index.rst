@@ -9,6 +9,14 @@ Welcome to helloWorld's
    modules
 
 
+.. 
+    coment: https://stackoverflow.com/questions/4783814/how-to-comment-a-string-in-restructured-text
+    https://stackoverflow.com/questions/58486590/sphinx-sidebar-include-modules-functions-and-class-methods
+
+    https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+
+
+
 .. uml:: utilmy
     :classes:
     :packages:
