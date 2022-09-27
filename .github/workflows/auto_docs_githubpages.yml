@@ -7,9 +7,11 @@ on:
   workflow_dispatch:
     inputs:  
     
+
 #  schedule:
-#    - cron:  '0 14 * * *'      #### 60mins
+#    - cron:  '0 14 * * *'      #### every day at 14pm
 #    #    - cron:  '*/10 * * * *'
+
 
   push:
     branches:
@@ -91,8 +93,6 @@ jobs:
 
     - name: Execute script to build our documentation and update pages
       env:
-      
-        #### Be careful than secrets exist
         GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
       run: |
         chmod -R 777 docs_ghpage
