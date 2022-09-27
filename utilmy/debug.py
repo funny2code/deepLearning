@@ -6,26 +6,25 @@ Doc::
 
     pip install filprofiler
 
-    https://github.com/alexmojaki/snoop
-
 
 
 
 """
 import itertools, time, multiprocessing, pandas as pd, numpy as np, pickle, gc
-import os, sys, time, datetime,inspect, json, yaml, gc
-from collections import OrderedDict
 
-###################################################################################################
-from utilmy.utilmy_base import log, log2
+#################################################################################################
+def log(*s):
+    """function log.         """
+    print(*s, flush=True)
+
 
 def help():
-    from utilmy import help_create
-    ss  = help_create(__file__)  #### Merge test code
+    """function help."""
+    ss  = ""
     print(ss)
 
 
-###################################################################################################
+
 def print_everywhere():
     """.
     Doc::
@@ -58,7 +57,7 @@ def log10(*s, nmax=60):
         print(nameof(x, frame=2), ":", type(x), "\n",  str(x)[:nmax], "\n")
 
 
-def logvar(*s):
+def logic(*s):
     """    ### Equivalent of print, but more :  https://github.com/gruns/icecream.
     Doc::
             
@@ -210,12 +209,4 @@ def test2():
         log('Running ' + get_function_name() + '(' + str(get_function_parameters_and_values()) +')')
 
 
-
-
-
-
-###################################################################################################
-if __name__ == "__main__":
-    import fire
-    fire.Fire()
 

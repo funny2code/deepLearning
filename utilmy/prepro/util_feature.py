@@ -1,69 +1,25 @@
+# pylint: disable=C0321,C0103,E1221,C0301,E1305,E1121,C0302,C0330
 # -*- coding: utf-8 -*-
-"""Methods for feature extraction and preprocessing util_feature: input/output is pandas
-Docs::
-
-    col_extractname(col_onehot)
-    col_remove(cols, colsremove, mode = "exact")
-    estimator_boostrap_bayes(err, alpha = 0.05, )
-    estimator_bootstrap(err, custom_stat = None, alpha = 0.05, n_iter = 10000)
-    estimator_std_normal(err, alpha = 0.05, )
-    feature_correlation_cat(df, colused)
-    feature_importance_perm(clf, Xtrain, ytrain, cols, n_repeats = 8, scoring = 'neg_root_mean_squared_error', show_graph = 1)
-    feature_selection_multicolinear(df, threshold = 1.0)
-    fetch_dataset(url_dataset, path_target = None, file_target = None)
-    fetch_spark_koalas(path_data_x, path_data_y = '', colid = "jobId", n_sample = -1)
-    load(file_name)
-    load_dataset(path_data_x, path_data_y = '', colid = "jobId", n_sample = -1)
-    load_features(name, path)
-    load_function_uri(uri_name="myfolder/myfile.py = "myfolder/myfile.py::myFunction")
-
-    metrics_eval(metric_list = ["mean_squared_error"], ytrue = None, ypred = None, ypred_proba = None, return_dict = False)
-    np_conv_to_one_col(np_array, sep_char = "_")
-    os_get_function_name()
-    os_getcwd()
-    pa_read_file(path =   'folder_parquet/', cols = None, n_rows = 1000, file_start = 0, file_end = 100000, verbose = 1, )
-    pa_write_file(df, path =   'folder_parquet/', cols = None, n_rows = 1000, partition_cols = None, overwrite = True, verbose = 1, filesystem  =  'hdfs')
-    params_check(pars, check_list, name = "")
-    pd_col_fillna(dfref, colname = None, method = "frequent", value = None, colgroupby = None, return_val = "dataframe,param", )
-    pd_col_filter(df, filter_val = None, iscol = 1)
-    pd_col_merge_onehot(df, colname)
-    pd_col_to_num(df, colname = None, default = np.nan)
-    pd_col_to_onehot(dfref, colname = None, colonehot = None, return_val = "dataframe,column")
-    pd_colcat_mapping(df, colname)
-    pd_colcat_mergecol(df, col_list, x0, colid = "easy_id")
-    pd_colcat_toint(dfref, colname, colcat_map = None, suffix = None)
-    pd_colcat_tonum(df, colcat = "all", drop_single_label = False, drop_fact_dict = True)
-    pd_colnum_normalize(df0, colname, pars, suffix = "_norm", return_val = 'dataframe,param')
-    pd_colnum_tocat(df, colname = None, colexclude = None, colbinmap = None, bins = 5, suffix = "_bin", method = "uniform", na_value = -1, return_val = "dataframe,param", params={"KMeans_n_clusters" = {"KMeans_n_clusters": 8, "KMeans_init": 'k-means++', "KMeans_n_init": 10,"KMeans_max_iter": 300, "KMeans_tol": 0.0001, "KMeans_precompute_distances": 'auto',"KMeans_verbose": 0, "KMeans_random_state": None,"KMeans_copy_x": True, "KMeans_n_jobs": None, "KMeans_algorithm": 'auto'})
-    pd_colnum_tocat_stat(df, feature, target_col, bins, cuts = 0)
-    pd_feature_generate_cross(df, cols, cols_cross_input = None, pct_threshold = 0.2, m_combination = 2)
-    pd_pipeline_apply(df, pipeline)
-    pd_read_file(path_glob = "*.pkl", ignore_index = True, cols = None, verbose = False, nrows = -1, concat_sort = True, n_pool = 1, drop_duplicates = None, col_filter = None, col_filter_val = None, **kw)
-    pd_stat_correl_pair(df, coltarget = None, colname = None)
-    pd_stat_dataset_shift(dftrain, dftest, colused, nsample = 10000, buckets = 5, axis = 0)
-    pd_stat_datashift_psi(expected, actual, buckettype = 'bins', buckets = 10, axis = 0)
-    pd_stat_distribution_colnum(df, nrows = 2000, verbose = False)
-    pd_stat_histogram(df, bins = 50, coltarget = "diff")
-    pd_stat_pandas_profile(df, savefile = "report.html", title = "Pandas Profile")
-    pd_stat_shift_changes(df, target_col, features_list = 0, bins = 10, df_test = 0)
-    pd_stat_shift_trend_changes(df, feature, target_col, threshold = 0.03)
-    pd_stat_shift_trend_correlation(df, df_test, colname, target_col)
-    save(obj, path)
-    save_features(df, name, path = None)
-    save_list(path, name_list, glob)
-    test_get_classification_data(name = None)
-    test_heteroscedacity(y, y_pred, pred_value_only = 1)
-    test_mutualinfo(error, Xtest, colname = None, bins = 5)
-    test_normality(error, distribution = "norm", test_size_limit = 5000)
-
-
-
+"""
+Methods for feature extraction and preprocessing
+util_feature: input/output is pandas
 """
 import os, sys, copy, re, numpy as np, pandas as pd
 from collections import OrderedDict
 #############################################################################################
-from utilmy import log, log2, log3
 verbosity = 5
+
+def log(*s, n=0, m=1, **kw):
+    sspace = "#" * n
+    sjump = "\n" * m
+    ### Implement Logging
+    print(sjump, sspace, s, sspace, flush=True, **kw)
+
+def log2(*s, **kw):
+    if verbosity >=2 : print(*s, flush=True, **kw)
+
+def log3(*s, **kw):
+    if verbosity >=2 : print(*s, flush=True, **kw)
 
 log2("os.getcwd", os.getcwd())
 
