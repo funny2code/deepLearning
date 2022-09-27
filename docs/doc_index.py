@@ -3,9 +3,16 @@
 utilmy/__init__.py
 
 
+utilmy/abash.py
+-------------------------functions----------------------
+adocker()
+
+
+
 utilmy/adatasets.py
 -------------------------functions----------------------
 help()
+pd_generate_random_genders(size, p = None)
 template_dataset_classifier_XXXXX(nrows = 500, **kw)
 test()
 test1()
@@ -304,15 +311,14 @@ utilmy/configs/logs/test_log.py
 -------------------------functions----------------------
 test1()
 test2()
-test_launch_server()
-test_server()
+test_all()
+test_logging()
 
--------------------------methods----------------------
-LoggingStreamHandler.handle(self)
 
 
 utilmy/configs/logs/util_log.py
 -------------------------functions----------------------
+test_all()
 z_logger_custom_1()
 z_logger_stdout_override()
 
@@ -392,7 +398,6 @@ utilmy/dates.py
 -------------------------functions----------------------
 date_generate(start = '2018-01-01', ndays = 100)
 date_is_holiday(array)
-date_now(fmt="%Y-%m-%d %H = "%Y-%m-%d %H:%M:%S %Z%z", add_days = 0, timezone = 'Asia/Tokyo')
 date_to_timezone(tdate, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
 date_weekday_excel(x)
 date_weekmonth(date_value)
@@ -401,8 +406,9 @@ date_weekyear2(dt)
 date_weekyear_excel(x)
 help()
 pd_date_split(df, coldate  =   'time_key', prefix_col  = "", sep = "/", verbose = False)
-random_dates(start, end, size)
-random_genders(size, p = None)
+pd_random_daterange(start, end, size)
+test1()
+test2()
 test_all()
 
 
@@ -479,10 +485,12 @@ utilmy/db/util_sql.py
 utilmy/debug.py
 -------------------------functions----------------------
 help()
-log(*s)
 log10(*s, nmax = 60)
+log_debug_everywhere()
 log_trace(msg = "", dump_path = "", globs = None)
-logic(*s)
+logfull(*s, nmax = 60)
+logfull2(*s)
+logvar(*s)
 os_get_function_name()
 os_get_function_parameters_and_values()
 os_typehint_check(fun)
@@ -2035,7 +2043,6 @@ yolov5_from_xml(xml_file_path:str  =  "None", xml_folder:str =  "None", output:s
 
 utilmy/distributed.py
 -------------------------functions----------------------
-date_now(fmt = "%Y-%m-%d %H =  "%Y-%m-%d %H:%M:%S %Z%z")
 help()
 load(to_file = "")
 load_serialize(name)
@@ -2402,22 +2409,21 @@ loaddf()
 
 
 
-utilmy/graph.py
-
-
 utilmy/graph/__init__.py
 
 
 utilmy/graph/util_graph.py
 -------------------------functions----------------------
-dag_create_network(df_or_file: Union[str, pd.DataFrame], cola, colb, colvertex = "")
-dag_load(dirin = "")
-dag_pagerank(net)
-dag_save(net, dirout)
+dag_networkit_convert(df_or_file: pd.DataFrame, cola = 'cola', colb = 'colb', colvertex = "", nrows = 1000)
+dag_networkit_load(dirin = "", model_target = 'networkit', nrows = 1000, cola = 'cola', colb = 'colb', colvertex = '')
+dag_networkit_save(net, dirout, format = 'metis/gml/parquet', tag = "", cols =  None, index_map = None, n_vertex = 1000)
 help()
 pd_plot_network(df:pd.DataFrame, cola: str = 'col_node1', colb: str = 'col_node2', coledge: str = 'col_edge', colweight: str = "weight", html_code:bool  =  True)
 test1()
 test_all()
+test_get_amazon()
+test_networkit(net)
+test_pd_create_dag(nrows = 1000, n_nodes = 100)
 
 
 
@@ -2516,10 +2522,10 @@ ztest1(dirin = 'final_dataset_clean_v2 .tsv')
 
 -------------------------methods----------------------
 KGEmbedder.__init__(self, graph:ntx.MultiDiGraph, embedding_dim:int, dirin:str = "./mydatain/", dirout:str = "./mydataout/", )
-KGEmbedder.compute_embeddings(self, batch_size = 64, n_epochs = 8)
+KGEmbedder.compute_embeddings(self, path_to_embeddings, batch_size, n_epochs = 8)
 KGEmbedder.load_embeddings(self, path_to_embeddings:str)
+KGEmbedder.model_init(self, dirmodel_in = None, do_train = False)
 KGEmbedder.save_embeddings(self, )
-KGEmbedder.setup_embeddings(self, )
 NERExtractor.__init__(self, dirin_or_df:pd.DataFrame, dirout:str = "./mydataout/", model_name = "ro_core_news_sm")
 NERExtractor.export_data(self, dirout = None)
 NERExtractor.extract_entities(self, sents:List[str])
@@ -2805,8 +2811,8 @@ is_float(x)
 is_int(x)
 np_add_remove(set_, to_remove, to_add)
 np_list_intersection(l1, l2)
-test0()
 test1()
+test1_convert()
 to_datetime(x)
 to_dict(**kw)
 to_float(x, valdef = -1)
@@ -2822,6 +2828,61 @@ dict_to_namespace.__init__(self, d)
 fixedDict.__init__(self, *args, **kwds)
 fixedDict.__setitem__(self, key, value)
 fixedDict._check_size_limit(self)
+
+
+utilmy/oos.py
+-------------------------functions----------------------
+glob_glob(dirin = "", file_list = [], exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, npool = 1)
+help()
+os_copy(dirfrom = "folder/**/*.parquet", dirto = "", mode = 'file', exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, dry = 0)
+os_copy_safe(dirin:str = None, dirout:str = None, nlevel = 5, nfile = 5000, logdir = "./", pattern = "*", exclude = "", force = False, sleep = 0.5, cmd_fallback = "", verbose = Trueimport shutil, time, os, globflist = [] ; dirinj = dirinnlevel) =  [] ; dirinj = dirinnlevel):)
+os_cpu_info()
+os_file_check(fpath:str)
+os_file_date_modified(dirin, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
+os_file_info(dirin, returnval = 'list', date_format = 'unix')
+os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel = 1)
+os_get_function_name()
+os_get_ip(mode = 'internal')
+os_get_os()
+os_get_uniqueid(format = "int")
+os_getcwd()
+os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
+os_makedirs(dir_or_file)
+os_merge_safe(dirin_list = None, dirout = None, nlevel = 5, nfile = 5000, nrows = 10**8, cmd_fallback  =  "umount /mydrive/  && mount /mydrive/  ", sleep = 0.3)
+os_monkeypatch_help()
+os_path_size(path  =  '.')
+os_path_split(fpath:str = "")
+os_process_list()
+os_ram_info()
+os_ram_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
+os_remove(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", ndays_past = 1000, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
+os_removedirs(path, verbose = False)
+os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
+os_system(cmd, doprint = False)
+os_system_list(ll, logfile = None, sleep_sec = 10)
+os_variable_check(ll, globs = None, do_terminate = True)
+os_variable_del(varlist, globx)
+os_variable_exist(x, globs, msg = "")
+os_variable_init(ll, globs)
+os_wait_processes(nhours = 7)
+os_walk(path, pattern = "*", dirlevel = 50)
+test1()
+test2()
+test4()
+test6_os()
+test7_os()
+test8()
+test8_os()
+test_all()
+test_filecache()
+test_globglob()
+test_os_module_uncache()
+z_os_search_fast(fname, texts = None, mode = "regex/str")
+
+-------------------------methods----------------------
+fileCache.__init__(self, dir_cache = None, ttl = None, size_limit = 10000000, verbose = 1)
+fileCache.get(self, path)
+fileCache.set(self, path:str, flist:list, ttl = None)
 
 
 utilmy/optim/__init__.py
@@ -2868,10 +2929,12 @@ test1_parallel2()
 test1_parallel_island()
 test2()
 test3()
-test4()
+test4_newton(x = 5)
 test5()
 test6()
 test7()
+test8()
+test9()
 test_all()
 test_pars_values()
 zzz_search_formulae_dcgpy_cuckoo(myproblem = None, pars_dict:dict = None, verbose = False, )
@@ -2890,12 +2953,22 @@ myProblem5.get_data(self)
 myProblem6.__init__(self)
 myProblem6.get_cost_symbolic(self, dCGP)
 myProblem6.get_data_symbolic(self)
-myProblem_ranking.__init__(self, n_sample  =  5, kk  =  1.0, nsize  =  100, ncorrect1  =  40, ncorrect2  =  50, adjust = 1.0)
-myProblem_ranking.get_correlm(self, formulae_str:str)
+myProblem7.__init__(self)
+myProblem7.get_cost(self, dCGP, symbols)
+myProblem_ranking.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking.check(self)
+myProblem_ranking.get_correlm(self, formulae_str)
 myProblem_ranking.get_cost(self, expr:None, symbols)
 myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
 myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
 myProblem_ranking.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
+myProblem_ranking_v2.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking_v2.get_correlm(self, formulae_str:str)
+myProblem_ranking_v2.get_cost(self, expr:None, symbols)
+myProblem_ranking_v2.get_rank_based_other(self, l1: list, l2: list)
+myProblem_ranking_v2.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem_ranking_v2.rank_merge_v5(self, ll1:list, ll2:list, formulae_str)
+myProblem_ranking_v2.rank_score(self, formulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/optim/util_hyper.py
@@ -3028,7 +3101,8 @@ np_add_remove(set_, to_remove, to_add)
 np_list_intersection(l1, l2)
 pd_add_noise(df, level = 0.05, cols_exclude:list = [])
 pd_cartesian(df1, df2)
-pd_col_bins(df, col, nbins = 5)
+pd_col_bins(df, col: str, nbins: int  =  5)
+pd_colcat_toint(dfref, colname, colcat_map = None, suffix = None)
 pd_cols_unique_count(df, cols_exclude:list = [], nsample = -1)
 pd_del(df, cols:list)
 pd_dtype_count_unique(df, col_continuous = [])
@@ -3048,6 +3122,7 @@ pd_to_hiveparquet(dirin, dirout = "/ztmp_hive_parquet/df.parquet", verbose = Fal
 pd_to_mapdict(df, colkey = 'ranid', colval = 'item_tag', naval = '0', colkey_type = 'str', colval_type = 'str', npool = 5, nrows = 900900900, verbose = True)
 test2()
 test_all()
+test_pd_col_bins()
 to_datetime(x)
 to_dict(**kw)
 to_float(x)
@@ -3079,9 +3154,6 @@ utilmy/prepro/prepro.py
 -------------------------functions----------------------
 _pd_colnum(df, col, pars)
 _pd_colnum_fill_na_median(df, col, pars)
-log(*s)
-log2(*s)
-log3(*s)
 log4(*s, n = 0, m = 1)
 log4_pd(name, df, *s)
 os_convert_topython_code(txt)
@@ -3175,9 +3247,6 @@ load(file_name)
 load_dataset(path_data_x, path_data_y = '', colid = "jobId", n_sample = -1)
 load_features(name, path)
 load_function_uri(uri_name="myfolder/myfile.py = "myfolder/myfile.py::myFunction")
-log(*s, n = 0, m = 1, **kw)
-log2(*s, **kw)
-log3(*s, **kw)
 metrics_eval(metric_list = ["mean_squared_error"], ytrue = None, ypred = None, ypred_proba = None, return_dict = False)
 np_conv_to_one_col(np_array, sep_char = "_")
 os_get_function_name()
@@ -4500,8 +4569,11 @@ hdfs_dir_list(path, recursive = False)
 hdfs_dir_rm(path)
 hdfs_download(dirin = "", dirout = "./", verbose = False, n_pool = 1, **kw)
 hdfs_file_exists(filename)
+hdfs_get2(from_dir = "", to_dir = "", verbose = True, n_pool = 20, **kw)
 hdfs_ls(path, flag = "-h ", filename_only = False, use_regex = False, match_file = '')
 hdfs_mkdir(hdfs_dir)
+hdfs_put2(from_dir = "", to_dir = "", verbose = True, n_pool = 25, dirlevel = 50, **kw)
+hdfs_walk(path="hdfs = "hdfs://nameservice1/user/", dirlevel = 3, hdfs = None)
 hive_csv_tohive(folder, tablename = "ztmp", tableref = "nono2.table2")
 hive_db_dumpall()
 hive_df_tohive(df, tableref = "nono2.table2")
@@ -5245,7 +5317,8 @@ test_imodels()
 
 utilmy/tabular/util_generator.py
 -------------------------functions----------------------
-evaluate(data_pars = None, compute_pars:dict = None, out_pars: dict = None, **kw)
+evaluate(Xnew  =  None, Xtrue  =  None, compute_pars:dict = None, metrics = None, metric_type = None)
+evaluate_timeseries(synthetic_data, real_data = None, metadata = None, metrics = None, target = "y", **kw)
 fit(data_pars: dict = None, compute_pars: dict = None, task_type  =  "train", **kw)
 generator_load_generate(dirmodel = "", compute_pars:dict = None, dirout:str = None)
 generator_train_save(dirin_or_df = "", dirout = "", model_pars:dict = None, model_class  =  'CTGAN', model_class_pars  =  None, compute_pars:dict = None, metrics_pars  = None, n_sample = 1000, cols  =  None, )
@@ -5264,6 +5337,7 @@ test4(n_sample  =  1000)
 test5(n_sample  =  1000)
 test6()
 test7()
+test8()
 test_helper(model_pars:dict, data_pars:dict, compute_pars:dict, task_type  =  "train")
 transform(Xpred = None, data_pars: dict = None, compute_pars: dict = None, out_pars: dict = None, **kw)
 zz_pd_augmentation_sdv(df, col = None, pars = {})
@@ -5868,6 +5942,13 @@ Tokenizer._scan(self, target)
 Tokenizer.tokens(self)
 
 
+utilmy/tools/googledrive_upload/apps.py
+-------------------------functions----------------------
+get_service(api_name, api_version, scopes, key_file_location)
+main()
+
+
+
 utilmy/tools/mybash/mybash/github_getallrepo.py
 -------------------------functions----------------------
 gather_clone_urls(account, no_forks = True)
@@ -6116,7 +6197,6 @@ bootstrap_sequential()
 utilmy/util_batch.py
 -------------------------functions----------------------
 batchLog(object)
-date_now_jp(fmt = "%Y%m%d", add_days = 0, add_hours = 0, timezone = 'jp')
 main()
 now_daymonth_isin(day_month, timezone = "jp")
 now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "jp")
@@ -6166,7 +6246,6 @@ pip_auto_install()
 
 utilmy/util_cpu.py
 -------------------------functions----------------------
-log(*argv)
 monitor_maintain()
 monitor_nodes()
 np_avg(list)
@@ -6256,8 +6335,10 @@ unzip(dirin, dirout)
 
 utilmy/utilmy_base.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
-direpo()
+date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+dir_testinfo(tag = "", verbose = 1, )
+direpo(show = 0)
+dirpackage(show = 0)
 find_fuzzy(word:str, wlist:list, threshold = 0.0)
 get_loggers(mode = 'print', n_loggers = 2, verbose_level = None)
 get_verbosity(verbose:int = None)
@@ -6288,12 +6369,19 @@ sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
 test1()
+test2()
+test3()
+test4()
+test5()
+test6_datenow()
+test7()
+test8_load_save()
+test9_find_fuzzy()
 test_all()
-test_load_function_uri()
 to_file(txt, fpath, mode = 'a')
 
 -------------------------methods----------------------
-Index0.__init__(self, findex:str = "ztmp_file.txt")
+Index0.__init__(self, findex:str = "ztmp_file.txt", min_chars = 5)
 Index0.read(self, )
 Index0.save(self, flist:list)
 Session.__init__(self, dir_session = "ztmp/session/", )
@@ -6302,6 +6390,10 @@ Session.load_session(self, folder, globs = None)
 Session.save(self, name, glob = None, tag = "")
 Session.save_session(self, folder, globs, tag = "")
 Session.show(self)
+toFileSafe.__init__(self, fpath)
+toFileSafe.log(self, *s)
+toFileSafe.w(self, *s)
+toFileSafe.write(self, *s)
 
 
 utilmy/utils.py
@@ -6361,7 +6453,18 @@ utilmy/viz/test_vizhtml.py
 -------------------------functions----------------------
 test1(verbose = False)
 test2(verbose = False)
+test3(verbose = False)
+test4(verbose = False)
+test_colimage_table()
+test_cssname(verbose = False, css_name = "a4")
+test_external_css()
 test_getdata(verbose = True)
+test_page()
+test_pd_plot_network(verbose = False)
+test_scatter_and_histogram_matplot(verbose = False)
+test_serve(verbose = False)
+test_table()
+test_tseries_dateformat()
 
 
 
@@ -6422,6 +6525,7 @@ htmlDoc.plot_scatter(self, df:pd.DataFrame, colx, coly, collabel = None, colclas
 htmlDoc.print(self)
 htmlDoc.save(self, dir_out = None)
 htmlDoc.sep(self, css: str = '')
+htmlDoc.serve_file(self)
 htmlDoc.table(self, df:pd.DataFrame, format: str = 'blue_light', custom_css_class = None, colimage  =  None, use_datatable = False, table_id = None, **kw)
 htmlDoc.tag(self, x)
 mpld3_TopToolbar.__init__(self)
