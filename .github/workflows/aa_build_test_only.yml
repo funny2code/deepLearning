@@ -137,10 +137,10 @@ jobs:
           python utilmy/cli.py help
 
 
-    - name:  sspark/src/util_spark.py
-      # continue-on-error: true
-      # run: |
-          python utilmy/sspark/src/util_spark.py test_all
+    # - name:  sspark/src/util_spark.py
+    #   # continue-on-error: true
+    #   # run: |
+    #       python utilmy/sspark/src/util_spark.py test_all
 
 
 
