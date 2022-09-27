@@ -1504,11 +1504,13 @@ def z_os_search_fast(fname, texts=None, mode="regex/str"):
 ###################################################################################################
 def os_variable_init(ll, globs):
     """function os_variable_init
-    Args:
-        ll:
-        globs:
-    Returns:
-        None
+    Docs::
+
+        Args:
+            ll:
+            globs:
+        Returns:
+            None
     """
     for x in ll :
         try :
@@ -1519,12 +1521,14 @@ def os_variable_init(ll, globs):
 
 def os_variable_exist(x ,globs, msg="") :
     """function os_variable_exist
-    Args:
-        x:
-        globs:
-        msg:str = ""
-    Returns:
-        True | False
+    Docs::
+
+        Args:
+            x:
+            globs:
+            msg:str = ""
+        Returns:
+            True | False
     """
     x_str = str(globs.get(x, None))
     if "None" in x_str:
@@ -1537,12 +1541,14 @@ def os_variable_exist(x ,globs, msg="") :
 
 def os_variable_check(ll, globs=None, do_terminate=True):
   """function os_variable_check
-  Args:
-      ll:
-      globs:None
-      do_terminate:bool = True
-  Returns:
-      None
+  Docs::
+
+      Args:
+          ll:
+          globs:None
+          do_terminate:bool = True
+      Returns:
+          None
   """
   import sys
   for x in ll :
@@ -1557,11 +1563,13 @@ def os_variable_check(ll, globs=None, do_terminate=True):
 
 def os_variable_del(varlist, globx):
   """function os_clean_memory
-  Args:
-      varlist:
-      globx:
-  Returns:
-      None
+    Docs::
+
+        Args:
+          varlist:
+          globx:
+        Returns:
+          None
   """
   for x in varlist :
     try :
@@ -1604,9 +1612,11 @@ def os_ram_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 def os_get_function_name():
     """function os_get_function_name
-    Args:
-    Returns:
-        ss
+    Docs::
+
+        Args:
+        Returns:
+            ss
     """
     ### Get ane,
     import sys, socket
@@ -1628,7 +1638,9 @@ def os_get_function_name():
 def os_get_uniqueid(format="int"):
     """  Unique INT64 ID:  OSname +ip + process ID + timeStamp
          for distributed compute
+    Docs::
 
+        format:str = "int"
 
 
     """
