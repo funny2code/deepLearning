@@ -81,11 +81,12 @@ def test_all():
     test_globglob()
 
     test1()
-    # test2()
+    test2()
     test4()
-    test5_os()
     test6_os()
     test7_os()
+    test8()
+    test8_os()
 
 
 
@@ -93,34 +94,80 @@ def test_globglob():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
-    for path in ["folder/test/file1.txt","folder/test/tmp/1.txt","folder/test/tmp/myfile.txt",\
-                "folder/test/tmp/record.txt","folder/test/tmp/part.parquet","folder/test/file2.txt",\
-                "folder/test/file3.txt"]:
+    tlist= [
+        "folder/test/file1.txt",
+        "folder/test/tmp/1.txt",
+        "folder/test/tmp/myfile.txt",
+        "folder/test/tmp/record.txt",
+        "folder/test/tmp/part.parquet",
+        "folder/test/file2.txt",
+        "folder/test/file3.txt"
+    ]
+
+    for path in tlist:
 
         os_makedirs(path)
         assert os.path.exists(path),"File doesn't exist"
 
 
-    glob_glob(dirin="folder/**/*.txt")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
-    glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
-    glob_glob(dirin="folder/**/*",nfiles=5)
-    glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
-    glob_glob(dirin="folder/",npool=1)
-    glob_glob(dirin="folder/test/",npool=1)
+    res = glob_glob(dirin="folder/**/*.txt")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
 
-    flist = ['folder/test/file.txt',
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1")
+    print(res)
+    assert "folder/test/tmp/part.parquet" not in res, "Failed, glob_glob"
+    assert "folder/test/file2.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/tmp/1.txt" not in res, "Failed, glob_glob"
+    assert "folder/test/file1.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*",nfiles=5)
+    print(res)
+    assert len(res) == 5, "Failed, glob_glob"
+
+    res = glob_glob(dirin="folder/**/*.txt",ndays_past=0,nmin_past=5,verbose=1)
+    print(res)
+
+    res = glob_glob(dirin="folder/",npool=1)
+    print(res)
+
+    res =     glob_glob(dirin="folder/test/",npool=1)
+    print(res)
+
+
+    flist = [
+        'folder/test/file.txt',
         'folder/test/file1.txt',
         'folder/test/file2.txt',
         'folder/test/file3.txt',
         'folder/test/tmp/1.txt',
         'folder/test/tmp/myfile.txt',
-        'folder/test/tmp/record.txt']
-    glob_glob(dirin="", file_list=flist)
-    glob_glob(file_list=flist)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
-    glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+        'folder/test/tmp/record.txt'
+    ]
+
+    res = glob_glob(dirin="", file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res =  glob_glob(file_list=flist)
+    print(res)
+    assert "folder/test/file.txt" not in res, "Failed, glob_glob"
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file")
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
+
+
+    res = glob_glob(file_list=flist,exclude="file2.txt,1",include_only="file",npool=1)
+    print(res)
+    assert "folder/test/file3.txt"  in res, "Failed, glob_glob"
+    assert "folder/test/tmp/myfile.txt"  in res, "Failed, glob_glob"
 
 
 def test_filecache():
@@ -169,6 +216,7 @@ def test1():
 
 
     #################
+    log("####### os_makedirs() ..")
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
     os_makedirs('/tmp/one/two')
@@ -182,6 +230,7 @@ def test1():
        f = os.path.exists(os.path.abspath(p))
        assert  f == True, "path " + p
 
+    log("####### os_removedirs() ..")
     rev_stat = os_removedirs("ztmp/ztmp2")
     assert not rev_stat == False, "cannot delete root folder"
 
@@ -190,30 +239,7 @@ def test1():
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    assert os_get_os() == sys.platform
-
-
-
-def test_create_testfiles():
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
-
-    from utilmy import to_file
-
-
-    ss= """
-    
-    
-    """
-    to_file(ss,dtmp + "/test.txt" )
-
-
-
-    ss ="""
-    
-    """
-    to_file(ss,dtmp + "/test.txt" )
-
+    log( os_get_os() )
 
 
 def test2():
@@ -222,28 +248,37 @@ def test2():
     import utilmy as uu
     drepo, dtmp = uu.dir_testinfo()
 
-    test_create_testfiles()
-
-
-    size_ = os_path_size("./")
-    log("total size", size_)
-
-    result_ = os_path_split("test/tmp/test.txt")
-    log("result", result_)
-    
-
 
     uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
     os_file_check(dtmp + "/os_file_test.txt")
 
 
-    res = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "os_file_test*", mode="regex", dirlevel=2)
 
-    os_file_replacestring(findstr="text",replacestr="text_replace",
-                          some_dir=dtmp + "/", pattern="*.*", dirlevel=2)
+    log("#######   os_search_fast() ..")
+    uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
+    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    assert  not log(res) and len(res) >0, res
 
-    os_copy_safe(drepo + "/testdata/tmp/test", drepo + "/testdata/tmp/test_copy/")
+    log("#######   os_search_content() ..")
+    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
+    assert  not log(dfres) and len(dfres) >0, dfres
 
+    log("###### os_walk() ..")
+    folders = os_walk(path=dtmp,pattern="*.txt")
+    assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
+
+    # TODO this test has a bug
+    #log("#######   os_copy_safe() ..")
+    #uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
+    #os_copy_safe(drepo + "/testdata/tmp/test/*", drepo + "/testdata/tmp/test_copy_safe")
+    #f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt.txt"))
+    #assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
+
+    log("####### os_copy() ..")
+    uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_test.txt")
+    os_copy(drepo + "/testdata/tmp/test/os_copy_test.txt", drepo + "/testdata/tmp/test_copy")
+    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy/os_copy_test.txt"))
+    assert  f == True, "The file os_copy_test.txt doesn't exist"
 
 
 def test4():
@@ -258,6 +293,19 @@ def test4():
     #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
+
+
+    log("#######   os_variables_test ..")
+    ll = ["test_var"]
+    globs = {}
+    os_variable_init(ll,globs)
+    os_variable_exist("test_var",globs)
+    os_variable_check("other_var",globs,do_terminate=False)
+    os_import(mod_name="pandas", globs=globs)
+    os_variable_del(["test_var"], globs)
+    log(os_variable_exist("test_var",globs))
+
+
     ll = ["test_var"]
     globs = {}
     os_variable_init(ll,globs)
@@ -270,37 +318,29 @@ def test4():
     assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
 
 
-
-def test5_os():
-    log(" os_copy")
-    os_copy(dirfrom="folder/**/*.parquet", dirto="folder2/",
-
-            mode='file',
-
-            exclude="", include_only="",
-            min_size_mb=0, max_size_mb=500000,
-            ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
-            nfiles=99999999, verbose=0,
-
-            dry=0
-            )
-
-
-
 def test6_os():
-
+    """function test6_os
+    """
     #from utilmy import oos as m
     import utilmy as uu
     drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
+    log("#######   os_get_os()..")
     log(os_get_os())
-    assert os_get_os() == sys.platform, "Platform mismatch"
+    assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
+
+    log("#######   os_cpu_info()..")
     log(os_cpu_info())
+
+    log("#######   os_ram_info()..")
     log(os_ram_info())
+
+    log("#######   os_getcwd()..")
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
+    log("#######   os_ram_sizeof()..")
     c = {1, 3, "sdsfsdf"}
     log(os_ram_sizeof(c, set()))
 
@@ -314,33 +354,9 @@ def test6_os():
     result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
 
-
+    # TODO: Add test to this function here
     log("#######   os_file_replacestring() ..")
 
-
-
-    log("#######   os_walk() ..")
-    cwd = os.getcwd()
-    # log(os_walk(cwd))
-
-
-    log("#######   os_copy_safe() ..")
-    os_copy_safe(dtmp+"/test", dtmp+"/test_copy/")
-
-
-
-    log("#######   z_os_search_fast() ..")
-    with open(dtmp+"/os_search_test.txt", 'a') as file:
-        file.write("Dummy text to test fast search string")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
-    print(res)
-    assert os.path.exists(dtmp+"/os_search_test.txt"),"File not found"
-
-
-
-    log("#######   os_search_content() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
-    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
 
 
     cwd = os.getcwd()
@@ -349,22 +365,6 @@ def test6_os():
     res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
     log(res)
     '''
-
-
-    log("#######   os_get_function_name() ..")
-    log(os_get_function_name())
-
-
-
-    log("#######   os_variables_test ..")
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_variable_del(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
 
 
     log("#######   os_system_list() ..")
@@ -379,19 +379,27 @@ def test6_os():
 
 
 
-    log("#######   os utils...")
+    log("#######   os_file_replacestring...")
     uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
     uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
+    print("dtmp:",dtmp+"/os_test/")
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
+
+    #TODO Merge this test with the same test that is in "test1" function
+    log("#######   os_removedirs()...")
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+
+
+    log("#######   os_ram_sizeof()...")
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
-
 def test7_os():
+    """function test7_os
+    """
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -408,8 +416,12 @@ def test7_os():
 
 
 def test8():
+    """function test8
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
+    
+    log("#######   os_remove()")
 
     obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
@@ -468,9 +480,9 @@ def test8():
     assert len(before_files) == len(cur_files)
 
 
-
 def test8_os():
-    from pytz import timezone
+    """function test8_os
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -481,6 +493,7 @@ def test8_os():
 
 
     log("\n#######", os_file_date_modified)
+    from pytz import timezone
     uu.to_file("first line", file_dir)
     created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
     last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
@@ -490,13 +503,12 @@ def test8_os():
 
 
 
-    from pytz import timezone
-    import requests, json
 
     log("\n#######", os_get_ip)
+    import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
-    assert public_ip == os_get_ip()
+    log('internal ip', os_get_ip() )
 
 
     import os
@@ -510,6 +522,7 @@ def test8_os():
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
 
+    
     file_stats = os_file_info(file_dir)
     assert file_dir == file_stats[0][0]
     assert test_file_size == file_stats[0][1]
@@ -519,11 +532,16 @@ def test8_os():
 
     log("\n#######", os_file_info)
     _, file__name__, _, function_name = os_get_function_name().split(',')
-    
+
     log("File __name__ value:", __name__)
     log("Function name:", inspect.stack()[0][3])
     assert file__name__ == __name__
     assert function_name == inspect.stack()[0][3]
+
+
+
+
+
 
 
 
@@ -535,7 +553,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
             nfiles=99999999, verbose=0, npool=1
     ):
-    """ Advanced Glob filtering.
+    """ Advanced glob.glob filtering.
     Docs::
 
         dirin="": get the files in path dirin, works when file_list=[]
@@ -561,11 +579,28 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=min_size_mb, max_size_mb=max_size_mb,
             ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
             nfiles=nfiles, verbose=verbose,npool=npool):
-        
+        """
+        Docs::
+
+            dirin=dirin
+            file_list=file_list
+            exclude=exclude
+            include_only=include_only
+            min_size_mb=min_size_mb
+            max_size_mb=max_size_mb
+            ndays_past=ndays_past
+            nmin_past=nmin_past
+            start_date=start_date
+            end_date=end_date
+            nfiles=nfiles
+            verbose=verbose
+            npool=npool
+
+        """
         if dirin and not file_list:
             files = glob.glob(dirin, recursive=True)
             files = sorted(files)
-        
+
         if file_list:
             files = file_list
 
@@ -661,8 +696,40 @@ def os_remove(dirin="folder/**/*.parquet",
               nfiles=99999999,
               dry=0):
 
-    """  Delete files bigger than some size
+    """  Delete files with criteria, using glob_glob
+    Docs::
 
+        Args:
+            dirin (string): Path with wildcards to match with folder to remove all its content.
+                Defaults to "folder/**/*.parquet".
+            min_size_mb (int): Min size of the files to remove.
+                Defaults to 0.
+            max_size_mb (int): Max size of the files to remove.
+                Defaults to 1.
+            exclude (string): Paths separated by commas to exclude.
+                Defaults to ""
+            include_only (string): Paths to only include if they are matched by the function.
+                Defaults to ""
+            ndays_past (int): Number of days past that the file must be old to remove.
+                Defaults to 1000
+            start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
+                Defaults to '1970-01-02'
+            end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
+                Defaults to '2050-01-01'
+            nfiles (int): Max number of files to remove.
+                Defaults to 99999999
+            dry (Boolean)=1: Flag to test only
+                Defaults to 0
+                
+        Example:
+            Deleting all files in a specified folder::
+                from utilmy import oos
+                
+                path = "/home/user/Desktop/example/*"
+
+                oos.os_remove(path, ndays_past=0)
+                #All the files in "example" are deleted
+        
     """
     import os, sys, time, glob, datetime as dt
 
@@ -691,8 +758,12 @@ def os_remove(dirin="folder/**/*.parquet",
 
 
 def os_system(cmd, doprint=False):
-  """ get values
-       os_system( f"   ztmp ",  doprint=True)
+  """ Get stdout, stderr from Command Line into  a string varables  mout, merr
+  Docs::     
+       
+       out_txt, err_txt = os_system( f"   ztmp ",  doprint=True)
+
+
   """
   import subprocess
   try :
@@ -733,6 +804,12 @@ class fileCache(object):
 
 
     def get(self, path):
+        """ method get
+         Docs::
+
+              path: str
+
+         """
         path = path.replace("\\","/")
         return self.db.get(path, None)
 
@@ -765,8 +842,18 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
 
           mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
-
-
+          mode='file'
+          exclude=""
+          include_only=""
+          min_size_mb=0
+          max_size_mb=500000
+          ndays_past=-1
+          nmin_past=-1
+          start_date='1970-01-02'
+          end_date='2050-01-01'
+          nfiles=99999999
+          verbose=0
+          dry=0
 
     """
     import os, shutil
@@ -804,6 +891,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
     """ Copy safe, using callback command to re-connect network if broken
     Docs::
 
+        dirin:str=None
+        dirout:str=None
+        nlevel=5
+        nfile=5000
+        logdir="./"
+        pattern="*"
+        exclude=""
+        force=False
+        sleep=0.5
+        cmd_fallback=""
+        verbose=True
 
     """
     import shutil, time, os, glob
@@ -1068,13 +1166,22 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
 
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
+    Docs::
+
+    dirin:str -The time of last modification of the specified path
+    fmt:str="%Y%m%d-%H:%M" -Time format
+    timezone:str='Asia/Tokyo' -Timezone
+
     """
     import datetime
-    from pytz import timezone as tzone
-    try :
+    from pytz import timezone as tzone, utc
+    try:
+
         mtime  = os.path.getmtime(dirin)
         mtime2 = datetime.datetime.utcfromtimestamp(mtime)
+        mtime2 = mtime2.replace(tzinfo=utc)
         mtime2 = mtime2.astimezone(tzone(timezone))
+        
         return mtime2.strftime(fmt)
     except:
         return ""
@@ -1082,6 +1189,10 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 
 def os_file_check(fpath:str):
    """Check file stat info
+   Docs::
+
+        fpath: str
+
    """
    import os, time
 
@@ -1099,12 +1210,16 @@ def os_file_check(fpath:str):
 # TODO
 def os_file_info(dirin, returnval='list', date_format='unix'):
     """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
+    Docs::
 
+        dirin
+        returnval='list'
+        date_format='unix'
 
     """
     flist = glob_glob(dirin)
     flist2 =[]
-    mbyte  =1 /( 1024*1014.0)
+    mbyte  =1 /(1024*1024)
     for fi in flist :
         try :
             st = os.stat(fi)
@@ -1122,12 +1237,30 @@ def os_file_info(dirin, returnval='list', date_format='unix'):
 
 def os_walk(path, pattern="*", dirlevel=50):
     """  Get files from  sub-folder, same than glob_glob
-    Doc ::
+    Docs::
+        Args:
+        path (string): Path of the file to get all its sub-folder paths.
+        pattern (string): Pattern with wildcards like used in Unix shells.
+            Defaults to "*".
+        dirlevel (int): Level of sub-folders or sub-directories to get.
+            Defaults to 50.
 
-        dirlevel=0 : root directory
-        dirlevel=1 : 1 path below
+            Example: 
+                dirlevel=0 : root directory
+                dirlevel=1 : 1 path below
+        Returns:
+            Returns dict of  ['file'  , 'dir'].
 
-        return dict of  ['file'  , 'dir']
+        Example:
+
+            from utilmy import oos
+
+            path = "/home/username/Desktop/example"
+
+            sub_folders = oos.os_walk(path=path)
+
+            print("Sub folders:",sub_folders)
+            # All the sub-folders of the folder named example
 
     """
     import fnmatch, os, numpy as np
@@ -1242,15 +1375,45 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 ###################################################################################################
 def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
     """  search inside the files
+    Docs::
 
+        Args:
+            srch_pattern (:obj:`list` of :obj:'str'): List of strings to match with the content of the files.
+            Defaults to None.
+            mode (string): To search content using the srch.
+            Defaults to "str".
+            dir1 (str): Folder/Directory name to search its content.
+            Defaults to "".
+            file_pattern (str): File pattern to match with the content of the directory.
+            Defaults to "*.*".
+            dirlevel (int): Max dir level to search content.
+            Defaults to 1.
+
+        Returns:
+            Returns a panda dataframe with all the matches, the columns are the folllowing:
+            1.search: Word that was matched
+            2.filename: Directory where the match was found
+            3.lineno: Number of line where the match was found
+            4.pos: Position in the line where the match was found
+            5.line: The line where the match was found
+
+        Examples:
+        
+            from utilmy import oos
+
+            path = "/home/necromancer/Desktop/New"
+
+            content = oos.os_search_content(dir1=path,file_pattern="*")
+            # "content" is the dataframe
     """
     import pandas as pd
     if srch_pattern is None:
         srch_pattern = ["from ", "import "]
 
-    list_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    ###  'file', 'dir'
+    dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
     ll = []
-    for f in list_all["fullpath"]:
+    for f in dict_all["file"]:
         ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
     df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
     return df
@@ -1258,11 +1421,29 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
 
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
-    Args:
-        fname:
-        texts:
-        mode:
-    Returns:
+    Docs::
+        Args:
+            fname (string): Path of the file to search texts that match.
+            texts (:obj:`list` of :obj:'str'): List of words or regex to search in the file.
+            mode (string): To take the argument called "texts" as a list of text or a list of regex.
+                There are two allowed values:
+                - "regex"
+                - "str"
+        Returns:
+            Return a list of tuples that each tuple has the following values of each match:
+                1.First value: Word that was matched.
+                2.Second value: Directory where the match was found.
+                3.Third value: Number of line where the match was found.
+                4.Fourth value: Position in the line where the match was found.
+                5.Fifth value: The line where the match was found.
+        Examples:
+            from utilmy import oos
+
+            path = "/home/username/Desktop/example/test"
+
+            searching = oos.z_os_search_fast(fname=path,texts=["dummy"], mode="str")
+
+            print("Searching result:", searching)
 
     """
     import re
@@ -1447,23 +1628,45 @@ def os_get_uniqueid(format="int"):
 
 
 def os_get_os():
-    """function os_platform_os
-    Args:
-    Returns:
+    """function os_get_os
+    """
+    import platform
+    return platform.system()
+
+
+
+def os_get_ip(mode='internal'):
+    """Return primary ip adress
+    Docs::
+
+        Does NOT need routable net access or any connection at all.
+        Works even if all interfaces are unplugged from the network.
+        Does NOT need or even try to get anywhere else.
+        Works with NAT, public, private, external, and internal IP's
+        Pure Python 2 (or 3) with no external dependencies.
+        Works on Linux, Windows, and OSX.
 
     """
-    #### get linux or windows
-    return sys.platform
 
-# TODO
-def os_get_ip():
-    """function os_platform_ip
-    Args:
-    Returns:
+    if mode =='internal':
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.254.254.254', 1))
+            IP = s.getsockname()[0]
+        except Exception:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP
 
-    """
-    ### IP
-    pass
+
+    else :
+       import requests, json
+       public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+       return public_ip
 
 
 # TODO
@@ -1475,8 +1678,8 @@ def os_cpu_info():
     """
     ncpu= os.cpu_count()
 
-    cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
-    cpu_usage = os_system(cmd)
+    # cmd = """ top -bn1 | grep "Cpu(s)" |  sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}'  """
+    # cpu_usage = os_system(cmd)
 
 
     cmd = """ awk '{u=$2+$4; t=$2+$4+$5; if (NR==1){u1=u; t1=t;} else print ($2+$4-u1) * 100 / (t-t1) "%"; }' <(grep 'cpu ' /proc/stat) <(sleep 1;grep 'cpu ' /proc/stat) """
@@ -1545,111 +1748,7 @@ def os_wait_processes(nhours=7):
 
 
 ###################################################################################################
-###### HELP ######################################################################################
-# TODO
-def aaa_bash_help():
-    """ Shorcuts for Bash
-    Docs::
-
-
-        --  Glob in Bash
-        setopt extendedglob
-        ls *(<tab>                                                    # to get help regarding globbing
-        rm ../debianpackage(.)                                        # remove files only
-        ls -d *(/)                                                    # list directories only
-        ls /etc/*(@)                                                  # list symlinks only
-        ls -l *.(png|jpg|gif)                                         # list pictures only
-        ls *(*)                                                       # list executables only
-        ls /etc/**/zsh                                                # which directories contain 'zsh'?
-        ls **/*(-@)                                                   # list dangling symlinks ('**' recurses down directory trees)
-        ls foo*~*bar*                                                 # match everything that starts with foo but doesn't contain bar
-        ls *(e:'file $REPLY | grep -q JPEG':)                         # match all files of which file says that they are JPEGs
-        ls -ldrt -- *(mm+15)                                          # List all files older than 15mins
-        ls -ldrt -- *(.mm+15)                                         # List Just regular files
-        ls -ld /my/path/**/*(D@-^@)                                   # List the unbroken sysmlinks under a directory.
-        ls -Lldrt -- *(-mm+15)                                        # List the age of the pointed to file for symlinks
-        ls -l **/README                                               # Search for `README' in all Subdirectories
-        ls -l foo<23->                                                # List files beginning at `foo23' upwards (foo23, foo24, foo25, ..)
-        ls -l 200406{04..10}*(N)                                      # List all files that begin with the date strings from June 4 through June 9 of 2004
-        ls -l 200306<4-10>.*                                          # or if they are of the form 200406XX (require ``setopt extended_glob'')
-        ls -l *.(c|h)                                                 # Show only all *.c and *.h - Files
-        ls -l *(R)                                                    # Show only world-readable files
-        ls -fld *(OL)                                                 # Sort the output from `ls -l' by file size
-        ls -fl *(DOL[1,5])                                            # Print only 5 lines by "ls" command (like ``ls -laS | head -n 5'')
-        ls -l *(G[users])                                             # Show only files are owned from group `users'
-        ls *(L0f.go-w.)                                               # Show only empty files which nor `group' or `world writable'
-        ls *.c~foo.c                                                  # Show only all *.c - files and ignore `foo.c'
-        print -rl /home/me/**/*(D/e{'reply=($REPLY/*(N[-1]:t))'})     # Find all directories, list their contents and output the first item in the above list
-        print -rl /**/*~^*/path(|/*)                                  # Find command to search for directory name instead of basename
-        print -l ~/*(ND.^w)                                           # List files in the current directory are not writable by the owner
-        print -rl -- *(Dmh+10^/)                                      # List all files which have not been updated since last 10 hours
-        print -rl -- **/*(Dom[1,10])                                  # List the ten newest files in directories and subdirs (recursive)
-        print -rl -- /path/to/dir/**/*(D.om[5,10])                    # Display the 5-10 last modified files
-        print -rl -- **/*.c(D.OL[1,10]:h) | sort -u                   # Print the path of the directories holding the ten biggest C regular files in the current directory and subdirectories.
-        setopt dotglob ; print directory/**/*(om[1])                  # Find most recent file in a directory
-        for a in ./**/*\ *(Dod); do mv $a ${a:h}/${a:t:gs/ /_}; done  # Remove spaces from filenames
-
-
-    """
-    pass
-
-
-
-
-
-
-
-
-###################################################################################################
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
-def zz_os_remove_file_past(dirin="folder/**/*.parquet", ndays_past=20, nfiles=1000000, exclude="", dry=1) :
-    """  Delete files older than ndays.
-
-
-    """
-    import os, sys, time, glob, datetime as dt
-
-    dry = True if dry ==True or dry==1 else False
-
-    files = glob.glob(dirin, recursive=True)
-    files = sorted(files)
-    for exi in exclude.split(","):
-        if len(exi) > 0:
-           files = [  fi for fi in files if exi not in fi ]
-
-    now = time.time()
-    cutoff = now - ( abs(ndays_past) * 86400)
-    print('now',   dt.datetime.utcfromtimestamp(now).strftime("%Y-%m-%d"),
-          ',past', dt.datetime.utcfromtimestamp(cutoff).strftime("%Y-%m-%d") )
-    flist2=[]
-    for fi in files[:nfiles]:
-        try :
-          t = os.stat( fi)
-          c = t.st_ctime
-          # delete file if older than 10 days
-          if c < cutoff:
-            flist2.append(fi)
-        except : pass
-
-    print ('Nfiles', len(flist2))
-    jj = 0
-    for fi in flist2 :
-        try :
-            if not dry :
-               os.remove(fi)
-               jj = jj +1
-            else :
-               print(fi)
-        except Exception as e :
-            print(fi, e)
-
-    if dry :  print('dry mode only')
-    else :    print('deleted', jj)
-
-
 
