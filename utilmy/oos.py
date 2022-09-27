@@ -558,18 +558,18 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     """ Advanced glob.glob filtering.
     Docs::
 
-        dirin="": get the files in path dirin, works when file_list=[]
-        file_list=[]: if file_list works, dirin will not work
-        exclude=""   :
-        include_only="" :
-        min_size_mb=0
-        max_size_mb=500000
-        ndays_past=3000
-        start_date='1970-01-01'
-        end_date='2050-01-01'
-        nfiles=99999999
-        verbose=0
-        npool=1: multithread not working
+        dirin:str = "": get the files in path dirin, works when file_list=[]
+        file_list: list = []: if file_list works, dirin will not work
+        exclude:str  = ""
+        include_only:str = ""
+        min_size_mb:int = 0
+        max_size_mb:int = 500000
+        ndays_past:int = 3000
+        start_date:str = '1970-01-01'
+        end_date:str = '2050-01-01'
+        nfiles:int = 99999999
+        verbose:int = 0
+        npool:int = 1: multithread not working
 
         https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
 
@@ -584,19 +584,18 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
         """
         Docs::
 
-            dirin=dirin
-            file_list=file_list
-            exclude=exclude
-            include_only=include_only
-            min_size_mb=min_size_mb
-            max_size_mb=max_size_mb
-            ndays_past=ndays_past
-            nmin_past=nmin_past
-            start_date=start_date
-            end_date=end_date
-            nfiles=nfiles
-            verbose=verbose
-            npool=npool
+            dirin:str = "": get the files in path dirin, works when file_list=[]
+            file_list: list = []: if file_list works, dirin will not work
+            exclude:str  = ""
+            include_only:str = ""
+            min_size_mb:int = 0
+            max_size_mb:int = 500000
+            ndays_past:int = 3000
+            start_date:str = '1970-01-01'
+            end_date:str = '2050-01-01'
+            nfiles:int = 99999999
+            verbose:int = 0
+            npool:int = 1: multithread not working
 
         """
         if dirin and not file_list:
@@ -818,8 +817,12 @@ class fileCache(object):
 
     def set(self, path:str, flist:list, ttl=None):
         """
+        Docs::
 
-        expire (float) – seconds until item expires (default None, no expiry)
+            path:str
+            flist:list
+            ttl=None
+            expire (float) – seconds until item expires (default None, no expiry)
 
         """
         ttl = ttl if isinstance(ttl, int)  else self.ttl
@@ -842,20 +845,19 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
     """  Advance copy with filter.
     Docs::
 
-          mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
+          mode:str = 'file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
-          mode='file'
-          exclude=""
-          include_only=""
-          min_size_mb=0
-          max_size_mb=500000
-          ndays_past=-1
-          nmin_past=-1
-          start_date='1970-01-02'
-          end_date='2050-01-01'
-          nfiles=99999999
-          verbose=0
-          dry=0
+          exclude:str = ""
+          include_only:str = ""
+          min_size_mb:int = 0
+          max_size_mb:int = 500000
+          ndays_past:int = -1
+          nmin_past:int = -1
+          start_date:str = '1970-01-02'
+          end_date:str = '2050-01-01'
+          nfiles:int = 99999999
+          verbose:int = 0
+          dry:int = 0
 
     """
     import os, shutil
@@ -893,17 +895,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
     """ Copy safe, using callback command to re-connect network if broken
     Docs::
 
-        dirin:str=None
-        dirout:str=None
-        nlevel=5
-        nfile=5000
-        logdir="./"
-        pattern="*"
-        exclude=""
-        force=False
-        sleep=0.5
-        cmd_fallback=""
-        verbose=True
+        dirin:str = None
+        dirout:str = None
+        nlevel:int = 5
+        nfile:int = 5000
+        logdir:str = "./"
+        pattern:str = "*"
+        exclude:str = ""
+        force:bool = False
+        sleep:float = 0.5
+        cmd_fallback:str =""
+        verbose:bool = True
 
     """
     import shutil, time, os, glob
@@ -959,16 +961,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
 def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
                   cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
     """function os_merge_safe
-    Args:
-        dirin_list:
-        dirout:
-        nlevel:
-        nfile:
-        nrows:
-        cmd_fallback :
-        sleep:
-    Returns:
-
+    Docs::
+        Args:
+            dirin_list:None
+            dirout:None
+            nlevel:int = 5
+            nfile:int = 5000
+            nrows:int = 10**8
+            cmd_fallback:str = "umount /mydrive/  && mount /mydrive/  "
+            sleep:float = 0.3
+        Returns:
+            None
     """
     ### merge file in safe way
     nrows = 10**8
@@ -1033,10 +1036,12 @@ def os_removedirs(path, verbose=False):
 
 def os_makedirs(dir_or_file):
     """function os_makedirs
-    Args:
-        dir_or_file:
-    Returns:
+    Docs::
 
+        Args:
+            dir_or_file:
+        Returns:
+            None
     """
     if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
         os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
@@ -1057,12 +1062,13 @@ def os_getcwd():
 
 def os_system_list(ll, logfile=None, sleep_sec=10):
    """function os_system_list
-   Args:
-       ll:
-       logfile:
-       sleep_sec:
-   Returns:
-
+   Docs::
+       Args:
+           ll:
+           logfile:None = None
+           sleep_sec:int = 10
+       Returns:
+            None
    """
    ### Execute a sequence of cmd
    import time, sys
@@ -1100,10 +1106,12 @@ def os_process_list():
 
 def os_path_size(path = '.'):
     """function os_path_size
-    Args:
-        path :
-    Returns:
+    Docs::
 
+        Args:
+            path:str = "."
+        Returns:
+            total_size
     """
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(path):
@@ -1341,7 +1349,7 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
         globs:
         verbose:
     Returns:
-
+        None
     """
     ### Import in Current Python Session a module   from module import *
     ### from mod_name import *
@@ -1502,7 +1510,7 @@ def os_variable_init(ll, globs):
         ll:
         globs:
     Returns:
-
+        None
     """
     for x in ll :
         try :
@@ -1516,9 +1524,9 @@ def os_variable_exist(x ,globs, msg="") :
     Args:
         x:
         globs:
-        msg:
+        msg:str = ""
     Returns:
-
+        True | False
     """
     x_str = str(globs.get(x, None))
     if "None" in x_str:
@@ -1533,10 +1541,10 @@ def os_variable_check(ll, globs=None, do_terminate=True):
   """function os_variable_check
   Args:
       ll:
-      globs:
-      do_terminate:
+      globs:None
+      do_terminate:bool = True
   Returns:
-
+      None
   """
   import sys
   for x in ll :
@@ -1555,7 +1563,7 @@ def os_variable_del(varlist, globx):
       varlist:
       globx:
   Returns:
-
+      None
   """
   for x in varlist :
     try :
@@ -1600,7 +1608,7 @@ def os_get_function_name():
     """function os_get_function_name
     Args:
     Returns:
-
+        ss
     """
     ### Get ane,
     import sys, socket
@@ -1713,12 +1721,13 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     Docs::
 
         Args:
-            cpu_min:
-            sleep:
-            interval:
-            msg:
-            verbose:
+            cpu_min:int = 30
+            sleep:int = 10
+            interval:int = 5
+            msg:str = ""
+            verbose:bool = True
         Returns:
+            aux
     """
     #### Sleep until CPU becomes normal usage
     import psutil, time
@@ -1735,9 +1744,9 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
 def os_wait_processes(nhours=7):
     """function os_wait_processes
     Args:
-        nhours:
+        nhours:int = 7
     Returns:
-
+        None
     """
     t0 = time.time()
     while (time.time() - t0 ) < nhours * 3600 :
