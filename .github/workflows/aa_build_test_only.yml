@@ -139,8 +139,8 @@ jobs:
 
     - name:  sspark/src/util_spark.py
       # continue-on-error: true
-      run: |
-          python utilmy/sspark/src/util_spark.py test_all
+      # run: |
+      #    python utilmy/sspark/src/util_spark.py test_all
 
 
 
@@ -185,8 +185,8 @@ jobs:
 
     - name: utilmy/deeplearning/ttorch/model_ensemble.py
       # continue-on-error: true
-      run: |
-          python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
+      #run: |
+      #    # python utilmy/deeplearning/ttorch/model_ensemble.py   test_all
 
 
     - name: utilmy/deeplearning/ttorch/util_torch.py
@@ -198,15 +198,15 @@ jobs:
 
     - name: utilmy/deeplearning/ttorch/util_model.py
       # continue-on-error: true
-      run: |
-          python utilmy/deeplearning/ttorch/util_model.py     test_all
+ #     run: |
+ #         python utilmy/deeplearning/ttorch/util_model.py     test_all
 
 
     #################################################################
     - name: utilmy/deeplearning/util_embedding.py
       # continue-on-error: true
-      run: |
-          python utilmy/deeplearning/util_embedding.py test_all
+#      run: |
+#          #python utilmy/deeplearning/util_embedding.py test_all
 
 
 
