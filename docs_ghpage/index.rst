@@ -1,4 +1,4 @@
-Welcome to helloWorld's documentation!
+Welcome to helloWorld's 
 ======================================
 
 .. toctree::
