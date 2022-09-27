@@ -2,12 +2,12 @@
  # How the documentation is generated:
 ```
 
-  Commit in zdocs_y23487teg65f6
+  Commit in zdocs_y23487teg65f6 branch
      --> Trigger   .github/auto_docs_githubpages.yml
            ---> Install Sphynx Doc
               -->  Launch docs_ghpage/buildDocs.sh
                     -->  Generate Doc + Push doc into gh-pages branch
-                      --. Every 10 mins, Github picks up the content of gh-pages and publish on Internet
+                      --. Every 10 mins, Github picks up the content of gh-pages branch and publish on Internet
 
 
 Config files to updates:
@@ -22,9 +22,7 @@ Config files to updates:
 
 Doc pushed here:
 
-
-https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.html
-
+    https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.html
 
 
 
@@ -33,23 +31,21 @@ https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.htm
 
 
 
-#### Show HTML
-
-Fork the repository to your account.
-Clone it locally on your machine
-Create a gh-pages branch (if one already exists, remove it and create a new one based off master).
-Push the branch back to GitHub.
-View the pages at http://username.github.io/repo`
-In code:
-
-git clone git@github.com:username/repo.git
-cd repo
-git branch gh-pages
-# Might need to do this first: git branch -D gh-pages
-git push -u origin gh-pages # Push the new branch back to github
-Go to http://username.github.io/repo
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
