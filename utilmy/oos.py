@@ -230,6 +230,7 @@ def test1():
        f = os.path.exists(os.path.abspath(p))
        assert  f == True, "path " + p
 
+    log("####### os_removedirs() ..")
     rev_stat = os_removedirs("ztmp/ztmp2")
     assert not rev_stat == False, "cannot delete root folder"
 
@@ -325,13 +326,21 @@ def test6_os():
     drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
+    log("#######   os_get_os()..")
     log(os_get_os())
     assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
+
+    log("#######   os_cpu_info()..")
     log(os_cpu_info())
+
+    log("#######   os_ram_info()..")
     log(os_ram_info())
+
+    log("#######   os_getcwd()..")
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
+    log("#######   os_ram_sizeof()..")
     c = {1, 3, "sdsfsdf"}
     log(os_ram_sizeof(c, set()))
 
@@ -345,21 +354,9 @@ def test6_os():
     result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
 
-
+    # TODO: Add test to this function here
     log("#######   os_file_replacestring() ..")
 
-
-
-    log("#######   os_walk() ..")
-    cwd = os.getcwd()
-    # log(os_walk(cwd))
-
-
-
-
-    log("#######   os_search_content() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
-    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
 
 
     cwd = os.getcwd()
@@ -368,14 +365,6 @@ def test6_os():
     res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
     log(res)
     '''
-
-
-    log("#######   os_get_function_name() ..")
-    log(os_get_function_name())
-
-
-
-
 
 
     log("#######   os_system_list() ..")
@@ -390,14 +379,21 @@ def test6_os():
 
 
 
-    log("#######   os utils...")
+    log("#######   os_file_replacestring...")
     uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
     uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
+    print("dtmp:",dtmp+"/os_test/")
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
+
+    #TODO Merge this test with the same test that is in "test1" function
+    log("#######   os_removedirs()...")
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+
+
+    log("#######   os_ram_sizeof()...")
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
@@ -424,6 +420,8 @@ def test8():
     """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
+    
+    log("#######   os_remove()")
 
     obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
@@ -524,7 +522,7 @@ def test8_os():
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
 
-
+    
     file_stats = os_file_info(file_dir)
     assert file_dir == file_stats[0][0]
     assert test_file_size == file_stats[0][1]

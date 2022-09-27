@@ -41,6 +41,21 @@
  
  https://github.com/arita37/zdata/blob/main/README.md
  
+
+
+
+ # How the documentation is generated:
+
+  Commit in zdocs_y23487teg65f6
+     --> Trigger   .github/auto_docs_githubpages.yml
+           ---> Install Sphynx Doc
+              -->  Launch docs_ghpage/buildDocs.sh
+                    -->  Generate Doc + Push doc into gh-pages branch
+                      --. Every 10 mins, Github picks up the content of gh-pages and publish on Internet
+
+
+                      
+
  
  
  
@@ -54,8 +69,5 @@
 
         pip install scikit-learn-intelex
  
-
-
-
 
 

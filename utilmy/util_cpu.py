@@ -1,32 +1,55 @@
 # -*- coding: utf-8 -*-
-""" CPU usage
-Docs::
-
-    Launch processors and monitor the CPU, memory usage.
-    Maintain same level of processors over time.
+# pylint: disable=C0103,W0601,E1123,W0614,F0401,E1120,E1101,E0611,W0702
+"""
+Launch processors and monitor the CPU, memory usage.
+Maintain same level of processors over time.
 
 
 
 
 """
-import csv, os, platform, re, shlex, subprocess, sys, time
+import csv
+import os
+import platform
+import re
+import shlex
+import subprocess
+import sys
+import time
 from collections import namedtuple
 from datetime import datetime
 from time import sleep, time
 
-import arrow, psutil
+import arrow
+# non-stdlib imports
+import psutil
 
-
+from aapackage import util_log
 
 ############# Root folder #####################################################
 VERSION = 1
 
 
+#############Variable #########################################################
+
 ######### Logging ##############################################################
-from utilmy import log
+LOG_FILE = "zlog/" + util_log.create_logfilename(__file__)
+APP_ID = util_log.create_appid(__file__)
+
+logger = util_log.logger_setup(__name__, log_file=None, formatter=util_log.FORMATTER_4)
 
 
+def log(*argv):
+    """function log
+    Args:
+        *argv:   
+    Returns:
+        
+    """
+    logger.info(",".join([str(x) for x in argv]))
 
+
+# log("Ok, test_log")
 ################################################################################
 
 

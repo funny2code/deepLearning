@@ -1,3 +1,57 @@
+
+ # How the documentation is generated:
+```
+
+  Commit in zdocs_y23487teg65f6 branch
+     --> Trigger   .github/auto_docs_githubpages.yml
+           ---> Install Sphynx Doc
+              -->  Launch docs_ghpage/buildDocs.sh
+                    -->  Generate Doc + Push doc into gh-pages branch
+                      --. Every 10 mins, Github picks up the content of gh-pages branch and publish on Internet
+
+
+Config files to updates:
+
+   builDocs.sh : Sphynx +  git push to gh-pages
+
+   index.rst  : template of the Index.html
+
+   conf.py : Sphynx generator
+
+
+
+Doc pushed here:
+
+    https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.html
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ![docs_pages_workflow](https://github.com/maltfield/rtd-github-pages/workflows/docs_pages_workflow/badge.svg?branch=master)
 
 # Continuous Documentation: Hosting Read the Docs on GitHub Pages
