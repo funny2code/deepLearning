@@ -230,6 +230,7 @@ def test1():
        f = os.path.exists(os.path.abspath(p))
        assert  f == True, "path " + p
 
+    log("####### os_removedirs() ..")
     rev_stat = os_removedirs("ztmp/ztmp2")
     assert not rev_stat == False, "cannot delete root folder"
 
@@ -318,19 +319,28 @@ def test4():
 
 
 def test6_os():
-
+    """function test6_os
+    """
     #from utilmy import oos as m
     import utilmy as uu
     drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
+    log("#######   os_get_os()..")
     log(os_get_os())
     assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
+
+    log("#######   os_cpu_info()..")
     log(os_cpu_info())
+
+    log("#######   os_ram_info()..")
     log(os_ram_info())
+
+    log("#######   os_getcwd()..")
     log(os_getcwd())
     os_sleep_cpu(cpu_min=30, sleep=1, interval=5, verbose=True)
 
+    log("#######   os_ram_sizeof()..")
     c = {1, 3, "sdsfsdf"}
     log(os_ram_sizeof(c, set()))
 
@@ -344,21 +354,9 @@ def test6_os():
     result_ = os_path_split(dtmp+"/test.txt")
     log("result", result_)
 
-
+    # TODO: Add test to this function here
     log("#######   os_file_replacestring() ..")
 
-
-
-    log("#######   os_walk() ..")
-    cwd = os.getcwd()
-    # log(os_walk(cwd))
-
-
-
-
-    log("#######   os_search_content() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp+"/os_search_content_test.txt", mode='a')
-    # os_search_content(srch_pattern="fast", dir1=dtmp, file_pattern="*.txt")
 
 
     cwd = os.getcwd()
@@ -367,14 +365,6 @@ def test6_os():
     res = os_search_content(srch_pattern= "Dummy text",dir1=os.path.join(cwd ,"tmp/test/"))
     log(res)
     '''
-
-
-    log("#######   os_get_function_name() ..")
-    log(os_get_function_name())
-
-
-
-
 
 
     log("#######   os_system_list() ..")
@@ -389,18 +379,27 @@ def test6_os():
 
 
 
-    log("#######   os utils...")
+    log("#######   os_file_replacestring...")
     uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
     uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
+    print("dtmp:",dtmp+"/os_test/")
     os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
 
+
+    #TODO Merge this test with the same test that is in "test1" function
+    log("#######   os_removedirs()...")
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
     os_removedirs(dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+
+
+    log("#######   os_ram_sizeof()...")
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
 
 def test7_os():
+    """function test7_os
+    """
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -417,8 +416,12 @@ def test7_os():
 
 
 def test8():
+    """function test8
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
+    
+    log("#######   os_remove()")
 
     obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
@@ -478,6 +481,8 @@ def test8():
 
 
 def test8_os():
+    """function test8_os
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -517,7 +522,7 @@ def test8_os():
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
 
-
+    
     file_stats = os_file_info(file_dir)
     assert file_dir == file_stats[0][0]
     assert test_file_size == file_stats[0][1]
@@ -574,7 +579,24 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             min_size_mb=min_size_mb, max_size_mb=max_size_mb,
             ndays_past=ndays_past, nmin_past=nmin_past,  start_date=start_date, end_date=end_date,
             nfiles=nfiles, verbose=verbose,npool=npool):
+        """
+        Docs::
 
+            dirin=dirin
+            file_list=file_list
+            exclude=exclude
+            include_only=include_only
+            min_size_mb=min_size_mb
+            max_size_mb=max_size_mb
+            ndays_past=ndays_past
+            nmin_past=nmin_past
+            start_date=start_date
+            end_date=end_date
+            nfiles=nfiles
+            verbose=verbose
+            npool=npool
+
+        """
         if dirin and not file_list:
             files = glob.glob(dirin, recursive=True)
             files = sorted(files)
@@ -782,6 +804,12 @@ class fileCache(object):
 
 
     def get(self, path):
+        """ method get
+         Docs::
+
+              path: str
+
+         """
         path = path.replace("\\","/")
         return self.db.get(path, None)
 
@@ -814,8 +842,18 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
 
           mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
-
-
+          mode='file'
+          exclude=""
+          include_only=""
+          min_size_mb=0
+          max_size_mb=500000
+          ndays_past=-1
+          nmin_past=-1
+          start_date='1970-01-02'
+          end_date='2050-01-01'
+          nfiles=99999999
+          verbose=0
+          dry=0
 
     """
     import os, shutil
@@ -853,6 +891,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
     """ Copy safe, using callback command to re-connect network if broken
     Docs::
 
+        dirin:str=None
+        dirout:str=None
+        nlevel=5
+        nfile=5000
+        logdir="./"
+        pattern="*"
+        exclude=""
+        force=False
+        sleep=0.5
+        cmd_fallback=""
+        verbose=True
 
     """
     import shutil, time, os, glob
@@ -1117,6 +1166,12 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
 
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
+    Docs::
+
+    dirin:str -The time of last modification of the specified path
+    fmt:str="%Y%m%d-%H:%M" -Time format
+    timezone:str='Asia/Tokyo' -Timezone
+
     """
     import datetime
     from pytz import timezone as tzone, utc
@@ -1134,6 +1189,10 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 
 def os_file_check(fpath:str):
    """Check file stat info
+   Docs::
+
+        fpath: str
+
    """
    import os, time
 
@@ -1151,7 +1210,11 @@ def os_file_check(fpath:str):
 # TODO
 def os_file_info(dirin, returnval='list', date_format='unix'):
     """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
+    Docs::
 
+        dirin
+        returnval='list'
+        date_format='unix'
 
     """
     flist = glob_glob(dirin)
@@ -1565,7 +1628,7 @@ def os_get_uniqueid(format="int"):
 
 
 def os_get_os():
-    """function os_platform_os
+    """function os_get_os
     """
     import platform
     return platform.system()
