@@ -1063,6 +1063,7 @@ def test_all():
     test6_datenow()
     test7()
     test8_load_save()
+    test9_find_fuzzy()
 
 
 def test1():
