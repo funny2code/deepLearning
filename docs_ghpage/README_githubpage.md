@@ -27,8 +27,12 @@ Doc pushed here:
 
 
 
+### Sphynx Doc
+https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
 
 
+
+index.rst
 
 
 Welcome to helloWorld's
