@@ -232,6 +232,8 @@ def config_load(
         config_path:    str  = None,
         to_dataclass:   bool = True,  True, can access the dict as dot   mydict.field
         config_field_name :  str  = Extract sub-field name from the dict
+
+        --- Default config
         environ_path_default: str = "config_path_default",
         path_default:   str  = None,
         config_default: dict = None,

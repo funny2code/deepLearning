@@ -20,6 +20,42 @@
 
 
 
+
+ # How the documentation is generated:
+```
+
+  Commit in zdocs_y23487teg65f6 branch
+     --> Trigger   .github/auto_docs_githubpages.yml
+           ---> Install Sphynx Doc
+              -->  Launch docs_ghpage/buildDocs.sh
+                    -->  Generate Doc + Push doc into gh-pages branch
+                         here :   https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.html
+                         
+                      --. Every 10 mins, Github picks up the content of gh-pages branch and publish on Internet
+
+
+Config files to updates:
+
+     docs_ghpages/ builDocs.sh : Sphynx +  git push to gh-pages
+
+    docs_ghpages/ index.rst  : template of the Index.html
+
+    docs_ghpages/   conf.py : Sphynx generator
+
+
+Doc pushed here:
+
+    https://github.com/arita37/myutil/blob/gh-pages/en/zdocs_y23487teg65f6/index.html
+
+
+
+
+
+
+
+
+```
+
 ## How to use 
  
     https://drive.google.com/drive/folders/1FawUmqrNOxabWbepiCchDd1b60pseDXm?usp=sharing
