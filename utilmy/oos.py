@@ -1623,7 +1623,7 @@ def os_get_process_info(sep="-"):
     """
     import time
     ss = []
-    ss.append( str(os.getpid() )
+    ss.append( str(os.getpid()) )
     ss.append( os.get_ip())
     ss.append( str(int(time.time())) )
     return sep.join(ss)

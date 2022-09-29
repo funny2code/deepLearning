@@ -50,7 +50,7 @@ def test_pars_values():
         p.seed          = 43
 
     """
-    myproblem1 = myProblem2()
+    myproblem1 = myProblem_ranking()
 
     p               = Box({})
     p.log_file      = 'trace.log'
@@ -278,11 +278,19 @@ class myProblem_ranking:
         for i in range(2):
             x0 = rlist[i]
             x1 = rlist2[i]
-            s1 =  eval(formulae_str)
+            #s1 =  eval(formulae_str)
+            try:
+                s1 = eval(formulae_str)
+            except:
+                s1 = 10000
 
             x0 = rlist2[i]
             x1 = rlist[i]
-            s2 =  eval(formulae_str)
+            #s2 =  eval(formulae_str)
+            try:
+                s2 = eval(formulae_str)
+            except:
+                s2 = 10000
             difflist.append(abs(s1-s2))
 
 
