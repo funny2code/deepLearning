@@ -144,7 +144,117 @@ def test9():
 
 
 
+""""
 
+2 issues :
+   Symmetric formulae : not yet, our cost for symmetric : not regular, pb of gradient, noisy.
+
+   Compliexyt :  good,  len(expr)  :    dcgpy.simplify()  : 1/(x1+x1) ---. 1/(2*x1)   
+                    print("New best found: gen: ", kstep, " value: ", fitness[i], " ", dCGP.simplify(symbols))
+
+                    0.002* len(exprt)  --> force fomuale
+
+
+We need to improve 
+        self.check()  --> benchmark level  
+          we dont how good is the new formulae.
+
+--> Discover a new math formulae   by using the 
+
+
+
+1) Add more manual baseline to see
+ Manual :
+   base1:  x0 + x1
+   base2 : x0 * x1
+   base3   log(x0) + log(x1)
+   base3:  "random.random()"   --> random expr
+
+
+
+
+   Cost very concentrated  around [9.0 - 10.0]
+
+    def check(self):
+        lexpr =[ ('x0 + x1', 'ok')  ,   ### symmetric
+                 ('log(x0) + log(x1)', 'ok'),
+                 'random.random()', 'rand'),
+
+                 (' x0/x1', 'bad')  ### incorrect not symmetric
+
+
+
+
+                 ....
+
+        ]
+
+        for expr in lexpr:
+            cost = self.get_correlm(expr[0] )
+            res.append([ expr[1], expr[0], cost ])
+
+        dfr = pd.DataFrame(res, columns=['expr_type', 'expr', 'cst'])
+        log(dfr)
+        
+
+        our formuale
+
+
+#### later
+### save our model and re-load inject back some formulae
+  
+
+  
+2) Single variable formulae
+   new problem defintion
+
+     Good idea as start Force symmetric.
+       r =  x0*x1  -->  f(r)    ---> some New direction == symmetric consistence.
+       r  = x0+x1  -->  F(r)
+
+
+
+       r = x0+x1 
+
+
+
+
+
+
+   Newformulae - randomScore === Actual improvement
+
+   NewFormCost - CostBase1
+      Why trhe cost not symmetric is not so high ?
+
+
+
+
+My guess:
+   Symmetry Cost:  not force too much the symmetr, 
+                  no linear, not smooeht --> pb of convergence.
+     
+
+
+        x0 = 1/(self.kk + rank1)  ### inverse of rank, decreasing in rank :  rank=1 --> high score.
+        x1 = 1/(self.kk + rank2*self.adjust)
+
+        x0 = rank2 / 100.0 in [0,1]
+        x1 = rank1 / 100.0  in [0,1]
+        
+
+ 
+
+        scores_new =  eval(formulae_str)  ### formulaue 1 variable in r
+
+
+ DCPY : GP + Gradient (NNeural cost)  --> gredient direction to smallest cost.  
+
+
+
+
+
+
+"""
 
 
 ###################################################################################################
@@ -648,6 +758,9 @@ class myProblem_ranking_v2:
         ### numpy vector :  take inverse of rank As PROXT.
         x0 = 1/(self.kk + rank1)
         x1 = 1/(self.kk + rank2*self.adjust)
+
+
+
         scores_new =  eval(formulae_str)
 
 
