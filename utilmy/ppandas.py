@@ -96,8 +96,7 @@ def test_all():
     pd_to_file(df1, "testdata/ppandas/file.csv")
     pd_sample_strat(df1, col="a", n=10)
 
-    ## you int64
-    bins = pd_col_bins(df1, col="a", nbins= 5)
+    bins = pd_col_bins(df1, "a", 5)
     assert len(np.unique(bins)) == 5, "bins not formed"
 
     pd_dtype_reduce(df1)
@@ -134,21 +133,6 @@ def test2():
     to_timeunix(datetime.datetime(2018,1,16))
     to_datetime("2018-01-16")
     
-def test_pd_col_bins():
-  import utilmy as uu
-  import pandas as pd
-  import numpy as np
-  np.random.seed(42)
-
-  normal_col = np.random.normal(loc=666, scale=10, size=1000)
-  geo_col = np.random.geometric(p=0.1, size=1000)
-  df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
-
-  binned_norm = uu.pd_col_bins(df, 'norm', 10)
-  binned_geo = uu.pd_col_bins(df, 'geo', 10)
-
-  assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
-  assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
 
 ###################################################################################################
 ###### Pandas #####################################################################################
@@ -500,71 +484,21 @@ def pd_cartesian(df1, df2) :
   return df3
 
 
-def pd_col_bins(df, col: str, nbins: int = 5):
-  """Shortcut for easy binning of numerical values.
+def pd_col_bins(df, col, nbins=5):
+  """function pd_col_bins.
   Doc::
-
-    np.random.seed(42)
-
-    normal_col = np.random.normal(loc=666, scale=10, size=1000)
-    geo_col = np.random.geometric(p=0.1, size=1000)
-    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
-
-    binned_norm = uu.pd_col_bins(df, 'norm', 10)
-    binned_geo = uu.pd_col_bins(df, 'geo', 10)
-
-    assert len(binned_norm.unique()) == 10, "bins are not formed for normal distribution"
-    assert len(binned_geo.unique()) == 9, "bins are not formed for geometric distribution"
-
-    Args:
-        df (pandas.DataFrame):   The dataframe.
-        col (str):    The name of the column for cutting. Column should be of numeric type.
-        nbins (int):  The number of bins (default 5).
-
-    Returns:
-        pandas.Series of type int16.
+          
+        Args:
+            df:   
+            col:   
+            nbins:   
+        Returns:
+            
   """
-  import pandas as pd
-  # assert nbins < 256, 'nbins< 255'
-  return pd.qcut(df[col], q=nbins, labels=False, duplicates='drop').astype('int16')
-
-
-def pd_colcat_toint(dfref, colname, colcat_map=None, suffix=None):
-
-    ### to ensure dataframe
-    colname = [colname] if isinstance(colname, str) else colname
-
-    df = dfref[colname]
-    # if colname is single value df will be series type not a dataframe so we convert it to dataframe to be sure it is a dataframe type
-    df = pd.DataFrame(df)
-
-    suffix = "" if suffix is None else suffix
-    colname_new = []
-
-    if colcat_map is not None:
-        for col in colname:
-            print(col, col + suffix)
-            ddict            = colcat_map[col]["encode"]
-            # print(ddict)
-            df[col + suffix] = df[col].apply(lambda x: ddict.get(x))
-            colname_new.append(col + suffix)
-
-        return df[colname_new], colcat_map
-
-    colcat_map = {}
-    
-    # old: for col in colname:
-    # update: for col in [colname] >> if colname is just single value it will loop through string not the list, so we convert to list before looping
-    for col in colname:
-        
-        colcat_map[col]           = {}
-        df[col + suffix], label   = df[col].factorize()
-        colcat_map[col]["decode"] = {i: t for i, t in enumerate(list(label))}
-        colcat_map[col]["encode"] = {t: i for i, t in enumerate(list(label))}
-        colname_new.append(col + suffix)
-
-    return df[colname_new], colcat_map
-
+  ### Shortcuts for easy bin of numerical values
+  import pandas as pd, numpy as np
+  assert nbins < 256, 'nbins< 255'
+  return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int8')
 
 
 def pd_dtype_reduce(dfm, int0 ='int32', float0 = 'float32') :
