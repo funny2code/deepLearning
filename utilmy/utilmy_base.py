@@ -1056,22 +1056,12 @@ def load(to_file=""):
 def test_all():
     """function test_all
     """
-    test1()
-    test2()
-    test3()
-    test4()
-    test5()
-    test6()
-    test7()
-    test8_load_save()
-    test9_find_fuzzy()
 
-
-
-def test1():
     import utilmy as m
+    drepo, dtmp = dir_testinfo()
 
     ###################################################################
+
     log("\n##### git_repo_root  ", m.git_repo_root())
     assert not m.git_repo_root() == None, "err git repo"
 
@@ -1080,6 +1070,7 @@ def test1():
 
 
     ####################################################################
+
     log("\n##### global_verbosity  ")
     log('verbosity', m.global_verbosity(__file__, "config.json", 40,))
     log('verbosity', m.global_verbosity('../', "config.json", 40,))
@@ -1091,13 +1082,7 @@ def test1():
     gverbosity =m.global_verbosity(__file__, "config.json", 40,)
     assert gverbosity == verbosity, "incorrect verbosity "
 
-    ################################################################################################
-
-
-def test2():
-    import utilmy as m
-    drepo, dtmp = dir_testinfo()
-
+    ####################################################################
 
     file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name, min_chars=8)
@@ -1107,10 +1092,7 @@ def test2():
     x = set(index.read())
     assert not log(x) and x  == set(xtrue), f"{xtrue} <> {x}"
 
-
-
-def test3():
-    import utilmy as m
+    ####################################################################
 
     log('#### Session')
     d0 = os_get_dirtmp()
@@ -1128,15 +1110,9 @@ def test3():
     
     assert glob2 == glob, 'FAILED, -> session error'
 
+    ####################################################################
 
-def test4():
-    import utilmy as m
-
-
-    drepo, dirtmp = dir_testinfo()
-
-
-    def test_func(arg1, arg2):
+    def _test_func(arg1, arg2):
         """HELP doc string
         """
         return arg1 + arg2
@@ -1148,23 +1124,19 @@ def test4():
         log("\n####", name,"\n", m.help_info(name))
         # assert m.help_info(name), f'FAILED -> help_info {name}'
 
-    log("\n####", m.help_get_codesource(func=test_func))
-    assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
+    log("\n####", m.help_get_codesource(func=_test_func))
+    assert m.help_get_codesource(func=_test_func), 'FAILED -> help_get_codesource'
 
-    log("\n####", m.help_get_docstring(func=test_func))
-    assert m.help_get_docstring(func=test_func), 'FAILED -> help_get_docstring'
+    log("\n####", m.help_get_docstring(func=_test_func))
+    assert m.help_get_docstring(func=_test_func), 'FAILED -> help_get_docstring'
 
-    log("\n####", m.help_get_funargs(func=test_func))
-    assert m.help_get_funargs(func=test_func), 'FAILED -> help_get_funargs'
+    log("\n####", m.help_get_funargs(func=_test_func))
+    assert m.help_get_funargs(func=_test_func), 'FAILED -> help_get_funargs'
 
-    log("\n####", m.help_signature(f=test_func))
-    assert m.help_signature(f=test_func), 'FAILED -> help_signature'
+    log("\n####", m.help_signature(f=_test_func))
+    assert m.help_signature(f=_test_func), 'FAILED -> help_signature'
 
-
-def test5():
-    import utilmy as m
-
-    drepo = direpo()
+    ####################################################################
 
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
@@ -1179,12 +1151,12 @@ def test5():
     log("\n####", m.get_loggers())
     log("\n####", m.get_loggers(n_loggers=3))
 
-    log("\n####", m.import_function(fun_name='test3', module_name='utilmy'))
-    assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
+    log("\n####", m.import_function(fun_name='test_all', module_name='utilmy'))
+    assert m.import_function(fun_name='test_all', module_name='utilmy'), 'FAILED -> import_function'
 
 
     log("\n####", m.load_function_uri )
-    ll = [ drepo + "utilmy/utilmy_base.py:test2"
+    ll = [ drepo + "utilmy/utilmy_base.py:test_all"
 
     ]
     for uri_name in ll :
@@ -1192,10 +1164,7 @@ def test5():
         log(myclass)
         assert myclass, 'FAILED -> load_function_uri'
 
-
-def test6():
-    import utilmy as m
-
+    ####################################################################
 
     log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
@@ -1210,14 +1179,7 @@ def test6():
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
 
-
-
-
-def test7():
-    import utilmy as m
-
-    d0 = os_get_dirtmp()
-
+    ####################################################################
 
     log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
@@ -1247,6 +1209,21 @@ def test7():
 
     os.remove("./testfile")
 
+    ####################################################################
+
+    score_word_dict = {}
+    word = 'Catherine M Gitau'
+    wlist = ['Catherine Gitau', 'Gitau Catherine']
+
+
+    log("\n####", m.find_fuzzy)
+    log(f"Similarity score of '{word}' with:")
+    from difflib import SequenceMatcher as SM
+    for wlist_word, score in zip(wlist, [SM(None, str(word), str(s2) ).ratio() for s2 in wlist]):
+        score_word_dict[score] = wlist_word
+        log(f"'{wlist_word}' - {score}")
+    highest_score_word = score_word_dict[max(list(score_word_dict.keys()))]
+    assert highest_score_word == m.find_fuzzy(word, wlist), f"FAILED -> find_fuzzy. Word with highest score should be {highest_score_word}, got {m.find_fuzzy(word, wlist)}"
 
 
 

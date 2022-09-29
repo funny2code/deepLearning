@@ -79,14 +79,7 @@ def test_all():
     """
     test_filecache()
     test_globglob()
-
-    test1()
-    test2()
-    test4()
-    test6_os()
-    test7_os()
-    test8()
-    test8_os()
+    test_os()
 
 
 
@@ -213,24 +206,41 @@ def test_os_module_uncache():
 
 
 
-def test1():
-    """ python  utilmy/oos.py test1
-    """
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
+def test_os():
+    from pytz import timezone
+    import sys, os, inspect, requests, json
+    import  utilmy as uu
 
-    #logfull("log2")
-    #logfull2("log5")
+    drepo, dirtmp = uu.dir_testinfo()
 
 
-    #################
+    old_modules = sys.modules.copy()
+    exclude_mods = {"json.decoder"}
+    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
+    os_module_uncache(exclude_mods)
+    new_modules = sys.modules.copy()
+    removed = []
+    kept = []
+    for module_name in old_modules:
+        module_prefix = module_name.split('.', 1)[0]
+        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
+            assert module_name not in new_modules
+            removed.append(module_name)
+        else:
+            assert module_name in new_modules
+            if module_name in exclude_mods:
+                kept.append(module_name)
+
+    log("Successfully remove module cache: ", ", ".join(removed))
+    log("Successfully kept: ", ", ".join(kept))
+
     log("####### os_makedirs() ..")
-    os_makedirs(dir_or_file='ztmp/ztmp2/myfile.txt')
-    os_makedirs(dir_or_file='ztmp/ztmp3/ztmp4')
-    os_makedirs(dir_or_file='/tmp/one/two')
-    os_makedirs(dir_or_file='/tmp/myfile')
-    os_makedirs(dir_or_file='/tmp/one/../mydir/')
-    os_makedirs(dir_or_file='./tmp/test')
+    os_makedirs('ztmp/ztmp2/myfile.txt')
+    os_makedirs('ztmp/ztmp3/ztmp4')
+    os_makedirs('/tmp/one/two')
+    os_makedirs('/tmp/myfile')
+    os_makedirs('/tmp/one/../mydir/')
+    os_makedirs('./tmp/test')
     os.system("ls ztmp")
 
     path = ["/tmp/", "ztmp/ztmp3/ztmp4", "/tmp/", "./tmp/test","/tmp/one/../mydir/"]
@@ -239,72 +249,53 @@ def test1():
        assert  f == True, "path " + p
 
     log("####### os_removedirs() ..")
-    rev_stat = os_removedirs(path="ztmp/ztmp2")
-    assert not rev_stat == False, "cannot delete root folder"
+    rev_stat = os_removedirs("ztmp/ztmp2")
+    assert not rev_stat == False, "Cannot delete root folder"
 
+    os_removedirs(dirtmp + "/os_test")
+    assert ~os.path.exists(dirtmp + "/os_test"), "Folder still found after removing"
 
-    ############
-    res = os_system(cmd= f" ls . ",  doprint=True)
+    res = os_system( f" ls . ",  doprint=True)
     log(res)
-    res = os_system(cmd= f" ls . ",  doprint=False)
-    log( os_get_os() )
+    res = os_system( f" ls . ",  doprint=False)
+    log(os_get_os())
 
 
-def test2():
-    """function test2
-    """
-    import utilmy as uu
-    drepo, dtmp = uu.dir_testinfo()
-
-
-    uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
-    os_file_check(dtmp + "/os_file_test.txt")
+    uu.to_file("Dummy text", dirtmp + "/os_file_test.txt")
+    os_file_check(dirtmp + "/os_file_test.txt")
 
 
 
     log("#######   os_search_fast() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
-    
-    res = z_os_search_fast(
-        fname=dtmp+"/os_search_test.txt",
-        texts=["Dummy"],mode="regex")
-
+    uu.to_file("Dummy text to test fast search string", dirtmp + "/os_search_test.txt")
+    res = z_os_search_fast(dirtmp + "/os_search_test.txt", ["Dummy"],mode="regex")
     assert  not log(res) and len(res) >0, res
 
     log("#######   os_search_content() ..")
-    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
-    assert  not log(dfres) and len(dfres) >0, dfres
+    dfres = os_search_content(srch_pattern='Dummy', dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
+    assert not log(dfres) and len(dfres) > 0, dfres
 
     log("###### os_walk() ..")
-    folders = os_walk(path=dtmp,pattern="*.txt")
+    folders = os_walk(path=dirtmp, pattern="*.txt")
     assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
 
-    # TODO this test has a bug
-    #log("#######   os_copy_safe() ..")
-    #uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
-    #os_copy_safe(drepo + "/testdata/tmp/test/*", drepo + "/testdata/tmp/test_copy_safe")
-    #f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt.txt"))
-    #assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
+    log("#######   os_copy_safe() ..")
+    uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
+    os_copy_safe(dirin=drepo + "testdata/tmp/test", dirout=drepo + "testdata/tmp/test_copy_safe/", nlevel=1, pattern="*.txt")
+    log(drepo + "testdata/tmp/test_copy_safe/os_copy_safe_test.txt")
+    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt"))
+    assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
 
     log("####### os_copy() ..")
     uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_test.txt")
-    
     os_copy(
-        dirfrom=drepo + "/testdata/tmp/test/os_copy_test.txt",
-        dirto=drepo + "/testdata/tmp/test_copy")
-    
-    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy/os_copy_test.txt"))
+        dirfrom=drepo + "testdata/tmp/test",
+        dirto=drepo + "testdata/tmp/test_copy",
+        mode="dir")
+    f = os.path.exists(os.path.abspath(drepo + "testdata/tmp/test_copy/os_copy_test.txt"))
     assert  f == True, "The file os_copy_test.txt doesn't exist"
 
 
-def test4():
-    """function test4
-    """
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
-
-
-    log(os_get_function_name())
     cwd = os.getcwd()
     #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
@@ -331,20 +322,16 @@ def test4():
     os_variable_del(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
-    assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
+    assert os.path.exists(dirtmp + "/"),"Directory doesn't exist"
 
-
-def test6_os():
-    """function test6_os
-    """
-    #from utilmy import oos as m
-    import utilmy as uu
-    drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
     log("#######   os_get_os()..")
     log(os_get_os())
-    assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
+    platform = sys.platform.lower()
+    if platform == 'win32':
+        platform = 'windows'
+    assert os_get_os().lower() == platform, "Platform mismatch"
 
     log("#######   os_cpu_info()..")
     log(os_cpu_info())
@@ -358,25 +345,16 @@ def test6_os():
 
     log("#######   os_ram_sizeof()..")
     c = {1, 3, "sdsfsdf"}
-
-    log(os_ram_sizeof(
-        o=c,
-        ids=set())
-    )
+    log(os_ram_sizeof(c, set()))
 
 
     log("#######   os_path_size() ..")
-
-    size_ = os_path_size(path=drepo)
-    
+    size_ = os_path_size(drepo)
     assert not log("total size", size_) and size_> 10 , f"error {size_}"
 
 
     log("#######   os_path_split() ..")
-    
-    result_ = os_path_split(
-        fpath=dtmp+"/test.txt")
-
+    result_ = os_path_split(dirtmp + "/test.txt")
     log("result", result_)
 
     # TODO: Add test to this function here
@@ -391,7 +369,6 @@ def test6_os():
     log(res)
     '''
 
-
     log("#######   os_system_list() ..")
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
@@ -399,36 +376,20 @@ def test6_os():
 
 
     log("#######   os_file_check()")
-    uu.to_file("test text to write to file", dtmp+"/file_test.txt", mode="a")
-    os_file_check(dtmp+"/file_test.txt")
-
+    uu.to_file("test text to write to file", dirtmp + "/file_test.txt", mode="a")
+    os_file_check(dirtmp + "/file_test.txt")
 
 
     log("#######   os_file_replacestring...")
-    uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
-    uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
-    print("dtmp:",dtmp+"/os_test/")
-    os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
-
-
-    #TODO Merge this test with the same test that is in "test1" function
-    log("#######   os_removedirs()...")
-    #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-
-    os_removedirs(path=dtmp+"/os_test")
-    assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+    uu.to_file("Dummy file to test os utils", dirtmp+"/os_utils_test.txt")
+    uu.to_file("Dummy text to test replace string", dirtmp+"/os_test/os_file_test.txt")
+    print("dtmp:",dirtmp + "/os_test/")
+    os_file_replacestring("text", "text_replace", dirtmp + "/os_test/")
 
 
     log("#######   os_ram_sizeof()...")
-    
-    log(os_ram_sizeof(o=["3434343", 343242, {3434, 343}], ids=set()))
+    log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
-
-def test7_os():
-    """function test7_os
-    """
-    import  utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
 
     log("\n#######", os_merge_safe)
     uu.to_file("""test input1""", dirtmp + "test1.txt" )
@@ -442,14 +403,8 @@ def test7_os():
     assert len(flist) < 2, flist
 
 
-def test8():
-    """function test8
-    """
-    import utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-    
-    log("#######   os_remove()")
 
+    log("#######   os_remove()")
     obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
     for name in ("xtest1", "xtest2", "xtest3"):
@@ -493,7 +448,7 @@ def test8():
               nfiles=1,
               dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
-    assert len(before_files)-len(cur_files) == 1
+    assert len(before_files) - len(cur_files) == 1
 
     # test file size
     before_files = glob.glob(obj_dir, recursive=True)
@@ -507,42 +462,24 @@ def test8():
     assert len(before_files) == len(cur_files)
 
 
-def test8_os():
-    """function test8_os
-    """
-    import utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-
-
     timezone_name = 'Asia/Tokyo'
     datetime_format = '%Y%m%d-%H:%M'
     file_dir = dirtmp + "/test.txt"
 
 
     log("\n#######", os_file_date_modified)
-    from pytz import timezone
     uu.to_file("first line", file_dir)
     created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
-
-    last_modified_created = os_file_date_modified(
-        dirin=file_dir, 
-        fmt=datetime_format, 
-        timezone=timezone_name)
+    last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
 
     log(created_time, last_modified_created)
     assert created_time == last_modified_created
 
 
-
-
     log("\n#######", os_get_ip)
-    import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
     log('internal ip', os_get_ip() )
-
-
-    import os
 
     uu.to_file("first line", file_dir)
 
@@ -553,12 +490,12 @@ def test8_os():
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
 
-    file_stats = os_file_info(dirin=file_dir)
+    
+    file_stats = os_file_info(file_dir)
     assert file_dir == file_stats[0][0]
     assert test_file_size == file_stats[0][1]
     assert test_file_modification_time == file_stats[0][2]
 
-    import inspect
 
     log("\n#######", os_file_info)
     _, file__name__, _, function_name = os_get_function_name().split(',')
@@ -885,7 +822,6 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
             ) :
     """  Advance copy with filter.
     Docs::
-
           mode:str = 'file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
           exclude:str = ""
@@ -899,7 +835,6 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
           nfiles:int = 99999999
           verbose:int = 0
           dry:int = 0
-
     """
     import os, shutil
 
@@ -910,7 +845,7 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
             nfiles=nfiles,)
 
     if mode =='file':
-        print ('Nfiles', len(flist))
+        print('Nfiles', len(flist))
         jj = 0
         for fi in flist :
             try :
@@ -927,7 +862,12 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
         else :    print('deleted', jj)
 
     elif mode =='dir':
-         shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None,  ignore_dangling_symlinks=False, dirs_exist_ok=False)
+        try:
+            shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None, ignore_dangling_symlinks=False)
+        except FileExistsError as e:
+            print('Directory is already exists')
+        except Exception as e:
+            print(e)
 
 
 
@@ -955,35 +895,39 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
 
     flist = [] ; dirinj = dirin
     for j in range(nlevel):
-        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
+        ztmp   = glob.glob(dirinj + "/" + pattern)
         dirinj = dirinj + "/*/"
-        if len(ztmp) < 1 : break
-        flist  = flist + ztmp
+        if len(ztmp) < 1: break
+        flist.extend(ztmp)
 
     flist2 = []
     for x in exclude.split(","):
-        if len(x) <=1 : continue
-        for t in flist :
-            if  not x in t :
+        if len(x) <= 1: continue
+        for t in flist:
+            if  not x in t:
                 flist2.append(t)
-    flist = flist2
+    flist = [x for x in flist if x not in flist2]
 
-    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
-    kk = 0 ; ntry = 0 ;i =0
-    for i in range(0, len(flist)) :
+    log('n files', len(flist), dirinj, dirout); time.sleep(sleep)
+    kk = 0; ntry = 0; i = 0
+    for i in range(0, len(flist)):
         fi  = flist[i]
         fi2 = fi.replace(dirin, dirout)
 
-        if not fi.isascii(): continue
-        if not os.path.isfile(fi) : continue
+        try:
+            if not fi.isascii(): continue
+        except AttributeError:
+            pass
 
-        if (not os.path.isfile(fi2) )  or force :
+        if not os.path.isfile(fi): continue
+
+        if (not os.path.isfile(fi2)) or force:
              kk = kk + 1
-             if kk > nfile   : return 1
-             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
-             if kk % 10 == 0  and verbose  : log(fi2)
+             if kk > nfile: return 1
+             if kk % 50 == 0 and sleep > 0: time.sleep(sleep)
+             if kk % 10 == 0 and verbose: log(fi2)
              os.makedirs(os.path.dirname(fi2), exist_ok=True)
-             try :
+             try:
                 shutil.copy(fi, fi2)
                 ntry = 0
                 if verbose: log(fi2)
@@ -1831,18 +1775,20 @@ def os_ram_info():
             Returns:
                 ret
     """
-    with open('/proc/meminfo', 'r') as mem:
-        ret = {}
-        tmp = 0
-        for i in mem:
-            sline = i.split()
-            if str(sline[0]) == 'MemTotal:':
-                ret['total'] = int(sline[1])
-            elif str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
-                tmp += int(sline[1])
-        ret['free'] = tmp
-        ret['used'] = int(ret['total']) - int(ret['free'])
-    return ret
+    if 'linux' in sys.platform.lower():
+        with open('/proc/meminfo', 'r') as mem:
+            ret = {}
+            tmp = 0
+            for i in mem:
+                sline = i.split()
+                if str(sline[0]) == 'MemTotal:':
+                    ret['total'] = int(sline[1])
+                elif str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
+                    tmp += int(sline[1])
+            ret['free'] = tmp
+            ret['used'] = int(ret['total']) - int(ret['free'])
+        return ret
+
 
 
 def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
