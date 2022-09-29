@@ -12,11 +12,11 @@
 
 Config files to updates:
 
-   builDocs.sh : Sphynx +  git push to gh-pages
+     docs_ghpages/ builDocs.sh : Sphynx +  git push to gh-pages
 
-   index.rst  : template of the Index.html
+    docs_ghpages/ index.rst  : template of the Index.html
 
-   conf.py : Sphynx generator
+    docs_ghpages/   conf.py : Sphynx generator
 
 
 
@@ -27,6 +27,35 @@ Doc pushed here:
 
 
 
+### Sphynx Doc
+https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+
+
+
+index.rst
+
+
+Welcome to helloWorld's
+======================================
+
+.. toctree::
+   :maxdepth: -1
+   :caption: Contents:
+
+   modules
+
+
+
+.. automodule:: utilmy.utilmy_base
+   :members:
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
 
 
 

@@ -1635,6 +1635,19 @@ def os_get_function_name():
 
 
 ###################################################################################################
+def os_get_process_info(sep="-"):
+    """ get  PID process-IPAdress-UnixTime to identify uniquely each process.
+
+    """
+    import time
+    ss = []
+    ss.append( str(os.getpid()) )
+    ss.append( os.get_ip())
+    ss.append( str(int(time.time())) )
+    return sep.join(ss)
+
+
+
 def os_get_uniqueid(format="int"):
     """  Unique INT64 ID:  OSname +ip + process ID + timeStamp
          for distributed compute
