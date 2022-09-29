@@ -659,8 +659,10 @@ class myProblem_ranking_v2:
                  ('x0/x1 - x1/x0','bad'),
                  ('x0**2/x1','bad'),
                  ('log(x0)','bad'),
-                 ('sin(x0*x1)','good')
-
+                 ('sin(x0*x1)','good'),
+                 ('(x0) / ((x0 - x0)*(x1 - x1))', 'bad'),
+                 ('log(x0*(1 - 2*x0))', 'bad'),
+                 ('x0*exp(-exp(x0))', 'bad'),
 
 
                     ]
