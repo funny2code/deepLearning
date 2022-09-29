@@ -225,12 +225,12 @@ def test1():
 
     #################
     log("####### os_makedirs() ..")
-    os_makedirs('ztmp/ztmp2/myfile.txt')
-    os_makedirs('ztmp/ztmp3/ztmp4')
-    os_makedirs('/tmp/one/two')
-    os_makedirs('/tmp/myfile')
-    os_makedirs('/tmp/one/../mydir/')
-    os_makedirs('./tmp/test')
+    os_makedirs(dir_or_file='ztmp/ztmp2/myfile.txt')
+    os_makedirs(dir_or_file='ztmp/ztmp3/ztmp4')
+    os_makedirs(dir_or_file='/tmp/one/two')
+    os_makedirs(dir_or_file='/tmp/myfile')
+    os_makedirs(dir_or_file='/tmp/one/../mydir/')
+    os_makedirs(dir_or_file='./tmp/test')
     os.system("ls ztmp")
 
     path = ["/tmp/", "ztmp/ztmp3/ztmp4", "/tmp/", "./tmp/test","/tmp/one/../mydir/"]
@@ -239,14 +239,14 @@ def test1():
        assert  f == True, "path " + p
 
     log("####### os_removedirs() ..")
-    rev_stat = os_removedirs("ztmp/ztmp2")
+    rev_stat = os_removedirs(path="ztmp/ztmp2")
     assert not rev_stat == False, "cannot delete root folder"
 
 
     ############
-    res = os_system( f" ls . ",  doprint=True)
+    res = os_system(cmd= f" ls . ",  doprint=True)
     log(res)
-    res = os_system( f" ls . ",  doprint=False)
+    res = os_system(cmd= f" ls . ",  doprint=False)
     log( os_get_os() )
 
 
@@ -264,7 +264,11 @@ def test2():
 
     log("#######   os_search_fast() ..")
     uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    
+    res = z_os_search_fast(
+        fname=dtmp+"/os_search_test.txt",
+        texts=["Dummy"],mode="regex")
+
     assert  not log(res) and len(res) >0, res
 
     log("#######   os_search_content() ..")
@@ -284,7 +288,11 @@ def test2():
 
     log("####### os_copy() ..")
     uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_test.txt")
-    os_copy(drepo + "/testdata/tmp/test/os_copy_test.txt", drepo + "/testdata/tmp/test_copy")
+    
+    os_copy(
+        dirfrom=drepo + "/testdata/tmp/test/os_copy_test.txt",
+        dirto=drepo + "/testdata/tmp/test_copy")
+    
     f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy/os_copy_test.txt"))
     assert  f == True, "The file os_copy_test.txt doesn't exist"
 
@@ -350,16 +358,25 @@ def test6_os():
 
     log("#######   os_ram_sizeof()..")
     c = {1, 3, "sdsfsdf"}
-    log(os_ram_sizeof(c, set()))
+
+    log(os_ram_sizeof(
+        o=c,
+        ids=set())
+    )
 
 
     log("#######   os_path_size() ..")
-    size_ = os_path_size(drepo)
+
+    size_ = os_path_size(path=drepo)
+    
     assert not log("total size", size_) and size_> 10 , f"error {size_}"
 
 
     log("#######   os_path_split() ..")
-    result_ = os_path_split(dtmp+"/test.txt")
+    
+    result_ = os_path_split(
+        fpath=dtmp+"/test.txt")
+
     log("result", result_)
 
     # TODO: Add test to this function here
@@ -397,12 +414,14 @@ def test6_os():
     #TODO Merge this test with the same test that is in "test1" function
     log("#######   os_removedirs()...")
     #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-    os_removedirs(dtmp+"/os_test")
+
+    os_removedirs(path=dtmp+"/os_test")
     assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
 
 
     log("#######   os_ram_sizeof()...")
-    log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
+    
+    log(os_ram_sizeof(o=["3434343", 343242, {3434, 343}], ids=set()))
 
 
 def test7_os():
@@ -504,7 +523,11 @@ def test8_os():
     from pytz import timezone
     uu.to_file("first line", file_dir)
     created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
-    last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
+
+    last_modified_created = os_file_date_modified(
+        dirin=file_dir, 
+        fmt=datetime_format, 
+        timezone=timezone_name)
 
     log(created_time, last_modified_created)
     assert created_time == last_modified_created
@@ -530,8 +553,7 @@ def test8_os():
     log("File Size in MB:", test_file_size)
     log("File Modification time:", test_file_modification_time)
 
-    
-    file_stats = os_file_info(file_dir)
+    file_stats = os_file_info(dirin=file_dir)
     assert file_dir == file_stats[0][0]
     assert test_file_size == file_stats[0][1]
     assert test_file_modification_time == file_stats[0][2]
