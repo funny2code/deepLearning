@@ -1077,7 +1077,89 @@ if __name__ == "__main__":
     test7()
     test8()
     
-    
+#test9()  -- error at evaluation phase
+##Exception has occurred: ValueError  
+##all input arrays must have the same shape
+###***STEPS****
+# 1. Downloaded the open-bandit dataclass
+# 2. Created the metadata information(manually)
+# 3. With PAR, facing runtime issue(Shape error)  
+
+##Note: there is no partiular information about context columns, tried different columns as
+# context column but faced the same issue
+
+
+# def test9():
+#     """function test9
+#     Doc:: Generating synthetic samples of tabular OpneBadit DataSet 
+#     """
+
+#     #####################################################################
+#     root   = "ztmp/"
+
+#     dataset_url = "https://research.zozo.com/data_release/open_bandit_dataset.zip"
+#     fname = "open_bandit_dataset/bts/men/men.csv"
+
+#     if os.path.exists(fname) == False:
+#        ###Downloading tabular dataset
+#        from utilmy.deeplearning.ttorch import  util_torch as ut
+#        dataset_path = ut.dataset_download(dataset_url, dirout='./')
+
+
+#     assert(os.path.exists(fname) == True)
+#     df      = pd.read_csv(fname)
+#     n_sample = 1
+#     data    = df.loc[0:100]
+
+
+
+#     #####################################################################
+
+#     metadata = {'fields': {
+#         'position': {'type': 'categorical'},
+#         'item_id': {'type': 'numerical', 'subtype': 'integer'},
+#         'click': {'type': 'numerical', 'subtype': 'integer'},
+#         'timestamp': {'type': 'datetime'},
+#         'user_feature_0' : {'type': 'categorical'},
+#         'propensity_score': {'type': 'numerical', 'subtype': 'float'},
+#         },
+#         'entity_columns': ['item_id'], 
+#         'sequence_index': 'timestamp',
+#         # 'context_columns': ['position']
+#         }
+
+#     entity_columns = ['item_id']
+#     # context_columns = ['position']
+#     sequence_index  = 'timestamp'
+
+#     data  = data[list(metadata['fields'].keys())[0:6]]
+#     data_col = {'cols':list(metadata['fields'].keys())[0:6]}
+#     data_pars = {'cols_model_type2' : data_col }
+#     data_pars['gen_samp'] =   {'Xtrain': data}
+#     data_pars['eval']     =   {'X': data, 'y': None}
+
+#     models = {
+#         'PAR': {'model_class': 'PAR',
+#                   'model_pars': {
+#                      ## PAR
+#                      'epochs': 1,
+#                      'entity_columns':  entity_columns,
+#                     #  'context_columns': context_columns,
+#                     #  'sequence_index':  sequence_index
+#                                 },
+#                 }
+#               }
+
+#     compute_pars = { 'compute_pars' : {},
+#                      'metadata'     :  metadata,
+#                      'target'       :  'user_feature_0',
+#                      'metrics_pars' : {'metrics' :['TSFClassifierEfficacy','LSTMClassifierEfficacy']},
+#                      'metric_type'  : 'timeseries',
+#                      'n_sample_generation' : n_sample
+#                    }
+
+#     #####################################################################
+#     test_helper(models['PAR'], data_pars, compute_pars, task_type = "gen_samp")
 
 
 
