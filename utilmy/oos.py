@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """  Utilities related to OS : file in/out, System Infod, Memmory/Variables
 Doc::
-
     utilmy/oos.py
     -------------------------functions----------------------
     aaa_bash_help()
@@ -14,8 +13,6 @@ Doc::
     os_file_date_modified(dirin, fmt="%Y%m%d-%H = "%Y%m%d-%H:%M", timezone = 'Asia/Tokyo')
     os_file_info(dirin, returnval = 'list', date_format = 'unix')
     os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel = 1)
-
-
     os_get_function_name()
     os_get_ip()
     os_get_os()
@@ -27,8 +24,6 @@ Doc::
     os_monkeypatch_help()
     os_path_size(path  =  '.')
     os_path_split(fpath:str = "")
-
-
     os_process_list()
     os_ram_info()
     os_ram_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
@@ -44,19 +39,14 @@ Doc::
     os_variable_init(ll, globs)
     os_wait_processes(nhours = 7)
     os_walk(path, pattern = "*", dirlevel = 50)
-
     z_os_search_fast(fname, texts = None, mode = "regex/str")
     zz_os_remove_file_past(dirin = "folder/**/*.parquet", ndays_past = 20, nfiles = 1000000, exclude = "", dry = 1)
-
     -------------------------methods----------------------
     fileCache.__init__(self, dir_cache = None, ttl = None, size_limit = 10000000, verbose = 1)
     fileCache.get(self, path)
     fileCache.set(self, path:str, flist:list, ttl = None)
-
     -------------------------------------------------------
     https://github.com/uqfoundation/pox/tree/master/pox
-
-
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
 
@@ -79,18 +69,13 @@ def test_all():
     """
     test_filecache()
     test_globglob()
-
-    test1()
-    test2()
-    test4()
-    test6_os()
-    test7_os()
-    test8()
-    test8_os()
+    test_os()
 
 
 
 def test_globglob():
+    """ python  utilmy/oos.py test_globglob
+    """
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
 
@@ -171,6 +156,8 @@ def test_globglob():
 
 
 def test_filecache():
+    """ python  utilmy/oos.py test_filecache
+    """
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -182,6 +169,8 @@ def test_filecache():
 
 
 def test_os_module_uncache():
+    """ python  utilmy/oos.py test_os_module_uncache
+    """
     import  utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -207,15 +196,34 @@ def test_os_module_uncache():
 
 
 
-def test1():
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
+def test_os():
+    from pytz import timezone
+    import sys, os, inspect, requests, json
+    import  utilmy as uu
 
-    #logfull("log2")
-    #logfull2("log5")
+    drepo, dirtmp = uu.dir_testinfo()
 
 
-    #################
+    old_modules = sys.modules.copy()
+    exclude_mods = {"json.decoder"}
+    excludes_prefixes = {exclude_mod.split('.', 1)[0] for exclude_mod in exclude_mods}
+    os_module_uncache(exclude_mods)
+    new_modules = sys.modules.copy()
+    removed = []
+    kept = []
+    for module_name in old_modules:
+        module_prefix = module_name.split('.', 1)[0]
+        if (module_prefix in excludes_prefixes) and (module_name not in exclude_mods):
+            assert module_name not in new_modules
+            removed.append(module_name)
+        else:
+            assert module_name in new_modules
+            if module_name in exclude_mods:
+                kept.append(module_name)
+
+    log("Successfully remove module cache: ", ", ".join(removed))
+    log("Successfully kept: ", ", ".join(kept))
+
     log("####### os_makedirs() ..")
     os_makedirs('ztmp/ztmp2/myfile.txt')
     os_makedirs('ztmp/ztmp3/ztmp4')
@@ -232,63 +240,52 @@ def test1():
 
     log("####### os_removedirs() ..")
     rev_stat = os_removedirs("ztmp/ztmp2")
-    assert not rev_stat == False, "cannot delete root folder"
+    assert not rev_stat == False, "Cannot delete root folder"
 
+    os_removedirs(dirtmp + "/os_test")
+    assert ~os.path.exists(dirtmp + "/os_test"), "Folder still found after removing"
 
-    ############
     res = os_system( f" ls . ",  doprint=True)
     log(res)
     res = os_system( f" ls . ",  doprint=False)
-    log( os_get_os() )
+    log(os_get_os())
 
 
-def test2():
-    """function test2
-    """
-    import utilmy as uu
-    drepo, dtmp = uu.dir_testinfo()
-
-
-    uu.to_file("Dummy text", dtmp + "/os_file_test.txt")
-    os_file_check(dtmp + "/os_file_test.txt")
+    uu.to_file("Dummy text", dirtmp + "/os_file_test.txt")
+    os_file_check(dirtmp + "/os_file_test.txt")
 
 
 
     log("#######   os_search_fast() ..")
-    uu.to_file("Dummy text to test fast search string", dtmp + "/os_search_test.txt")
-    res = z_os_search_fast(dtmp+"/os_search_test.txt", ["Dummy"],mode="regex")
+    uu.to_file("Dummy text to test fast search string", dirtmp + "/os_search_test.txt")
+    res = z_os_search_fast(dirtmp + "/os_search_test.txt", ["Dummy"],mode="regex")
     assert  not log(res) and len(res) >0, res
 
     log("#######   os_search_content() ..")
-    dfres = os_search_content( srch_pattern='Dummy', dir1= dtmp, file_pattern= "*.txt", mode="str", dirlevel=2)
-    assert  not log(dfres) and len(dfres) >0, dfres
+    dfres = os_search_content(srch_pattern='Dummy', dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
+    assert not log(dfres) and len(dfres) > 0, dfres
 
     log("###### os_walk() ..")
-    folders = os_walk(path=dtmp,pattern="*.txt")
+    folders = os_walk(path=dirtmp, pattern="*.txt")
     assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
 
-    # TODO this test has a bug
-    #log("#######   os_copy_safe() ..")
-    #uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
-    #os_copy_safe(drepo + "/testdata/tmp/test/*", drepo + "/testdata/tmp/test_copy_safe")
-    #f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt.txt"))
-    #assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
+    log("#######   os_copy_safe() ..")
+    uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_safe_test.txt")
+    os_copy_safe(dirin=drepo + "testdata/tmp/test", dirout=drepo + "testdata/tmp/test_copy_safe/", nlevel=1, pattern="*.txt")
+    log(drepo + "testdata/tmp/test_copy_safe/os_copy_safe_test.txt")
+    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy_safe/os_copy_safe_test.txt"))
+    assert  f == True, "The file os_copy_safe_test.txt doesn't exist"
 
     log("####### os_copy() ..")
     uu.to_file("Dummy text", drepo + "/testdata/tmp/test/os_copy_test.txt")
-    os_copy(drepo + "/testdata/tmp/test/os_copy_test.txt", drepo + "/testdata/tmp/test_copy")
-    f = os.path.exists(os.path.abspath(drepo + "/testdata/tmp/test_copy/os_copy_test.txt"))
+    os_copy(
+        dirfrom=drepo + "testdata/tmp/test",
+        dirto=drepo + "testdata/tmp/test_copy",
+        mode="dir")
+    f = os.path.exists(os.path.abspath(drepo + "testdata/tmp/test_copy/os_copy_test.txt"))
     assert  f == True, "The file os_copy_test.txt doesn't exist"
 
 
-def test4():
-    """function test4
-    """
-    import utilmy
-    drepo, dtmp = utilmy.dir_testinfo()
-
-
-    log(os_get_function_name())
     cwd = os.getcwd()
     #log(os_walk(cwd))
     cmd = ["pwd","whoami"]
@@ -315,20 +312,16 @@ def test4():
     os_variable_del(["test_var"], globs)
 
     log(os_variable_exist("test_var",globs))
-    assert os.path.exists(dtmp + "/"),"Directory doesn't exist"
+    assert os.path.exists(dirtmp + "/"),"Directory doesn't exist"
 
-
-def test6_os():
-    """function test6_os
-    """
-    #from utilmy import oos as m
-    import utilmy as uu
-    drepo, dtmp = uu.dir_testinfo()
 
     log("#######   os utils...")
     log("#######   os_get_os()..")
     log(os_get_os())
-    assert os_get_os().lower() == sys.platform.lower(), "Platform mismatch"
+    platform = sys.platform.lower()
+    if platform == 'win32':
+        platform = 'windows'
+    assert os_get_os().lower() == platform, "Platform mismatch"
 
     log("#######   os_cpu_info()..")
     log(os_cpu_info())
@@ -351,7 +344,7 @@ def test6_os():
 
 
     log("#######   os_path_split() ..")
-    result_ = os_path_split(dtmp+"/test.txt")
+    result_ = os_path_split(dirtmp + "/test.txt")
     log("result", result_)
 
     # TODO: Add test to this function here
@@ -366,7 +359,6 @@ def test6_os():
     log(res)
     '''
 
-
     log("#######   os_system_list() ..")
     cmd = ["pwd","whoami"]
     os_system_list(cmd, sleep_sec=0)
@@ -374,34 +366,20 @@ def test6_os():
 
 
     log("#######   os_file_check()")
-    uu.to_file("test text to write to file", dtmp+"/file_test.txt", mode="a")
-    os_file_check(dtmp+"/file_test.txt")
-
+    uu.to_file("test text to write to file", dirtmp + "/file_test.txt", mode="a")
+    os_file_check(dirtmp + "/file_test.txt")
 
 
     log("#######   os_file_replacestring...")
-    uu.to_file("Dummy file to test os utils", dtmp+"/os_utils_test.txt")
-    uu.to_file("Dummy text to test replace string", dtmp+"/os_test/os_file_test.txt")
-    print("dtmp:",dtmp+"/os_test/")
-    os_file_replacestring("text", "text_replace", dtmp+"/os_test/")
-
-
-    #TODO Merge this test with the same test that is in "test1" function
-    log("#######   os_removedirs()...")
-    #os_copy(os.path.join(os_getcwd(), "tmp/test"), os.path.join(os_getcwd(), "tmp/test/os_test"))
-    os_removedirs(dtmp+"/os_test")
-    assert ~os.path.exists(dtmp+"/os_test"),"Folder still found after removing"
+    uu.to_file("Dummy file to test os utils", dirtmp+"/os_utils_test.txt")
+    uu.to_file("Dummy text to test replace string", dirtmp+"/os_test/os_file_test.txt")
+    print("dtmp:",dirtmp + "/os_test/")
+    os_file_replacestring("text", "text_replace", dirtmp + "/os_test/")
 
 
     log("#######   os_ram_sizeof()...")
     log(os_ram_sizeof(["3434343", 343242, {3434, 343}], set()))
 
-
-def test7_os():
-    """function test7_os
-    """
-    import  utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
 
     log("\n#######", os_merge_safe)
     uu.to_file("""test input1""", dirtmp + "test1.txt" )
@@ -415,14 +393,8 @@ def test7_os():
     assert len(flist) < 2, flist
 
 
-def test8():
-    """function test8
-    """
-    import utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-    
-    log("#######   os_remove()")
 
+    log("#######   os_remove()")
     obj_dir = dirtmp+"/xtest*.txt"
     total_files = []
     for name in ("xtest1", "xtest2", "xtest3"):
@@ -466,7 +438,7 @@ def test8():
               nfiles=1,
               dry=0)
     cur_files = glob.glob(obj_dir, recursive=True)
-    assert len(before_files)-len(cur_files) == 1
+    assert len(before_files) - len(cur_files) == 1
 
     # test file size
     before_files = glob.glob(obj_dir, recursive=True)
@@ -480,20 +452,12 @@ def test8():
     assert len(before_files) == len(cur_files)
 
 
-def test8_os():
-    """function test8_os
-    """
-    import utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-
-
     timezone_name = 'Asia/Tokyo'
     datetime_format = '%Y%m%d-%H:%M'
     file_dir = dirtmp + "/test.txt"
 
 
     log("\n#######", os_file_date_modified)
-    from pytz import timezone
     uu.to_file("first line", file_dir)
     created_time = datetime.datetime.now(timezone(timezone_name)).strftime(datetime_format)
     last_modified_created = os_file_date_modified(file_dir, datetime_format, timezone_name)
@@ -502,16 +466,10 @@ def test8_os():
     assert created_time == last_modified_created
 
 
-
-
     log("\n#######", os_get_ip)
-    import requests, json
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
     log('internal ip', os_get_ip() )
-
-
-    import os
 
     uu.to_file("first line", file_dir)
 
@@ -528,7 +486,6 @@ def test8_os():
     assert test_file_size == file_stats[0][1]
     assert test_file_modification_time == file_stats[0][2]
 
-    import inspect
 
     log("\n#######", os_file_info)
     _, file__name__, _, function_name = os_get_function_name().split(',')
@@ -555,22 +512,19 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
     ):
     """ Advanced glob.glob filtering.
     Docs::
-
-        dirin="": get the files in path dirin, works when file_list=[]
-        file_list=[]: if file_list works, dirin will not work
-        exclude=""   :
-        include_only="" :
-        min_size_mb=0
-        max_size_mb=500000
-        ndays_past=3000
-        start_date='1970-01-01'
-        end_date='2050-01-01'
-        nfiles=99999999
-        verbose=0
-        npool=1: multithread not working
-
+        dirin:str = "": get the files in path dirin, works when file_list=[]
+        file_list: list = []: if file_list works, dirin will not work
+        exclude:str  = ""
+        include_only:str = ""
+        min_size_mb:int = 0
+        max_size_mb:int = 500000
+        ndays_past:int = 3000
+        start_date:str = '1970-01-01'
+        end_date:str = '2050-01-01'
+        nfiles:int = 99999999
+        verbose:int = 0
+        npool:int = 1: multithread not working
         https://www.twilio.com/blog/working-with-files-asynchronously-in-python-using-aiofiles-and-asyncio
-
     """
     import glob, copy, datetime as dt, time
 
@@ -581,21 +535,18 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             nfiles=nfiles, verbose=verbose,npool=npool):
         """
         Docs::
-
-            dirin=dirin
-            file_list=file_list
-            exclude=exclude
-            include_only=include_only
-            min_size_mb=min_size_mb
-            max_size_mb=max_size_mb
-            ndays_past=ndays_past
-            nmin_past=nmin_past
-            start_date=start_date
-            end_date=end_date
-            nfiles=nfiles
-            verbose=verbose
-            npool=npool
-
+            dirin:str = "": get the files in path dirin, works when file_list=[]
+            file_list: list = []: if file_list works, dirin will not work
+            exclude:str  = ""
+            include_only:str = ""
+            min_size_mb:int = 0
+            max_size_mb:int = 500000
+            ndays_past:int = 3000
+            start_date:str = '1970-01-01'
+            end_date:str = '2050-01-01'
+            nfiles:int = 99999999
+            verbose:int = 0
+            npool:int = 1: multithread not working
         """
         if dirin and not file_list:
             files = glob.glob(dirin, recursive=True)
@@ -698,7 +649,6 @@ def os_remove(dirin="folder/**/*.parquet",
 
     """  Delete files with criteria, using glob_glob
     Docs::
-
         Args:
             dirin (string): Path with wildcards to match with folder to remove all its content.
                 Defaults to "folder/**/*.parquet".
@@ -726,7 +676,6 @@ def os_remove(dirin="folder/**/*.parquet",
                 from utilmy import oos
                 
                 path = "/home/user/Desktop/example/*"
-
                 oos.os_remove(path, ndays_past=0)
                 #All the files in "example" are deleted
         
@@ -760,10 +709,11 @@ def os_remove(dirin="folder/**/*.parquet",
 def os_system(cmd, doprint=False):
   """ Get stdout, stderr from Command Line into  a string varables  mout, merr
   Docs::     
-       
-       out_txt, err_txt = os_system( f"   ztmp ",  doprint=True)
-
-
+       Args:
+           cmd: Command to run subprocess
+           doprint=False: int
+       Returns:
+           out_txt, err_txt
   """
   import subprocess
   try :
@@ -785,7 +735,12 @@ class fileCache(object):
     def __init__(self, dir_cache=None, ttl=None, size_limit=10000000, verbose=1):
         """ Simple cache system to store path --> list of files
             for S3 or HDFS
-
+            Docs::
+                Args:
+                    dir_cache=None
+                    ttl=None
+                    size_limit=10000000 (int)
+                    verbose=1 (int)
         """
         import tempfile, diskcache as dc
 
@@ -806,9 +761,10 @@ class fileCache(object):
     def get(self, path):
         """ method get
          Docs::
-
-              path: str
-
+            Args:
+                path: str
+            Returns:
+                self.db.get(path, None)
          """
         path = path.replace("\\","/")
         return self.db.get(path, None)
@@ -816,9 +772,14 @@ class fileCache(object):
 
     def set(self, path:str, flist:list, ttl=None):
         """
-
-        expire (float) – seconds until item expires (default None, no expiry)
-
+        Docs::
+            Args:
+                path:str
+                flist:list
+                ttl=None
+                expire (float) – seconds until item expires (default None, no expiry)
+            Returns:
+                None
         """
         ttl = ttl if isinstance(ttl, int)  else self.ttl
         path = path.replace("\\","/")
@@ -839,22 +800,19 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
             ) :
     """  Advance copy with filter.
     Docs::
-
-          mode=='file'  :   file by file, very safe (can be very slow, not nulti thread)
+          mode:str = 'file'  :   file by file, very safe (can be very slow, not nulti thread)
           https://stackoverflow.com/questions/123198/how-to-copy-files
-          mode='file'
-          exclude=""
-          include_only=""
-          min_size_mb=0
-          max_size_mb=500000
-          ndays_past=-1
-          nmin_past=-1
-          start_date='1970-01-02'
-          end_date='2050-01-01'
-          nfiles=99999999
-          verbose=0
-          dry=0
-
+          exclude:str = ""
+          include_only:str = ""
+          min_size_mb:int = 0
+          max_size_mb:int = 500000
+          ndays_past:int = -1
+          nmin_past:int = -1
+          start_date:str = '1970-01-02'
+          end_date:str = '2050-01-01'
+          nfiles:int = 99999999
+          verbose:int = 0
+          dry:int = 0
     """
     import os, shutil
 
@@ -865,7 +823,7 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
             nfiles=nfiles,)
 
     if mode =='file':
-        print ('Nfiles', len(flist))
+        print('Nfiles', len(flist))
         jj = 0
         for fi in flist :
             try :
@@ -882,7 +840,12 @@ def os_copy(dirfrom="folder/**/*.parquet", dirto="",
         else :    print('deleted', jj)
 
     elif mode =='dir':
-         shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None,  ignore_dangling_symlinks=False, dirs_exist_ok=False)
+        try:
+            shutil.copytree(dirfrom, dirto, symlinks=False, ignore=None, ignore_dangling_symlinks=False)
+        except FileExistsError as e:
+            print('Directory is already exists')
+        except Exception as e:
+            print(e)
 
 
 
@@ -890,53 +853,58 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
                  verbose=True):  ###
     """ Copy safe, using callback command to re-connect network if broken
     Docs::
-
-        dirin:str=None
-        dirout:str=None
-        nlevel=5
-        nfile=5000
-        logdir="./"
-        pattern="*"
-        exclude=""
-        force=False
-        sleep=0.5
-        cmd_fallback=""
-        verbose=True
-
+        Args:
+            dirin:str = None
+            dirout:str = None
+            nlevel:int = 5
+            nfile:int = 5000
+            logdir:str = "./"
+            pattern:str = "*"
+            exclude:str = ""
+            force:bool = False
+            sleep:float = 0.5
+            cmd_fallback:str =""
+            verbose:bool = True
+        Return:
+            None
     """
     import shutil, time, os, glob
 
     flist = [] ; dirinj = dirin
     for j in range(nlevel):
-        ztmp   = sorted( glob.glob(dirinj + "/" + pattern ) )
+        ztmp   = glob.glob(dirinj + "/" + pattern)
         dirinj = dirinj + "/*/"
-        if len(ztmp) < 1 : break
-        flist  = flist + ztmp
+        if len(ztmp) < 1: break
+        flist.extend(ztmp)
 
     flist2 = []
     for x in exclude.split(","):
-        if len(x) <=1 : continue
-        for t in flist :
-            if  not x in t :
+        if len(x) <= 1: continue
+        for t in flist:
+            if  not x in t:
                 flist2.append(t)
-    flist = flist2
+    flist = [x for x in flist if x not in flist2]
 
-    log('n files', len(flist), dirinj, dirout ) ; time.sleep(sleep)
-    kk = 0 ; ntry = 0 ;i =0
-    for i in range(0, len(flist)) :
+    log('n files', len(flist), dirinj, dirout); time.sleep(sleep)
+    kk = 0; ntry = 0; i = 0
+    for i in range(0, len(flist)):
         fi  = flist[i]
         fi2 = fi.replace(dirin, dirout)
 
-        if not fi.isascii(): continue
-        if not os.path.isfile(fi) : continue
+        try:
+            if not fi.isascii(): continue
+        except AttributeError:
+            pass
 
-        if (not os.path.isfile(fi2) )  or force :
+        if not os.path.isfile(fi): continue
+
+        if (not os.path.isfile(fi2)) or force:
              kk = kk + 1
-             if kk > nfile   : return 1
-             if kk % 50 == 0  and sleep >0 : time.sleep(sleep)
-             if kk % 10 == 0  and verbose  : log(fi2)
+             if kk > nfile: return 1
+             if kk % 50 == 0 and sleep > 0: time.sleep(sleep)
+             if kk % 10 == 0 and verbose: log(fi2)
              os.makedirs(os.path.dirname(fi2), exist_ok=True)
-             try :
+             try:
                 shutil.copy(fi, fi2)
                 ntry = 0
                 if verbose: log(fi2)
@@ -957,16 +925,17 @@ def os_copy_safe(dirin:str=None, dirout:str=None,  nlevel=5, nfile=5000, logdir=
 def os_merge_safe(dirin_list=None, dirout=None, nlevel=5, nfile=5000, nrows=10**8,
                   cmd_fallback = "umount /mydrive/  && mount /mydrive/  ", sleep=0.3):
     """function os_merge_safe
-    Args:
-        dirin_list:
-        dirout:
-        nlevel:
-        nfile:
-        nrows:
-        cmd_fallback :
-        sleep:
-    Returns:
-
+    Docs::
+        Args:
+            dirin_list:None
+            dirout:None
+            nlevel:int = 5
+            nfile:int = 5000
+            nrows:int = 10**8
+            cmd_fallback:str = "umount /mydrive/  && mount /mydrive/  "
+            sleep:float = 0.3
+        Returns:
+            None
     """
     ### merge file in safe way
     nrows = 10**8
@@ -1002,6 +971,12 @@ def os_removedirs(path, verbose=False):
     # Delete everything reachable from the directory named in 'top',
     # assuming there are no symbolic links.
     # CAUTION:  This is dangerous!  For example, if top == '/', it could delete all your disk files.
+    Docs::
+        Args:
+            path: Path to walk and create directory
+            verbose=False
+        Returns:
+            True | False
     """
     if len(path) < 3 :
         print("cannot delete root folder")
@@ -1031,10 +1006,11 @@ def os_removedirs(path, verbose=False):
 
 def os_makedirs(dir_or_file):
     """function os_makedirs
-    Args:
-        dir_or_file:
-    Returns:
-
+    Docs::
+        Args:
+            dir_or_file:
+        Returns:
+            None
     """
     if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
         os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
@@ -1047,7 +1023,11 @@ def os_makedirs(dir_or_file):
 
 def os_getcwd():
     """  os.getcwd() This is for Windows Path normalized As Linux path /
-
+        Docs::
+            Args:
+                None
+            Returns:
+                root: an absolute pathname of the current working directory
     """
     root = os.path.abspath(os.getcwd()).replace("\\", "/") + "/"
     return  root
@@ -1055,12 +1035,13 @@ def os_getcwd():
 
 def os_system_list(ll, logfile=None, sleep_sec=10):
    """function os_system_list
-   Args:
-       ll:
-       logfile:
-       sleep_sec:
-   Returns:
-
+   Docs::
+       Args:
+           ll:
+           logfile:None = None
+           sleep_sec:int = 10
+       Returns:
+            None
    """
    ### Execute a sequence of cmd
    import time, sys
@@ -1088,6 +1069,11 @@ def os_process_list():
     #ll = os_process_list()
     #ll = [t for t in ll if 'root' in t and 'python ' in t ]
     ### root   ....  python run
+    Docs::
+        Args:
+            None
+        Returns:
+            ll
     """
     import subprocess
     ps = subprocess.Popen('ps -ef', shell=True, stdout=subprocess.PIPE)
@@ -1098,10 +1084,11 @@ def os_process_list():
 
 def os_path_size(path = '.'):
     """function os_path_size
-    Args:
-        path :
-    Returns:
-
+    Docs::
+        Args:
+            path:str = "."
+        Returns:
+            total_size
     """
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(path):
@@ -1119,7 +1106,7 @@ def os_path_split(fpath:str=""):
     Args:
         fpath ( str ) :
     Returns:
-
+        parent, fname, ext
     """
     #### Get path split
     fpath = fpath.replace("\\", "/")
@@ -1140,12 +1127,25 @@ def os_path_split(fpath:str=""):
 def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel=1):
     """  replace string into sub-files
     Docs::
-
-         os_file_replacestring_files("logo.png", "logonew.png", r"D:/__Alpaca__details/aiportfolio",
-                                 pattern="*.html", dirlevel=5  )
+        Args:
+            findstr="logo.png" (str)
+            replacestr="logonew.png" (str)
+            some_dir=r"D:/__Alpaca__details/aiportfolio" (str)
+            pattern="*.html" (str)
+            dirlevel=5 (int)
+        Returns:
+            None
     """
     def os_file_replacestring1(find_str, rep_str, file_path):
-        """replaces all find_str by rep_str in file file_path"""
+        """replaces all find_str by rep_str in file file_path
+        Docs::
+            Args:
+                find_str:str - finds string
+                rep_str:str - replaces string
+                file_path:str - file to replace string
+            Returns:
+                None
+        """
         import fileinput
 
         file1 = fileinput.FileInput(file_path, inplace=True, backup=".bak")
@@ -1167,11 +1167,12 @@ def os_file_replacestring(findstr, replacestr, some_dir, pattern="*.*", dirlevel
 def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """last modified date
     Docs::
-
-    dirin:str -The time of last modification of the specified path
-    fmt:str="%Y%m%d-%H:%M" -Time format
-    timezone:str='Asia/Tokyo' -Timezone
-
+        Args:
+            dirin:str -The time of last modification of the specified path
+            fmt:str="%Y%m%d-%H:%M" -Time format
+            timezone:str='Asia/Tokyo' -Timezone
+        Returns:
+            mtime2.strftime(fmt) | ""
     """
     import datetime
     from pytz import timezone as tzone, utc
@@ -1190,9 +1191,10 @@ def os_file_date_modified(dirin, fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
 def os_file_check(fpath:str):
    """Check file stat info
    Docs::
-
-        fpath: str
-
+        Args:
+            fpath: str - File patj
+        Returns:
+            flag: True | False
    """
    import os, time
 
@@ -1211,11 +1213,12 @@ def os_file_check(fpath:str):
 def os_file_info(dirin, returnval='list', date_format='unix'):
     """ Return file info:   filenmae, Size in mb,  Unix time (Epoch time, Posix time)
     Docs::
-
-        dirin
-        returnval='list'
-        date_format='unix'
-
+        Args:
+            dirin
+            returnval='list'
+            date_format='unix'
+        Returns:
+            flist2
     """
     flist = glob_glob(dirin)
     flist2 =[]
@@ -1244,24 +1247,17 @@ def os_walk(path, pattern="*", dirlevel=50):
             Defaults to "*".
         dirlevel (int): Level of sub-folders or sub-directories to get.
             Defaults to 50.
-
             Example: 
                 dirlevel=0 : root directory
                 dirlevel=1 : 1 path below
         Returns:
             Returns dict of  ['file'  , 'dir'].
-
         Example:
-
             from utilmy import oos
-
             path = "/home/username/Desktop/example"
-
             sub_folders = oos.os_walk(path=path)
-
             print("Sub folders:",sub_folders)
             # All the sub-folders of the folder named example
-
     """
     import fnmatch, os, numpy as np
 
@@ -1292,10 +1288,10 @@ def os_walk(path, pattern="*", dirlevel=50):
 def os_monkeypatch_help():
     """function os_monkeypatch_help
     Args:
+        None
     Returns:
-
+        None
     https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
-
     """
     print( """    
     """)
@@ -1307,6 +1303,8 @@ def os_module_uncache(exclude='os.system'):
     Args:
         exclude (iter<str>): Sequence of module paths.
         https://medium.com/@chipiga86/python-monkey-patching-like-a-boss-87d7ddb8098e
+    Returns:
+        None
     """
     import sys
     pkgs = []
@@ -1339,7 +1337,7 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
         globs:
         verbose:
     Returns:
-
+        None
     """
     ### Import in Current Python Session a module   from module import *
     ### from mod_name import *
@@ -1376,7 +1374,6 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
     """  search inside the files
     Docs::
-
         Args:
             srch_pattern (:obj:`list` of :obj:'str'): List of strings to match with the content of the files.
             Defaults to None.
@@ -1388,7 +1385,6 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
             Defaults to "*.*".
             dirlevel (int): Max dir level to search content.
             Defaults to 1.
-
         Returns:
             Returns a panda dataframe with all the matches, the columns are the folllowing:
             1.search: Word that was matched
@@ -1396,13 +1392,10 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
             3.lineno: Number of line where the match was found
             4.pos: Position in the line where the match was found
             5.line: The line where the match was found
-
         Examples:
         
             from utilmy import oos
-
             path = "/home/necromancer/Desktop/New"
-
             content = oos.os_search_content(dir1=path,file_pattern="*")
             # "content" is the dataframe
     """
@@ -1438,13 +1431,9 @@ def z_os_search_fast(fname, texts=None, mode="regex/str"):
                 5.Fifth value: The line where the match was found.
         Examples:
             from utilmy import oos
-
             path = "/home/username/Desktop/example/test"
-
             searching = oos.z_os_search_fast(fname=path,texts=["dummy"], mode="str")
-
             print("Searching result:", searching)
-
     """
     import re
     if texts is None:
@@ -1496,11 +1485,12 @@ def z_os_search_fast(fname, texts=None, mode="regex/str"):
 ###################################################################################################
 def os_variable_init(ll, globs):
     """function os_variable_init
-    Args:
-        ll:
-        globs:
-    Returns:
-
+    Docs::
+        Args:
+            ll:
+            globs:
+        Returns:
+            None
     """
     for x in ll :
         try :
@@ -1511,12 +1501,13 @@ def os_variable_init(ll, globs):
 
 def os_variable_exist(x ,globs, msg="") :
     """function os_variable_exist
-    Args:
-        x:
-        globs:
-        msg:
-    Returns:
-
+    Docs::
+        Args:
+            x:
+            globs:
+            msg:str = ""
+        Returns:
+            True | False
     """
     x_str = str(globs.get(x, None))
     if "None" in x_str:
@@ -1529,12 +1520,13 @@ def os_variable_exist(x ,globs, msg="") :
 
 def os_variable_check(ll, globs=None, do_terminate=True):
   """function os_variable_check
-  Args:
-      ll:
-      globs:
-      do_terminate:
-  Returns:
-
+  Docs::
+      Args:
+          ll:
+          globs:None
+          do_terminate:bool = True
+      Returns:
+          None
   """
   import sys
   for x in ll :
@@ -1549,11 +1541,12 @@ def os_variable_check(ll, globs=None, do_terminate=True):
 
 def os_variable_del(varlist, globx):
   """function os_clean_memory
-  Args:
-      varlist:
-      globx:
-  Returns:
-
+    Docs::
+        Args:
+          varlist:
+          globx:
+        Returns:
+          None
   """
   for x in varlist :
     try :
@@ -1565,7 +1558,6 @@ def os_variable_del(varlist, globx):
 def os_ram_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
     """ Find the memory footprint of a Python object
     Docs::
-
         deep_getsizeof(df_pd, set())
         The sys.getsizeof function does a shallow size of only. It counts each
         object inside a container as pointer only regardless of how big it
@@ -1596,9 +1588,11 @@ def os_ram_sizeof(o, ids, hint=" deep_getsizeof(df_pd, set()) "):
 
 def os_get_function_name():
     """function os_get_function_name
-    Args:
-    Returns:
-
+    Docs::
+        Args:
+            None
+        Returns:
+            ss
     """
     ### Get ane,
     import sys, socket
@@ -1619,7 +1613,11 @@ def os_get_function_name():
 ###################################################################################################
 def os_get_process_info(sep="-"):
     """ get  PID process-IPAdress-UnixTime to identify uniquely each process.
-
+        Docs::
+            Args:
+                sep="-" (str)
+            Returns:
+                sep.join(ss)
     """
     import time
     ss = []
@@ -1633,9 +1631,11 @@ def os_get_process_info(sep="-"):
 def os_get_uniqueid(format="int"):
     """  Unique INT64 ID:  OSname +ip + process ID + timeStamp
          for distributed compute
-
-
-
+    Docs::
+        Args:
+            format:str = "int"
+        Returns:
+            None
     """
     pass
 
@@ -1651,14 +1651,14 @@ def os_get_os():
 def os_get_ip(mode='internal'):
     """Return primary ip adress
     Docs::
-
         Does NOT need routable net access or any connection at all.
         Works even if all interfaces are unplugged from the network.
         Does NOT need or even try to get anywhere else.
         Works with NAT, public, private, external, and internal IP's
         Pure Python 2 (or 3) with no external dependencies.
         Works on Linux, Windows, and OSX.
-
+        Args:
+            mode='internal' (str)
     """
 
     if mode =='internal':
@@ -1686,8 +1686,11 @@ def os_get_ip(mode='internal'):
 def os_cpu_info():
     """ get info on CPU  : nb of cpu, usage
     Docs:
-
          https://stackoverflow.com/questions/9229333/how-to-get-overall-cpu-usage-e-g-57-on-linux
+         Args:
+             None
+         Returns:
+             ddict
     """
     ncpu= os.cpu_count()
 
@@ -1704,32 +1707,39 @@ def os_cpu_info():
 
 def os_ram_info():
     """ Get total memory and memory usage in linux
+        Docs::
+            Args:
+                None
+            Returns:
+                ret
     """
-    with open('/proc/meminfo', 'r') as mem:
-        ret = {}
-        tmp = 0
-        for i in mem:
-            sline = i.split()
-            if str(sline[0]) == 'MemTotal:':
-                ret['total'] = int(sline[1])
-            elif str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
-                tmp += int(sline[1])
-        ret['free'] = tmp
-        ret['used'] = int(ret['total']) - int(ret['free'])
-    return ret
+    if 'linux' in sys.platform.lower():
+        with open('/proc/meminfo', 'r') as mem:
+            ret = {}
+            tmp = 0
+            for i in mem:
+                sline = i.split()
+                if str(sline[0]) == 'MemTotal:':
+                    ret['total'] = int(sline[1])
+                elif str(sline[0]) in ('MemFree:', 'Buffers:', 'Cached:'):
+                    tmp += int(sline[1])
+            ret['free'] = tmp
+            ret['used'] = int(ret['total']) - int(ret['free'])
+        return ret
+
 
 
 def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
     """function os_sleep_cpu
     Docs::
-
         Args:
-            cpu_min:
-            sleep:
-            interval:
-            msg:
-            verbose:
+            cpu_min:int = 30
+            sleep:int = 10
+            interval:int = 5
+            msg:str = ""
+            verbose:bool = True
         Returns:
+            aux
     """
     #### Sleep until CPU becomes normal usage
     import psutil, time
@@ -1746,9 +1756,9 @@ def os_sleep_cpu(cpu_min=30, sleep=10, interval=5, msg= "", verbose=True):
 def os_wait_processes(nhours=7):
     """function os_wait_processes
     Args:
-        nhours:
+        nhours:int = 7
     Returns:
-
+        None
     """
     t0 = time.time()
     while (time.time() - t0 ) < nhours * 3600 :

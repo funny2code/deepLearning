@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Main entry
 
-dsfdsfsdfsdf
-
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, random
 from tkinter import E
@@ -40,7 +38,6 @@ verbose = get_verbosity()   ### Global setting
 
 def direpo(show=0):
     """ Root folder of the repo in Unix / format
-
     """
     try :
        import utilmy
@@ -55,7 +52,6 @@ def direpo(show=0):
 
 def dirpackage(show=0):
     """ dirname of the file  utilmy_base.py  (ie site-packages/utilmy/ )
-
     """
     try :
        import utilmy
@@ -71,10 +67,7 @@ def dirpackage(show=0):
 def dir_testinfo(tag="", verbose=1, ):
     """ Print - Return Info for test writing
     Docs::
-
         https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
-
-
     """
     log("\n---------------------------------------------------------------------")
     drepo = direpo()
@@ -259,7 +252,6 @@ def help_create(modulename='utilmy.nnumpy', prefixs=None):
 ###################################################################################################
 def os_get_dirtmp(subdir=None, return_path=False):
     """ return dir temp for testing,...
-
     """
     import tempfile
     from pathlib import Path
@@ -308,10 +300,7 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 def to_file(txt, fpath, mode='a'):
     """  Write txt on Disk
     Docs::
-
           to_file(
-
-
     """
     os_makedirs(fpath) ### create folder
     try :
@@ -327,7 +316,6 @@ class toFileSafe(object):
    def __init__(self,fpath):
       """ Thread Safe file writer Class
       Docs::
-
         tofile = toFileSafe('mylog.log')
         tofile.w("msg")
       """
@@ -344,7 +332,6 @@ class toFileSafe(object):
         Args:
             msg:
         Returns:
-
         """
         msg = " ".join([ str(si) for si in s ])
         self.logger.info( msg)
@@ -360,7 +347,6 @@ class toFileSafe(object):
         Args:
             msg:
         Returns:
-
         """
         msg = " ".join([ str(si) for si in s ])
         self.logger.info( msg)
@@ -453,7 +439,6 @@ def pip_install(pkg_str=" pandas "):
         
     finally:
         import pandas as pd
-
     """    
     import subprocess, sys
     clist = [sys.executable, "-m", "pip", "install",  ]  + pkg_str.split(" ")
@@ -477,10 +462,8 @@ def sys_path_append(path="__file__", level_above=2):
 def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
     """ Load dynamically Python function/Class from string name
     Doc::
-
         ###### Pandas CSV case : Custom MLMODELS One
         #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
-
         ###### External File processor :
         #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
     """
@@ -532,7 +515,7 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
 
 ### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
-             add_days=0,  add_mins=0, add_hours=0, add_months=0,add_weeks=0,
+             add_days=0,  add_mins=0, add_hours=0, add_months=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
@@ -540,7 +523,6 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
-
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -548,10 +530,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')    -->  20211001
         date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
         date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->
-
-
         date_now(1634324632848, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
-
     """
     from pytz import timezone as tzone
     import datetime, time
@@ -577,25 +556,26 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = now_utc.replace(day=force_dayofmonth)
 
     if force_dayofweek >0 :
-        actual_day = now_utc.weekday()
-        days_of_difference = force_dayofweek - actual_day
-        now_utc = now_utc + datetime.timedelta(minutes=24*60*days_of_difference)
+        # https://stackoverflow.com/questions/25426919/python-construct-datetime-having-weekday-with-other-time-parameters
+        #from datetime import timedelta
+        #monday = today - datetime.timedelta(days= now_utc.weekday())
+        #result = (monday + timedelta(days=weekday)).replace(hour=int(t), minutes=int((t - int(t)) * 60))
+        pass
 
     if force_hourofday >0 :
         now_utc = now_utc.replace(hour=force_hourofday)
 
 
     now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_new + datetime.timedelta(days=add_days + 7*add_weeks, hours=add_hours, minutes=add_mins,)
+    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours, minutes=add_mins,)
 
 
-    if add_months!=0 :
-        from dateutil.relativedelta import relativedelta
-        now_new = now_new + relativedelta(months=add_months)
+    if add_months>0 :
+        pass
 
-    if    returnval == 'datetime': return now_new ### datetime
-    elif  returnval == 'int':      return int(now_new.strftime(fmt))
-    elif  returnval == 'unix':     return time.mktime(now_new.timetuple())
+    if   returnval == 'datetime': return now_new ### datetime
+    elif returnval == 'int':      return int(now_new.strftime(fmt))
+    elif returnval == 'unix':     return time.mktime(now_new.timetuple())
     else:                         return now_new.strftime(fmt)
 
 
@@ -665,17 +645,13 @@ def pd_getdata(verbose=True):
 class Index0(object):
     """ Class Maintain global index,
     Docs::
-
         file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
         index = m.Index0(file_name, min_chars=8)
-
-
         ### 2 save some data
         data   = [ "testestest", 'duplicate', '5char', '### comment line, so skipped',]
         output = [ 'testestest', 'duplicate',  ]
         index.save(data)
         assert set(index.read()) == set(output), f"{output} , {index.read()}"
-
     """
     def __init__(self, findex:str="ztmp_file.txt", min_chars=5):
         """ Index0:__init__
@@ -1055,21 +1031,12 @@ def load(to_file=""):
 def test_all():
     """function test_all
     """
-    test1()
-    test2()
-    test3()
-    test4()
-    test5()
-    test6_datenow()
-    test7()
-    test8_load_save()
-    test9_find_fuzzy()
 
-
-def test1():
     import utilmy as m
+    drepo, dtmp = dir_testinfo()
 
     ###################################################################
+
     log("\n##### git_repo_root  ", m.git_repo_root())
     assert not m.git_repo_root() == None, "err git repo"
 
@@ -1078,6 +1045,7 @@ def test1():
 
 
     ####################################################################
+
     log("\n##### global_verbosity  ")
     log('verbosity', m.global_verbosity(__file__, "config.json", 40,))
     log('verbosity', m.global_verbosity('../', "config.json", 40,))
@@ -1089,13 +1057,7 @@ def test1():
     gverbosity =m.global_verbosity(__file__, "config.json", 40,)
     assert gverbosity == verbosity, "incorrect verbosity "
 
-    ################################################################################################
-
-
-def test2():
-    import utilmy as m
-    drepo, dtmp = dir_testinfo()
-
+    ####################################################################
 
     file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
     index = m.Index0(file_name, min_chars=8)
@@ -1105,10 +1067,7 @@ def test2():
     x = set(index.read())
     assert not log(x) and x  == set(xtrue), f"{xtrue} <> {x}"
 
-
-
-def test3():
-    import utilmy as m
+    ####################################################################
 
     log('#### Session')
     d0 = os_get_dirtmp()
@@ -1126,15 +1085,9 @@ def test3():
     
     assert glob2 == glob, 'FAILED, -> session error'
 
+    ####################################################################
 
-def test4():
-    import utilmy as m
-
-
-    drepo, dirtmp = dir_testinfo()
-
-
-    def test_func(arg1, arg2):
+    def _test_func(arg1, arg2):
         """HELP doc string
         """
         return arg1 + arg2
@@ -1146,23 +1099,19 @@ def test4():
         log("\n####", name,"\n", m.help_info(name))
         # assert m.help_info(name), f'FAILED -> help_info {name}'
 
-    log("\n####", m.help_get_codesource(func=test_func))
-    assert m.help_get_codesource(func=test_func), 'FAILED -> help_get_codesource'
+    log("\n####", m.help_get_codesource(func=_test_func))
+    assert m.help_get_codesource(func=_test_func), 'FAILED -> help_get_codesource'
 
-    log("\n####", m.help_get_docstring(func=test_func))
-    assert m.help_get_docstring(func=test_func), 'FAILED -> help_get_docstring'
+    log("\n####", m.help_get_docstring(func=_test_func))
+    assert m.help_get_docstring(func=_test_func), 'FAILED -> help_get_docstring'
 
-    log("\n####", m.help_get_funargs(func=test_func))
-    assert m.help_get_funargs(func=test_func), 'FAILED -> help_get_funargs'
+    log("\n####", m.help_get_funargs(func=_test_func))
+    assert m.help_get_funargs(func=_test_func), 'FAILED -> help_get_funargs'
 
-    log("\n####", m.help_signature(f=test_func))
-    assert m.help_signature(f=test_func), 'FAILED -> help_signature'
+    log("\n####", m.help_signature(f=_test_func))
+    assert m.help_signature(f=_test_func), 'FAILED -> help_signature'
 
-
-def test5():
-    import utilmy as m
-
-    drepo = direpo()
+    ####################################################################
 
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
@@ -1177,12 +1126,12 @@ def test5():
     log("\n####", m.get_loggers())
     log("\n####", m.get_loggers(n_loggers=3))
 
-    log("\n####", m.import_function(fun_name='test3', module_name='utilmy'))
-    assert m.import_function(fun_name='test3', module_name='utilmy'), 'FAILED -> import_function'
+    log("\n####", m.import_function(fun_name='test_all', module_name='utilmy'))
+    assert m.import_function(fun_name='test_all', module_name='utilmy'), 'FAILED -> import_function'
 
 
     log("\n####", m.load_function_uri )
-    ll = [ drepo + "utilmy/utilmy_base.py:test2"
+    ll = [ drepo + "utilmy/utilmy_base.py:test_all"
 
     ]
     for uri_name in ll :
@@ -1190,10 +1139,7 @@ def test5():
         log(myclass)
         assert myclass, 'FAILED -> load_function_uri'
 
-
-def test6_datenow():
-    import utilmy as m
-
+    ####################################################################
 
     log("\n####", m.date_now)
     assert m.date_now(timezone='Asia/Tokyo')    #-->  "20200519"   ## Today date in YYYMMDD
@@ -1208,23 +1154,7 @@ def test6_datenow():
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
 
-    assert date_now('2020-05-09', add_months=-2, fmt='%Y-%m-%d') == "2020-03-09" #Test adding -2 months
-
-    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_mins=20,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:20:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 20 minutes
-
-    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_hours=11,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 23:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 11 hours
-
-    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_days=5,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-11 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 5 days
-
-    assert date_now('2012-12-06 12:00:00',returnval='datetime',force_dayofweek=3,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test forcing day 3 of the week
-
-
-
-def test7():
-    import utilmy as m
-
-    d0 = os_get_dirtmp()
-
+    ####################################################################
 
     log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
@@ -1254,34 +1184,12 @@ def test7():
 
     os.remove("./testfile")
 
-
-def test8_load_save():
-    import utilmy as m
-
-    d0 = os_get_dirtmp()
-
-    test_object = {'hello': 'world'}
-    test_object_filename = '/test_object.pkl'
-
-    log("\n####", save)
-    save(test_object, d0 + test_object_filename)
-    assert os.path.isfile(d0 + test_object_filename), "FAILED -> save"
-
-    log("\n####", load)
-    loaded_test_object = load(d0 + test_object_filename)
-    assert loaded_test_object == test_object, "FAILED -> load"
-
-
-
-def test9_find_fuzzy():
-    import utilmy as m
-
-    d0 = os_get_dirtmp()
+    ####################################################################
 
     score_word_dict = {}
     word = 'Catherine M Gitau'
     wlist = ['Catherine Gitau', 'Gitau Catherine']
-    
+
 
     log("\n####", m.find_fuzzy)
     log(f"Similarity score of '{word}' with:")
@@ -1294,11 +1202,8 @@ def test9_find_fuzzy():
 
 
 
+
 ###################################################################################################
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
-
