@@ -18,13 +18,26 @@ from loguru import logger
 #####################################################################
 def load_function(package="mlmodels.util", name="path_norm"):
   """function load_function.
-  Doc::
+  Get the function of a package.
+
+  Docs::
           
         Args:
-            package:   
-            name:   
+            package (string): Package's name. Defaults to "mlmodels.util".
+            name (string): Name of the function that belongs to the package.  
+
         Returns:
-            
+            Returns the function of the package.
+
+        Example:
+            from utilmy import utils
+
+            function = utils.load_function(
+                package="datetime",
+                name="timedelta")
+
+            print(function())#0:00:00
+    
   """
   import importlib
   return  getattr(importlib.import_module(package), name)
@@ -33,15 +46,28 @@ def load_function(package="mlmodels.util", name="path_norm"):
 
 def load_function_uri(uri_name="path_norm"):
     """ Load dynamically function from URI.
-    Doc::
-            
+    Docs::
+
+        ###### Pandas CSV case : Custom MLMODELS One
+        #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
+    
+        ###### External File processor :
+        #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+
+        Args:
+            uri_name (string): URI of the function to get.
         
-            ###### Pandas CSV case : Custom MLMODELS One
-            #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
-        
-            ###### External File processor :
-            #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
-        
+        Returns:
+            Returns the function with the given URI.
+
+        Example:
+            from utilmy import utils
+
+            function = utils.load_function_uri(uri_name="datetime:timedelta")
+
+            print(function()) #0:00:00
+
+
     """
     
     import importlib, sys
@@ -314,13 +340,27 @@ def config_load(config_path: Optional[Union[str, pathlib.Path]] = None):
 ################### donwload  ############################################################
 def dataset_donwload(url, path_target):
     """Donwload on disk the tar.gz file.
-    Doc::
+    Docs::
             
-            Args:
-                url:
-                path_target:
-            Returns:
-        
+        Args:
+            url (string): File's URL to download.
+            path_target (string): Folder's path to save the file.
+
+        Returns:
+            string: Full path of the saved file.
+
+        Example:
+            from utilmy import utils
+
+            url = "{url of the file}"
+            path_target = "/home/username/Desktop/example"
+
+            full_path = utils.dataset_donwload(
+                url=url, 
+                path_target=path_target)
+
+            print(full_path)
+
     """
     import wget
     log(f"Donwloading mnist dataset in {path_target}")
@@ -384,13 +424,29 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
 
 def to_file(s, filep):
     """function to_file.
-    Doc::
+    
+    Write the argument "s" in a file.
+
+    Docs::
             
-            Args:
-                s:   
-                filep:   
-            Returns:
-                
+        Args:
+            s (string): string to write in the file.    
+            filep (string): Path of the file to write.
+        
+        Returns:
+            None.
+
+        Example:
+            from utilmy import utils
+
+            filep = "/home/username/Desktop/example/test"
+
+            string = "Test string"
+
+            result = utils.to_file(s=string, filep=filep)
+
+            print(result)#It prints "None", but the file has the text.
+
     """
     with open(filep, mode="a") as fp:
         fp.write(str(s) + "\n")
