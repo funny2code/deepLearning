@@ -199,7 +199,7 @@ def test_os_module_uncache():
 def test_os():
     from pytz import timezone
     import sys, os, inspect, requests, json
-    import  utilmy as uu
+    import utilmy as uu
 
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -295,23 +295,12 @@ def test_os():
     log("#######   os_variables_test ..")
     ll = ["test_var"]
     globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
+    os_variable_init(ll, globs)
+    os_variable_exist("test_var", globs)
+    os_variable_check("other_var", globs,do_terminate=False)
     os_import(mod_name="pandas", globs=globs)
     os_variable_del(["test_var"], globs)
-    log(os_variable_exist("test_var",globs))
-
-
-    ll = ["test_var"]
-    globs = {}
-    os_variable_init(ll,globs)
-    os_variable_exist("test_var",globs)
-    os_variable_check("other_var",globs,do_terminate=False)
-    os_import(mod_name="pandas", globs=globs)
-    os_variable_del(["test_var"], globs)
-
-    log(os_variable_exist("test_var",globs))
+    log(os_variable_exist("test_var", globs))
     assert os.path.exists(dirtmp + "/"),"Directory doesn't exist"
 
 
@@ -386,7 +375,7 @@ def test_os():
     uu.to_file("""test input2""", dirtmp + "test2.txt" )
 
     os_merge_safe(dirin_list=[dirtmp+'./*.txt'], dirout=dirtmp+"merge.txt")
-    os_remove(    dirin=dirtmp+'test1.txt', ndays_past=-1)
+    os_remove(dirin=dirtmp+'test1.txt', ndays_past=-1)
     log(os_file_date_modified(dirin=dirtmp+'merge.txt'))
 
     flist = glob_glob(dirtmp)
@@ -469,7 +458,7 @@ def test_os():
     log("\n#######", os_get_ip)
     public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
     log("Public IP", public_ip)
-    log('internal ip', os_get_ip() )
+    log("Internal IP", os_get_ip())
 
     uu.to_file("first line", file_dir)
 
@@ -494,11 +483,6 @@ def test_os():
     log("Function name:", inspect.stack()[0][3])
     assert file__name__ == __name__
     assert function_name == inspect.stack()[0][3]
-
-
-
-
-
 
 
 

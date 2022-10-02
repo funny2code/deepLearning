@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 """  dates utilities
 Doc::
-
-
-
-
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, numpy as np, pandas as pd
 
@@ -271,6 +267,3 @@ def date_generate(start='2018-01-01', ndays=100) :
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
