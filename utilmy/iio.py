@@ -5,48 +5,41 @@ HELP= """ IO
 """
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 from pathlib import Path; from collections import defaultdict, OrderedDict
-# from utilmy import  to_file, date_now_jp
 from box import Box
+from utilmy.utilmy_base import log
 
 
 #####################################################################################
+def test_all():
+  test_screenshot()
 
-
-
+  
 #####################################################################################
-#####################################################################################
-def test():
-    """
+def test_screenshot():
+  import utilmy as uu
+
+  _, dirtmp = uu.dir_testinfo()
+  output_filename = "test_screenshot.png"
+
+  log("\n#######", screenshot)
+  screenshot(dirtmp + output_filename)
+  assert uu.os_file_check(dirtmp + output_filename), "FAILED -> screenshot()"
 
 
-    """
-    pass
-
-
-
-
-
-def screenshot( output='fullscreen.png', monitors=-1):
+def screenshot(output='fullscreen.png'):
   """
   with mss() as sct:
     for _ in range(100):
         sct.shot()
   # MacOS X
   from mss.darwin import MSS as mss
-
-
   """
-  try :
-    # GNU/Linux
-    from mss.linux import MSS as mss
-  except :
-    # Microsoft Windows
-    from mss.windows import MSS as mss
+  import mss  
 
-  filename = sct.shot(mon= monitors, output= output)
-  print(filename)
+  with mss.mss() as mss_instance:
+    mss_instance.shot(output=output)
 
 
-
-
-
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
