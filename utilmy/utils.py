@@ -209,7 +209,25 @@ def test1():
             Returns:
                 
     """
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
     config_load()
+
+    
+    log("####### config_load() ..")
+    # TODO: This test has a bug
+    # Testing config_load with a custom yaml file.
+    # test_path = drepo + "testdata/tmp/test/"
+    # test_file_path = test_path + "config.yaml"
+    # test_text = '{"testing": "testing",}'
+    # expected_response = dict(testing="testing")
+    # uu.to_file(test_text, test_file_path)
+    # config_load_response = config_load(config_path=test_file_path)
+    # assert config_load_response == expected_response, "The config isn't the expected"
+
+
+
     dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
     os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
     to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
@@ -461,3 +479,6 @@ def to_file(s, filep):
     """
     with open(filep, mode="a") as fp:
         fp.write(str(s) + "\n")
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
