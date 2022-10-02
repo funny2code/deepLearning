@@ -223,9 +223,12 @@ def test1():
     # test_text = '{"testing": "testing",}'
     # expected_response = dict(testing="testing")
     # uu.to_file(test_text, test_file_path)
-    # config_load_response = config_load(config_path=test_file_path)
+    # config_load_response = config_load()
     # assert config_load_response == expected_response, "The config isn't the expected"
-
+    # Error's output: Cannot read yaml file /home/necromancer/Documents/programming/Jobs/Freelancer/pythontests/myutil/testdata/tmp/test/config.yaml,'str' object has no attribute 'read_text'
+    # Error's reason: The string that has the path of the existing yaml file, is expected to have the method named "read_text".
+    # This method exists in the objects "pathlib.PosixPath", When we give a value to the parameter "config_path", it won't have the value of the variable "config_path_default",
+    # Which it is an object "pathlib.PosixPath", therefore, "config_path" won't be an object "pathlib.PosixPath", but will be an string.
 
 
     dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
@@ -479,6 +482,3 @@ def to_file(s, filep):
     """
     with open(filep, mode="a") as fp:
         fp.write(str(s) + "\n")
-if __name__ == "__main__":
-    import fire
-    fire.Fire()
