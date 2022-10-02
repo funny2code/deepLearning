@@ -375,19 +375,30 @@ def dataset_donwload(url, path_target):
 
 def os_extract_archive(file_path, path=".", archive_format="auto"):
     """Extracts an archive if it matches tar, tar.gz, tar.bz, or zip formats..
-    Doc::
-            
-            Args:
-                file_path: path to the archive file
-                path: path to extract the archive file
-                archive_format: Archive format to try for extracting the file.
-                    Options are 'auto', 'tar', 'zip', and None.
-                    'tar' includes tar, tar.gz, and tar.bz files.
-                    The default 'auto' is ['tar', 'zip'].
-                    None or an empty list will return no matches found.
-            Returns:
-                True if a match was found and an archive extraction was completed,
-                False otherwise.
+    
+    Docs::
+                
+        Args:
+            file_path (string): path to the archive file
+            path (string): path to extract the archive file
+            archive_format (string): Archive format to try for extracting the file.
+                Options are 'auto', 'tar', 'zip', and None.
+                'tar' includes tar, tar.gz, and tar.bz files.
+                The default 'auto' is ['tar', 'zip'].
+                None or an empty list will return no matches found.
+        Returns:
+            True if a match was found and an archive extraction was completed,
+            False otherwise.
+
+        Example:
+        from utilmy import utils
+
+        is_extracted = utils.os_extract_archive(
+            file_path="/home/necromancer/Desktop/example.zip",
+            path="/home/necromancer/Desktop/testingfolder")
+
+        print(is_extracted)#Displays true if the match was found
+
     """
     if archive_format is None:
         return False
