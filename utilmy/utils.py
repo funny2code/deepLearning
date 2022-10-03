@@ -166,6 +166,9 @@ def test_all():
     
     def config_load_test():
         from utilmy.utils import config_load
+        from utilmy.utils import os_extract_archive
+        import utilmy as uu
+        drepo, dirtmp = uu.dir_testinfo()
 
         log("####### config_load() ..")
         # TODO: This test has a bug
@@ -186,7 +189,11 @@ def test_all():
     
     def dataset_download_test():
         from utilmy.utils import dataset_donwload
-        dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+        
+        log("####### dataset_download_test() ..")
+        test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+        f = os.path.exists(os.path.abspath(test_file_path))
+        assert f == True, "The file made by dataset_download_test doesn't exist"
     
     def os_extract_archive_test():
         from utilmy.utils import os_extract_archive
