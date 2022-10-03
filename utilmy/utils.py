@@ -166,71 +166,18 @@ def test_all():
     
     def config_load_test():
         from utilmy.utils import config_load
-        from utilmy.utils import os_extract_archive
-        import utilmy as uu
-        drepo, dirtmp = uu.dir_testinfo()
-
-        log("####### config_load() ..")
-        # TODO: This test has a bug
-        # Testing config_load with a custom yaml file.
-        # test_path = drepo + "testdata/tmp/test/"
-        # test_file_path = test_path + "config.yaml"
-        # test_text = '{"testing": "testing",}'
-        # expected_response = dict(testing="testing")
-        # uu.to_file(test_text, test_file_path)
-        # config_load_response = config_load(config_path=test_file_path)
-        # assert config_load_response == expected_response, "The config isn't the expected"
-        # Error's output: Cannot read yaml file /home/necromancer/Documents/programming/Jobs/Freelancer/pythontests/myutil/testdata/tmp/test/config.yaml,'str' object has no attribute 'read_text'
-        # Error's reason: The string that has the path of the existing yaml file, is expected to have the method named "read_text".
-        # This method exists in the objects "pathlib.PosixPath", When we give a value to the parameter "config_path", it won't have the value of the variable "config_path_default",
-        # Which it is an object "pathlib.PosixPath", therefore, "config_path" won't be an object "pathlib.PosixPath", but will be an string.
-
         config_load()
     
     def dataset_download_test():
         from utilmy.utils import dataset_donwload
-        
-        log("####### dataset_download_test() ..")
-        test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-        f = os.path.exists(os.path.abspath(test_file_path))
-        assert f == True, "The file made by dataset_download_test doesn't exist"
+        dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
     
     def os_extract_archive_test():
         from utilmy.utils import os_extract_archive
-        import utilmy as uu
-        drepo, dirtmp = uu.dir_testinfo()
-
-
-        log("####### os_extract_archive() ..")
-        #Testing os_extract_archive() extracting a zip file
-        test_path = drepo + "testdata/tmp/test/"
-        test_zip_path = test_path + "test.zip"
-        zf = zipfile.ZipFile(test_zip_path, "w")
-        uu.to_file("Dummy test", test_path + "/zip_test.txt")
-        zf.write(test_path + "/zip_test.txt","zip_test.txt")
-        zf.close()
-        is_extracted = os_extract_archive(
-            file_path=test_zip_path,
-            path=drepo + "testdata/tmp/zip_test"
-            )
-        assert is_extracted == True, "The zip wasn't extracted"
-
-
-        #os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
+        os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
     
     def to_file_test():
         from utilmy.utils import to_file
-        import utilmy as uu
-        drepo, dirtmp = uu.dir_testinfo()
-            
-        log("####### to_file() ..")
-        test_path = drepo + "testdata/tmp/test/"
-        test_file_path = test_path + "to_file_test.txt"
-        test_text = "Dummy test"
-        to_file(test_text, test_file_path)
-        f = os.path.exists(os.path.abspath(test_file_path))
-        assert f == True, "The file made by to_file doesn't exist"
-
         to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
 
     test_logs()
@@ -263,9 +210,60 @@ def test1():
                 
     """
 
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+    log("####### config_load() ..")
+    # TODO: This test has a bug
+    # Testing config_load with a custom yaml file.
+    # test_path = drepo + "testdata/tmp/test/"
+    # test_file_path = test_path + "config.yaml"
+    # test_text = '{"testing": "testing",}'
+    # expected_response = dict(testing="testing")
+    # uu.to_file(test_text, test_file_path)
+    # config_load_response = config_load(config_path=test_file_path)
+    # assert config_load_response == expected_response, "The config isn't the expected"
+    # Error's output: Cannot read yaml file /home/necromancer/Documents/programming/Jobs/Freelancer/pythontests/myutil/testdata/tmp/test/config.yaml,'str' object has no attribute 'read_text'
+    # Error's reason: The string that has the path of the existing yaml file, is expected to have the method named "read_text".
+    # This method exists in the objects "pathlib.PosixPath", When we give a value to the parameter "config_path", it won't have the value of the variable "config_path_default",
+    # Which it is an object "pathlib.PosixPath", therefore, "config_path" won't be an object "pathlib.PosixPath", but will be an string.
+
     config_load()
+
+
+    log("####### dataset_download_test() ..")
+    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    f = os.path.exists(os.path.abspath(test_file_path))
+    assert f == True, "The file made by dataset_download_test doesn't exist"
+    
     dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    
+
+    log("####### os_extract_archive() ..")
+    #Testing os_extract_archive() extracting a zip file
+    test_path = drepo + "testdata/tmp/test/"
+    test_zip_path = test_path + "test.zip"
+    zf = zipfile.ZipFile(test_zip_path, "w")
+    uu.to_file("Dummy test", test_path + "/zip_test.txt")
+    zf.write(test_path + "/zip_test.txt","zip_test.txt")
+    zf.close()
+    is_extracted = os_extract_archive(
+        file_path=test_zip_path,
+        path=drepo + "testdata/tmp/zip_test"
+        )
+    assert is_extracted == True, "The zip wasn't extracted"
+    
     os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
+
+
+    log("####### to_file() ..")
+    test_path = drepo + "testdata/tmp/test/"
+    test_file_path = test_path + "to_file_test.txt"
+    test_text = "Dummy test"
+    to_file(test_text, test_file_path)
+    f = os.path.exists(os.path.abspath(test_file_path))
+    assert f == True, "The file made by to_file doesn't exist"
+
     to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
 
 ##########################################################################################
@@ -515,8 +513,3 @@ def to_file(s, filep):
     """
     with open(filep, mode="a") as fp:
         fp.write(str(s) + "\n")
-###################################################################################################
-if __name__ == "__main__":
-    import fire
-    fire.Fire()
-
