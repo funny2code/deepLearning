@@ -646,6 +646,36 @@ class myProblem_ranking_v2:
         self.x1_list        = np.array([[randomize.randint(0,100) for _ in range(101)] for _ in range(self.n_sample)])
         self.x0_rank_based_x1 = self.get_rank_based_other(self.x0_list, self.x1_list)
         self.x1_rank_based_x0 = self.get_rank_based_other(self.x1_list, self.x0_list)
+        self.check()
+
+
+    def check(self):
+        import pandas as pd
+
+        lexpr =[ ('x0 + x1', 'ok')  ,   ### symmetric
+                 ('log(x0) + log(x1)', 'ok'),
+                 #('exec("randomize.random()")', 'rand'),
+                 (' x0/x1', 'bad'),  ### incorrect not symmetric,
+                 ('x0/x1 + x1/x0','ok'),
+                 ('x0/x1 - x1/x0','bad'),
+                 ('x0**2/x1','bad'),
+                 ('log(x0)','bad'),
+                 ('sin(x0*x1)','good'),
+                 ('(x0) / ((x0 - x0)*(x1 - x1))', 'bad'),
+                 ('log(x0*(1 - 2*x0))', 'bad'),
+                 ('x0*exp(-exp(x0))', 'bad'),
+                 ('exp(x0*exp(-exp(x0)))', 'bad'),
+
+                    ]
+    
+        res = []
+        for expr in lexpr:
+            cost = self.get_correlm(expr[0] )
+            res.append([ expr[1], expr[0], cost ])
+
+        dfr = pd.DataFrame(res, columns=['expr_type', 'expr', 'cst'])
+        llog("Baseline Results")
+        llog(dfr)
 
 
     def get_cost(self, expr:None, symbols):
@@ -671,24 +701,33 @@ class myProblem_ranking_v2:
         """
         l1  = [ 1.0,  17.6, 37.5  ]
         l2 = [ 47.2,  4.7, 0.3  ]
-        diff = 0 
+        diff = 0
+        totalSum = 0 
         costSimple = len(formulae_str) * 0.003
         for i in range(2): 
             x0 = l1[i]
             x1 = l2[i]
             try:
                 s1 = eval(formulae_str)
-            except:
-                s1 = 10000
+            except Exception as e:
+                # the expression is not evaluatable -> must avoid this
+                return 1e4
 
             x0 = l2[i]
             x1 = l1[i]
             try:
                 s2 = eval(formulae_str)
-            except:
-                s2 = 10000
+            except Exception as e:
+                return 1e4
+            totalSum += s1 + s2
             diff += abs(s1 - s2)
-        if diff > 0.1: 
+        # if the expression gives very small results, then the diff will not be smaller than 0.1
+        # -> the expression will be considered as symmetric even it is not -> we must avoid this
+        if totalSum < 0.2: 
+            return 1e4
+        # if the expression gives nan result, then difference between two result is also 
+        # nan which is smaller than 0.1 -> we must avoid this
+        if diff > 0.1 or math.isnan(diff): 
             return 1e4
 
         from scipy import stats, signal
