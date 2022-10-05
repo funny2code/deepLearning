@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Main entry
 
-dsfdsfsdfsdf
-
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, random
 from tkinter import E
@@ -40,7 +38,6 @@ verbose = get_verbosity()   ### Global setting
 
 def direpo(show=0):
     """ Root folder of the repo in Unix / format
-
     """
     try :
        import utilmy
@@ -55,7 +52,6 @@ def direpo(show=0):
 
 def dirpackage(show=0):
     """ dirname of the file  utilmy_base.py  (ie site-packages/utilmy/ )
-
     """
     try :
        import utilmy
@@ -69,12 +65,10 @@ def dirpackage(show=0):
 
 
 def dir_testinfo(tag="", verbose=1, ):
-    """ Print - Return Info for test writing
+    """ Test infos:  return dir_repo, dir_tmp
     Docs::
 
         https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
-
-
     """
     log("\n---------------------------------------------------------------------")
     drepo = direpo()
@@ -259,7 +253,6 @@ def help_create(modulename='utilmy.nnumpy', prefixs=None):
 ###################################################################################################
 def os_get_dirtmp(subdir=None, return_path=False):
     """ return dir temp for testing,...
-
     """
     import tempfile
     from pathlib import Path
@@ -305,29 +298,41 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 
 ###################################################################################################
-def to_file(txt, fpath, mode='a'):
-    """  Write txt on Disk
+def to_file(txt:str, fpath:str, mode='a'):
+    """  Write the argument "s" in a file.
+
     Docs::
 
-          to_file(
+        Args:
+            s (string):     string to write in the file.
+            filep (string): Path of the file to write.
 
+        Returns:
+            None.
+
+        Example:
+            import utilmy as uu
+            filep = "./"
+            isok  = uu.to_file("Test string", fpath=filep)
 
     """
     os_makedirs(fpath) ### create folder
+    txt= str(txt)
     try :
         with open(fpath, mode=mode) as fp:
             fp.write(txt)
+        return True     
     except Exception as e:
         time.sleep(5)
         with open(fpath, mode=mode) as fp:
             fp.write(txt)
+        return True  
 
 
 class toFileSafe(object):
    def __init__(self,fpath):
       """ Thread Safe file writer Class
       Docs::
-
         tofile = toFileSafe('mylog.log')
         tofile.w("msg")
       """
@@ -344,7 +349,6 @@ class toFileSafe(object):
         Args:
             msg:
         Returns:
-
         """
         msg = " ".join([ str(si) for si in s ])
         self.logger.info( msg)
@@ -360,7 +364,6 @@ class toFileSafe(object):
         Args:
             msg:
         Returns:
-
         """
         msg = " ".join([ str(si) for si in s ])
         self.logger.info( msg)
@@ -453,7 +456,6 @@ def pip_install(pkg_str=" pandas "):
         
     finally:
         import pandas as pd
-
     """    
     import subprocess, sys
     clist = [sys.executable, "-m", "pip", "install",  ]  + pkg_str.split(" ")
@@ -475,14 +477,17 @@ def sys_path_append(path="__file__", level_above=2):
 
 
 def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
-    """ Load dynamically Python function/Class from string name
+    """ Load dynamically Python function/Class Object from string name
     Doc::
 
-        ###### Pandas CSV case : Custom MLMODELS One
+        myfun = load_function_uri(uri_name: str="MyFolder/utilmy_base.py:pd_random")
+
+        -- Pandas CSV case : Custom MLMODELS One
         #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
 
-        ###### External File processor :
-        #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+        -- External File processor :
+        "dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+
     """
     import importlib, sys
     from pathlib import Path
@@ -540,7 +545,6 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
-
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -548,10 +552,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')    -->  20211001
         date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
         date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->
-
-
         date_now(1634324632848, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
-
     """
     from pytz import timezone as tzone
     import datetime, time
@@ -666,17 +667,13 @@ def pd_getdata(verbose=True):
 class Index0(object):
     """ Class Maintain global index,
     Docs::
-
         file_name = f"{dtmp}/test_file_{int(time.time())}.txt"
         index = m.Index0(file_name, min_chars=8)
-
-
         ### 2 save some data
         data   = [ "testestest", 'duplicate', '5char', '### comment line, so skipped',]
         output = [ 'testestest', 'duplicate',  ]
         index.save(data)
         assert set(index.read()) == set(output), f"{output} , {index.read()}"
-
     """
     def __init__(self, findex:str="ztmp_file.txt", min_chars=5):
         """ Index0:__init__
@@ -1209,6 +1206,8 @@ def test_all():
 
     os.remove("./testfile")
 
+
+
     ####################################################################
 
     score_word_dict = {}
@@ -1232,7 +1231,3 @@ def test_all():
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
-
-
-

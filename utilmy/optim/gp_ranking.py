@@ -648,6 +648,7 @@ class myProblem_ranking_v2:
         self.x1_rank_based_x0 = self.get_rank_based_other(self.x1_list, self.x0_list)
         self.check()
 
+
     def check(self):
         import pandas as pd
 
@@ -663,7 +664,7 @@ class myProblem_ranking_v2:
                  ('(x0) / ((x0 - x0)*(x1 - x1))', 'bad'),
                  ('log(x0*(1 - 2*x0))', 'bad'),
                  ('x0*exp(-exp(x0))', 'bad'),
-
+                 ('exp(x0*exp(-exp(x0)))', 'bad'),
 
                     ]
     
@@ -700,7 +701,8 @@ class myProblem_ranking_v2:
         """
         l1  = [ 1.0,  17.6, 37.5  ]
         l2 = [ 47.2,  4.7, 0.3  ]
-        diff = 0 
+        diff = 0
+        totalSum = 0 
         costSimple = len(formulae_str) * 0.003
         for i in range(2): 
             x0 = l1[i]
@@ -708,16 +710,24 @@ class myProblem_ranking_v2:
             try:
                 s1 = eval(formulae_str)
             except Exception as e:
-                s1 = 10000
+                # the expression is not evaluatable -> must avoid this
+                return 1e4
 
             x0 = l2[i]
             x1 = l1[i]
             try:
                 s2 = eval(formulae_str)
             except Exception as e:
-                s2 = 10000
+                return 1e4
+            totalSum += s1 + s2
             diff += abs(s1 - s2)
-        if diff > 0.1: 
+        # if the expression gives very small results, then the diff will not be smaller than 0.1
+        # -> the expression will be considered as symmetric even it is not -> we must avoid this
+        if totalSum < 0.2: 
+            return 1e4
+        # if the expression gives nan result, then difference between two result is also 
+        # nan which is smaller than 0.1 -> we must avoid this
+        if diff > 0.1 or math.isnan(diff): 
             return 1e4
 
         from scipy import stats, signal
