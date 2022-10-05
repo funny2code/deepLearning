@@ -25,7 +25,9 @@ def test_all():
     """.
     Doc::
 
-            #### python test.py   test_utils
+         cd utilmy
+         python utils.py  test_all
+
     """
     test1()
 

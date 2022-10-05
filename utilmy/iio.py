@@ -6,7 +6,17 @@ HELP= """ IO
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 from pathlib import Path; from collections import defaultdict, OrderedDict
 from box import Box
-from utilmy.utilmy_base import log
+
+
+#################################################################
+from utilmy.utilmy_base import log, log2
+
+def help():
+    """function help"""
+    from utilmy import help_create
+    ss = help_create(__file__)
+    print(ss)
+
 
 
 #####################################################################################
@@ -14,7 +24,7 @@ def test_all():
   test_screenshot()
 
   
-#####################################################################################
+
 def test_screenshot():
   import utilmy as uu
 
@@ -26,13 +36,17 @@ def test_screenshot():
   assert uu.os_file_check(dirtmp + output_filename), "FAILED -> screenshot()"
 
 
+
+#####################################################################################
 def screenshot(output='fullscreen.png'):
-  """
-  with mss() as sct:
-    for _ in range(100):
-        sct.shot()
-  # MacOS X
-  from mss.darwin import MSS as mss
+  """ take screenshot from python and save on disk
+  Docs::
+
+        with mss() as sct:
+          for _ in range(100):
+              sct.shot()
+        # MacOS X
+        from mss.darwin import MSS as mss
   """
   import mss  
 
@@ -40,6 +54,11 @@ def screenshot(output='fullscreen.png'):
     mss_instance.shot(output=output)
 
 
+
+
+#####################################################################################
 if __name__ == "__main__":
     import fire
     fire.Fire()
+
+
