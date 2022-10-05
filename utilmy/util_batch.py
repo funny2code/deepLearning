@@ -31,8 +31,9 @@ def test_functions():
         log(f'Function running with arg: {fun_args}')
 
     # test that os_lock_run is working
-    os_lock_run(running, 'Test_args', plock='tmp/plock.lock')
-    os_lock_run(running, [1, 2, 3], plock='tmp/plock.lock')
+    os_lock_acquireLock(running, 'Test_args', plock='tmp/plock.lock')
+    os_lock_acquireLock(running, [1, 2, 3], plock='tmp/plock.lock')
+
 
 
 def test_funtions_thread():
@@ -54,7 +55,7 @@ def test_funtions_thread():
     # define test thread
     def thread_running(number):
         log(f'Thread {number} START')
-        os_lock_run(running, number, plock='tmp/plock2.lock')
+        os_lock_acquireLock(running, number, plock='tmp/plock2.lock')
         log(f'Thread {number} sleeping in {number*3}s')
         time.sleep(number* 0.5)
         log(f'Thread {number} END')
@@ -795,7 +796,6 @@ def main():
 
 #####################################################################################################
 if __name__ == '__main__':
-    # import fire
-    # fire.Fire()
-    main()
+    import fire
+    fire.Fire()
 

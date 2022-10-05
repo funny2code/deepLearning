@@ -1,15 +1,90 @@
 # -*- coding: utf-8 -*-
-import glob
-import json
-import os
-import pathlib
-import shutil
-import sys
-import tarfile
-import zipfile
+import glob,json, os, pathlib, shutil, sys, tarfile,zipfile
+import importlib, inspect
 from typing import Optional, Union
 import yaml
-from loguru import logger
+
+
+from utilmy.utilmy_base import to_file
+
+
+
+#################################################################
+from utilmy.utilmy_base import log, log2
+
+def help():
+    """function help"""
+    from utilmy import help_create
+    ss = help_create(__file__)
+    print(ss)
+
+
+
+
+#####################################################################
+def test_all():
+    """.
+    Doc::
+
+         cd utilmy
+         python utils.py  test_all
+
+
+     Easy to maintain and re-factors.
+    """
+    test1()
+    # test2()
+    # test3()
+    # test4
+
+
+
+
+
+def test1():
+    """function test1.
+    Doc::
+
+            Args:
+            Returns:
+
+    """
+
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    log("####### dataset_download_test() ..")
+    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    f = os.path.exists(os.path.abspath(test_file_path))
+    assert f == True, "The file made by dataset_download_test doesn't exist"
+
+    # dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+
+
+
+
+    log("####### os_extract_archive() ..")
+    #Testing os_extract_archive() extracting a zip file
+    path1    = dirtmp + "/dirout/"
+    path_zip = path1 + "test.zip"
+
+    uu.to_file("Dummy test", path1 + "/zip_test.txt")
+
+    ### https://docs.python.org/3/library/zipfile.html
+    ### https://stackoverflow.com/questions/16091904/how-to-eliminate-absolute-path-in-zip-archive-if-absolute-paths-for-files-are-pr
+    zf       = zipfile.ZipFile(path_zip, "w")
+    zf.write(path1 + "/zip_test.txt", "zip_test.txt")
+    zf.close()
+
+    is_extracted  = os_extract_archive(
+        file_path = path_zip,
+        path      = drepo + "testdata/tmp/zip_test"
+        #,archive_format = "auto"
+        )
+    assert is_extracted == True, "The zip wasn't extracted"
+
+    # os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
 
 
 
@@ -18,13 +93,26 @@ from loguru import logger
 #####################################################################
 def load_function(package="mlmodels.util", name="path_norm"):
   """function load_function.
-  Doc::
+  Get the function of a package.
+
+  Docs::
           
         Args:
-            package:   
-            name:   
+            package (string): Package's name. Defaults to "mlmodels.util".
+            name (string): Name of the function that belongs to the package.  
+
         Returns:
-            
+            Returns the function of the package.
+
+        Example:
+            from utilmy import utils
+
+            function = utils.load_function(
+                package="datetime",
+                name="timedelta")
+
+            print(function())#0:00:00
+    
   """
   import importlib
   return  getattr(importlib.import_module(package), name)
@@ -33,15 +121,28 @@ def load_function(package="mlmodels.util", name="path_norm"):
 
 def load_function_uri(uri_name="path_norm"):
     """ Load dynamically function from URI.
-    Doc::
-            
+    Docs::
+
+        ###### Pandas CSV case : Custom MLMODELS One
+        #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
+    
+        ###### External File processor :
+        #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+
+        Args:
+            uri_name (string): URI of the function to get.
         
-            ###### Pandas CSV case : Custom MLMODELS One
-            #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
-        
-            ###### External File processor :
-            #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
-        
+        Returns:
+            Returns the function with the given URI.
+
+        Example:
+            from utilmy import utils
+
+            function = utils.load_function_uri(uri_name="datetime:timedelta")
+
+            print(function()) #0:00:00
+
+
     """
     
     import importlib, sys
@@ -72,8 +173,8 @@ def load_function_uri(uri_name="path_norm"):
             raise NameError(f"Module {pkg} notfound, {e1}, {e2}")
 
 
-def load_callable_from_uri(uri):
-    """function load_callable_from_uri.
+def load_callable_from_uri(uri="mypath/myfile.py::myFunction"):
+    """ Will return the function Python Object from the string path mypath/myfile.py::myFunction
     Doc::
             
             Args:
@@ -81,6 +182,7 @@ def load_callable_from_uri(uri):
             Returns:
                 
     """
+    import importlib, inspect
     assert(len(uri)>0 and ('::' in uri or '.' in uri))
     if '::' in uri:
         module_path, callable_name = uri.split('::')
@@ -93,7 +195,7 @@ def load_callable_from_uri(uri):
         spec.loader.exec_module(module)
     else:
         module = importlib.import_module(module_path)
-    return dict(getmembers(module))[callable_name]
+    return dict(inspect.getmembers(module))[callable_name]
         
 
 def load_callable_from_dict(function_dict, return_other_keys=False):
@@ -122,190 +224,6 @@ def load_callable_from_dict(function_dict, return_other_keys=False):
 
 
 
-#####################################################################
-def test_all():
-    """.
-    Doc::
-            
-            #### python test.py   test_utils
-    """
-    def test_logs(): 
-        from utilmy.utils import log,log2, logw, loge, logger_setup
-        print("testing logs utils........")
-        logger_setup()
-        log("simple log ")
-        log2("debug log")
-        logw("warning log")
-        loge("error log")
-    
-    def config_load_test():
-        from utilmy.utils import config_load
-        config_load()
-    
-    def dataset_download_test():
-        from utilmy.utils import dataset_donwload
-        dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-    
-    def os_extract_archive_test():
-        from utilmy.utils import os_extract_archive
-        os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
-    
-    def to_file_test():
-        from utilmy.utils import to_file
-        to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
-
-    test_logs()
-    config_load_test()
-    dataset_download_test()
-    os_extract_archive_test()
-    to_file_test()
-
-
-def test0(): 
-    """function test0.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    logger_setup()
-    log("simple log ")
-    log2("debug log")
-    logw("warning log")
-    loge("error log")
-    
-def test1():
-    """function test1.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    config_load()
-    dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-    os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
-    to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
-
-##########################################################################################
-################### Logs Wrapper #########################################################
-def log(*s):
-    """function log.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.info(",".join([str(t) for t in s]))
-
-
-def log2(*s):
-    """function log2.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.debug(",".join([str(t) for t in s]))
-
-
-def logw(*s):
-    """function logw.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.warning(",".join([str(t) for t in s]))
-
-
-def loge(*s):
-    """function loge.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.error(",".join([str(t) for t in s]))
-
-
-def logger_setup():
-    """function logger_setup.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    config = {
-        "handlers": [
-            {
-                "sink": sys.stdout,
-                "format": "<level>{level: <8}</level>| <level>{message}</level>",
-            }
-        ]
-    }
-    logger.configure(**config)
-
-
-logger_setup()
-
-
-##########################################################################################
-################### donwload  ############################################################
-def config_load(config_path: Optional[Union[str, pathlib.Path]] = None):
-    """Load Config file into a dict.
-    Doc::
-            
-            1) load config_path
-            2) If not, load in HOME USER
-            3) If not, create default one
-            # config_default = yaml.load(os.path.join(os.path.dirname(__file__), 'config', 'config.yaml'))
-        
-            Args:
-                config_path: path of config or 'default' tag value
-            Returns: dict config
-    """
-    path_default = pathlib.Path.home() / ".mygenerator"
-    config_path_default = path_default / "config.yaml"
-    config_default = {
-        "current_dataset": "mnist",
-        "datasets": {
-            "mnist": {
-                "url": "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz",
-                "path": str(path_default / "mnist_png" / "training"),
-            }
-        },
-    }
-
-    ##################################################################
-    if config_path is None or config_path == "default":
-        logw(f"Using config: {config_path_default}")
-        config_path = config_path_default
-
-    try:
-        log2("loading config", config_path)
-        return yaml.load(config_path.read_text(), Loader=yaml.Loader)
-    except Exception as e:
-        logw(f"Cannot read yaml file {config_path}", e)
-
-    logw("#### Using default configuration")
-    log2(config_default)
-    log(f"Creating default config file in {config_path}")
-    os.makedirs(path_default, exist_ok=True)
-    with open(config_path, mode="w") as fp:
-        json.dump(config_default, fp)
-    return config_default
-
 
 
 
@@ -314,13 +232,27 @@ def config_load(config_path: Optional[Union[str, pathlib.Path]] = None):
 ################### donwload  ############################################################
 def dataset_donwload(url, path_target):
     """Donwload on disk the tar.gz file.
-    Doc::
+    Docs::
             
-            Args:
-                url:
-                path_target:
-            Returns:
-        
+        Args:
+            url (string): File's URL to download.
+            path_target (string): Folder's path to save the file.
+
+        Returns:
+            string: Full path of the saved file.
+
+        Example:
+            from utilmy import utils
+
+            url = "{url of the file}"
+            path_target = "/home/username/Desktop/example"
+
+            full_path = utils.dataset_donwload(
+                url=url, 
+                path_target=path_target)
+
+            print(full_path)
+
     """
     import wget
     log(f"Donwloading mnist dataset in {path_target}")
@@ -335,19 +267,30 @@ def dataset_donwload(url, path_target):
 
 def os_extract_archive(file_path, path=".", archive_format="auto"):
     """Extracts an archive if it matches tar, tar.gz, tar.bz, or zip formats..
-    Doc::
-            
-            Args:
-                file_path: path to the archive file
-                path: path to extract the archive file
-                archive_format: Archive format to try for extracting the file.
-                    Options are 'auto', 'tar', 'zip', and None.
-                    'tar' includes tar, tar.gz, and tar.bz files.
-                    The default 'auto' is ['tar', 'zip'].
-                    None or an empty list will return no matches found.
-            Returns:
-                True if a match was found and an archive extraction was completed,
-                False otherwise.
+    
+    Docs::
+                
+        Args:
+            file_path (string): path to the archive file
+            path (string): path to extract the archive file
+            archive_format (string): Archive format to try for extracting the file.
+                Options are 'auto', 'tar', 'zip', and None.
+                'tar' includes tar, tar.gz, and tar.bz files.
+                The default 'auto' is ['tar', 'zip'].
+                None or an empty list will return no matches found.
+        Returns:
+            True if a match was found and an archive extraction was completed,
+            False otherwise.
+
+        Example:
+        from utilmy import utils
+
+        is_extracted = utils.os_extract_archive(
+            file_path="/home/necromancer/Desktop/example.zip",
+            path="/home/necromancer/Desktop/testingfolder")
+
+        print(is_extracted)#Displays true if the match was found
+
     """
     if archive_format is None:
         return False
@@ -382,15 +325,31 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
     return False
 
 
-def to_file(s, filep):
-    """function to_file.
-    Doc::
-            
-            Args:
-                s:   
-                filep:   
-            Returns:
-                
-    """
-    with open(filep, mode="a") as fp:
-        fp.write(str(s) + "\n")
+
+
+
+###################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+
+"""
+pip install fire
+
+https://www.google.com/search?q=pip+insall+fire&pws=0&gl=us&gws_rd=cr
+
+
+cd myutil
+cd utilmy
+
+python  utils.py   test_all
+
+
+
+
+
+
+
+
+"""

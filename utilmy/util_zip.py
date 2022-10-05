@@ -5,9 +5,37 @@ from typing import Optional, Union
 import wget, yaml
 
 
+from utilmy import to_file
+
+
+#################################################################
+from utilmy.utilmy_base import log, log2
+
+def help():
+    """function help
+    """
+    from utilmy import help_create
+    ss = help_create(__file__)
+    print(ss)
+
+
+#####################################################################
+def test_all():
+    """
+    """
+    test1()
+
+
+
+
+
+def test1():
+    pass
+
+
+
 
 ##########################################################################################
-################### donwload  ############################################################
 def unzip(dirin, dirout):
     """function unzip.
     Doc::
@@ -18,11 +46,25 @@ def unzip(dirin, dirout):
             Returns:
                 
     """
-    # !/usr/bin/env python3
-    import sys
-    import zipfile
+    import  zipfile
     with zipfile.ZipFile(dirin, 'r') as zip_ref:
         zip_ref.extractall(dirout)
+
+
+def zip(dirin:str="mypath", dirout:str="myfile.zip", format='zip'):
+    """ zip a full dirin folder into dirout file
+    Doc::
+            
+            https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+            Args:
+                dirin:   
+                dirout:   
+            Returns:
+                
+    """
+    import shutil
+    shutil.make_archive(base_name=dirout,format=format,base_dir=dirin)
+
 
 
 def gzip(dirin='/mydir', dirout="./"):
@@ -159,19 +201,6 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
             return True
     return False
 
-
-def to_file(s, filep):
-    """function to_file.
-    Doc::
-            
-            Args:
-                s:   
-                filep:   
-            Returns:
-                
-    """
-    with open(filep, mode="a") as fp:
-        fp.write(str(s) + "\n")
 
         
         

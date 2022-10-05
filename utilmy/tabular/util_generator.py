@@ -1,23 +1,16 @@
 # -*- coding: utf-8 -*-
 """Genreate New train_data  using advanced Auto-Encoder, GAN
 Docs::
-
     Install :
        pip install sdv ctgan==0.5.1  scikit-learn   imlearn  utilmy
-
-
     -------------------------------------------------------------------------------------
     import utilmy.tabular.util_generator as ug
     from utilmy import log
-
     root  = "ztmp/"
-
-
     -------------------------------------------------------------------------------------
     n_sample = 100
     from sdv.demo import load_timeseries_demo
     from sdv.constraints import Unique
-
     data = load_timeseries_demo()
     entity_columns  = ['Symbol']
     context_columns = ['MarketCap', 'Sector', 'Industry']
@@ -27,7 +20,6 @@ Docs::
                 }
     data_pars['gen_samp'] =   {'Xtrain': data}
     data_pars['eval']     =   {'X': data, 'y': None}
-
     -------------------------------------------------------------------------------------
     models = {
         'PAR': {'model_class': 'PAR',
@@ -39,45 +31,33 @@ Docs::
                      'sequence_index': 'Date'
                                 },
                } }
-
-
     compute_pars = { 'compute_pars' : {},
                      'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False},
                      'n_sample_generation' : 10
                    }
-
     -------------------------------------------------------------------------------------
     model = ug.Model(model_pars=models['PAR'], data_pars=None, compute_pars=None)
-
     log('Training the model')
     ug.fit(data_pars=data_pars, compute_pars=compute_pars, out_pars=None,task_type='gen_samp')
     print()
-
     log('Predict data..')
     Xnew = ug.transform(Xpred=None, data_pars=data_pars, compute_pars=compute_pars)
     log(f'Xnew', Xnew)
-
     log('Evaluating model..')
     log( ug.evaluate(data_pars=data_pars, compute_pars=compute_pars))
-
     log('Savinf model..')
     ug.save(path= root + '/model_dir/')
-
     log('Load model..')
     ug.model, session = load_model(path= root + "/model_dir/")
     log(model)
-
-
     ----------------------------------------------------------------------------------
       Transformation for ALL Columns :   Increase samples, Reduce Samples.
-
       WARNING :
       Main isssue is the number of rows change  !!!!
         cannot merge with others
         --> store as train data
         train data ---> new train data
         Transformation with less rows !
-
 """
 import os, sys,copy, pathlib, pprint, json, pandas as pd, numpy as np, scipy as sci, sklearn
 from box import Box
@@ -599,17 +579,12 @@ def generator_train_save(dirin_or_df="", dirout="",
                          ):
     """ Data Generator Wrapper to train/save
     Docs::
-
         root   = "ztmp/"
         dirout = "ztmp/"
-
         data  = sdv.demo.load_tabular_demo('student_placements')
         colid = 'student_id'
-
         rule_unique_employee_student_id = sdv.constraints.Unique(column_names=['student_id'])
         constraints = [rule_unique_employee_student_id]
-
-
         model_pars = {'model_class': 'CTGAN',
                     'model_pars': {
                           ## CTGAN
@@ -622,14 +597,10 @@ def generator_train_save(dirin_or_df="", dirout="",
                          'constraints':constraints
                                      },
                     }
-
         compute_pars = { 'compute_pars' : {},
                          'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
                        }
-
         generator_train_save(dirin_or_df= data, dirout=root, model_pars=model_pars, compute_pars=compute_pars)
-
-
     """
     global model, session
 
@@ -674,15 +645,12 @@ def generator_train_save(dirin_or_df="", dirout="",
 def generator_load_generate(dirmodel="", compute_pars:dict=None, dirout:str=None):
     """ Data genrator to load/generate
     Docs::
-
         root   = "ztmp/"
         dirout = "ztmp/"
-
         compute_pars = { 'compute_pars' : {},
                          'metrics_pars' : {'metrics' :['CSTest', 'KSTest'], 'aggregate':False}
                        }
         generator_load_generate(dirmodel=root, compute_pars= compute_pars, dirout=dirout)
-
     """
     global model, session
 
@@ -744,10 +712,8 @@ def fit(data_pars: dict=None, compute_pars: dict=None, task_type = "train",**kw)
 def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, metric_type=None):
     """ Return metrics of the model when fitted.
     Docs::
-
         Single Table Metrics
         https://github.com/sdv-dev/SDMetrics/tree/master/sdmetrics/single_table
-
         from sdmetrics.single_table import SingleTableMetric
         SingleTableMetric.get_subclasses()
         {'BNLogLikelihood'                 : sdmetrics.single_table.bayesian_network.BNLogLikelihood,
@@ -777,23 +743,16 @@ def evaluate(Xnew = None, Xtrue = None, compute_pars:dict=None, metrics=None, me
         'NumericalMLP'                     : sdmetrics.single_table.privacy.numerical_sklearn,
         'NumericalSVR'                     : sdmetrics.single_table.privacy.numerical_sklearn,
         'NumericalRadiusNearestNeighbor'   : sdmetrics.single_table.privacy.radius_nearest_neighbor}
-
-
-
         -------------------------------------------------------------------------------------
         https://github.com/sdv-dev/SDMetrics/tree/master/sdmetrics/timeseries
         from sdmetrics.timeseries import TimeSeriesMetric
         TimeSeriesMetric.get_subclasses()
         {'LSTMDetection': sdmetrics.timeseries.detection.LSTMDetection}
-
-
         -------------------------------------------------------------------------------------
         In [13]: sdv.evaluation.evaluate(synthetic_data, real_data, metrics=['CSTest'], aggregate=False)
         Out[13]:
            metric         name  raw_score  normalized_score  min_value  max_value      goal error
         0  CSTest  Chi-Squared   0.948027          0.948027        0.0        1.0  MAXIMIZE  None
-
-
     """
     compute_pars = {} if compute_pars is None else compute_pars
 
@@ -910,7 +869,6 @@ def predict(Xpred=None, data_pars: dict=None, compute_pars: dict=None, out_pars:
 def save(path=None, info=None):
     """function save.
     Doc::
-
             Args:
                 path:
                 info:
@@ -971,7 +929,6 @@ def load_info(path=""):
 ############# Dataset ##############################################################################
 def get_dataset_load(df_or_path):
    """ Load the data into dataframe
-
    """
    if isinstance(df_or_path, pd.DataFrame):
       return df_or_path
@@ -1186,8 +1143,6 @@ def test_dataset_classi_fake(nrows=500):
     df[coly]   = y.reshape(-1, 1)
     # log(df)
     return df, colnum, colcat, coly
-
-
 def train_test_split2(df, coly):
     from sklearn.model_selection import train_test_split
     log3(df.dtypes)
@@ -1197,11 +1152,9 @@ def train_test_split2(df, coly):
     ######### Split the df into train/test subsets
     X_train_full, X_test, y_train_full, y_test = train_test_split(X, y, test_size=0.05, random_state=2021)
     X_train, X_valid, y_train, y_valid         = train_test_split(X_train_full, y_train_full, random_state=2021)
-
     #####
     # y = y.astype('uint8')
     num_classes                                = len(set(y_train_full.values.ravel()))
-
     return X,y, X_train, X_valid, y_train, y_valid, X_test,  y_test, num_classes
 """
 
