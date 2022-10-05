@@ -1,15 +1,74 @@
 # -*- coding: utf-8 -*-
-import glob
-import json
-import os
-import pathlib
-import shutil
-import sys
-import tarfile
-import zipfile
+import glob,json, os, pathlib, shutil, sys, tarfile,zipfile
+import importlib, inspect
 from typing import Optional, Union
 import yaml
-from loguru import logger
+
+
+from utilmy.utilmy_base import to_file
+
+
+#################################################################
+from utilmy.utilmy_base import log, log2
+
+def help():
+    """function help"""
+    from utilmy import help_create
+    ss = help_create(__file__)
+    print(ss)
+
+
+
+
+#####################################################################
+def test_all():
+    """.
+    Doc::
+
+            #### python test.py   test_utils
+    """
+    test1()
+
+
+
+
+
+def test1():
+    """function test1.
+    Doc::
+
+            Args:
+            Returns:
+
+    """
+
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    log("####### dataset_download_test() ..")
+    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    f = os.path.exists(os.path.abspath(test_file_path))
+    assert f == True, "The file made by dataset_download_test doesn't exist"
+
+    dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+
+
+    log("####### os_extract_archive() ..")
+    #Testing os_extract_archive() extracting a zip file
+    test_path = drepo + "testdata/tmp/test/"
+    test_zip_path = test_path + "test.zip"
+    zf = zipfile.ZipFile(test_zip_path, "w")
+    uu.to_file("Dummy test", test_path + "/zip_test.txt")
+    zf.write(test_path + "/zip_test.txt","zip_test.txt")
+    zf.close()
+    is_extracted = os_extract_archive(
+        file_path=test_zip_path,
+        path=drepo + "testdata/tmp/zip_test"
+        )
+    assert is_extracted == True, "The zip wasn't extracted"
+
+    os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
 
 
 
@@ -107,6 +166,7 @@ def load_callable_from_uri(uri):
             Returns:
                 
     """
+    import importlib, inspect
     assert(len(uri)>0 and ('::' in uri or '.' in uri))
     if '::' in uri:
         module_path, callable_name = uri.split('::')
@@ -119,7 +179,7 @@ def load_callable_from_uri(uri):
         spec.loader.exec_module(module)
     else:
         module = importlib.import_module(module_path)
-    return dict(getmembers(module))[callable_name]
+    return dict(inspect.getmembers(module))[callable_name]
         
 
 def load_callable_from_dict(function_dict, return_other_keys=False):
@@ -147,242 +207,6 @@ def load_callable_from_dict(function_dict, return_other_keys=False):
     
 
 
-
-#####################################################################
-def test_all():
-    """.
-    Doc::
-            
-            #### python test.py   test_utils
-    """
-    def test_logs(): 
-        from utilmy.utils import log,log2, logw, loge, logger_setup
-        print("testing logs utils........")
-        logger_setup()
-        log("simple log ")
-        log2("debug log")
-        logw("warning log")
-        loge("error log")
-    
-    def config_load_test():
-        from utilmy.utils import config_load
-        config_load()
-    
-    def dataset_download_test():
-        from utilmy.utils import dataset_donwload
-        dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-    
-    def os_extract_archive_test():
-        from utilmy.utils import os_extract_archive
-        os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
-    
-    def to_file_test():
-        from utilmy.utils import to_file
-        to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
-
-    test_logs()
-    config_load_test()
-    dataset_download_test()
-    os_extract_archive_test()
-    to_file_test()
-
-
-def test0(): 
-    """function test0.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    logger_setup()
-    log("simple log ")
-    log2("debug log")
-    logw("warning log")
-    loge("error log")
-    
-def test1():
-    """function test1.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-
-    import utilmy as uu
-    drepo, dirtmp = uu.dir_testinfo()
-
-    log("####### config_load() ..")
-    # TODO: This test has a bug
-    # Testing config_load with a custom yaml file.
-    # test_path = drepo + "testdata/tmp/test/"
-    # test_file_path = test_path + "config.yaml"
-    # test_text = '{"testing": "testing",}'
-    # expected_response = dict(testing="testing")
-    # uu.to_file(test_text, test_file_path)
-    # config_load_response = config_load(config_path=test_file_path)
-    # assert config_load_response == expected_response, "The config isn't the expected"
-    # Error's output: Cannot read yaml file /home/necromancer/Documents/programming/Jobs/Freelancer/pythontests/myutil/testdata/tmp/test/config.yaml,'str' object has no attribute 'read_text'
-    # Error's reason: The string that has the path of the existing yaml file, is expected to have the method named "read_text".
-    # This method exists in the objects "pathlib.PosixPath", When we give a value to the parameter "config_path", it won't have the value of the variable "config_path_default",
-    # Which it is an object "pathlib.PosixPath", therefore, "config_path" won't be an object "pathlib.PosixPath", but will be an string.
-
-    config_load()
-
-
-    log("####### dataset_download_test() ..")
-    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-    f = os.path.exists(os.path.abspath(test_file_path))
-    assert f == True, "The file made by dataset_download_test doesn't exist"
-    
-    dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
-    
-
-    log("####### os_extract_archive() ..")
-    #Testing os_extract_archive() extracting a zip file
-    test_path = drepo + "testdata/tmp/test/"
-    test_zip_path = test_path + "test.zip"
-    zf = zipfile.ZipFile(test_zip_path, "w")
-    uu.to_file("Dummy test", test_path + "/zip_test.txt")
-    zf.write(test_path + "/zip_test.txt","zip_test.txt")
-    zf.close()
-    is_extracted = os_extract_archive(
-        file_path=test_zip_path,
-        path=drepo + "testdata/tmp/zip_test"
-        )
-    assert is_extracted == True, "The zip wasn't extracted"
-    
-    os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
-
-
-    log("####### to_file() ..")
-    test_path = drepo + "testdata/tmp/test/"
-    test_file_path = test_path + "to_file_test.txt"
-    test_text = "Dummy test"
-    to_file(test_text, test_file_path)
-    f = os.path.exists(os.path.abspath(test_file_path))
-    assert f == True, "The file made by to_file doesn't exist"
-
-    to_file("to_file_test_str", "./testdata/tmp/test/to_file.txt")
-
-##########################################################################################
-################### Logs Wrapper #########################################################
-def log(*s):
-    """function log.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.info(",".join([str(t) for t in s]))
-
-
-def log2(*s):
-    """function log2.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.debug(",".join([str(t) for t in s]))
-
-
-def logw(*s):
-    """function logw.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.warning(",".join([str(t) for t in s]))
-
-
-def loge(*s):
-    """function loge.
-    Doc::
-            
-            Args:
-                *s:   
-            Returns:
-                
-    """
-    logger.error(",".join([str(t) for t in s]))
-
-
-def logger_setup():
-    """function logger_setup.
-    Doc::
-            
-            Args:
-            Returns:
-                
-    """
-    config = {
-        "handlers": [
-            {
-                "sink": sys.stdout,
-                "format": "<level>{level: <8}</level>| <level>{message}</level>",
-            }
-        ]
-    }
-    logger.configure(**config)
-
-
-logger_setup()
-
-
-##########################################################################################
-################### donwload  ############################################################
-def config_load(config_path: Optional[Union[str, pathlib.Path]] = None):
-    """Load Config file into a dict.
-    Doc::
-            
-            1) load config_path
-            2) If not, load in HOME USER
-            3) If not, create default one
-            # config_default = yaml.load(os.path.join(os.path.dirname(__file__), 'config', 'config.yaml'))
-        
-            Args:
-                config_path: path of config or 'default' tag value
-            Returns: dict config
-    """
-    path_default = pathlib.Path.home() / ".mygenerator"
-    config_path_default = path_default / "config.yaml"
-    config_default = {
-        "current_dataset": "mnist",
-        "datasets": {
-            "mnist": {
-                "url": "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz",
-                "path": str(path_default / "mnist_png" / "training"),
-            }
-        },
-    }
-
-    ##################################################################
-    if config_path is None or config_path == "default":
-        logw(f"Using config: {config_path_default}")
-        config_path = config_path_default
-
-    try:
-        log2("loading config", config_path)
-        return yaml.load(config_path.read_text(), Loader=yaml.Loader)
-    except Exception as e:
-        logw(f"Cannot read yaml file {config_path}", e)
-
-    logw("#### Using default configuration")
-    log2(config_default)
-    log(f"Creating default config file in {config_path}")
-    os.makedirs(path_default, exist_ok=True)
-    with open(config_path, mode="w") as fp:
-        json.dump(config_default, fp)
-    return config_default
 
 
 
@@ -485,31 +309,11 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
     return False
 
 
-def to_file(s, filep):
-    """function to_file.
-    
-    Write the argument "s" in a file.
 
-    Docs::
-            
-        Args:
-            s (string): string to write in the file.    
-            filep (string): Path of the file to write.
-        
-        Returns:
-            None.
 
-        Example:
-            from utilmy import utils
 
-            filep = "/home/username/Desktop/example/test"
+###################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
 
-            string = "Test string"
-
-            result = utils.to_file(s=string, filep=filep)
-
-            print(result)#It prints "None", but the file has the text.
-
-    """
-    with open(filep, mode="a") as fp:
-        fp.write(str(s) + "\n")

@@ -297,10 +297,28 @@ def get_loggers(mode='print', n_loggers=2, verbose_level=None):
 
 
 ###################################################################################################
-def to_file(txt, fpath, mode='a'):
-    """  Write txt on Disk
+def to_file(txt:str, fpath:str, mode='a'):
+    """  Write the argument "s" in a file.
+
     Docs::
-          to_file(
+
+        Args:
+            s (string): string to write in the file.
+            filep (string): Path of the file to write.
+
+        Returns:
+            None.
+
+        Example:
+            from utilmy import utils
+
+            filep = "/home/username/Desktop/example/test"
+
+            string = "Test string"
+
+            result = utils.to_file(s=string, filep=filep)
+
+            print(result)#It prints "None", but the file has the text.
     """
     os_makedirs(fpath) ### create folder
     try :
@@ -1183,6 +1201,8 @@ def test_all():
     assert file_content == "some_text_data", "FAILED -> to_file"
 
     os.remove("./testfile")
+
+
 
     ####################################################################
 
