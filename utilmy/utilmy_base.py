@@ -65,8 +65,9 @@ def dirpackage(show=0):
 
 
 def dir_testinfo(tag="", verbose=1, ):
-    """ Print - Return Info for test writing
+    """ Test infos:  return dir_repo, dir_tmp
     Docs::
+
         https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
     """
     log("\n---------------------------------------------------------------------")
