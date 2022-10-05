@@ -8,6 +8,7 @@ import yaml
 from utilmy.utilmy_base import to_file
 
 
+
 #################################################################
 from utilmy.utilmy_base import log, log2
 
@@ -28,8 +29,13 @@ def test_all():
          cd utilmy
          python utils.py  test_all
 
+
+     Easy to maintain and re-factors.
     """
     test1()
+    # test2()
+    # test3()
+    # test4
 
 
 
@@ -53,24 +59,32 @@ def test1():
     f = os.path.exists(os.path.abspath(test_file_path))
     assert f == True, "The file made by dataset_download_test doesn't exist"
 
-    dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    # dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+
+
 
 
     log("####### os_extract_archive() ..")
     #Testing os_extract_archive() extracting a zip file
-    test_path = drepo + "testdata/tmp/test/"
-    test_zip_path = test_path + "test.zip"
-    zf = zipfile.ZipFile(test_zip_path, "w")
-    uu.to_file("Dummy test", test_path + "/zip_test.txt")
-    zf.write(test_path + "/zip_test.txt","zip_test.txt")
+    path1    = dirtmp + "/dirout/"
+    path_zip = path1 + "test.zip"
+
+    uu.to_file("Dummy test", path1 + "/zip_test.txt")
+
+    ### https://docs.python.org/3/library/zipfile.html
+    ### https://stackoverflow.com/questions/16091904/how-to-eliminate-absolute-path-in-zip-archive-if-absolute-paths-for-files-are-pr
+    zf       = zipfile.ZipFile(path_zip, "w")
+    zf.write(path1 + "/zip_test.txt", "zip_test.txt")
     zf.close()
-    is_extracted = os_extract_archive(
-        file_path=test_zip_path,
-        path=drepo + "testdata/tmp/zip_test"
+
+    is_extracted  = os_extract_archive(
+        file_path = path_zip,
+        path      = drepo + "testdata/tmp/zip_test"
+        #,archive_format = "auto"
         )
     assert is_extracted == True, "The zip wasn't extracted"
 
-    os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
+    # os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
 
 
 
@@ -159,8 +173,8 @@ def load_function_uri(uri_name="path_norm"):
             raise NameError(f"Module {pkg} notfound, {e1}, {e2}")
 
 
-def load_callable_from_uri(uri):
-    """function load_callable_from_uri.
+def load_callable_from_uri(uri="mypath/myfile.py::myFunction"):
+    """ Will return the function Python Object from the string path mypath/myfile.py::myFunction
     Doc::
             
             Args:
@@ -319,3 +333,23 @@ if __name__ == "__main__":
     import fire
     fire.Fire()
 
+
+"""
+pip install fire
+
+https://www.google.com/search?q=pip+insall+fire&pws=0&gl=us&gws_rd=cr
+
+
+cd myutil
+cd utilmy
+
+python  utils.py   test_all
+
+
+
+
+
+
+
+
+"""
