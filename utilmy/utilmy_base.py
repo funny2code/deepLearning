@@ -304,31 +304,29 @@ def to_file(txt:str, fpath:str, mode='a'):
     Docs::
 
         Args:
-            s (string): string to write in the file.
+            s (string):     string to write in the file.
             filep (string): Path of the file to write.
 
         Returns:
             None.
 
         Example:
-            from utilmy import utils
+            import utilmy as uu
+            filep = "./"
+            isok  = uu.to_file("Test string", fpath=filep)
 
-            filep = "/home/username/Desktop/example/test"
-
-            string = "Test string"
-
-            result = utils.to_file(s=string, filep=filep)
-
-            print(result)#It prints "None", but the file has the text.
     """
     os_makedirs(fpath) ### create folder
+    txt= str(txt)
     try :
         with open(fpath, mode=mode) as fp:
             fp.write(txt)
+        return True     
     except Exception as e:
         time.sleep(5)
         with open(fpath, mode=mode) as fp:
             fp.write(txt)
+        return True  
 
 
 class toFileSafe(object):
@@ -479,12 +477,17 @@ def sys_path_append(path="__file__", level_above=2):
 
 
 def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
-    """ Load dynamically Python function/Class from string name
+    """ Load dynamically Python function/Class Object from string name
     Doc::
-        ###### Pandas CSV case : Custom MLMODELS One
+
+        myfun = load_function_uri(uri_name: str="MyFolder/utilmy_base.py:pd_random")
+
+        -- Pandas CSV case : Custom MLMODELS One
         #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
-        ###### External File processor :
-        #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+
+        -- External File processor :
+        "dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
+
     """
     import importlib, sys
     from pathlib import Path
