@@ -488,6 +488,19 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
         -- External File processor :
         "dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
 
+
+        Args:
+            package (string): Package's name. Defaults to "mlmodels.util".
+            name (string): Name of the function that belongs to the package.  
+
+        Returns:
+            Returns the function of the package.
+
+        Example:
+            from utilmy import utils
+            function = utils.load_function_uri("datetime.timedelta",)
+            print(function())#0:00:00
+
     """
     import importlib, sys
     from pathlib import Path

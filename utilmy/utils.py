@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""" Various utils
+Docs::
+
+    various
+
+
+"""
 import glob,json, os, pathlib, shutil, sys, tarfile,zipfile
 import importlib, inspect
 from typing import Optional, Union
@@ -91,86 +98,8 @@ def test1():
 
 
 #####################################################################
-def load_function(package="mlmodels.util", name="path_norm"):
-  """function load_function.
-  Get the function of a package.
+from utilmy.utilmy_base import load_function_uri
 
-  Docs::
-          
-        Args:
-            package (string): Package's name. Defaults to "mlmodels.util".
-            name (string): Name of the function that belongs to the package.  
-
-        Returns:
-            Returns the function of the package.
-
-        Example:
-            from utilmy import utils
-
-            function = utils.load_function(
-                package="datetime",
-                name="timedelta")
-
-            print(function())#0:00:00
-    
-  """
-  import importlib
-  return  getattr(importlib.import_module(package), name)
-
-
-
-def load_function_uri(uri_name="path_norm"):
-    """ Load dynamically function from URI.
-    Docs::
-
-        ###### Pandas CSV case : Custom MLMODELS One
-        #"dataset"        : "mlmodels.preprocess.generic:pandasDataset"
-    
-        ###### External File processor :
-        #"dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
-
-        Args:
-            uri_name (string): URI of the function to get.
-        
-        Returns:
-            Returns the function with the given URI.
-
-        Example:
-            from utilmy import utils
-
-            function = utils.load_function_uri(uri_name="datetime:timedelta")
-
-            print(function()) #0:00:00
-
-
-    """
-    
-    import importlib, sys
-    from pathlib import Path
-    pkg = uri_name.split(":")
-
-    assert len(pkg) > 1, "  Missing :   in  uri_name module_name:function_or_class "
-    package, name = pkg[0], pkg[1]
-    
-    try:
-        #### Import from package mlmodels sub-folder
-        return  getattr(importlib.import_module(package), name)
-
-    except Exception as e1:
-        try:
-            ### Add Folder to Path and Load absoluate path module
-            path_parent = str(Path(package).parent.parent.absolute())
-            sys.path.append(path_parent)
-            #log(path_parent)
-
-            #### import Absolute Path model_tf.1_lstm
-            model_name   = Path(package).stem  # remove .py
-            package_name = str(Path(package).parts[-2]) + "." + str(model_name)
-            #log(package_name, model_name)
-            return  getattr(importlib.import_module(package_name), name)
-
-        except Exception as e2:
-            raise NameError(f"Module {pkg} notfound, {e1}, {e2}")
 
 
 def load_callable_from_uri(uri="mypath/myfile.py::myFunction"):
@@ -334,22 +263,3 @@ if __name__ == "__main__":
     fire.Fire()
 
 
-"""
-pip install fire
-
-https://www.google.com/search?q=pip+insall+fire&pws=0&gl=us&gws_rd=cr
-
-
-cd myutil
-cd utilmy
-
-python  utils.py   test_all
-
-
-
-
-
-
-
-
-"""
