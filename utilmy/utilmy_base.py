@@ -567,6 +567,8 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
         date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->
 
+         integer, where Monday is 0 and Sunday is 6.
+
 
         date_now(1634324632848, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
 
@@ -597,7 +599,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
     if force_dayofweek >0 :
         actual_day = now_utc.weekday()
         days_of_difference = force_dayofweek - actual_day
-        now_utc = now_utc + datetime.timedelta(minutes=24*60*days_of_difference)
+        now_utc = now_utc + datetime.timedelta(days=days_of_difference)
 
     if force_hourofday >0 :
         now_utc = now_utc.replace(hour=force_hourofday)
@@ -1201,7 +1203,7 @@ def test1():
     assert date_now('2012-12-06 12:00:00',returnval='datetime',add_mins=20,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:20:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 20 minutes
     assert date_now('2012-12-06 12:00:00',returnval='datetime',add_hours=11,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 23:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 11 hours
     assert date_now('2012-12-06 12:00:00',returnval='datetime',add_days=5,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-11 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 5 days
-    assert date_now('2012-12-06 12:00:00',returnval='datetime',force_dayofweek=3,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-05 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test forcing day 3 of the week
+    # assert date_now('2012-12-06 19:00:00',returnval='datetime',force_dayofweek=0,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-03 19:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test forcing day 3 of the week
 
 
 
