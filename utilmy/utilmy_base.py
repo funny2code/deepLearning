@@ -1069,7 +1069,11 @@ def load(to_file=""):
 def test_all():
     """function test_all
     """
+    test1()
 
+
+
+def test1():
     import utilmy as m
     drepo, dtmp = dir_testinfo()
 
