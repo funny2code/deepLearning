@@ -33,9 +33,51 @@ def test_all():
 
 
 
-
 def test1():
-    pass
+    """function test1.
+    Doc::
+
+            Args:
+            Returns:
+
+    """
+
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
+
+
+    log("####### dataset_download_test() ..")
+    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    f = os.path.exists(os.path.abspath(test_file_path))
+    assert f == True, "The file made by dataset_download_test doesn't exist"
+
+    # dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+
+
+
+
+    log("####### os_extract_archive() ..")
+    #Testing os_extract_archive() extracting a zip file
+    path1    = dirtmp + "/dirout/"
+    path_zip = path1 + "test.zip"
+
+    uu.to_file("Dummy test", path1 + "/zip_test.txt")
+
+    ### https://docs.python.org/3/library/zipfile.html
+    ### https://stackoverflow.com/questions/16091904/how-to-eliminate-absolute-path-in-zip-archive-if-absolute-paths-for-files-are-pr
+    zf       = zipfile.ZipFile(path_zip, "w")
+    zf.write(path1 + "/zip_test.txt", "zip_test.txt")
+    zf.close()
+
+    is_extracted  = os_extract_archive(
+        file_path = path_zip,
+        path      = drepo + "testdata/tmp/zip_test"
+        #,archive_format = "auto"
+        )
+    assert is_extracted == True, "The zip wasn't extracted"
+
+    # os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
+
 
 
 
@@ -210,5 +252,10 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
         
         
         
-        
-        
+
+###################################################################################################
+if __name__ == "__main__":
+    import fire
+    fire.Fire()
+
+

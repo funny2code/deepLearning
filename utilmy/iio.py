@@ -2,6 +2,7 @@
 HELP= """ IO
 
 
+
 """
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 from pathlib import Path; from collections import defaultdict, OrderedDict
@@ -42,11 +43,13 @@ def screenshot(output='fullscreen.png'):
   """ take screenshot from python and save on disk
   Docs::
 
-        with mss() as sct:
-          for _ in range(100):
-              sct.shot()
-        # MacOS X
-        from mss.darwin import MSS as mss
+      output_filename = "test_screenshot.png"
+      log("\n#######", screenshot)
+      screenshot(dirtmp + output_filename)
+      assert uu.os_file_check(dirtmp + output_filename), "FAILED -> screenshot()"
+
+
+
   """
   import mss  
 
