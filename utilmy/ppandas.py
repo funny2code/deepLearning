@@ -157,6 +157,47 @@ def pd_schema_enforce(df, int_default:int=0, dtype_dict:dict=None):
                  'category': 'int64',
                  'chain': 'int64',
               }
+
+            Docs::
+
+                Args:
+                
+                    df (Union[:obj:'pd.DataFrame', string]): Panda dataframe or can be path to a file that can be loaded as a dataframe(ex: CSV).
+                    int_default (int): This argument is the default int number if data is an int and an error occurs when parsed it to its dtype again.
+                        This argument works if the argument dtype_dict isn't given. Defaults to 0.
+                    dtype_dict (dict): This is the scheme, This dictionary contains the datatype of each column to parse.
+                        Example
+                            dtype1 = {
+                                'name': 'string',
+                                'age': 'int',
+                            }
+                        This can work with a dataframe that contains the columns "name" and "age".capitalize()
+                    
+                Return:
+
+                    Panda Dataframe with the data parsed.
+
+                Example:
+
+                    import pandas as pd
+                    from utilmy import ppandas
+
+                    test_dictionary = dict(
+                        name=["Mathew", "Sarah", "Michael"], 
+                        age=[21, 21, 35]
+                    )
+
+                    dataframe = pd.DataFrame(test_dictionary)
+
+                    dtype = {
+                        "age":"string",
+                    }
+
+
+                    parsed_dataframe = ppandas.pd_schema_enforce(dataframe)
+
+                    print(str(parsed_dataframe["age"].dtypes)) # Displays string
+
         """
         if isinstance(df, str):
             df = pd_read_file(df)
