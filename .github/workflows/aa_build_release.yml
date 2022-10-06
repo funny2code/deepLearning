@@ -237,7 +237,8 @@ jobs:
           # If you want to figure it out dynamically
           echo "BASE_BRANCH=$( echo 'zdocs_y23487teg65f6')" >> $GITHUB_ENV
           
-      - name: Create and Merge Pull Request
+      - name: Create and Merge PR into zdocs_y23487teg65f6
+        continue-on-error: true
         id: create_pr
         uses: actions/github-script@v6
         env:
