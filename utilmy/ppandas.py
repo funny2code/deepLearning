@@ -76,6 +76,12 @@ def help():
 
 ###################################################################################
 def test_all():
+    test1()
+    test2()
+    test_pd_col_bins()
+
+
+def test1():
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
 
@@ -120,7 +126,7 @@ def test_all():
     pd_cartesian(a,b)
 
     pd_show(df_str)
-    
+
 def test2():
     l1 = [1,2,3]
     l2 = [2,3,4]
@@ -135,20 +141,20 @@ def test2():
     to_datetime("2018-01-16")
     
 def test_pd_col_bins():
-  import utilmy as uu
-  import pandas as pd
-  import numpy as np
-  np.random.seed(42)
+    import utilmy as uu
+    import pandas as pd
+    import numpy as np
+    np.random.seed(42)
 
-  normal_col = np.random.normal(loc=666, scale=10, size=1000)
-  geo_col = np.random.geometric(p=0.1, size=1000)
-  df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+    normal_col = np.random.normal(loc=666, scale=10, size=1000)
+    geo_col = np.random.geometric(p=0.1, size=1000)
+    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
 
-  binned_norm = uu.pd_col_bins(df, 'norm', 10)
-  binned_geo = uu.pd_col_bins(df, 'geo', 10)
+    binned_norm = uu.pd_col_bins(df, 'norm', 10)
+    binned_geo = uu.pd_col_bins(df, 'geo', 10)
 
-  assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
-  assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
+    assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
+    assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
 
 ###################################################################################################
 ###### Pandas #####################################################################################
