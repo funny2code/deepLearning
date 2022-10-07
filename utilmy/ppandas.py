@@ -127,6 +127,30 @@ def test1():
 
     pd_show(df_str)
 
+    log("####### pd_schema_enforce() ..")
+
+    test_dictionary = dict(
+        name=["Mathew", "sarah", "michael"], 
+        age=[21, 21, 35],
+    )   
+
+    dataframe = pd.DataFrame(test_dictionary)
+
+    previous_dtype = str(dataframe["age"].dtypes)
+
+    log("Previous dtype:",previous_dtype)
+
+    dtype1 = {
+        "age":"string",
+    }
+
+    parsed_dataframe = pd_schema_enforce(dataframe,dtype_dict = dtype1)
+
+    log("dtype now:", str(parsed_dataframe["age"].dtypes))
+    assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
+
+
+
 def test2():
     l1 = [1,2,3]
     l2 = [2,3,4]
