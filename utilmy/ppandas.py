@@ -76,6 +76,12 @@ def help():
 
 ###################################################################################
 def test_all():
+    test1()
+    test2()
+    test_pd_col_bins()
+
+
+def test1():
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
 
@@ -90,9 +96,12 @@ def test_all():
    
     pd_merge(df1, df2, on="b")
 
+    log("####### pd_filter() ..")
     df = pd_filter(df3, filter_dict="a>1")
     assert df.shape[0] == 3, "not filtered properly"
 
+
+    log( "####### pd_col_bins() ..")
     pd_to_file(df1, "testdata/ppandas/file.csv")
     pd_sample_strat(df1, col="a", n=10)
 
@@ -100,6 +109,7 @@ def test_all():
     bins = pd_col_bins(df1, col="a", nbins= 5)
     assert len(np.unique(bins)) == 5, "bins not formed"
 
+    log( "####### pd_dtype_to_category() ..")
     pd_dtype_reduce(df1)
     pd_dtype_count_unique(df1,col_continuous=['b'])
 
@@ -120,13 +130,41 @@ def test_all():
     pd_cartesian(a,b)
 
     pd_show(df_str)
-    
+
+    log("####### pd_schema_enforce() ..")
+
+    test_dictionary = dict(
+        name=["Mathew", "sarah", "michael"], 
+        age=[21, 21, 35],
+    )   
+
+    dataframe = pd.DataFrame(test_dictionary)
+
+    previous_dtype = str(dataframe["age"].dtypes)
+
+    log("Previous dtype:",previous_dtype)
+
+    dtype1 = {
+        "age":"string",
+    }
+
+    parsed_dataframe = pd_schema_enforce(df=dataframe,dtype_dict = dtype1)
+
+    log("dtype now:", str(parsed_dataframe["age"].dtypes))
+    assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
+
+
+
 def test2():
+
+    log( "####### np_list_intersection() ..")
     l1 = [1,2,3]
     l2 = [2,3,4]
     l  = np_list_intersection(l1,l2)
     assert len(l) == 2, "Intersection failed"
 
+
+    log( "####### np_add_remove() ..")
     l = np_add_remove(set(l1),[1,2],4)
     assert l == set([3,4]), "Add remove failed"
 
@@ -135,20 +173,22 @@ def test2():
     to_datetime("2018-01-16")
     
 def test_pd_col_bins():
-  import utilmy as uu
-  import pandas as pd
-  import numpy as np
-  np.random.seed(42)
+    import utilmy as uu
+    import pandas as pd
+    import numpy as np
 
-  normal_col = np.random.normal(loc=666, scale=10, size=1000)
-  geo_col = np.random.geometric(p=0.1, size=1000)
-  df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+    log( "####### pd_col_bins() ..")
+    np.random.seed(42)
 
-  binned_norm = uu.pd_col_bins(df, 'norm', 10)
-  binned_geo = uu.pd_col_bins(df, 'geo', 10)
+    normal_col = np.random.normal(loc=666, scale=10, size=1000)
+    geo_col = np.random.geometric(p=0.1, size=1000)
+    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
 
-  assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
-  assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
+    binned_norm = uu.pd_col_bins(df, 'norm', 10)
+    binned_geo = uu.pd_col_bins(df, 'geo', 10)
+
+    assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
+    assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
 
 ###################################################################################################
 ###### Pandas #####################################################################################
