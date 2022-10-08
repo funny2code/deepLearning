@@ -14,8 +14,15 @@ from utilmy import log, log2
 
 
 
+
 ################################################################################################
-# Test functions
+def test_all():
+    """function test_all
+    """
+    test_os_process_find_name()
+    test_index()
+
+
 def test_functions():
     """Check that list function is working.
     os_lock_releaseLock, os_lock_releaseLock, os_lock_run
@@ -162,14 +169,6 @@ def test_os_process_find_name():
     print(os_process_find_name(name='*.py'))
     print(os_process_find_name(name='python*'))
 
-def test_all():
-    """function test_all
-    Args:
-    Returns:
-        
-    """
-    test_os_process_find_name()
-    test_index()
 
 
 ########################################################################################
@@ -235,11 +234,7 @@ def now_daymonth_isin(day_month, timezone="jp"):
     return False
 
 
-  
-
-      
-        
-def time_sleep_random(nmax=5):
+def time_sleep(nmax=5, israndom=True):
     """function time_sleep_random
     Args:
         nmax:   
@@ -247,8 +242,12 @@ def time_sleep_random(nmax=5):
         
     """
     import random, time
-    time.sleep( random.randrange(nmax) )
-              
+    if israndom:
+       time.sleep( random.randrange(nmax) )
+    else :
+       time.sleep( nmax )
+
+
         
 
 ####################################################################################################
@@ -303,6 +302,7 @@ def batchLog(object):
             if fi[0] == "#" or len(fi) < 5 : continue
             flist2.append(fi)            
         return flist2
+
 
 
 #########################################################################################
@@ -494,6 +494,7 @@ def to_file_safe(msg:str, fpath:str):
    logger.info( ss)
 
 
+
 #########################################################################################################
 ####### Atomic File Index  read/writing #################################################################
 class IndexLock(object):
@@ -626,7 +627,6 @@ class IndexLock(object):
 
 
 
-
 class Index0(object):
     """
     ### to maintain global index, flist = index.read()  index.save(flist)
@@ -752,13 +752,6 @@ def os_lock_releaseLock(locked_file_descriptor):
 
 
 
-def main():
-    """function main
-    Args:
-    Returns:
-        
-    """
-    test_all()
 
 
 #####################################################################################################
