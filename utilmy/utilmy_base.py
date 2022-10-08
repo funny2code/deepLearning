@@ -488,6 +488,19 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
         -- External File processor :
         "dataset"        : "MyFolder/preprocess/myfile.py:pandasDataset"
 
+
+        Args:
+            package (string): Package's name. Defaults to "mlmodels.util".
+            name (string): Name of the function that belongs to the package.  
+
+        Returns:
+            Returns the function of the package.
+
+        Example:
+            from utilmy import utils
+            function = utils.load_function_uri("datetime.timedelta",)
+            print(function())#0:00:00
+
     """
     import importlib, sys
     from pathlib import Path
@@ -537,7 +550,7 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
 
 ### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
-             add_days=0,  add_mins=0, add_hours=0, add_months=0,
+             add_days=0,  add_mins=0, add_hours=0, add_months=0,add_weeks=0,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
@@ -545,6 +558,7 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
+
         datenow: 2012-02-12  or ""  emptry string for today's date.
         fmt:     output format # "%Y-%m-%d %H:%M:%S %Z%z"
         date_now(timezone='Asia/Tokyo')    -->  "20200519"   ## Today date in YYYMMDD
@@ -552,7 +566,12 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         date_now('2021-10-05',fmt='%Y%m%d', add_days=-5, returnval='int')    -->  20211001
         date_now(20211005, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
         date_now(20211005,  fmt_input='%Y%m%d', returnval='unix')    -->
+
+         integer, where Monday is 0 and Sunday is 6.
+
+
         date_now(1634324632848, fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')    -->  '2021-10-05'
+
     """
     from pytz import timezone as tzone
     import datetime, time
@@ -578,22 +597,21 @@ def date_now(datenow:Union[str,int,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = now_utc.replace(day=force_dayofmonth)
 
     if force_dayofweek >0 :
-        # https://stackoverflow.com/questions/25426919/python-construct-datetime-having-weekday-with-other-time-parameters
-        #from datetime import timedelta
-        #monday = today - datetime.timedelta(days= now_utc.weekday())
-        #result = (monday + timedelta(days=weekday)).replace(hour=int(t), minutes=int((t - int(t)) * 60))
-        pass
+        actual_day = now_utc.weekday()
+        days_of_difference = force_dayofweek - actual_day
+        now_utc = now_utc + datetime.timedelta(days=days_of_difference)
 
     if force_hourofday >0 :
         now_utc = now_utc.replace(hour=force_hourofday)
 
 
     now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_new + datetime.timedelta(days=add_days, hours=add_hours, minutes=add_mins,)
+    now_new = now_new + datetime.timedelta(days=add_days + 7*add_weeks, hours=add_hours, minutes=add_mins,)
 
 
-    if add_months>0 :
-        pass
+    if add_months!=0 :
+        from dateutil.relativedelta import relativedelta
+        now_new = now_new + relativedelta(months=add_months)
 
     if   returnval == 'datetime': return now_new ### datetime
     elif returnval == 'int':      return int(now_new.strftime(fmt))
@@ -1053,7 +1071,11 @@ def load(to_file=""):
 def test_all():
     """function test_all
     """
+    test1()
 
+
+
+def test1():
     import utilmy as m
     drepo, dtmp = dir_testinfo()
 
@@ -1176,8 +1198,16 @@ def test_all():
     x = m.date_now(20211005,     fmt='%Y-%m-%d', fmt_input='%Y%m%d', returnval='str')  #-->  '2021-10-05'
     assert   not log(x ) and  x  == '2021-10-05' , x                                   #-->  1634324632848
 
-    ####################################################################
+    
+    assert date_now('2020-05-09', add_months=-2, fmt='%Y-%m-%d') == "2020-03-09" #Test adding -2 months
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_mins=20,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 12:20:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 20 minutes
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_hours=11,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-06 23:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 11 hours
+    assert date_now('2012-12-06 12:00:00',returnval='datetime',add_days=5,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-11 12:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test adding 5 days
+    # assert date_now('2012-12-06 19:00:00',returnval='datetime',force_dayofweek=0,fmt_input="%Y-%m-%d %H:%M:%S") == date_now('2012-12-03 19:00:00',returnval='datetime',fmt_input="%Y-%m-%d %H:%M:%S") #Test forcing day 3 of the week
 
+
+
+    ####################################################################
     log("\n####", m.pd_random)
     df = m.pd_random(nrows=37, ncols=5)
     assert tuple(df.shape) == (37,5), f"FAILED -> Current shape: {df.shape}  vs True Shape 37,5 "

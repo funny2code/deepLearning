@@ -76,6 +76,12 @@ def help():
 
 ###################################################################################
 def test_all():
+    test1()
+    test2()
+    test_pd_col_bins()
+
+
+def test1():
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
 
@@ -90,15 +96,20 @@ def test_all():
    
     pd_merge(df1, df2, on="b")
 
+    log("####### pd_filter() ..")
     df = pd_filter(df3, filter_dict="a>1")
     assert df.shape[0] == 3, "not filtered properly"
 
+
+    log( "####### pd_col_bins() ..")
     pd_to_file(df1, "testdata/ppandas/file.csv")
     pd_sample_strat(df1, col="a", n=10)
 
-    bins = pd_col_bins(df1, "a", 5)
+    ## you int64
+    bins = pd_col_bins(df1, col="a", nbins= 5)
     assert len(np.unique(bins)) == 5, "bins not formed"
 
+    log( "####### pd_dtype_to_category() ..")
     pd_dtype_reduce(df1)
     pd_dtype_count_unique(df1,col_continuous=['b'])
 
@@ -119,13 +130,41 @@ def test_all():
     pd_cartesian(a,b)
 
     pd_show(df_str)
-    
+
+    log("####### pd_schema_enforce() ..")
+
+    test_dictionary = dict(
+        name=["Mathew", "sarah", "michael"], 
+        age=[21, 21, 35],
+    )   
+
+    dataframe = pd.DataFrame(test_dictionary)
+
+    previous_dtype = str(dataframe["age"].dtypes)
+
+    log("Previous dtype:",previous_dtype)
+
+    dtype1 = {
+        "age":"string",
+    }
+
+    parsed_dataframe = pd_schema_enforce(df=dataframe,dtype_dict = dtype1)
+
+    log("dtype now:", str(parsed_dataframe["age"].dtypes))
+    assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
+
+
+
 def test2():
+
+    log( "####### np_list_intersection() ..")
     l1 = [1,2,3]
     l2 = [2,3,4]
     l  = np_list_intersection(l1,l2)
     assert len(l) == 2, "Intersection failed"
 
+
+    log( "####### np_add_remove() ..")
     l = np_add_remove(set(l1),[1,2],4)
     assert l == set([3,4]), "Add remove failed"
 
@@ -133,6 +172,23 @@ def test2():
     to_timeunix(datetime.datetime(2018,1,16))
     to_datetime("2018-01-16")
     
+def test_pd_col_bins():
+    import utilmy as uu
+    import pandas as pd
+    import numpy as np
+
+    log( "####### pd_col_bins() ..")
+    np.random.seed(42)
+
+    normal_col = np.random.normal(loc=666, scale=10, size=1000)
+    geo_col = np.random.geometric(p=0.1, size=1000)
+    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+
+    binned_norm = uu.pd_col_bins(df, 'norm', 10)
+    binned_geo = uu.pd_col_bins(df, 'geo', 10)
+
+    assert len(binned_norm.unique()) == 10, "bins not formed for normal distribution"
+    assert len(binned_geo.unique()) == 9, "bins not formed for geometric distribution"
 
 ###################################################################################################
 ###### Pandas #####################################################################################
@@ -141,6 +197,47 @@ def pd_schema_enforce(df, int_default:int=0, dtype_dict:dict=None):
                  'category': 'int64',
                  'chain': 'int64',
               }
+
+            Docs::
+
+                Args:
+                
+                    df (Union[:obj:'pd.DataFrame', string]): Panda dataframe or can be path to a file that can be loaded as a dataframe(ex: CSV).
+                    int_default (int): This argument is the default int number if data is an int and an error occurs when parsed it to its dtype again.
+                        This argument works if the argument dtype_dict isn't given. Defaults to 0.
+                    dtype_dict (dict): This is the scheme, This dictionary contains the datatype of each column to parse.
+                        Example
+                            dtype1 = {
+                                'name': 'string',
+                                'age': 'int',
+                            }
+                        This can work with a dataframe that contains the columns "name" and "age".capitalize()
+                    
+                Return:
+
+                    Panda Dataframe with the data parsed.
+
+                Example:
+
+                    import pandas as pd
+                    from utilmy import ppandas
+
+                    test_dictionary = dict(
+                        name=["Mathew", "Sarah", "Michael"], 
+                        age=[21, 21, 35]
+                    )
+
+                    dataframe = pd.DataFrame(test_dictionary)
+
+                    dtype = {
+                        "age":"string",
+                    }
+
+
+                    parsed_dataframe = ppandas.pd_schema_enforce(dataframe)
+
+                    print(str(parsed_dataframe["age"].dtypes)) # Displays string
+
         """
         if isinstance(df, str):
             df = pd_read_file(df)
@@ -484,21 +581,71 @@ def pd_cartesian(df1, df2) :
   return df3
 
 
-def pd_col_bins(df, col, nbins=5):
-  """function pd_col_bins.
+def pd_col_bins(df, col: str, nbins: int = 5):
+  """Shortcut for easy binning of numerical values.
   Doc::
-          
-        Args:
-            df:   
-            col:   
-            nbins:   
-        Returns:
-            
+
+    np.random.seed(42)
+
+    normal_col = np.random.normal(loc=666, scale=10, size=1000)
+    geo_col = np.random.geometric(p=0.1, size=1000)
+    df = pd.DataFrame({'norm': normal_col, 'geo': geo_col})
+
+    binned_norm = uu.pd_col_bins(df, 'norm', 10)
+    binned_geo = uu.pd_col_bins(df, 'geo', 10)
+
+    assert len(binned_norm.unique()) == 10, "bins are not formed for normal distribution"
+    assert len(binned_geo.unique()) == 9, "bins are not formed for geometric distribution"
+
+    Args:
+        df (pandas.DataFrame):   The dataframe.
+        col (str):    The name of the column for cutting. Column should be of numeric type.
+        nbins (int):  The number of bins (default 5).
+
+    Returns:
+        pandas.Series of type int16.
   """
-  ### Shortcuts for easy bin of numerical values
-  import pandas as pd, numpy as np
-  assert nbins < 256, 'nbins< 255'
-  return pd.qcut(df[col], q=nbins,labels= np.arange(0, nbins, 1)).astype('int8')
+  import pandas as pd
+  # assert nbins < 256, 'nbins< 255'
+  return pd.qcut(df[col], q=nbins, labels=False, duplicates='drop').astype('int16')
+
+
+def pd_colcat_toint(dfref, colname, colcat_map=None, suffix=None):
+
+    ### to ensure dataframe
+    colname = [colname] if isinstance(colname, str) else colname
+
+    df = dfref[colname]
+    # if colname is single value df will be series type not a dataframe so we convert it to dataframe to be sure it is a dataframe type
+    df = pd.DataFrame(df)
+
+    suffix = "" if suffix is None else suffix
+    colname_new = []
+
+    if colcat_map is not None:
+        for col in colname:
+            print(col, col + suffix)
+            ddict            = colcat_map[col]["encode"]
+            # print(ddict)
+            df[col + suffix] = df[col].apply(lambda x: ddict.get(x))
+            colname_new.append(col + suffix)
+
+        return df[colname_new], colcat_map
+
+    colcat_map = {}
+    
+    # old: for col in colname:
+    # update: for col in [colname] >> if colname is just single value it will loop through string not the list, so we convert to list before looping
+    for col in colname:
+        
+        colcat_map[col]           = {}
+        df[col + suffix], label   = df[col].factorize()
+        colcat_map[col]["decode"] = {i: t for i, t in enumerate(list(label))}
+        colcat_map[col]["encode"] = {t: i for i, t in enumerate(list(label))}
+        colname_new.append(col + suffix)
+
+    return df[colname_new], colcat_map
+
 
 
 def pd_dtype_reduce(dfm, int0 ='int32', float0 = 'float32') :
@@ -853,7 +1000,6 @@ def is_float(x):
 if __name__ == "__main__":
     import fire
     fire.Fire()
-
 
 
 

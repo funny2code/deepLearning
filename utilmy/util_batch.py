@@ -6,21 +6,23 @@ HELP= """ Utils for easy batching
 """
 import os, sys, socket, platform, time, gc,logging, random, datetime, logging
 
+from utilmy.utilmy_base import date_now
+
 ################################################################################################
 verbose = 3   ### Global setting
+from utilmy import log, log2
 
-def log(*s, **kw):
-    print(*s, flush=True, **kw)
 
-def log2(*s, **kw):
-    if verbose >=2 : print(*s, flush=True, **kw)
-
-def log3(*s, **kw):
-    if verbose >=3 : print(*s, flush=True, **kw)
 
 
 ################################################################################################
-# Test functions
+def test_all():
+    """function test_all
+    """
+    test_os_process_find_name()
+    test_index()
+
+
 def test_functions():
     """Check that list function is working.
     os_lock_releaseLock, os_lock_releaseLock, os_lock_run
@@ -167,14 +169,6 @@ def test_os_process_find_name():
     print(os_process_find_name(name='*.py'))
     print(os_process_find_name(name='python*'))
 
-def test_all():
-    """function test_all
-    Args:
-    Returns:
-        
-    """
-    test_os_process_find_name()
-    test_index()
 
 
 ########################################################################################
@@ -240,39 +234,7 @@ def now_daymonth_isin(day_month, timezone="jp"):
     return False
 
 
-  
-# date_now = date_now_jp()  ### alias
-
-
-def date_now_jp(fmt="%Y%m%d", add_days=0, add_hours=0, timezone='jp'):
-    """function date_now_jp
-    Args:
-        fmt:   
-        add_days:   
-        add_hours:   
-        timezone:   
-    Returns:
-        
-    """
-    # "%Y-%m-%d %H:%M:%S %Z%z"
-    from pytz import timezone as tzone
-    import datetime
-    # Current time in UTC
-    now_utc = datetime.datetime.now(tzone('UTC'))
-    now_new = now_utc+ datetime.timedelta(days=add_days, hours=add_hours)
-
-    if timezone == 'utc':
-       return now_new.strftime(fmt)
-      
-    else :
-       timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'jp') 
-       # Convert to US/Pacific time zone
-       now_pacific = now_new.astimezone(tzone(timezone))
-       return now_pacific.strftime(fmt)
-
-      
-        
-def time_sleep_random(nmax=5):
+def time_sleep(nmax=5, israndom=True):
     """function time_sleep_random
     Args:
         nmax:   
@@ -280,8 +242,12 @@ def time_sleep_random(nmax=5):
         
     """
     import random, time
-    time.sleep( random.randrange(nmax) )
-              
+    if israndom:
+       time.sleep( random.randrange(nmax) )
+    else :
+       time.sleep( nmax )
+
+
         
 
 ####################################################################################################
@@ -299,7 +265,7 @@ def batchLog(object):
            dt\t prog_name\t name \t tag \t info
         
         """
-        today = date_now_jp("%Y%m%d")        
+        today = date_now(fmt="%Y%m%d")
         self.dirlog = dirlog + f"/batchlog_{tag}_{today}.log"
         
     
@@ -336,6 +302,7 @@ def batchLog(object):
             if fi[0] == "#" or len(fi) < 5 : continue
             flist2.append(fi)            
         return flist2
+
 
 
 #########################################################################################
@@ -527,6 +494,7 @@ def to_file_safe(msg:str, fpath:str):
    logger.info( ss)
 
 
+
 #########################################################################################################
 ####### Atomic File Index  read/writing #################################################################
 class IndexLock(object):
@@ -659,7 +627,6 @@ class IndexLock(object):
 
 
 
-
 class Index0(object):
     """
     ### to maintain global index, flist = index.read()  index.save(flist)
@@ -785,17 +752,9 @@ def os_lock_releaseLock(locked_file_descriptor):
 
 
 
-def main():
-    """function main
-    Args:
-    Returns:
-        
-    """
-    test_all()
 
 
 #####################################################################################################
 if __name__ == '__main__':
     import fire
     fire.Fire()
-
