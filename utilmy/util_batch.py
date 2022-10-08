@@ -19,8 +19,11 @@ from utilmy import log, log2
 def test_all():
     """function test_all
     """
+    test1()
+
     test_os_process_find_name()
     test_index()
+
 
 
 def test_functions():
@@ -169,6 +172,14 @@ def test_os_process_find_name():
     print(os_process_find_name(name='*.py'))
     print(os_process_find_name(name='python*'))
 
+def test1():
+    
+    # TODO: This test has a bug
+    log("#######   now_weekday_isin()...")
+    # timezone = datetime.timezone.utc
+    # now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
+    # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
+    # assert is_week_in == True, "This isn't correct weekday"
 
 
 ########################################################################################
