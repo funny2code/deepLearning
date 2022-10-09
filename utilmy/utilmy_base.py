@@ -1124,13 +1124,13 @@ def test_loadfunctionuri():
     drepo, dtmp = dir_testinfo()
 
     log("####", m.load_function_uri )
-    ll = [ drepo + "utilmy/utilmy_base.py:test_all"
+    ll = [ drepo + "utilmy/utilmy_base.py:test_datenow"
 
     ]
     for uri_name in ll :
         myclass = load_function_uri(uri_name=uri_name)
         result = myclass()
-        assert result, 'FAILED -> load_function_uri'
+        assert myclass, 'FAILED -> load_function_uri'
 
 
 def test1():
