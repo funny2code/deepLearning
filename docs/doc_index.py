@@ -3,9 +3,16 @@
 utilmy/__init__.py
 
 
+utilmy/abash.py
+-------------------------functions----------------------
+adocker()
+
+
+
 utilmy/adatasets.py
 -------------------------functions----------------------
 help()
+pd_generate_random_genders(size, p = None)
 template_dataset_classifier_XXXXX(nrows = 500, **kw)
 test()
 test1()
@@ -381,6 +388,10 @@ os_getenv_dict()
 
 
 utilmy/data.py
+-------------------------functions----------------------
+help()
+log(*s)
+
 
 
 utilmy/dates.py
@@ -474,13 +485,12 @@ utilmy/db/util_sql.py
 utilmy/debug.py
 -------------------------functions----------------------
 help()
-log(*s)
 log10(*s, nmax = 60)
 log_debug_everywhere()
 log_trace(msg = "", dump_path = "", globs = None)
 logfull(*s, nmax = 60)
 logfull2(*s)
-logic(*s)
+logvar(*s)
 os_get_function_name()
 os_get_function_parameters_and_values()
 os_typehint_check(fun)
@@ -2033,7 +2043,6 @@ yolov5_from_xml(xml_file_path:str  =  "None", xml_folder:str =  "None", output:s
 
 utilmy/distributed.py
 -------------------------functions----------------------
-date_now(fmt = "%Y-%m-%d %H =  "%Y-%m-%d %H:%M:%S %Z%z")
 help()
 load(to_file = "")
 load_serialize(name)
@@ -2400,15 +2409,11 @@ loaddf()
 
 
 
-utilmy/graph.py
-
-
 utilmy/graph/__init__.py
 
 
 utilmy/graph/util_graph.py
 -------------------------functions----------------------
-dag_create_network(df_or_file: Union[str, pd.DataFrame], cola, colb, colvertex = "")
 dag_networkit_convert(df_or_file: pd.DataFrame, cola = 'cola', colb = 'colb', colvertex = "", nrows = 1000)
 dag_networkit_load(dirin = "", model_target = 'networkit', nrows = 1000, cola = 'cola', colb = 'colb', colvertex = '')
 dag_networkit_save(net, dirout, format = 'metis/gml/parquet', tag = "", cols =  None, index_map = None, n_vertex = 1000)
@@ -2423,11 +2428,6 @@ test_pd_create_dag(nrows = 1000, n_nodes = 100)
 
 
 utilmy/iio.py
--------------------------functions----------------------
-screenshot(output = 'fullscreen.png')
-test_all()
-test_screenshot()
-
 
 
 utilmy/images/__init__.py
@@ -2844,7 +2844,6 @@ os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel =
 os_get_function_name()
 os_get_ip(mode = 'internal')
 os_get_os()
-os_get_process_info(sep = "-")
 os_get_uniqueid(format = "int")
 os_getcwd()
 os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
@@ -2867,10 +2866,16 @@ os_variable_exist(x, globs, msg = "")
 os_variable_init(ll, globs)
 os_wait_processes(nhours = 7)
 os_walk(path, pattern = "*", dirlevel = 50)
+test1()
+test2()
+test4()
+test6_os()
+test7_os()
+test8()
+test8_os()
 test_all()
 test_filecache()
 test_globglob()
-test_os()
 test_os_module_uncache()
 z_os_search_fast(fname, texts = None, mode = "regex/str")
 
@@ -2908,31 +2913,6 @@ myProblem7.get_cost_symbolic(self, dCGP)
 myProblem7.get_data_symbolic(self)
 
 
-utilmy/optim/gp_ranking.py
--------------------------functions----------------------
-help()
-test5()
-test9()
-test_pars_values()
-
--------------------------methods----------------------
-myProblem_ranking.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
-myProblem_ranking.check(self)
-myProblem_ranking.get_correlm(self, formulae_str)
-myProblem_ranking.get_cost(self, expr:None, symbols)
-myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
-myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
-myProblem_ranking.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
-myProblem_ranking_v2.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
-myProblem_ranking_v2.check(self)
-myProblem_ranking_v2.get_correlm(self, formulae_str:str)
-myProblem_ranking_v2.get_cost(self, expr:None, symbols)
-myProblem_ranking_v2.get_rank_based_other(self, l1: list, l2: list)
-myProblem_ranking_v2.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
-myProblem_ranking_v2.rank_merge_v5(self, ll1:list, ll2:list, formulae_str)
-myProblem_ranking_v2.rank_score(self, formulae_str:str, rank1:list, rank2:list)
-
-
 utilmy/optim/gp_searchformulae.py
 -------------------------functions----------------------
 _search_formulae_dcgpy_v1_wrapper(pars_dict:dict = None, myproblem = None, verbose = False, )
@@ -2954,6 +2934,7 @@ test5()
 test6()
 test7()
 test8()
+test9()
 test_all()
 test_pars_values()
 zzz_search_formulae_dcgpy_cuckoo(myproblem = None, pars_dict:dict = None, verbose = False, )
@@ -2975,7 +2956,8 @@ myProblem6.get_data_symbolic(self)
 myProblem7.__init__(self)
 myProblem7.get_cost(self, dCGP, symbols)
 myProblem_ranking.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
-myProblem_ranking.get_correlm(self, formulae_str:str)
+myProblem_ranking.check(self)
+myProblem_ranking.get_correlm(self, formulae_str)
 myProblem_ranking.get_cost(self, expr:None, symbols)
 myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
 myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
@@ -3138,7 +3120,6 @@ pd_show(df, nrows = 100, reader = 'notepad.exe', **kw)
 pd_to_file(df, filei, check = 0, verbose = True, show = 'shape', **kw)
 pd_to_hiveparquet(dirin, dirout = "/ztmp_hive_parquet/df.parquet", verbose = False)
 pd_to_mapdict(df, colkey = 'ranid', colval = 'item_tag', naval = '0', colkey_type = 'str', colval_type = 'str', npool = 5, nrows = 900900900, verbose = True)
-test1()
 test2()
 test_all()
 test_pd_col_bins()
@@ -3173,9 +3154,6 @@ utilmy/prepro/prepro.py
 -------------------------functions----------------------
 _pd_colnum(df, col, pars)
 _pd_colnum_fill_na_median(df, col, pars)
-log(*s)
-log2(*s)
-log3(*s)
 log4(*s, n = 0, m = 1)
 log4_pd(name, df, *s)
 os_convert_topython_code(txt)
@@ -3269,9 +3247,6 @@ load(file_name)
 load_dataset(path_data_x, path_data_y = '', colid = "jobId", n_sample = -1)
 load_features(name, path)
 load_function_uri(uri_name="myfolder/myfile.py = "myfolder/myfile.py::myFunction")
-log(*s, n = 0, m = 1, **kw)
-log2(*s, **kw)
-log3(*s, **kw)
 metrics_eval(metric_list = ["mean_squared_error"], ytrue = None, ypred = None, ypred_proba = None, return_dict = False)
 np_conv_to_one_col(np_array, sep_char = "_")
 os_get_function_name()
@@ -4594,8 +4569,11 @@ hdfs_dir_list(path, recursive = False)
 hdfs_dir_rm(path)
 hdfs_download(dirin = "", dirout = "./", verbose = False, n_pool = 1, **kw)
 hdfs_file_exists(filename)
+hdfs_get2(from_dir = "", to_dir = "", verbose = True, n_pool = 20, **kw)
 hdfs_ls(path, flag = "-h ", filename_only = False, use_regex = False, match_file = '')
 hdfs_mkdir(hdfs_dir)
+hdfs_put2(from_dir = "", to_dir = "", verbose = True, n_pool = 25, dirlevel = 50, **kw)
+hdfs_walk(path="hdfs = "hdfs://nameservice1/user/", dirlevel = 3, hdfs = None)
 hive_csv_tohive(folder, tablename = "ztmp", tableref = "nono2.table2")
 hive_db_dumpall()
 hive_df_tohive(df, tableref = "nono2.table2")
@@ -6219,6 +6197,7 @@ bootstrap_sequential()
 utilmy/util_batch.py
 -------------------------functions----------------------
 batchLog(object)
+main()
 now_daymonth_isin(day_month, timezone = "jp")
 now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "jp")
 now_weekday_isin(day_week = None, timezone = 'jp')
@@ -6229,11 +6208,11 @@ os_wait_cpu_ram_lower(cpu_min = 30, sleep = 10, interval = 5, msg =  "", name_pr
 os_wait_fileexist2(dirin, ntry_max = 100, sleep_time = 300)
 os_wait_filexist(flist, sleep = 300)
 os_wait_program_end(cpu_min = 30, sleep = 60, interval = 5, msg =  "", program_name = None, verbose = True)
-test_functions()
+test_all()
 test_funtions_thread()
 test_index()
 test_os_process_find_name()
-time_sleep(nmax = 5, israndom = True)
+time_sleep_random(nmax = 5)
 to_file_safe(msg:str, fpath:str)
 
 -------------------------methods----------------------
@@ -6267,7 +6246,6 @@ pip_auto_install()
 
 utilmy/util_cpu.py
 -------------------------functions----------------------
-log(*argv)
 monitor_maintain()
 monitor_nodes()
 np_avg(list)
@@ -6349,12 +6327,9 @@ dataset_donwload(url, path_target)
 dataset_get_path(cfg: dict)
 dir_size(dirin = "mypath", dirout = "./save.txt")
 gzip(dirin = '/mydir', dirout = "./")
-help()
 os_extract_archive(file_path, path = ".", archive_format = "auto")
-test1()
-test_all()
+to_file(s, filep)
 unzip(dirin, dirout)
-zip(dirin:str = "mypath", dirout:str = "myfile.zip", format = 'zip')
 
 
 
@@ -6394,8 +6369,16 @@ sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
 test1()
+test2()
+test3()
+test4()
+test5()
+test6_datenow()
+test7()
+test8_load_save()
+test9_find_fuzzy()
 test_all()
-to_file(txt:str, fpath:str, mode = 'a')
+to_file(txt, fpath, mode = 'a')
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt", min_chars = 5)
@@ -6415,11 +6398,22 @@ toFileSafe.write(self, *s)
 
 utilmy/utils.py
 -------------------------functions----------------------
-help()
+config_load(config_path: Optional[Union[str, pathlib.Path]]  =  None)
+dataset_donwload(url, path_target)
 load_callable_from_dict(function_dict, return_other_keys = False)
-load_callable_from_uri(uri="mypath/myfile.py = "mypath/myfile.py::myFunction")
+load_callable_from_uri(uri)
+load_function(package = "mlmodels.util", name = "path_norm")
+load_function_uri(uri_name = "path_norm")
+log(*s)
+log2(*s)
+loge(*s)
+logger_setup()
+logw(*s)
+os_extract_archive(file_path, path = ".", archive_format = "auto")
+test0()
 test1()
 test_all()
+to_file(s, filep)
 
 
 

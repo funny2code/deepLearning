@@ -31,6 +31,21 @@ Docs::
 https://networkit.github.io/
 
 
+https://pyvis.readthedocs.io/en/latest/index.html#
+
+
+https://deepgraph.readthedocs.io/en/latest/what_is_deepgraph.html
+
+
+https://towardsdatascience.com/pyviz-simplifying-the-data-visualisation-process-in-python-1b6d2cb728f1
+
+
+https://graphviz.org/
+
+
+
+
+
 """
 import os, glob, sys, math, time, json, functools, random, yaml, gc, copy, pandas as pd, numpy as np
 import datetime
@@ -42,7 +57,7 @@ with warnings.catch_warnings():
     pass
 
 
-from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob
+from utilmy import pd_read_file, os_makedirs, pd_to_file, glob_glob, json_load
 
 
 #############################################################################################
@@ -90,47 +105,77 @@ def test_pd_create_dag(nrows=1000, n_nodes=100):
 
 
 ############################################################################################################################
-"""
-class  GraphDataLoader()
+class  GraphDataLoader(object):
+    def __init__(self,):
+        """
+        Load/save/convert data into parquet, pandas dataframe
 
-   Load/save/convert data into parquet, pandas dataframe
+            mygraph242423/
+                edges.parquet
+                nodes.parquet
+                meta.json
+                    
 
-     mygraph242423/
-         edges.parquet
-         nodes.parquet
-         meta.json
-         
-         
-     self.edges = pd.DafraFrame
-     self.nodes = pd.datarFrame
-     #self.nodes_dict = node_idint --> infos
-     
-         
-   def get_node_info(id_list):
-   
-   def set_node_info(id_list):
-            
-         
+        load(dirin,  )
+            -->  edges: pd.Dataframe ( 'node_a', 'node_b' 'weight', 'edge_type' ] 
+                verteex :  pd.daframe('node_id'  , 'node_int',  'col1', 'col2' ]
+                meta : dict of metatada
+                            
+                
+        save(dirout)
+            os.makedirs
 
-   load(dirin,  )
-      -->  edges: pd.Dataframe ( 'node_a', 'node_b' 'weight', 'edge_type' ] 
-           verteex :  pd.daframe('node_id'  , 'node_int',  'col1', 'col2' ]
-           meta : dict of metatada
-                      
-           
-   save(dirout)
-      os.makedirs
+        convert
+            (edget, node, meta) --->   networkit or networkx
+        """
 
-
-   convert
-      (edget, node, meta) --->   networkit or networkx
-      
-      
-      
+        self.edges = pd.DafraFrame()
+        self.nodes = pd.datarFrame()
+        self.nodes_index = {}  #node_idint --> infos
+        self.meta = {'cola':  'cola', 'colb': 'cola', 'colvertex': 'colvertex'}
 
 
 
-"""
+    def load(self, dirin, from='networkit/networkx'):
+        """ Load from disk
+
+        """
+        self.nodes = pd_read_file(dirin +"/nodes.parquet")
+        self.edges = pd_read_file(dirin +"/edges.parquet")  ### graph        
+        self.meta =  json_load(dirin    +"/meta.json")
+        self.nodes_index = {}  #node_idint --> infos
+
+
+        dd = {}
+        for x in self.nodex[ 'node_id' ].values :
+           dd[ hash(x) ] = x
+        self.nodes_index = dd  #node_idint --> infos
+
+
+    def convert_from(self, graph, from='networkit/networkx'):
+        """ Get From existing network in Memory
+
+        """
+        self.nodes = pd.datarFrame()
+        self.edges = pd.DafraFrame()
+
+        self.nodes_index = {}  #node_idint --> infos
+        self.meta = {}
+
+
+    def save(self, dirout):
+        pass
+
+
+    def convert_to(self, target='networkit/networkx'):
+
+
+       if target == 'networkit':
+           graph, index = dag_networkit_convert(df_or_file= self.nodes, 
+                                 cola= self.meta['cola'], 
+                                 colb= self.meta['cola'], colvertex= self.meta['colvertex'], nrows=1000000000)
+
+       return graph, index
 
 
 
@@ -143,6 +188,7 @@ class  GraphDataLoader()
 
 
 
+############################################################################################################################
 ############################################################################################################################
 def test_networkit(net):
     """Compute PageRank as a measure of node centrality by receiving a NetworkKit graph.
@@ -168,37 +214,6 @@ def test_networkit(net):
     pr = nk.centrality.PageRank(net)
     pr.run()
     print( pr.ranking())
-
-
-
-def dag_create_network(df_or_file: Union[str,pd.DataFrame], cola, colb, colvertex=""):
-    """Convert a panadas dataframe into a NetworKit graph
-    Docs::
-                     df   :    dataframe[[ cola, colb, colvertex ]]
-        cola='col_node1'  :  column name of node1
-        colb='col_node2'  :  column name of node2
-        colvertex=""      :  weight
-
-    """
-    import networkit as nk, gc
-
-    if isinstance(df_or_file, str):
-        df = pd_read_file(df_or_file)
-    else :
-        df = df_or_file
-
-    #### not clear ?
-    arr = np.unique(df[[cola, colb]].values)
-    arr+= 1
-    graph = nk.Graph(max(arr), edgesIndexed=False)
-    del arr ; gc.collect()   ### save memory
-
-    df = df[[cola, colb]].values
-    for i in range(len(df)):
-        graph.addEdge( df[i, 0], df[i, 0])
-    return graph
-
-
 
 
 def dag_networkit_convert(df_or_file: pd.DataFrame, cola='cola', colb='colb', colvertex="", nrows=1000):

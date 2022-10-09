@@ -455,20 +455,8 @@ def os_lock_run(fun_run, fun_args=None, ntry=5, plock="tmp/plock.lock", sleep=5)
 
 
 ################################################################################################
-def date_now(fmt = "%Y-%m-%d %H:%M:%S %Z%z"):
-    """function date_now
-    Args:
-        fmt = "%Y-%m-%d %H:   
-    Returns:
-        
-    """
-    from pytz import timezone
-    from datetime import datetime
-    # Current time in UTC
-    now_utc = datetime.now(timezone('UTC'))
-    # Convert to US/Pacific time zone
-    now_pacific = now_utc.astimezone(timezone('Asia/Tokyo'))
-    return now_pacific.strftime(fmt)
+from utilmy.utilmy_base import date_now
+
 
 
 def time_sleep_random(nmax=5):
