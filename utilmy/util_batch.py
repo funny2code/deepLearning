@@ -181,6 +181,22 @@ def test1():
     # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
     # assert is_week_in == True, "This isn't correct weekday"
 
+    # TODO: This test has a bug
+    log("#######   now_hour_between()...")
+    # UTC time now.
+    # timezone = datetime.timezone.utc
+    # now_hour = datetime.datetime.now(tz=timezone)
+    # format_time = "%H:%M"
+    # Hours with 1 hour more and 1 hour less difference.
+    # first_hour = (now_hour + datetime.timedelta(hours=1)).time().strftime("%H:%M")
+    # second_hour = (now_hour + datetime.timedelta(hours=-1)).strftime("%H:%M")
+    # is_hour_between = now_hour_between(
+    #     hour1=first_hour,
+    #     hour2=second_hour,
+    #     timezone="utc"
+    # )
+    # assert is_hour_between == True, "Now hour isn't between"
+
 
 ########################################################################################
 ##### Date #############################################################################
@@ -220,12 +236,21 @@ def now_weekday_isin(day_week=None, timezone='jp'):
 
 def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
     """function now_hour_between
-    Args:
-        hour1="12:   
-        hour2="13:   
-        timezone:   
-    Returns:
-        
+    Check if the time is between two hours.
+
+    Docs::
+
+        Args:
+            hour1 (string): Hour, with the format "%H:%M", will be the first to compare.
+                Default to "12:45".
+            hour2 (string): Hour, with the format "%H:%M", will be the second to compare.   
+                Default to "13:45".
+            timezone (string): Timezone of time now.
+                Default to "jp". 
+                
+        Returns:
+            Boolean, true if the time is between two hours, false otherwise.
+            
     """
     # Daily Batch time is between 2 time.
     timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
