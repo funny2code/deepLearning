@@ -236,12 +236,21 @@ def now_weekday_isin(day_week=None, timezone='jp'):
 
 def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
     """function now_hour_between
-    Args:
-        hour1="12:   
-        hour2="13:   
-        timezone:   
-    Returns:
-        
+    Check if the time is between two hours.
+
+    Docs::
+
+        Args:
+            hour1 (string): Hour, with the format "%H:%M", will be the first to compare.
+                Default to "12:45".
+            hour2 (string): Hour, with the format "%H:%M", will be the second to compare.   
+                Default to "13:45".
+            timezone (string): Timezone of time now.
+                Default to "jp". 
+                
+        Returns:
+            Boolean, true if the time is between two hours, false otherwise.
+            
     """
     # Daily Batch time is between 2 time.
     timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
