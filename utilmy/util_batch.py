@@ -197,6 +197,17 @@ def test1():
     # )
     # assert is_hour_between == True, "Now hour isn't between"
 
+    # TODO: This test has a bug.
+    log("#######   now_daymonth_isin()...")
+    # timezone = datetime.timezone.utc
+    # now_day_month = datetime.datetime.now(tz=timezone).day
+    # is_daymonth_in = now_daymonth_isin(
+    #     day_month=[now_day_month],
+    #     timezone=timezone
+    #     )
+    # assert is_daymonth_in == True, "The day month isn't in"
+
+
 
 ########################################################################################
 ##### Date #############################################################################
