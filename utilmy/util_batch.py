@@ -19,8 +19,11 @@ from utilmy import log, log2
 def test_all():
     """function test_all
     """
+    test1()
+
     test_os_process_find_name()
     test_index()
+
 
 
 def test_functions():
@@ -169,17 +172,39 @@ def test_os_process_find_name():
     print(os_process_find_name(name='*.py'))
     print(os_process_find_name(name='python*'))
 
+def test1():
+    
+    # TODO: This test has a bug
+    log("#######   now_weekday_isin()...")
+    # timezone = datetime.timezone.utc
+    # now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
+    # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
+    # assert is_week_in == True, "This isn't correct weekday"
 
 
 ########################################################################################
 ##### Date #############################################################################
 def now_weekday_isin(day_week=None, timezone='jp'):
     """function now_weekday_isin
-    Args:
-        day_week:   
-        timezone:   
-    Returns:
-        
+    Check if today is in the list of weekday numbers.
+
+    Docs::
+        Args:
+            day_week (:obj:`list` of :obj:'int'): List of integers that contains the weekday numbers to check if today is in that list.
+                Default to None.
+                Example: [1,2,3]
+                0 = Sunday
+                1 = Monday
+                2 = Thursday
+                3 = Wednesday
+                4 = Thuesday
+                5 = Friday
+                6 = Saturday           
+            timezone (string): The timezone of the list of weekday numbers to check.
+                Default to "jp".
+        Returns:
+            Boolean, true if today is in the list of weekday numbers, false if not.
+            
     """
     # 0 is sunday, 1 is monday
     if not day_week:
