@@ -186,11 +186,25 @@ def test1():
 ##### Date #############################################################################
 def now_weekday_isin(day_week=None, timezone='jp'):
     """function now_weekday_isin
-    Args:
-        day_week:   
-        timezone:   
-    Returns:
-        
+    Check if today is in the list of weekday numbers.
+
+    Docs::
+        Args:
+            day_week (:obj:`list` of :obj:'int'): List of integers that contains the weekday numbers to check if today is in that list.
+                Default to None.
+                Example: [1,2,3]
+                0 = Sunday
+                1 = Monday
+                2 = Thursday
+                3 = Wednesday
+                4 = Thuesday
+                5 = Friday
+                6 = Saturday           
+            timezone (string): The timezone of the list of weekday numbers to check.
+                Default to "jp".
+        Returns:
+            Boolean, true if today is in the list of weekday numbers, false if not.
+            
     """
     # 0 is sunday, 1 is monday
     if not day_week:
