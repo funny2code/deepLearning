@@ -276,11 +276,17 @@ def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
 
 def now_daymonth_isin(day_month, timezone="jp"):
     """function now_daymonth_isin
+
+    Check if today is in a List of days of the month in numbers 
+
     Args:
-        day_month:   
-        timezone:   
+        day_month (:obj:`list` of :obj:'int'): List of days of the month in numbers to check if today is in this list.
+        timezone (string): Timezone of time now.
+            Default to "jp".  
+    
     Returns:
-        
+        Boolean, true if today is in the list "day_month", false otherwise.
+
     """
     # 1th day of month
     timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
