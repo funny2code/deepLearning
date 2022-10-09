@@ -263,20 +263,47 @@ def pd_schema_enforce(df, int_default:int=0, dtype_dict:dict=None):
 
 def pd_to_mapdict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type='str', colval_type='str', npool=5, nrows=900900900, verbose=True):
     """function pd_to_mapdict.
-    Doc::
+        Load a Pandas Dataframe to a Dictionary.
+        
+    Docs::
             
-            Args:
-                df:   
-                colkey:   
-                colval:   
-                naval:   
-                colkey_type:   
-                colval_type:   
-                npool:   
-                nrows:   
-                verbose:   
-            Returns:
-                
+        Args:
+            df (Union[:obj:'pd.DataFrame', string]): This can be a Panda dataframe, can be path to a file that can be loaded as a dataframe(ex: CSV).
+                Or can be a directory with files that can be a loaded as a dataframe.
+            colkey (string): The name of the column that will be the key of each item of the dictionary, that will be the return value.
+                Default to "ranid".
+            colval (string): The name of the column that will be the value of each item of the dictionary, that will be the return value.    
+                Default to "item_tag".
+            naval (Union[string, int, float]): Value, that the int cells don't have any value or a number (NaN), will have.
+                Default to "0".  
+            colkey_type (string): Data type of the column that will be the key of each item of the dictionary.
+                Default to "str".
+            colval_type (string): Data type of the column that will be the value of each item of the dictionary.
+                Default to "str".
+            npool (int): Number of workers that will be loading the dataframes.
+                If it useful if the argument "df" is an directory path with files what can be loaded as dataframes.
+                Default to 5
+            nrows (int): Number of rows to load in the dataframe. Default to 900900900.
+            verbose (boolean): If it is true, the logs can be seen. Default to True.  
+        
+        Returns:
+            Dictionary.
+
+        Example:
+
+            import pandas as pd
+            from utilmy import ppandas
+
+            test_dictionary = dict(
+                name=["Mathew", "sarah", "michael"], 
+                age=[21, 21, 35]
+            )
+
+            dataframe = pd.DataFrame(test_dictionary)
+
+            dictionary = ppandas.pd_to_mapdict(dataframe,colkey="name",colval="age")
+
+            print(dictionary) #Display "{'Mathew': '21', 'sarah': '21', 'michael': '35'}".
     """
     ### load Pandas into key-val dict, for apply-map
     if isinstance(df, str):
@@ -286,13 +313,18 @@ def pd_to_mapdict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type=
        df    = pd_read_file(flist, cols=[ colkey, colval  ], nrows=nrows,  n_pool=npool, verbose= verbose)
 
     if verbose: log( df, df.dtypes )
+    #Cleaning data
     df = df.drop_duplicates(colkey)
     df = df.fillna(naval)    
 
+    #colkey will be the key of each item of the dictionary
     df[colkey] = df[colkey].astype(colkey_type)
+    #colval will be the value of each item of the dictionary
     df[colval] = df[colval].astype(colval_type)
 
-    df = df.set_index(colkey)        
+    #The index will be the key of each item of the dictionary
+    df = df.set_index(colkey)     
+ 
     df = df[[ colval ]].to_dict()
     df = df[colval] ### dict
     if verbose: log('Dict Loaded', len(df), str(df)[:100])
