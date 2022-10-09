@@ -181,6 +181,22 @@ def test1():
     # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
     # assert is_week_in == True, "This isn't correct weekday"
 
+    # TODO: This test has a bug
+    log("#######   now_hour_between()...")
+    # UTC time now.
+    # timezone = datetime.timezone.utc
+    # now_hour = datetime.datetime.now(tz=timezone)
+    # format_time = "%H:%M"
+    # Hours with 1 hour more and 1 hour less difference.
+    # first_hour = (now_hour + datetime.timedelta(hours=1)).time().strftime("%H:%M")
+    # second_hour = (now_hour + datetime.timedelta(hours=-1)).strftime("%H:%M")
+    # is_hour_between = now_hour_between(
+    #     hour1=first_hour,
+    #     hour2=second_hour,
+    #     timezone="utc"
+    # )
+    # assert is_hour_between == True, "Now hour isn't between"
+
 
 ########################################################################################
 ##### Date #############################################################################
