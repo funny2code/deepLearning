@@ -240,25 +240,19 @@ def now_weekday_isin(day_week=None, timezone='jp'):
 
 
 def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
-    """function now_hour_between
-    Check if the time is between two hours.
-
+    """Check if the time is between   hour1 <  current_hour_time_zone < hour2
     Docs::
 
         Args:
-            hour1 (string): Hour, with the format "%H:%M", will be the first to compare.
-                Default to "12:45".
-            hour2 (string): Hour, with the format "%H:%M", will be the second to compare.   
-                Default to "13:45".
-            timezone (string): Timezone of time now.
-                Default to "jp". 
+            hour1 (string):     start format "%H:%M",  "12:45".
+            hour2 (string):     end,  format "%H:%M",  Default to "13:45".
+            timezone (string):  'Asia/Tokyo', 'utc' 
                 
-        Returns:
-            Boolean, true if the time is between two hours, false otherwise.
+        Returns:  true if the time is between two hours, false otherwise.
             
     """
     # Daily Batch time is between 2 time.
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
     format_time = "%H:%M"
     hour1 = datetime.datetime.strptime(hour1, format_time).time()
     hour2 = datetime.datetime.strptime(hour2, format_time).time()
