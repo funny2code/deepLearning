@@ -220,28 +220,18 @@ def now_weekday_isin(day_week=None, timezone='jp'):
     """Check if today is in the list of weekday numbers.
     Docs::
     
+        true if now() is in the list of weekday numbers, false if not
+
         Args:
-            day_week (:obj:`list` of :obj:'int'): List of integers that contains the weekday numbers to check if today is in that list.
-                Default to None.
-                Example: [1,2,3]
-                0 = Sunday
-                1 = Monday
-                2 = Thursday
-                3 = Wednesday
-                4 = Thuesday
-                5 = Friday
-                6 = Saturday           
-            timezone (string): The timezone of the list of weekday numbers to check.
-                Default to "jp".
-        Returns:
-            Boolean, true if today is in the list of weekday numbers, false if not.
+            day_week          :  [1,2,3],  0 = Sunday, 1 = Monday, ...   6 = Saturday           
+            timezone (string) :  Timezone :  'UTC', 'Asia/Tokyo'
             
     """
     # 0 is sunday, 1 is monday
     if not day_week:
-        day_week = [0, 1, 2]
+        day_week = {0, 1, 2,4,5,6}
 
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
     
     now_weekday = (datetime.datetime.now(tz=tzone(timezone)).weekday() + 1) % 7
     if now_weekday in day_week:
