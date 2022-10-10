@@ -5,7 +5,7 @@ HELP= """ Utils for easy batching
 
 """
 import os, sys, socket, platform, time, gc,logging, random, datetime, logging, pytz
-from subprocess import Popen, PIPE
+from subprocess import Popen
 from utilmy.utilmy_base import date_now
 
 ################################################################################################
@@ -219,6 +219,13 @@ def test1():
         timezone="utc"
         )
     assert is_daymonth_in == True, "The day month isn't in"
+    
+    log("#######   os_process_find_name()...")
+    process = Popen(['sleep',"5"])
+    list = os_process_find_name("sleep 5")
+    assert len(list) >= 1, "The process wasn't found"
+    process.kill()
+ 
 
 
 
