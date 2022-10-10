@@ -207,7 +207,7 @@ def test1():
     #     )
     # assert is_daymonth_in == True, "The day month isn't in"
 
-    log("#######   now_daymonth_isin()...")
+
 
 
 
