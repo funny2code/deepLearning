@@ -5,7 +5,7 @@ HELP= """ Utils for easy batching
 
 """
 import os, sys, socket, platform, time, gc,logging, random, datetime, logging, pytz
-
+from subprocess import Popen, PIPE
 from utilmy.utilmy_base import date_now
 
 ################################################################################################
@@ -177,30 +177,40 @@ def test_os_process_find_name():
 
 def test1():
     
-    # TODO: This test has a bug
     log("#######   now_weekday_isin()...")
     timezone = datetime.timezone.utc
     now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
     is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
     assert is_week_in == True, "This isn't correct weekday"
 
-    # TODO: This test has a bug
+
     log("#######   now_hour_between()...")
     # UTC time now.
-    timezone = datetime.timezone.utc
-    now_hour = datetime.datetime.now(tz=timezone)
+    tzone = datetime.timezone.utc
+    tzone_text = "utc"
+    now_hour = datetime.datetime.now(tz=tzone)
+
+    # if the time is 23 hours, then, 1 hour more will be 00, and 1 hour less will be 23,
+    # therefore, first_hour > second_hour, this conditional is to avoid this, changing to another
+    # timezone.
+    if(now_hour.hour == 23):
+        tzone = pytz.timezone('Asia/Tokyo')
+        tzone_text = 'Asia/Tokyo'
+        now_hour = datetime.datetime.now(tz=tzone)
+
     format_time = "%H:%M"
     # Hours with 1 hour more and 1 hour less difference.
     first_hour = (now_hour + datetime.timedelta(hours=-1)).time().strftime("%H:%M")
     second_hour = (now_hour + datetime.timedelta(hours=1)).strftime("%H:%M")
+
     is_hour_between = now_hour_between(
         hour1=first_hour,
         hour2=second_hour,
-        timezone="utc"
+        timezone=tzone_text
     )
     assert is_hour_between == True, "Now hour isn't between"
 
-    # TODO: This test has a bug.
+
     log("#######   now_daymonth_isin()...")
     timezone = datetime.timezone.utc
     now_day_month = datetime.datetime.now(tz=timezone).day
