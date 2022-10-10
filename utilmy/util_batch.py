@@ -199,6 +199,19 @@ def test1():
     # )
     # assert is_hour_between == True, "Now hour isn't between"
 
+    # TODO: This test has a bug.
+    log("#######   now_daymonth_isin()...")
+    # timezone = datetime.timezone.utc
+    # now_day_month = datetime.datetime.now(tz=timezone).day
+    # is_daymonth_in = now_daymonth_isin(
+    #     day_month=[now_day_month],
+    #     timezone=timezone
+    #     )
+    # assert is_daymonth_in == True, "The day month isn't in"
+
+
+
+
 
 ########################################################################################
 ##### Date #############################################################################
@@ -266,11 +279,19 @@ def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
 
 def now_daymonth_isin(day_month, timezone="jp"):
     """function now_daymonth_isin
-    Args:
-        day_month:   
-        timezone:   
-    Returns:
+
+    Check if today is in a List of days of the month in numbers 
+    
+    Docs::
+
+        Args:
+            day_month (:obj:`list` of :obj:'int'): List of days of the month in numbers to check if today is in this list.
+            timezone (string): Timezone of time now.
+                Default to "jp".  
         
+        Returns:
+            Boolean, true if today is in the list "day_month", false otherwise.
+
     """
     # 1th day of month
     timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
@@ -287,10 +308,27 @@ def now_daymonth_isin(day_month, timezone="jp"):
 
 def time_sleep(nmax=5, israndom=True):
     """function time_sleep_random
-    Args:
-        nmax:   
-    Returns:
+
+    Time sleep function with random feature.
+    
+    Docs::
+
+        Args:
+            nmax (int): Number of seconds for the time sleep.
+                Default to 5.   
+            israndom (boolean): True if the argument "nmax" is the max number of second to be chosen randomly.
+                Default to True.
+
+        Returns: None.
         
+        Example:
+            from utilmy import util_batch
+            import datetime
+
+            timezone = datetime.timezone.utc
+            now_day_month = datetime.datetime.now(tz=timezone).day
+
+            util_batch.time_sleep(nmax = 10, israndom=False)
     """
     import random, time
     if israndom:
