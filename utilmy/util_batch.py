@@ -43,11 +43,13 @@ def test_functions():
 
 def test_funtions_thread():
     """Check that list function is working.
-    os_lock_releaseLock, os_lock_releaseLock, os_lock_run
-    Multi threads
-    How the test work.
-    - Create and run 5 threads. These threads try to access and use 1 function `running`
-    with os_lock_run. So in one 1, only 1 thread can access and use this function.
+    Docs::
+
+        os_lock_releaseLock, os_lock_releaseLock, os_lock_run
+        Multi threads
+        How the test work.
+        - Create and run 5 threads. These threads try to access and use 1 function `running`
+        with os_lock_run. So in one 1, only 1 thread can access and use this function.
     """
     import threading
 
@@ -201,10 +203,9 @@ def test1():
 ########################################################################################
 ##### Date #############################################################################
 def now_weekday_isin(day_week=None, timezone='jp'):
-    """function now_weekday_isin
-    Check if today is in the list of weekday numbers.
-
+    """Check if today is in the list of weekday numbers.
     Docs::
+    
         Args:
             day_week (:obj:`list` of :obj:'int'): List of integers that contains the weekday numbers to check if today is in that list.
                 Default to None.
