@@ -245,7 +245,7 @@ def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
 
         Args:
             hour1 (string):     start format "%H:%M",  "12:45".
-            hour2 (string):     end,  format "%H:%M",  Default to "13:45".
+            hour2 (string):     end,  format "%H:%M",  "13:45".
             timezone (string):  'Asia/Tokyo', 'utc' 
                 
         Returns:  true if the time is between two hours, false otherwise.
