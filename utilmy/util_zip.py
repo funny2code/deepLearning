@@ -26,11 +26,10 @@ def help():
 
 #####################################################################
 def test_all():
-    """
+    """ python  utilmy/util_zip.py test_all
     """
     test1()
-
-
+    test2()
 
 
 def test1():
@@ -79,6 +78,40 @@ def test1():
     # os_extract_archive("./testdata/tmp/test/dataset/mnist_png.tar.gz","./testdata/tmp/test/dataset/archive/", archive_format = "auto")
 
 
+def test2():
+    """function test2.
+    Doc::
+
+            Args:
+            Returns:
+
+    """
+
+    import utilmy as uu
+    import filecmp
+
+    _, dirtmp = uu.dir_testinfo()
+
+    log("####### unzip() ..")
+
+    file_name = "zip_test.txt"
+
+    file_path = dirtmp + file_name
+    unzipped_file_path = dirtmp + "unzipped/"
+
+    path_zip = dirtmp + "test.zip"
+
+    uu.to_file("Dummy test", file_path)
+
+    zf       = zipfile.ZipFile(path_zip, "w")
+    zf.write(file_path, file_name)
+    zf.close()
+
+    unzip(path_zip, unzipped_file_path)
+
+    assert filecmp.cmp(file_path, unzipped_file_path + file_name), "FAILED -> unzip(); Unzipped file is not equal to initial"
+
+
 
 
 
@@ -88,12 +121,12 @@ def unzip(dirin, dirout):
     Doc::
             
             Args:
-                dirin:   
-                dirout:   
+                dirin:
+                dirout:
             Returns:
                 
     """
-    import  zipfile
+    import zipfile
     with zipfile.ZipFile(dirin, 'r') as zip_ref:
         zip_ref.extractall(dirout)
 
