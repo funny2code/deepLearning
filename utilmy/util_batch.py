@@ -10,7 +10,7 @@ from utilmy.utilmy_base import date_now
 
 ################################################################################################
 verbose = 3   ### Global setting
-from utilmy import log, log2
+from utilmy import log, log2, oos
 
 
 
@@ -176,7 +176,11 @@ def test_os_process_find_name():
 
 
 def test1():
-    
+
+    import utilmy as uu
+
+    drepo, dirtmp = uu.dir_testinfo()
+
     log("#######   now_weekday_isin()...")
     timezone = datetime.timezone.utc
     now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
@@ -225,7 +229,12 @@ def test1():
     assert len(list) >= 1, "The process wasn't found"
     test_process.kill()
 
- 
+    log("#######   toFile...")
+    test_path = dirtmp + "test_log.txt"
+    to_file = toFile(fpath=test_path)
+    to_file.write("test log")
+    f = os.path.exists(test_path)
+    assert f == True, "The file named test_log.txt doesn't exist"
 
 
 
