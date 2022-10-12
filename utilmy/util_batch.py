@@ -189,11 +189,10 @@ def test1():
     tzone = datetime.timezone.utc
     tzone_text = "utc"
     now_hour = datetime.datetime.now(tz=tzone)
-
     # if the time is 23 hours, then, 1 hour more will be 00, and 1 hour less will be 23,
     # therefore, first_hour > second_hour, this conditional is to avoid this, changing to another
-    # timezone.
-    if(now_hour.hour == 23):
+    # timezone. Something similar when the time is 0 hours.
+    if(now_hour.hour in [23, 0]):
         tzone = pytz.timezone('Asia/Tokyo')
         tzone_text = 'Asia/Tokyo'
         now_hour = datetime.datetime.now(tz=tzone)
@@ -221,10 +220,11 @@ def test1():
     assert is_daymonth_in == True, "The day month isn't in"
     
     log("#######   os_process_find_name()...")
-    process = Popen(['sleep',"5"])
-    list = os_process_find_name("sleep 5")
+    test_process = Popen(['sleep',"5"])
+    list = os_process_find_name(name="sleep 5")
     assert len(list) >= 1, "The process wasn't found"
-    process.kill()
+    test_process.kill()
+
  
 
 
@@ -563,7 +563,7 @@ class toFile(object):
             msg:     
         Returns:
            
-        """
+        """ 
         self.logger.info( msg)
 
 
