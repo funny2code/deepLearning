@@ -509,7 +509,7 @@ def os_process_find_name(name=r"((.*/)?tasks.*/t.*/main\.(py|sh))", ishow=1, isr
                     Default to " r"((.*/)?tasks.*/t.*/main\.(py|sh))" ".
                 ishow (int)   : Flag to show the id and its info.
                     Default to 1.
-                isregex (int) : Flag whether the "name" arg is a regex or not.
+                isregex (int) : Flag whether the argument "name" is a regex or not.
                     Default to 1.
 
             Returns:
@@ -606,10 +606,21 @@ class toFile(object):
 
 def to_file_safe(msg:str, fpath:str):
    """function to_file_safe
-   Args:
-       msg ( str ) :   
-       fpath ( str ) :   
-   Returns:
+
+    Docs::
+
+        Args:
+            msg ( str )   : String to write in the file.
+            fpath ( str ) : File path to the file to wrinte in.
+        
+        Returns: None.
+
+        Example:
+        
+            from utilmy import util_batch
+
+            path = "file.txt"
+            util_batch.to_file_safe("Lorem", path)
        
    """
    ss = str(msg)
