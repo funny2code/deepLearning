@@ -236,6 +236,13 @@ def test1():
     f = os.path.exists(test_path)
     assert f == True, "The file named test_log.txt doesn't exist"
 
+    log("#######   to_file_safe...")
+    test_path = dirtmp + "test_file_safe.txt"
+    to_file_safe("Dummy text",test_path)
+    f = os.path.exists(test_path)
+    assert f == True, "The file named test_file_safe.txt doesn't exist"
+
+
 
 
 
