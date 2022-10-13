@@ -4,13 +4,13 @@ HELP= """ Utils for easy batching
 
 
 """
-import os, sys, socket, platform, time, gc,logging, random, datetime, logging
-
+import os, sys, socket, platform, time, gc,logging, random, datetime, logging, pytz
+from subprocess import Popen
 from utilmy.utilmy_base import date_now
 
 ################################################################################################
 verbose = 3   ### Global setting
-from utilmy import log, log2
+from utilmy import log, log2, oos
 
 
 
@@ -43,11 +43,13 @@ def test_functions():
 
 def test_funtions_thread():
     """Check that list function is working.
-    os_lock_releaseLock, os_lock_releaseLock, os_lock_run
-    Multi threads
-    How the test work.
-    - Create and run 5 threads. These threads try to access and use 1 function `running`
-    with os_lock_run. So in one 1, only 1 thread can access and use this function.
+    Docs::
+
+        os_lock_releaseLock, os_lock_releaseLock, os_lock_run
+        Multi threads
+        How the test work.
+        - Create and run 5 threads. These threads try to access and use 1 function `running`
+        with os_lock_run. So in one 1, only 1 thread can access and use this function.
     """
     import threading
 
@@ -172,87 +174,143 @@ def test_os_process_find_name():
     print(os_process_find_name(name='*.py'))
     print(os_process_find_name(name='python*'))
 
+
 def test1():
-    
-    # TODO: This test has a bug
+
+    import utilmy as uu
+
+    drepo, dirtmp = uu.dir_testinfo()
+
     log("#######   now_weekday_isin()...")
-    # timezone = datetime.timezone.utc
-    # now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
-    # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
-    # assert is_week_in == True, "This isn't correct weekday"
+    timezone = datetime.timezone.utc
+    now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
+    is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
+    assert is_week_in == True, "This isn't correct weekday"
+
+
+    log("#######   now_hour_between()...")
+    # UTC time now.
+    tzone = datetime.timezone.utc
+    tzone_text = "utc"
+    now_hour = datetime.datetime.now(tz=tzone)
+    # if the time is 23 hours, then, 1 hour more will be 00, and 1 hour less will be 23,
+    # therefore, first_hour > second_hour, this conditional is to avoid this, changing to another
+    # timezone. Something similar when the time is 0 hours.
+    if(now_hour.hour in [23, 0]):
+        tzone = pytz.timezone('Asia/Tokyo')
+        tzone_text = 'Asia/Tokyo'
+        now_hour = datetime.datetime.now(tz=tzone)
+
+    format_time = "%H:%M"
+    # Hours with 1 hour more and 1 hour less difference.
+    first_hour = (now_hour + datetime.timedelta(hours=-1)).time().strftime("%H:%M")
+    second_hour = (now_hour + datetime.timedelta(hours=1)).strftime("%H:%M")
+
+    is_hour_between = now_hour_between(
+        hour1=first_hour,
+        hour2=second_hour,
+        timezone=tzone_text
+    )
+    assert is_hour_between == True, "Now hour isn't between"
+
+
+    log("#######   now_daymonth_isin()...")
+    timezone = datetime.timezone.utc
+    now_day_month = datetime.datetime.now(tz=timezone).day
+    is_daymonth_in = now_daymonth_isin(
+        day_month=[now_day_month],
+        timezone="utc"
+        )
+    assert is_daymonth_in == True, "The day month isn't in"
+    
+    log("#######   os_process_find_name()...")
+    test_process = Popen(['sleep',"5"])
+    list = os_process_find_name(name="sleep 5")
+    assert len(list) >= 1, "The process wasn't found"
+    test_process.kill()
+
+    log("#######   toFile...")
+    test_path = dirtmp + "test_log.txt"
+    to_file = toFile(fpath=test_path)
+    to_file.write("test log")
+    f = os.path.exists(test_path)
+    assert f == True, "The file named test_log.txt doesn't exist"
+
+
+
 
 
 ########################################################################################
 ##### Date #############################################################################
-def now_weekday_isin(day_week=None, timezone='jp'):
-    """function now_weekday_isin
-    Check if today is in the list of weekday numbers.
-
+def now_weekday_isin(day_week=None, timezone='Asia/Tokyo'):
+    """Check if today is in the list of weekday numbers.
     Docs::
+    
+        true if now() is in the list of weekday numbers, false if not
+
         Args:
-            day_week (:obj:`list` of :obj:'int'): List of integers that contains the weekday numbers to check if today is in that list.
-                Default to None.
-                Example: [1,2,3]
-                0 = Sunday
-                1 = Monday
-                2 = Thursday
-                3 = Wednesday
-                4 = Thuesday
-                5 = Friday
-                6 = Saturday           
-            timezone (string): The timezone of the list of weekday numbers to check.
-                Default to "jp".
-        Returns:
-            Boolean, true if today is in the list of weekday numbers, false if not.
+            day_week          :  [1,2,3],  0 = Sunday, 1 = Monday, ...   6 = Saturday           
+            timezone (string) :  Timezone :  'UTC', 'Asia/Tokyo'
             
     """
     # 0 is sunday, 1 is monday
     if not day_week:
-        day_week = [0, 1, 2]
+        day_week = {0, 1, 2,4,5,6}
 
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
     
-    now_weekday = (datetime.datetime.now(tz=tzone(timezone)).weekday() + 1) % 7
+    now_weekday = (datetime.datetime.now(tz=pytz.timezone(timezone)).weekday() + 1) % 7
     if now_weekday in day_week:
         return True
     return False
 
 
-def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
-    """function now_hour_between
-    Args:
-        hour1="12:   
-        hour2="13:   
-        timezone:   
-    Returns:
-        
+def now_hour_between(hour1="12:45", hour2="13:45", timezone="Asia/Tokyo"):
+    """Check if the time is between   hour1 <  current_hour_time_zone < hour2
+    Docs::
+
+        Args:
+            hour1 (string):     start format "%H:%M",  "12:45".
+            hour2 (string):     end,  format "%H:%M",  "13:45".
+            timezone (string):  'Asia/Tokyo', 'utc' 
+                
+        Returns:  true if the time is between two hours, false otherwise.
+            
     """
     # Daily Batch time is between 2 time.
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
     format_time = "%H:%M"
     hour1 = datetime.datetime.strptime(hour1, format_time).time()
     hour2 = datetime.datetime.strptime(hour2, format_time).time()
-    now_weekday = datetime.datetime.now(tz=tzone(timezone)).time()
+    now_weekday = datetime.datetime.now(tz=pytz.timezone(timezone)).time()       
     if hour1 <= now_weekday <= hour2:
         return True
     return False
 
 
-def now_daymonth_isin(day_month, timezone="jp"):
+def now_daymonth_isin(day_month, timezone="Asia/Tokyo"):
     """function now_daymonth_isin
-    Args:
-        day_month:   
-        timezone:   
-    Returns:
+
+    Check if today is in a List of days of the month in numbers 
+    
+    Docs::
+
+        Args:
+            day_month (:obj:`list` of :obj:'int'): List of days of the month in numbers to check if today is in this list.
+            timezone (string): Timezone of time now.
+                Default to "jp".  
         
+        Returns:
+            Boolean, true if today is in the list "day_month", false otherwise.
+
     """
     # 1th day of month
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    #timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
 
     if not day_month:
         day_month = [1]
 
-    now_day_month = datetime.datetime.now(tz=tzone(timezone)).day
+    now_day_month = datetime.datetime.now(tz=pytz.timezone(timezone)).day
 
     if now_day_month in day_month:
         return True
@@ -261,10 +319,27 @@ def now_daymonth_isin(day_month, timezone="jp"):
 
 def time_sleep(nmax=5, israndom=True):
     """function time_sleep_random
-    Args:
-        nmax:   
-    Returns:
+
+    Time sleep function with random feature.
+    
+    Docs::
+
+        Args:
+            nmax (int): Number of seconds for the time sleep.
+                Default to 5.   
+            israndom (boolean): True if the argument "nmax" is the max number of second to be chosen randomly.
+                Default to True.
+
+        Returns: None.
         
+        Example:
+            from utilmy import util_batch
+            import datetime
+
+            timezone = datetime.timezone.utc
+            now_day_month = datetime.datetime.now(tz=timezone).day
+
+            util_batch.time_sleep(nmax = 10, israndom=False)
     """
     import random, time
     if israndom:
@@ -497,7 +572,7 @@ class toFile(object):
             msg:     
         Returns:
            
-        """
+        """ 
         self.logger.info( msg)
 
 

@@ -1079,6 +1079,7 @@ def test_all():
     """
     test1()
     test_datenow()
+    test_loadfunctionuri()
 
 
 
@@ -1117,6 +1118,19 @@ def test_datenow():
     dtu = datetime.datetime.fromtimestamp(ts) #.strftime('%Y-%m-%d %H:%M:%S')
     datetime.datetime.timestamp(dtu )  
 
+
+def test_loadfunctionuri():
+    import utilmy as m
+    drepo, dtmp = dir_testinfo()
+
+    log("####", m.load_function_uri )
+    ll = [ drepo + "utilmy/utilmy_base.py:test_datenow"
+
+    ]
+    for uri_name in ll :
+        myclass = load_function_uri(uri_name=uri_name)
+        result = myclass()
+        assert myclass, 'FAILED -> load_function_uri'
 
 
 def test1():
@@ -1198,7 +1212,6 @@ def test1():
     assert m.help_signature(f=_test_func), 'FAILED -> help_signature'
 
     ####################################################################
-
     log("\n####", m.os_get_dirtmp)
     assert m.os_get_dirtmp(), 'FAILED -> os_get_dirtmp'
     assert m.os_get_dirtmp(subdir='test'), 'FAILED -> os_get_dirtmp'
@@ -1214,19 +1227,6 @@ def test1():
 
     log("\n####", m.import_function(fun_name='test_all', module_name='utilmy'))
     assert m.import_function(fun_name='test_all', module_name='utilmy'), 'FAILED -> import_function'
-
-
-    log("\n####", m.load_function_uri )
-    ll = [ drepo + "utilmy/utilmy_base.py:test_all"
-
-    ]
-    for uri_name in ll :
-        myclass = load_function_uri(uri_name=uri_name)
-        log(myclass)
-        assert myclass, 'FAILED -> load_function_uri'
-
-    ####################################################################
-
 
 
 
