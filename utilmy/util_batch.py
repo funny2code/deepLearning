@@ -4,13 +4,13 @@ HELP= """ Utils for easy batching
 
 
 """
-import os, sys, socket, platform, time, gc,logging, random, datetime, logging
-
+import os, sys, socket, platform, time, gc,logging, random, datetime, logging, pytz
+from subprocess import Popen
 from utilmy.utilmy_base import date_now
 
 ################################################################################################
 verbose = 3   ### Global setting
-from utilmy import log, log2
+from utilmy import log, log2, oos
 
 
 
@@ -176,39 +176,65 @@ def test_os_process_find_name():
 
 
 def test1():
-    
-    # TODO: This test has a bug
-    log("#######   now_weekday_isin()...")
-    # timezone = datetime.timezone.utc
-    # now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
-    # is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
-    # assert is_week_in == True, "This isn't correct weekday"
 
-    # TODO: This test has a bug
+    import utilmy as uu
+
+    drepo, dirtmp = uu.dir_testinfo()
+
+    log("#######   now_weekday_isin()...")
+    timezone = datetime.timezone.utc
+    now_weekday = (datetime.datetime.now(timezone).weekday() + 1) % 7
+    is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
+    assert is_week_in == True, "This isn't correct weekday"
+
+
     log("#######   now_hour_between()...")
     # UTC time now.
-    # timezone = datetime.timezone.utc
-    # now_hour = datetime.datetime.now(tz=timezone)
-    # format_time = "%H:%M"
-    # Hours with 1 hour more and 1 hour less difference.
-    # first_hour = (now_hour + datetime.timedelta(hours=1)).time().strftime("%H:%M")
-    # second_hour = (now_hour + datetime.timedelta(hours=-1)).strftime("%H:%M")
-    # is_hour_between = now_hour_between(
-    #     hour1=first_hour,
-    #     hour2=second_hour,
-    #     timezone="utc"
-    # )
-    # assert is_hour_between == True, "Now hour isn't between"
+    tzone = datetime.timezone.utc
+    tzone_text = "utc"
+    now_hour = datetime.datetime.now(tz=tzone)
+    # if the time is 23 hours, then, 1 hour more will be 00, and 1 hour less will be 23,
+    # therefore, first_hour > second_hour, this conditional is to avoid this, changing to another
+    # timezone. Something similar when the time is 0 hours.
+    if(now_hour.hour in [23, 0]):
+        tzone = pytz.timezone('Asia/Tokyo')
+        tzone_text = 'Asia/Tokyo'
+        now_hour = datetime.datetime.now(tz=tzone)
 
-    # TODO: This test has a bug.
+    format_time = "%H:%M"
+    # Hours with 1 hour more and 1 hour less difference.
+    first_hour = (now_hour + datetime.timedelta(hours=-1)).time().strftime("%H:%M")
+    second_hour = (now_hour + datetime.timedelta(hours=1)).strftime("%H:%M")
+
+    is_hour_between = now_hour_between(
+        hour1=first_hour,
+        hour2=second_hour,
+        timezone=tzone_text
+    )
+    assert is_hour_between == True, "Now hour isn't between"
+
+
     log("#######   now_daymonth_isin()...")
-    # timezone = datetime.timezone.utc
-    # now_day_month = datetime.datetime.now(tz=timezone).day
-    # is_daymonth_in = now_daymonth_isin(
-    #     day_month=[now_day_month],
-    #     timezone=timezone
-    #     )
-    # assert is_daymonth_in == True, "The day month isn't in"
+    timezone = datetime.timezone.utc
+    now_day_month = datetime.datetime.now(tz=timezone).day
+    is_daymonth_in = now_daymonth_isin(
+        day_month=[now_day_month],
+        timezone="utc"
+        )
+    assert is_daymonth_in == True, "The day month isn't in"
+    
+    log("#######   os_process_find_name()...")
+    test_process = Popen(['sleep',"5"])
+    list = os_process_find_name(name="sleep 5")
+    assert len(list) >= 1, "The process wasn't found"
+    test_process.kill()
+
+    log("#######   toFile...")
+    test_path = dirtmp + "test_log.txt"
+    to_file = toFile(fpath=test_path)
+    to_file.write("test log")
+    f = os.path.exists(test_path)
+    assert f == True, "The file named test_log.txt doesn't exist"
 
 
 
@@ -216,7 +242,7 @@ def test1():
 
 ########################################################################################
 ##### Date #############################################################################
-def now_weekday_isin(day_week=None, timezone='jp'):
+def now_weekday_isin(day_week=None, timezone='Asia/Tokyo'):
     """Check if today is in the list of weekday numbers.
     Docs::
     
@@ -233,13 +259,13 @@ def now_weekday_isin(day_week=None, timezone='jp'):
 
     # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
     
-    now_weekday = (datetime.datetime.now(tz=tzone(timezone)).weekday() + 1) % 7
+    now_weekday = (datetime.datetime.now(tz=pytz.timezone(timezone)).weekday() + 1) % 7
     if now_weekday in day_week:
         return True
     return False
 
 
-def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
+def now_hour_between(hour1="12:45", hour2="13:45", timezone="Asia/Tokyo"):
     """Check if the time is between   hour1 <  current_hour_time_zone < hour2
     Docs::
 
@@ -256,13 +282,13 @@ def now_hour_between(hour1="12:45", hour2="13:45", timezone="jp"):
     format_time = "%H:%M"
     hour1 = datetime.datetime.strptime(hour1, format_time).time()
     hour2 = datetime.datetime.strptime(hour2, format_time).time()
-    now_weekday = datetime.datetime.now(tz=tzone(timezone)).time()
+    now_weekday = datetime.datetime.now(tz=pytz.timezone(timezone)).time()       
     if hour1 <= now_weekday <= hour2:
         return True
     return False
 
 
-def now_daymonth_isin(day_month, timezone="jp"):
+def now_daymonth_isin(day_month, timezone="Asia/Tokyo"):
     """function now_daymonth_isin
 
     Check if today is in a List of days of the month in numbers 
@@ -279,12 +305,12 @@ def now_daymonth_isin(day_month, timezone="jp"):
 
     """
     # 1th day of month
-    timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
+    #timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
 
     if not day_month:
         day_month = [1]
 
-    now_day_month = datetime.datetime.now(tz=tzone(timezone)).day
+    now_day_month = datetime.datetime.now(tz=pytz.timezone(timezone)).day
 
     if now_day_month in day_month:
         return True
@@ -546,7 +572,7 @@ class toFile(object):
             msg:     
         Returns:
            
-        """
+        """ 
         self.logger.info( msg)
 
 
