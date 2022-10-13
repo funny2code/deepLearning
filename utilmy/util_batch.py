@@ -501,6 +501,27 @@ def os_process_find_name(name=r"((.*/)?tasks.*/t.*/main\.(py|sh))", ishow=1, isr
         Regex (./tasks./t./main.(py|sh)|tasks./t.*/main.(py|sh))
         Condensed Regex to:
         ((.*/)?tasks.*/t.*/main\.(py|sh)) - make the characters before 'tasks' optional group.
+    
+        Docs::
+
+            Args: 
+                name (str)    : Regex or string to match with process name.
+                    Default to " r"((.*/)?tasks.*/t.*/main\.(py|sh))" ".
+                ishow (int)   : Flag to show the id and its info.
+                    Default to 1.
+                isregex (int) : Flag whether the "name" arg is a regex or not.
+                    Default to 1.
+
+            Returns:
+                List of dictionaries, where each dictionary has the id and the info of the process.
+            
+            Example:
+
+                from utilmy import util_batch
+
+                list = util_batch.os_process_find_name(name="sleep 5")
+                print(list) #Displays the info of the processes that have in its name "sleep 5"
+
     """
     import psutil, re, fnmatch
     ls = []
