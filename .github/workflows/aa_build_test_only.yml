@@ -261,14 +261,14 @@ jobs:
               issue_number: result.data.number,
               labels: ['Auto-PR']
             });
-            # await github.rest.pulls.merge({
-            #   owner,
-            #   repo,
-            #   pull_number: result.data.number
-            # });
-            return result.data.number;
 
 
+# await github.rest.pulls.merge({
+#   owner,
+#   repo,
+#   pull_number: result.data.number
+# });
+# return result.data.number;
 
 
   ############################################## 
@@ -316,10 +316,12 @@ jobs:
              issue_number: result.data.number,
              labels: ['Auto-PR']
            });
-           #await github.rest.pulls.merge({
-           #  owner,
-           #  repo,
-           #  pull_number: result.data.number
-           #});
-           #return result.data.number;
+
+
+# await github.rest.pulls.merge({
+# owner,
+# repo,
+# pull_number: result.data.number
+# });
+# return result.data.number;
 
