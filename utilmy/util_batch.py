@@ -803,11 +803,23 @@ class Index0(object):
     """
     def __init__(self, findex:str="ztmp_file.txt", ntry=10):
         """ Index0:__init__
-        Args:
-            findex (function["arg_type"][i]) :     
-            ntry:     
-        Returns:
-           
+        
+        Docs::
+        
+            Args:
+                findex (function["arg_type"][i]) : Text file path.
+                    Default to "ztmp_file.txt".
+                ntry (int): Number of tries to save, with filter, file paths in the index when an error occurs.
+                    Default to 10.
+            
+            Example:  
+
+                from utilmy import util_batch
+
+                index_file_path = "test.txt"
+
+                index = util_batch.Index0(index_file_path)  
+                            
         """
         self.findex = findex
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
@@ -817,12 +829,26 @@ class Index0(object):
 
         self.ntry= ntry
 
-    def read(self,):
+    def read(self):
         """ Index0:read
-        Args:
-            :     
-        Returns:
-           
+        Read the content in the index, avoiding the comments and file paths with length less than 6 characters.
+
+        Docs::   
+
+            Returns:
+                List of strings or file paths.
+            
+            Example:
+                from utilmy import util_batch
+
+                index_file_path = "test.txt"
+
+                index = util_batch.Index0(index_file_path)
+
+                flist = index.read()
+
+                print(flist)
+
         """
         import time
         try :
@@ -843,9 +869,26 @@ class Index0(object):
 
     def save(self, flist:list):
         """ Index0:save
-        Args:
-            flist (function["arg_type"][i]) :     
-        Returns:
+
+        Docs::
+        
+            Args:
+                flist (list of strings) : List of file paths to save in the index.
+
+            Returns:
+                True if the list was saved or None otherwise.
+            
+            Example:
+                from utilmy import util_batch
+
+                index_file_path = "/home/username/file.text"
+
+                index = util_batch.Index0(index_file_path)
+
+                list = ["file.txt","folder/fileinfolder.txt"]
+
+                is_saved = index.save(flist=list)
+
            
         """
         if len(flist) < 1 : return True
@@ -862,6 +905,30 @@ class Index0(object):
           isok = index.save_isok(flist)
           if not isok : continue   ### Dont process flist
           ### Need locking mechanism Common File to check for Check + Write locking.
+
+          It checks if the file of the path exists in the index and creates it if doesn't exist.
+
+        Docs::
+
+            Args:
+
+                val (list of strings): Text file paths to write in the index.
+                    Default to None.
+            Return:
+
+                List of strings or file paths.
+
+            Example:
+                from utilmy import util_batch
+
+                index_file_path = "/home/username/file.text"
+
+                index = util_batch.Index0(index_file_path)
+
+                list = ["file.txt", "folder/fileinfolder.txt"]
+
+                result_list = index.save_filter(var=list)
+
         """
         import random, time
         if val is None : return True
