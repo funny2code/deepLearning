@@ -236,6 +236,13 @@ def test1():
     f = os.path.exists(test_path)
     assert f == True, "The file named test_log.txt doesn't exist"
 
+    log("#######   to_file_safe...")
+    test_path = dirtmp + "test_file_safe.txt"
+    to_file_safe("Dummy text",test_path)
+    f = os.path.exists(test_path)
+    assert f == True, "The file named test_file_safe.txt doesn't exist"
+
+
 
 
 
@@ -494,6 +501,27 @@ def os_process_find_name(name=r"((.*/)?tasks.*/t.*/main\.(py|sh))", ishow=1, isr
         Regex (./tasks./t./main.(py|sh)|tasks./t.*/main.(py|sh))
         Condensed Regex to:
         ((.*/)?tasks.*/t.*/main\.(py|sh)) - make the characters before 'tasks' optional group.
+    
+        Docs::
+
+            Args: 
+                name (str)    : Regex or string to match with process name.
+                    Default to " r"((.*/)?tasks.*/t.*/main\.(py|sh))" ".
+                ishow (int)   : Flag to show the id and its info.
+                    Default to 1.
+                isregex (int) : Flag whether the argument "name" is a regex or not.
+                    Default to 1.
+
+            Returns:
+                List of dictionaries, where each dictionary has the id and the info of the process.
+            
+            Example:
+
+                from utilmy import util_batch
+
+                list = util_batch.os_process_find_name(name="sleep 5")
+                print(list) #Displays the info of the processes that have in its name "sleep 5"
+
     """
     import psutil, re, fnmatch
     ls = []
@@ -578,10 +606,21 @@ class toFile(object):
 
 def to_file_safe(msg:str, fpath:str):
    """function to_file_safe
-   Args:
-       msg ( str ) :   
-       fpath ( str ) :   
-   Returns:
+
+    Docs::
+
+        Args:
+            msg ( str )   : String to write in the file.
+            fpath ( str ) : File path to the file to wrinte in.
+        
+        Returns: None.
+
+        Example:
+        
+            from utilmy import util_batch
+
+            path = "file.txt"
+            util_batch.to_file_safe("Lorem", path)
        
    """
    ss = str(msg)
