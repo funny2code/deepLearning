@@ -585,7 +585,18 @@ def os_wait_program_end(cpu_min=30, sleep=60, interval=5, msg= "", program_name=
 class toFile(object):
    def __init__(self,fpath):
       """
-       Thread Safe file writer
+        Thread Safe file writer
+      
+        Docs::
+            
+            Args:
+                fpath (string) : Text file path to write in.
+            
+            Example:
+                from utilmy import util_batch
+                file_path = "file.txt"
+                toFile = util_batch.toFile(file_path)
+    
       """
       logger = logging.getLogger('log')
       logger.setLevel(logging.INFO)
@@ -596,10 +607,20 @@ class toFile(object):
 
    def write(self, msg):
         """ toFile:write
-        Args:
-            msg:     
-        Returns:
-           
+
+        Write in the text file.
+        
+        Docs::
+        
+            Args:
+                msg (str) : String to write in the text file.
+
+            Example:
+                from utilmy import util_batch
+                file_path = "file.txt"
+                toFile = util_batch.toFile(file_path)
+                toFile.write("Lorem")
+
         """ 
         self.logger.info( msg)
 
@@ -613,8 +634,6 @@ def to_file_safe(msg:str, fpath:str):
             msg ( str )   : String to write in the file.
             fpath ( str ) : File path to the file to wrinte in.
         
-        Returns: None.
-
         Example:
         
             from utilmy import util_batch
