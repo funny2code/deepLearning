@@ -388,10 +388,6 @@ os_getenv_dict()
 
 
 utilmy/data.py
--------------------------functions----------------------
-help()
-log(*s)
-
 
 
 utilmy/dates.py
@@ -2428,6 +2424,11 @@ test_pd_create_dag(nrows = 1000, n_nodes = 100)
 
 
 utilmy/iio.py
+-------------------------functions----------------------
+screenshot(output = 'fullscreen.png')
+test_all()
+test_screenshot()
+
 
 
 utilmy/images/__init__.py
@@ -2844,6 +2845,7 @@ os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel =
 os_get_function_name()
 os_get_ip(mode = 'internal')
 os_get_os()
+os_get_process_info(sep = "-")
 os_get_uniqueid(format = "int")
 os_getcwd()
 os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
@@ -2866,16 +2868,10 @@ os_variable_exist(x, globs, msg = "")
 os_variable_init(ll, globs)
 os_wait_processes(nhours = 7)
 os_walk(path, pattern = "*", dirlevel = 50)
-test1()
-test2()
-test4()
-test6_os()
-test7_os()
-test8()
-test8_os()
 test_all()
 test_filecache()
 test_globglob()
+test_os()
 test_os_module_uncache()
 z_os_search_fast(fname, texts = None, mode = "regex/str")
 
@@ -2911,6 +2907,31 @@ myProblem6.get_data_symbolic(self)
 myProblem7.__init__(self)
 myProblem7.get_cost_symbolic(self, dCGP)
 myProblem7.get_data_symbolic(self)
+
+
+utilmy/optim/gp_ranking.py
+-------------------------functions----------------------
+help()
+test5()
+test9()
+test_pars_values()
+
+-------------------------methods----------------------
+myProblem_ranking.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking.check(self)
+myProblem_ranking.get_correlm(self, formulae_str)
+myProblem_ranking.get_cost(self, expr:None, symbols)
+myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
+myProblem_ranking.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
+myProblem_ranking_v2.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking_v2.check(self)
+myProblem_ranking_v2.get_correlm(self, formulae_str:str)
+myProblem_ranking_v2.get_cost(self, expr:None, symbols)
+myProblem_ranking_v2.get_rank_based_other(self, l1: list, l2: list)
+myProblem_ranking_v2.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem_ranking_v2.rank_merge_v5(self, ll1:list, ll2:list, formulae_str)
+myProblem_ranking_v2.rank_score(self, formulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/optim/gp_searchformulae.py
@@ -3120,6 +3141,7 @@ pd_show(df, nrows = 100, reader = 'notepad.exe', **kw)
 pd_to_file(df, filei, check = 0, verbose = True, show = 'shape', **kw)
 pd_to_hiveparquet(dirin, dirout = "/ztmp_hive_parquet/df.parquet", verbose = False)
 pd_to_mapdict(df, colkey = 'ranid', colval = 'item_tag', naval = '0', colkey_type = 'str', colval_type = 'str', npool = 5, nrows = 900900900, verbose = True)
+test1()
 test2()
 test_all()
 test_pd_col_bins()
@@ -6197,10 +6219,9 @@ bootstrap_sequential()
 utilmy/util_batch.py
 -------------------------functions----------------------
 batchLog(object)
-main()
-now_daymonth_isin(day_month, timezone = "jp")
-now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "jp")
-now_weekday_isin(day_week = None, timezone = 'jp')
+now_daymonth_isin(day_month, timezone = "Asia/Tokyo")
+now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "Asia/Tokyo")
+now_weekday_isin(day_week = None, timezone = 'Asia/Tokyo')
 os_lock_acquireLock(plock:str = "tmp/plock.lock")
 os_lock_releaseLock(locked_file_descriptor)
 os_process_find_name(name = r"((.*/)
@@ -6208,11 +6229,12 @@ os_wait_cpu_ram_lower(cpu_min = 30, sleep = 10, interval = 5, msg =  "", name_pr
 os_wait_fileexist2(dirin, ntry_max = 100, sleep_time = 300)
 os_wait_filexist(flist, sleep = 300)
 os_wait_program_end(cpu_min = 30, sleep = 60, interval = 5, msg =  "", program_name = None, verbose = True)
-test_all()
+test1()
+test_functions()
 test_funtions_thread()
 test_index()
 test_os_process_find_name()
-time_sleep_random(nmax = 5)
+time_sleep(nmax = 5, israndom = True)
 to_file_safe(msg:str, fpath:str)
 
 -------------------------methods----------------------
@@ -6327,15 +6349,19 @@ dataset_donwload(url, path_target)
 dataset_get_path(cfg: dict)
 dir_size(dirin = "mypath", dirout = "./save.txt")
 gzip(dirin = '/mydir', dirout = "./")
+help()
 os_extract_archive(file_path, path = ".", archive_format = "auto")
-to_file(s, filep)
+test1()
+test2()
+test_all()
 unzip(dirin, dirout)
+zip(dirin:str = "mypath", dirout:str = "myfile.zip", format = 'zip')
 
 
 
 utilmy/utilmy_base.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
 dir_testinfo(tag = "", verbose = 1, )
 direpo(show = 0)
 dirpackage(show = 0)
@@ -6369,16 +6395,10 @@ sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
 test1()
-test2()
-test3()
-test4()
-test5()
-test6_datenow()
-test7()
-test8_load_save()
-test9_find_fuzzy()
 test_all()
-to_file(txt, fpath, mode = 'a')
+test_datenow()
+test_loadfunctionuri()
+to_file(txt:str, fpath:str, mode = 'a')
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt", min_chars = 5)
@@ -6398,22 +6418,11 @@ toFileSafe.write(self, *s)
 
 utilmy/utils.py
 -------------------------functions----------------------
-config_load(config_path: Optional[Union[str, pathlib.Path]]  =  None)
-dataset_donwload(url, path_target)
+help()
 load_callable_from_dict(function_dict, return_other_keys = False)
-load_callable_from_uri(uri)
-load_function(package = "mlmodels.util", name = "path_norm")
-load_function_uri(uri_name = "path_norm")
-log(*s)
-log2(*s)
-loge(*s)
-logger_setup()
-logw(*s)
-os_extract_archive(file_path, path = ".", archive_format = "auto")
-test0()
+load_callable_from_uri(uri="mypath/myfile.py = "mypath/myfile.py::myFunction")
 test1()
 test_all()
-to_file(s, filep)
 
 
 
