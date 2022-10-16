@@ -153,6 +153,29 @@ def test1():
     log("dtype now:", str(parsed_dataframe["age"].dtypes))
     assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
 
+    log("####### pd_to_mapdict() ..")
+
+    test_dict = dict(
+        name=["mathew", "sarah", "michael"], 
+        age=[21, 21, 35]
+    )
+
+    expected_dict = dict(
+        mathew=21,
+        sarah=21,
+        michael=35
+    )
+
+    df = pd.DataFrame(test_dict)
+    
+    result_dict = pd_to_mapdict(
+        df=df,colkey="name",
+        colval="age",
+        colval_type="int"
+    )
+
+    assert result_dict == expected_dict, "The dictionaries aren't the same"
+
 
 
 def test2():
