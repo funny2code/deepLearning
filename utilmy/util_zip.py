@@ -203,12 +203,29 @@ def dir_size(dirin="mypath", dirout="./save.txt"):
     
 def dataset_donwload(url, path_target):
     """Donwload on disk the tar.gz file.
-    Doc::
+    
+    Docs::
             
             Args:
-                url:
-                path_target:
+                url (string): URL of the tar.gz file to download.
+                path_target (string): Directory path to save the file.
+            
             Returns:
+                Path of the saved file.
+            
+            Example:
+            from utilmy import util_zip
+
+            path_target = "/tmp/dataset"
+
+            url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
+
+            path = util_zip.dataset_donwload(
+                url=url, 
+                path_target=path_target
+            )
+
+            print(path)#Displays the path of the saved file
         
     """
     log(f"Donwloading mnist dataset in {path_target}")
