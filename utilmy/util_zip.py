@@ -4,6 +4,8 @@
 
 
 """
+from fileinput import filename
+from lib2to3.pgen2.token import OP
 import os, glob, sys, math, string, time, json, logging, functools, random, yaml, operator, gc
 import shutil, tarfile, zipfile
 from typing import Optional, Union
@@ -89,19 +91,42 @@ def test2():
 
     import utilmy as uu
     import filecmp
+    from os.path import exists
 
     _, dirtmp = uu.dir_testinfo()
 
-    log("####### unzip() ..")
+    log("####### zip() ..")
 
     file_name = "zip_test.txt"
+    path_zip = dirtmp + "test_zip"
+
+    uu.to_file("zip() function test", dirtmp + file_name)
+
+    zip(dirin=file_name, dirout=path_zip, root_dir=dirtmp)
+
+    assert exists(path_zip + '.zip'), "FAILED -> zip(); Zip file haven't been created"
+
+    log("####### gzip() ..")
+
+    file_name = "gzip_test.txt"
+    path_zip = "test_gzip.tar"
+
+    uu.to_file("gzip() function test", dirtmp + file_name)
+
+    gzip(dirin=file_name, dirout=path_zip, root_dir=dirtmp)
+
+    assert exists(path_zip), "FAILED -> gzip(); Tar file haven't been created"
+
+    log("####### unzip() ..")
+
+    file_name = "unzip_test.txt"
 
     file_path = dirtmp + file_name
     unzipped_file_path = dirtmp + "unzipped/"
 
-    path_zip = dirtmp + "test.zip"
+    path_zip = dirtmp + "test_unzip.zip"
 
-    uu.to_file("Dummy test", file_path)
+    uu.to_file("unzip() function test", file_path)
 
     zf       = zipfile.ZipFile(path_zip, "w")
     zf.write(file_path, file_name)
@@ -131,37 +156,36 @@ def unzip(dirin, dirout):
         zip_ref.extractall(dirout)
 
 
-def zip(dirin:str="mypath", dirout:str="myfile.zip", format='zip'):
-    """ zip a full dirin folder into dirout file
+def zip(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/', format='zip'):
+    """ zip a full dirin folder into dirout file starting from the root directory
     Doc::
             
             https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
             Args:
                 dirin:   
-                dirout:   
+                dirout:
+                root_dir:
             Returns:
                 
     """
     import shutil
-    shutil.make_archive(base_name=dirout,format=format,base_dir=dirin)
+    shutil.make_archive(base_name=dirout, format=format, root_dir=root_dir, base_dir=dirin)
 
 
 
-def gzip(dirin='/mydir', dirout="./"):
+def gzip(dirin='/mydir', dirout="./", root_dir:Optional[str]='/'):
     """function gzip.
     Doc::
             
             Args:
                 dirin:   
-                dirout:   
+                dirout: 
+                root_dir:  
             Returns:
                 
     """
-    #  python prepro.py gzip
-    name = "_".join(dirin.split("/")[-2:])
-    cmd  = f"tar -czf '{dirout}/{name}.tar.gz'   '{dirin}/'   "
-    print(cmd)
-    os.system(cmd)
+    os.chdir(root_dir)
+    os.system(f'tar -cvzf {dirout} {dirin}')
 
 
 def dir_size(dirin="mypath", dirout="./save.txt"):
