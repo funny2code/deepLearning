@@ -190,13 +190,27 @@ def gzip(dirin='/mydir', dirout="./", root_dir:Optional[str]='/'):
 
 def dir_size(dirin="mypath", dirout="./save.txt"):
     """function dir_size.
-    Doc::
+
+    Get the size of a directory and its content.
+
+    Docs::
             
             Args:
-                dirin:   
-                dirout:   
-            Returns:
-                
+                dirin (string) : Directory path to get its size.   
+                    Default to "mypath".
+                dirout (string) : Text file path to save the size of the directory.
+                    Default to "./save.txt".
+
+            Returns: None.
+
+            Example:
+
+                from utilmy import util_zip
+
+                path = "/tmp/dataset/mnist_png.tar.gz"
+
+                util_zip.dir_size(path,dirout = "/tmp/dataset/size.txt")
+                                
     """
     os.system( f" du -h --max-depth  13   '{dirin}'  | sort -hr  > '{dirout}'  ")
 
@@ -207,8 +221,8 @@ def dataset_donwload(url, path_target):
     Docs::
             
             Args:
-                url (string): URL of the tar.gz file to download.
-                path_target (string): Directory path to save the file.
+                url (string) : URL of the tar.gz file to download.
+                path_target (string) : Directory path to save the file.
             
             Returns:
                 Path of the saved file.
