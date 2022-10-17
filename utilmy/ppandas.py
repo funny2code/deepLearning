@@ -82,8 +82,12 @@ def test_all():
 
 
 def test1():
+    
+    # import utilmy as uu
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
+
+    # drepo, dirtmp = uu.dir_testinfo()
 
     df1 = pd_random(100)
     df2 = pd_random(100)
@@ -175,6 +179,27 @@ def test1():
     )
 
     assert result_dict == expected_dict, "The dictionaries aren't the same"
+    # TODO: This test has a bug
+    # log("####### pd_to_hiveparquet() ..")
+
+    # test_dictionary = dict(
+    #     name=["Mathew", "sarah", "michael"], 
+    #     age=[21, 21, 35]
+    # )
+
+    # test_dirout = dirtmp + "hiveparquet"
+
+    # dataframe = pd.DataFrame(test_dictionary)
+
+    # df = pd_to_hiveparquet(dirin=dataframe,dirout=test_dirout)
+
+    # parquet_path = test_dirout + "/part.0.parquet"
+
+    # parquet_df = pd.read_parquet(parquet_path)
+
+    # assert parquet_df.equals(df), "The dataframes aren't the same"
+
+
 
 
 
@@ -194,7 +219,7 @@ def test2():
     to_timeunix(datex="2018-01-16")
     to_timeunix(datetime.datetime(2018,1,16))
     to_datetime("2018-01-16")
-    
+
 def test_pd_col_bins():
     import utilmy as uu
     import pandas as pd
