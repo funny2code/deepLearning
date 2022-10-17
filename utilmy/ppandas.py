@@ -83,11 +83,11 @@ def test_all():
 
 def test1():
     
-    # import utilmy as uu
+    import utilmy as uu
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
 
-    # drepo, dirtmp = uu.dir_testinfo()
+    drepo, dirtmp = uu.dir_testinfo()
 
     df1 = pd_random(100)
     df2 = pd_random(100)
@@ -179,25 +179,25 @@ def test1():
     )
 
     assert result_dict == expected_dict, "The dictionaries aren't the same"
-    # TODO: This test has a bug
-    # log("####### pd_to_hiveparquet() ..")
+    
+    log("####### pd_to_hiveparquet() ..")
+    
+    test_dictionary = dict(
+        name=["Mathew", "sarah", "michael"], 
+        age=[21, 21, 35]
+    )
 
-    # test_dictionary = dict(
-    #     name=["Mathew", "sarah", "michael"], 
-    #     age=[21, 21, 35]
-    # )
+    test_dirout = dirtmp + "hiveparquet"
 
-    # test_dirout = dirtmp + "hiveparquet"
+    dataframe = pd.DataFrame(test_dictionary)
 
-    # dataframe = pd.DataFrame(test_dictionary)
+    df = pd_to_hiveparquet(dirin=dataframe,dirout=test_dirout)
 
-    # df = pd_to_hiveparquet(dirin=dataframe,dirout=test_dirout)
+    parquet_path = test_dirout + "/part.0.parquet"
 
-    # parquet_path = test_dirout + "/part.0.parquet"
+    parquet_df = pd.read_parquet(parquet_path)
 
-    # parquet_df = pd.read_parquet(parquet_path)
-
-    # assert parquet_df.equals(df), "The dataframes aren't the same"
+    assert parquet_df.equals(df), "The dataframes aren't the same"
 
 
 
@@ -388,8 +388,9 @@ def pd_to_hiveparquet(dirin, dirout="/ztmp_hive_parquet/df.parquet", verbose=Fal
     import fastparquet as fp   
     from utilmy import glob_glob
     if isinstance(dirin, pd.DataFrame):
-        fp.write(dirout, df, fixed_text=None, compression='SNAPPY', file_scheme='hive')    
-        return df.iloc[:10, :]
+        
+        fp.write(dirout, dirin, fixed_text=None, compression='SNAPPY', file_scheme='hive')    
+        return dirin.iloc[:10, :]
 
     os_makedirs(dirout)
     dirout = "/".join( dirout.split("/")[-1] )
