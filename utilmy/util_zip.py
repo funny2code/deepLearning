@@ -143,12 +143,29 @@ def test2():
 ##########################################################################################
 def unzip(dirin, dirout):
     """function unzip.
-    Doc::
+
+    Unzip a zip file.
+    
+    Docs::
             
-            Args:
-                dirin:
-                dirout:
-            Returns:
+        Args:
+            dirin (string): Zip file to unzip.
+            dirout (string): Directory to save the content of the zip file.
+        
+        Returns: None.
+
+        Example:
+            from utilmy import util_zip
+
+            dirin = "/tmp/dataset.zip"
+
+            dirout = "/tmp/dataset"
+
+
+            util_zip.unzip(
+                dirin = dirin,
+                dirout = dirout
+            )   
                 
     """
     import zipfile
@@ -179,29 +196,29 @@ def gzip(dirin='/mydir', dirout="./", root_dir:Optional[str]='/'):
     Compress a file to a gz file.
     
     Docs::
-            
-            Args:
-                dirin (string): Directory to compress to a gz file.
-                    Default to "/mydir".   
-                dirout (string): Path to save the gz file. It must end in ".gz".
-                    Default to "./".
-                root_dir (string): The root dir of the system.
-                    Default to "/".  
+        
+        Args:
+            dirin (string): Directory to compress to a gz file.
+                Default to "/mydir".   
+            dirout (string): Path to save the gz file. It must end in ".gz".
+                Default to "./".
+            root_dir (string): The root dir of the system.
+                Default to "/".  
 
-            Returns: None.
-            
-            Example:
+        Returns: None.
+        
+        Example:
 
-                from utilmy import util_zip
+            from utilmy import util_zip
 
-                dirin = "/tmp/dataset"
+            dirin = "/tmp/dataset"
 
-                dirout = "/tmp/data.gz"
+            dirout = "/tmp/data.gz"
 
-                util_zip.gzip(
-                    dirin = dirin,
-                    dirout = dirout
-                )   
+            util_zip.gzip(
+                dirin = dirin,
+                dirout = dirout
+            )   
     """
     os.chdir(root_dir)
     os.system(f'tar -cvzf {dirout} {dirin}')
