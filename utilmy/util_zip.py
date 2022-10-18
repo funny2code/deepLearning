@@ -175,14 +175,33 @@ def zip(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/',
 
 def gzip(dirin='/mydir', dirout="./", root_dir:Optional[str]='/'):
     """function gzip.
-    Doc::
+    
+    Compress a file to a gz file.
+    
+    Docs::
             
             Args:
-                dirin:   
-                dirout: 
-                root_dir:  
-            Returns:
-                
+                dirin (string): Directory to compress to a gz file.
+                    Default to "/mydir".   
+                dirout (string): Path to save the gz file. It must end in ".gz".
+                    Default to "./".
+                root_dir (string): The root dir of the system.
+                    Default to "/".  
+
+            Returns: None.
+            
+            Example:
+
+                from utilmy import util_zip
+
+                dirin = "/tmp/dataset"
+
+                dirout = "/tmp/data.gz"
+
+                util_zip.gzip(
+                    dirin = dirin,
+                    dirout = dirout
+                )   
     """
     os.chdir(root_dir)
     os.system(f'tar -cvzf {dirout} {dirin}')
