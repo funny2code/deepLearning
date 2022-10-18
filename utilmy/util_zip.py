@@ -357,6 +357,20 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
             Returns:
                 True if a match was found and an archive extraction was completed,
                 False otherwise.
+            
+            Example:
+                from importlib.resources import path
+                from utilmy import util_zip
+
+                file_path = "/tmp/mnist_png.tar.gz"
+                dir_path = "/tmp/mnist_png"
+
+                is_extracted = util_zip.os_extract_archive(
+                    file_path=file_path,
+                    path=path
+                )
+
+                print(is_extracted)
     """
     if archive_format is None:
         return False
