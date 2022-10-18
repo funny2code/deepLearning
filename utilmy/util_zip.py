@@ -174,16 +174,34 @@ def unzip(dirin, dirout):
 
 
 def zip(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/', format='zip'):
-    """ zip a full dirin folder into dirout file starting from the root directory
-    Doc::
+    """ zip a full dirin folder into dirout file starting from the root directory.
+
+    Docs::
             
-            https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
-            Args:
-                dirin:   
-                dirout:
-                root_dir:
-            Returns:
-                
+        https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+        
+        Args:
+            dirin (string) : Directory to zip.
+                Default to "mypath"
+            dirout (string): Path to save the zipped file.
+                Default to "myfile.zip".
+            root_dir (string): The root dir of the system.
+                Default to "/".
+            format (string): Format of the zipped file. It can be "zip", "tar", "gztar", or any other registered format.
+        
+        Returns: None.
+
+        Example:
+            from utilmy import util_zip
+
+            dirin = "/tmp/dataset"
+
+            dirout = "/tmp/result"
+
+            util_zip.zip(
+                dirin = dirin,
+                dirout = dirout
+            )   
     """
     import shutil
     shutil.make_archive(base_name=dirout, format=format, root_dir=root_dir, base_dir=dirin)
