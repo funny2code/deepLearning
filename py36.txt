@@ -14,7 +14,7 @@ flake8
 #### utilmy.ppandas
 pyarrow
 polars 
-
+fastparquet
 
 ########################################################
 #### utilmy.date

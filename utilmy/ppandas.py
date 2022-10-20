@@ -82,8 +82,12 @@ def test_all():
 
 
 def test1():
+    
+    import utilmy as uu
     from utilmy import os_makedirs
     os_makedirs("testdata/ppandas")
+
+    drepo, dirtmp = uu.dir_testinfo()
 
     df1 = pd_random(100)
     df2 = pd_random(100)
@@ -153,6 +157,50 @@ def test1():
     log("dtype now:", str(parsed_dataframe["age"].dtypes))
     assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
 
+    log("####### pd_to_mapdict() ..")
+
+    test_dict = dict(
+        name=["mathew", "sarah", "michael"], 
+        age=[21, 21, 35]
+    )
+
+    expected_dict = dict(
+        mathew=21,
+        sarah=21,
+        michael=35
+    )
+
+    df = pd.DataFrame(test_dict)
+    
+    result_dict = pd_to_mapdict(
+        df=df,colkey="name",
+        colval="age",
+        colval_type="int"
+    )
+
+    assert result_dict == expected_dict, "The dictionaries aren't the same"
+    
+    #log("####### pd_to_hiveparquet() ..")
+    #TODO: This test has a bug, it needs the package fastparquet
+    # test_dictionary = dict(
+    #     name=["Mathew", "sarah", "michael"], 
+    #     age=[21, 21, 35]
+    # )
+
+    # test_dirout = dirtmp + "hiveparquet"
+
+    # dataframe = pd.DataFrame(test_dictionary)
+
+    # df = pd_to_hiveparquet(dirin=dataframe,dirout=test_dirout)
+
+    # parquet_path = test_dirout + "/part.0.parquet"
+
+    # parquet_df = pd.read_parquet(parquet_path)
+
+    # assert parquet_df.equals(df), "The dataframes aren't the same"
+
+
+
 
 
 def test2():
@@ -171,7 +219,7 @@ def test2():
     to_timeunix(datex="2018-01-16")
     to_timeunix(datetime.datetime(2018,1,16))
     to_datetime("2018-01-16")
-    
+
 def test_pd_col_bins():
     import utilmy as uu
     import pandas as pd
@@ -340,8 +388,9 @@ def pd_to_hiveparquet(dirin, dirout="/ztmp_hive_parquet/df.parquet", verbose=Fal
     import fastparquet as fp   
     from utilmy import glob_glob
     if isinstance(dirin, pd.DataFrame):
-        fp.write(dirout, df, fixed_text=None, compression='SNAPPY', file_scheme='hive')    
-        return df.iloc[:10, :]
+        
+        fp.write(dirout, dirin, fixed_text=None, compression='SNAPPY', file_scheme='hive')    
+        return dirin.iloc[:10, :]
 
     os_makedirs(dirout)
     dirout = "/".join( dirout.split("/")[-1] )
