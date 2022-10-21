@@ -249,43 +249,28 @@ def pd_schema_enforce(df, int_default:int=0, dtype_dict:dict=None):
             Docs::
 
                 Args:
-                
-                    df (Union[:obj:'pd.DataFrame', string]): Panda dataframe or can be path to a file that can be loaded as a dataframe(ex: CSV).
-                    int_default (int): This argument is the default int number if data is an int and an error occurs when parsed it to its dtype again.
-                        This argument works if the argument dtype_dict isn't given. Defaults to 0.
-                    dtype_dict (dict): This is the scheme, This dictionary contains the datatype of each column to parse.
+                    df (df or str)    : df or path to a file that can be loaded as a df(ex: CSV).
+                    int_default (int) : number if data is an int, dtype_dict isn't given, and it can't be parsed to itself again. (Defaults to 0.)
+                    dtype_dict (dict) : Contains the datatype of each column to parse.
                         Example
                             dtype1 = {
                                 'name': 'string',
                                 'age': 'int',
                             }
-                        This can work with a dataframe that contains the columns "name" and "age".capitalize()
-                    
-                Return:
-
-                    Panda Dataframe with the data parsed.
-
+                Return: df with the parsed data.
                 Example:
-
                     import pandas as pd
                     from utilmy import ppandas
-
                     test_dictionary = dict(
                         name=["Mathew", "Sarah", "Michael"], 
                         age=[21, 21, 35]
                     )
-
                     dataframe = pd.DataFrame(test_dictionary)
-
                     dtype = {
                         "age":"string",
                     }
-
-
                     parsed_dataframe = ppandas.pd_schema_enforce(dataframe)
-
                     print(str(parsed_dataframe["age"].dtypes)) # Displays string
-
         """
         if isinstance(df, str):
             df = pd_read_file(df)
@@ -316,42 +301,26 @@ def pd_to_mapdict(df, colkey='ranid', colval='item_tag', naval='0', colkey_type=
     Docs::
             
         Args:
-            df (Union[:obj:'pd.DataFrame', string]): This can be a Panda dataframe, can be path to a file that can be loaded as a dataframe(ex: CSV).
-                Or can be a directory with files that can be a loaded as a dataframe.
-            colkey (string): The name of the column that will be the key of each item of the dictionary, that will be the return value.
-                Default to "ranid".
-            colval (string): The name of the column that will be the value of each item of the dictionary, that will be the return value.    
-                Default to "item_tag".
-            naval (Union[string, int, float]): Value, that the int cells don't have any value or a number (NaN), will have.
-                Default to "0".  
-            colkey_type (string): Data type of the column that will be the key of each item of the dictionary.
-                Default to "str".
-            colval_type (string): Data type of the column that will be the value of each item of the dictionary.
-                Default to "str".
-            npool (int): Number of workers that will be loading the dataframes.
-                If it useful if the argument "df" is an directory path with files what can be loaded as dataframes.
-                Default to 5
-            nrows (int): Number of rows to load in the dataframe. Default to 900900900.
-            verbose (boolean): If it is true, the logs can be seen. Default to True.  
-        
-        Returns:
-            Dictionary.
-
+            df (df or str)             : pd, directory path with files, or a file path that can be loaded as a dataframe (ex: CSV).
+            colkey (str)               : Column name that will be the key of the items. (Default to "ranid".)
+            colval (str)               : Column name that will be the value of the items. (Default to "item_tag".)
+            naval (str, int, or float) : Value for cells that don't have any value. (Default to "0".)  
+            colkey_type (str)          : Data type of the column that will be the key of the itms. (Default to "str".)
+            colval_type (str)          : Data type of the column that will be the value of the itms. (Default to "str".)
+            npool (int)                : Number of workers that will be loading the dataframes. (Default to 5.)
+            nrows (int)                : Number of rows to load in the df. (Default to 900900900.)
+            verbose (bool)             : true to show logs. (Default to True.)  
+        Returns: Dict.
         Example:
-
             import pandas as pd
             from utilmy import ppandas
-
             test_dictionary = dict(
                 name=["Mathew", "sarah", "michael"], 
                 age=[21, 21, 35]
             )
-
             dataframe = pd.DataFrame(test_dictionary)
-
             dictionary = ppandas.pd_to_mapdict(dataframe,colkey="name",colval="age")
-
-            print(dictionary) #Display "{'Mathew': '21', 'sarah': '21', 'michael': '35'}".
+            print(dictionary) #{'Mathew': '21', 'sarah': '21', 'michael': '35'}
     """
     ### load Pandas into key-val dict, for apply-map
     if isinstance(df, str):

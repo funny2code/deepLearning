@@ -4,9 +4,12 @@ HELP= """ Utils for easy batching
 
 
 """
+from concurrent.futures import process
 import os, sys, socket, platform, time, gc,logging, random, datetime, logging, pytz
-from subprocess import Popen
+import subprocess
+from subprocess import Popen, PIPE, SubprocessError
 from utilmy.utilmy_base import date_now
+from multiprocessing import Process
 
 ################################################################################################
 verbose = 3   ### Global setting
@@ -269,8 +272,7 @@ def now_weekday_isin(day_week=None, timezone='Asia/Tokyo'):
 
         Args:
             day_week          :  [1,2,3],  0 = Sunday, 1 = Monday, ...   6 = Saturday           
-            timezone (string) :  Timezone :  'UTC', 'Asia/Tokyo'
-            
+            timezone (string) :  Timezone :  'UTC', 'Asia/Tokyo'  
     """
     # 0 is sunday, 1 is monday
     if not day_week:
@@ -289,12 +291,10 @@ def now_hour_between(hour1="12:45", hour2="13:45", timezone="Asia/Tokyo"):
     Docs::
 
         Args:
-            hour1 (string):     start format "%H:%M",  "12:45".
-            hour2 (string):     end,  format "%H:%M",  "13:45".
-            timezone (string):  'Asia/Tokyo', 'utc' 
-                
-        Returns:  true if the time is between two hours, false otherwise.
-            
+            hour1 (string)    :     start format "%H:%M",  "12:45".
+            hour2 (string)    :     end,  format "%H:%M",  "13:45".
+            timezone (string) :  'Asia/Tokyo', 'utc' 
+        Returns: true if the time is between two hours, false otherwise.
     """
     # Daily Batch time is between 2 time.
     # timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
@@ -315,13 +315,10 @@ def now_daymonth_isin(day_month, timezone="Asia/Tokyo"):
     Docs::
 
         Args:
-            day_month (:obj:`list` of :obj:'int'): List of days of the month in numbers to check if today is in this list.
-            timezone (string): Timezone of time now.
-                Default to "jp".  
-        
+            day_month (list of int) : List of days of the month in numbers.
+            timezone (string)       : Timezone of time now. (Default to "Asia/Tokyo".)  
         Returns:
-            Boolean, true if today is in the list "day_month", false otherwise.
-
+            Bool, true if today is in the list "day_month", false otherwise.
     """
     # 1th day of month
     #timezone = {'jp' : 'Asia/Tokyo', 'utc' : 'utc'}.get(timezone, 'utc')
@@ -344,20 +341,14 @@ def time_sleep(nmax=5, israndom=True):
     Docs::
 
         Args:
-            nmax (int): Number of seconds for the time sleep.
-                Default to 5.   
-            israndom (boolean): True if the argument "nmax" is the max number of second to be chosen randomly.
-                Default to True.
-
+            nmax (int)      : Seconds for the time sleep. (Default to 5.)   
+            israndom (bool) : True if the argument "nmax" the max seconds will be chosen randomly. (Default to True.)
         Returns: None.
-        
         Example:
             from utilmy import util_batch
             import datetime
-
             timezone = datetime.timezone.utc
             now_day_month = datetime.datetime.now(tz=timezone).day
-
             util_batch.time_sleep(nmax = 10, israndom=False)
     """
     import random, time
@@ -517,23 +508,15 @@ def os_process_find_name(name=r"((.*/)?tasks.*/t.*/main\.(py|sh))", ishow=1, isr
         Docs::
 
             Args: 
-                name (str)    : Regex or string to match with process name.
-                    Default to " r"((.*/)?tasks.*/t.*/main\.(py|sh))" ".
-                ishow (int)   : Flag to show the id and its info.
-                    Default to 1.
-                isregex (int) : Flag whether the argument "name" is a regex or not.
-                    Default to 1.
-
+                name (str)    : Regex or string to match process name.( Default to " r"((.*/)?tasks.*/t.*/main\.(py|sh))" ".)
+                ishow (int)   : Flag to show process id and its info. (Default to 1.)
+                isregex (int) : Flag if the argument "name" is a regex or not. (Default to 1.)
             Returns:
-                List of dictionaries, where each dictionary has the id and the info of the process.
-            
+                List of dictionaries. each dictionary has the process id and its info.
             Example:
-
                 from utilmy import util_batch
-
                 list = util_batch.os_process_find_name(name="sleep 5")
-                print(list) #Displays the info of the processes that have in its name "sleep 5"
-
+                print(list)
     """
     import psutil, re, fnmatch
     ls = []
@@ -602,13 +585,11 @@ class toFile(object):
         Docs::
             
             Args:
-                fpath (string) : Text file path to write in.
-            
+                fpath (str) : Text file path.
             Example:
                 from utilmy import util_batch
                 file_path = "file.txt"
                 toFile = util_batch.toFile(file_path)
-    
       """
       logger = logging.getLogger('log')
       logger.setLevel(logging.INFO)
@@ -626,13 +607,11 @@ class toFile(object):
         
             Args:
                 msg (str) : String to write in the text file.
-
             Example:
                 from utilmy import util_batch
                 file_path = "file.txt"
                 toFile = util_batch.toFile(file_path)
                 toFile.write("Lorem")
-
         """ 
         self.logger.info( msg)
 
@@ -644,15 +623,11 @@ def to_file_safe(msg:str, fpath:str):
 
         Args:
             msg ( str )   : String to write in the file.
-            fpath ( str ) : File path to the file to wrinte in.
-        
+            fpath ( str ) : File path to the file to write in.
         Example:
-        
             from utilmy import util_batch
-
             path = "file.txt"
             util_batch.to_file_safe("Lorem", path)
-       
    """
    ss = str(msg)
    logger = logging.getLogger('log')
@@ -807,19 +782,12 @@ class Index0(object):
         Docs::
         
             Args:
-                findex (function["arg_type"][i]) : Text file path.
-                    Default to "ztmp_file.txt".
-                ntry (int): Number of tries to save, with filter, file paths in the index when an error occurs.
-                    Default to 10.
-            
+                findex (str) : Text file path. (Default to "ztmp_file.txt".)
+                ntry (int)   : Number of tries to save with filter, when an error occurs.(Default to 10.)
             Example:  
-
                 from utilmy import util_batch
-
                 index_file_path = "test.txt"
-
                 index = util_batch.Index0(index_file_path)  
-                            
         """
         self.findex = findex
         os.makedirs(os.path.dirname(self.findex), exist_ok=True)
@@ -837,18 +805,12 @@ class Index0(object):
 
             Returns:
                 List of strings or file paths.
-            
             Example:
                 from utilmy import util_batch
-
                 index_file_path = "test.txt"
-
                 index = util_batch.Index0(index_file_path)
-
                 flist = index.read()
-
                 print(flist)
-
         """
         import time
         try :
@@ -873,23 +835,15 @@ class Index0(object):
         Docs::
         
             Args:
-                flist (list of strings) : List of file paths to save in the index.
-
+                flist (list of strings) : List of file paths to save.
             Returns:
-                True if the list was saved or None otherwise.
-            
+                True if the list was saved.
             Example:
                 from utilmy import util_batch
-
                 index_file_path = "/home/username/file.text"
-
                 index = util_batch.Index0(index_file_path)
-
                 list = ["file.txt","folder/fileinfolder.txt"]
-
                 is_saved = index.save(flist=list)
-
-           
         """
         if len(flist) < 1 : return True
         ss = ""
@@ -911,24 +865,15 @@ class Index0(object):
         Docs::
 
             Args:
-
-                val (list of strings): Text file paths to write in the index.
-                    Default to None.
+                val (list of strings) : File paths to save in the index. (Default to None.)
             Return:
-
                 List of strings or file paths.
-
             Example:
                 from utilmy import util_batch
-
                 index_file_path = "/home/username/file.text"
-
                 index = util_batch.Index0(index_file_path)
-
                 list = ["file.txt", "folder/fileinfolder.txt"]
-
                 result_list = index.save_filter(var=list)
-
         """
         import random, time
         if val is None : return True
@@ -975,7 +920,7 @@ def os_lock_acquireLock(plock:str="tmp/plock.lock"):
     ''' acquire exclusive lock file access, return the locker
     '''
     import fcntl
-    os.makedirs(os.path.dirname(os.path.abspath(plock)), exist_ok=True)
+    #os.makedirs(os.path.dirname(os.path.abspath(plock)), exist_ok=True)
     locked_file_descriptor = open( plock, 'w+')
     fcntl.flock(locked_file_descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
     return locked_file_descriptor
