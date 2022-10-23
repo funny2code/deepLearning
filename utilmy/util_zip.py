@@ -140,6 +140,58 @@ def test2():
 
 
 
+def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/', format='zip',
+
+        exclude="", include_only="",
+        min_size_mb=0, max_size_mb=500000,
+        ndays_past=-1, nmin_past=-1,  start_date='1970-01-02', end_date='2050-01-01',
+        nfiles=99999999, verbose=0,
+
+
+
+
+):
+    """ zip a a dir with files Filterings : size, date   into  dirout file.
+
+    Docs::
+            
+        https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+        
+        Args:
+            dirin (str)    : Directory path. (Default to "mypath")
+            dirout (str)   : Path to save the zip file. (Default to "myfile.zip".)
+            root_dir (str) : Root dir of the system. (Default to "/".)
+            format (str)   : Format of the zipped file. (Default to "zip".)
+        Returns: None.
+        Example:
+            from utilmy import util_zip
+            dirin = "/tmp/dataset"
+            dirout = "/tmp/result"
+            util_zip.zip(
+                dirin = dirin,
+                dirout = dirout
+            )   
+    """
+    from utilmy import glob_glob
+
+    flist = glob_glob(dirin, exclude=exclude, include_only=include_only,
+            min_size_mb= min_size_mb, max_size_mb= max_size_mb,
+            ndays_past=ndays_past, start_date=start_date, end_date=end_date,
+            nfiles=nfiles,)
+
+    log('Nfiles', len(flist))        
+
+
+    import shutil
+    for fi in flist :
+        shutil.make_archive(base_name=dirout, format=format, root_dir=root_dir, base_dir=fi)
+
+
+
+
+
+
+
 ##########################################################################################
 def unzip(dirin, dirout):
     """function unzip.
