@@ -155,7 +155,7 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
 
     Docs::
             
-        https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
+        https://superfastpython.com/multithreaded-zip-files/    
         
         Args:
             dirin (str)    : Directory path. (Default to "mypath")
@@ -167,13 +167,50 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
             from utilmy import util_zip
             dirin = "/tmp/dataset"
             dirout = "/tmp/result"
-            util_zip.zip(
+            util_zip.zip2(
                 dirin = dirin,
                 dirout = dirout
             )   
-    """
-    from utilmy import glob_glob
 
+        SuperFastPython.com
+        # create a zip file and add files concurrently with threads without a lock
+        from os import listdir
+        from os.path import join
+        from zipfile import ZipFile
+        from zipfile import ZIP_DEFLATED
+        from concurrent.futures import ThreadPoolExecutor
+        from concurrent.futures import as_completed
+        
+        # load file into memory
+        def load_file(filepath):
+            # open the file
+            with open(filepath, 'r') as handle:
+                # return the contents and the filepath
+                return (filepath, handle.read())
+        
+        # create a zip file
+        def main(path='tmp'):
+            # list all files to add to the zip
+            files = [join(path,f) for f in listdir(path)]
+            # open the zip file
+            with ZipFile('testing.zip', 'w', compression=ZIP_DEFLATED) as handle:
+                # create the thread pool
+                with ThreadPoolExecutor(100) as exe:
+                    # load all files into memory
+                    futures = [exe.submit(load_file, filepath) for filepath in files]
+                    # compress files as they are loaded
+                    for future in as_completed(futures):
+                        # get the data
+                        filepath, data = future.result()
+                        # add to the archive
+                        handle.writestr(filepath, data)
+                        # report progress
+                        print(f'.added {filepath}')
+
+    """
+    import zipfile, os
+
+    from utilmy import glob_glob
     flist = glob_glob(dirin, exclude=exclude, include_only=include_only,
             min_size_mb= min_size_mb, max_size_mb= max_size_mb,
             ndays_past=ndays_past, start_date=start_date, end_date=end_date,
@@ -182,9 +219,15 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
     log('Nfiles', len(flist))        
 
 
-    import shutil
-    for fi in flist :
-        shutil.make_archive(base_name=dirout, format=format, root_dir=root_dir, base_dir=fi)
+    with zipfile.ZipFile(dirout, 'w', compression= zipfile.ZIP_DEFLATED) as zipObj:
+       for fi in flist :
+            # Add file to zip
+            zipObj.write(fi, os.path.basename(fi))
+
+
+    #import shutil
+    #for fi in flist :
+    #    shutil.make_archive(base_name=dirout, format=format, root_dir=root_dir, base_dir=fi)
 
 
 
