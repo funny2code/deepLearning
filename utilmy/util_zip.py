@@ -156,6 +156,8 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
     Docs::
             
         https://superfastpython.com/multithreaded-zip-files/    
+
+        https://gist.github.com/dreikanter/2835292
         
         Args:
             dirin (str)    : Directory path. (Default to "mypath")
