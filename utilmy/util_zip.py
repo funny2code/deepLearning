@@ -140,7 +140,7 @@ def test2():
 
 
 
-def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/', format='zip',
+def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/',
 
         exclude="", include_only="",
         min_size_mb=0, max_size_mb=500000,
@@ -208,21 +208,32 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
                         print(f'.added {filepath}')
 
     """
-    import zipfile, os
-
     from utilmy import glob_glob
+    import os
+
+    assert  dirout.endswith(".zip") or dirout.endswith(".tar.gz") 
+
     flist = glob_glob(dirin, exclude=exclude, include_only=include_only,
             min_size_mb= min_size_mb, max_size_mb= max_size_mb,
             ndays_past=ndays_past, start_date=start_date, end_date=end_date,
             nfiles=nfiles,)
+    log('Nfiles', len(flist))    
 
-    log('Nfiles', len(flist))        
+    if ".zip" in dirout :
+        import zipfile
+        with zipfile.ZipFile(dirout, 'w', compression= zipfile.ZIP_DEFLATED) as zipObj:
+            for fi in flist :
+                    zipObj.write(fi, os.path.basename(fi))
+        return dirout            
 
 
-    with zipfile.ZipFile(dirout, 'w', compression= zipfile.ZIP_DEFLATED) as zipObj:
-       for fi in flist :
-            # Add file to zip
-            zipObj.write(fi, os.path.basename(fi))
+    if ".tar" in dirout :
+        import tarfile    
+        with tarfile.open(dirout, "w:gz") as tar:
+            for fi in flist :
+                tar.add(fi, arcname=os.path.basename(fi))
+
+        return dirout            
 
 
     #import shutil
