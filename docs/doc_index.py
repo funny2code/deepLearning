@@ -6239,7 +6239,7 @@ to_file_safe(msg:str, fpath:str)
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt", ntry = 10)
-Index0.read(self, )
+Index0.read(self)
 Index0.save(self, flist:list)
 Index0.save_filter(self, val:list = None)
 IndexLock.__init__(self, findex, file_lock = None, min_size = 5, skip_comment = True, ntry = 20)
@@ -6348,14 +6348,14 @@ utilmy/util_zip.py
 dataset_donwload(url, path_target)
 dataset_get_path(cfg: dict)
 dir_size(dirin = "mypath", dirout = "./save.txt")
-gzip(dirin = '/mydir', dirout = "./")
+gzip(dirin = '/mydir', dirout = "./", root_dir:Optional[str] = '/')
 help()
 os_extract_archive(file_path, path = ".", archive_format = "auto")
 test1()
 test2()
 test_all()
 unzip(dirin, dirout)
-zip(dirin:str = "mypath", dirout:str = "myfile.zip", format = 'zip')
+zip(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '/', format = 'zip')
 
 
 
