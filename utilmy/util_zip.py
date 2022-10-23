@@ -149,24 +149,17 @@ def unzip(dirin, dirout):
     Docs::
             
         Args:
-            dirin (string): Zip file to unzip.
-            dirout (string): Directory to save the content of the zip file.
-        
+            dirin (str): Zip file path.
+            dirout (str): Directory path to save the content.
         Returns: None.
-
         Example:
             from utilmy import util_zip
-
             dirin = "/tmp/dataset.zip"
-
             dirout = "/tmp/dataset"
-
-
             util_zip.unzip(
                 dirin = dirin,
                 dirout = dirout
             )   
-                
     """
     import zipfile
     with zipfile.ZipFile(dirin, 'r') as zip_ref:
@@ -181,23 +174,15 @@ def zip(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/',
         https://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
         
         Args:
-            dirin (string) : Directory to zip.
-                Default to "mypath"
-            dirout (string): Path to save the zipped file.
-                Default to "myfile.zip".
-            root_dir (string): The root dir of the system.
-                Default to "/".
-            format (string): Format of the zipped file. It can be "zip", "tar", "gztar", or any other registered format.
-        
+            dirin (str)    : Directory path. (Default to "mypath")
+            dirout (str)   : Path to save the zip file. (Default to "myfile.zip".)
+            root_dir (str) : Root dir of the system. (Default to "/".)
+            format (str)   : Format of the zipped file. (Default to "zip".)
         Returns: None.
-
         Example:
             from utilmy import util_zip
-
             dirin = "/tmp/dataset"
-
             dirout = "/tmp/result"
-
             util_zip.zip(
                 dirin = dirin,
                 dirout = dirout
@@ -216,23 +201,14 @@ def gzip(dirin='/mydir', dirout="./", root_dir:Optional[str]='/'):
     Docs::
         
         Args:
-            dirin (string): Directory to compress to a gz file.
-                Default to "/mydir".   
-            dirout (string): Path to save the gz file. It must end in ".gz".
-                Default to "./".
-            root_dir (string): The root dir of the system.
-                Default to "/".  
-
+            dirin (str)    : Directory path to compress. (Default to "/mydir".)   
+            dirout (str)   : Path to save the gz file, it must end in ".gz". (Default to "./".)
+            root_dir (str) : Root dir of the system. (Default to "/".)  
         Returns: None.
-        
         Example:
-
             from utilmy import util_zip
-
             dirin = "/tmp/dataset"
-
             dirout = "/tmp/data.gz"
-
             util_zip.gzip(
                 dirin = dirin,
                 dirout = dirout
@@ -250,21 +226,13 @@ def dir_size(dirin="mypath", dirout="./save.txt"):
     Docs::
             
             Args:
-                dirin (string) : Directory path to get its size.   
-                    Default to "mypath".
-                dirout (string) : Text file path to save the size of the directory.
-                    Default to "./save.txt".
-
+                dirin (str)  : Directory path. (Default to "mypath".)
+                dirout (str) : Text file path to save the size. (Default to "./save.txt".)
             Returns: None.
-
             Example:
-
                 from utilmy import util_zip
-
                 path = "/tmp/dataset/mnist_png.tar.gz"
-
-                util_zip.dir_size(path,dirout = "/tmp/dataset/size.txt")
-                                
+                util_zip.dir_size(path,dirout = "/tmp/dataset/size.txt")     
     """
     os.system( f" du -h --max-depth  13   '{dirin}'  | sort -hr  > '{dirout}'  ")
 
@@ -275,26 +243,19 @@ def dataset_donwload(url, path_target):
     Docs::
             
             Args:
-                url (string) : URL of the tar.gz file to download.
-                path_target (string) : Directory path to save the file.
-            
+                url (str)         : URL of the tar.gz file.
+                path_target (str) : Directory path to save the file.
             Returns:
                 Path of the saved file.
-            
             Example:
             from utilmy import util_zip
-
             path_target = "/tmp/dataset"
-
             url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
-
             path = util_zip.dataset_donwload(
                 url=url, 
                 path_target=path_target
             )
-
             print(path)#Displays the path of the saved file
-        
     """
     log(f"Donwloading mnist dataset in {path_target}")
     os.makedirs(path_target, exist_ok=True)
@@ -357,19 +318,15 @@ def os_extract_archive(file_path, path=".", archive_format="auto"):
             Returns:
                 True if a match was found and an archive extraction was completed,
                 False otherwise.
-            
             Example:
                 from importlib.resources import path
                 from utilmy import util_zip
-
                 file_path = "/tmp/mnist_png.tar.gz"
                 dir_path = "/tmp/mnist_png"
-
                 is_extracted = util_zip.os_extract_archive(
                     file_path=file_path,
                     path=path
                 )
-
                 print(is_extracted)
     """
     if archive_format is None:

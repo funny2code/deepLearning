@@ -639,36 +639,23 @@ def os_remove(dirin="folder/**/*.parquet",
 
     """  Delete files with criteria, using glob_glob
     Docs::
+
         Args:
-            dirin (string): Path with wildcards to match with folder to remove all its content.
-                Defaults to "folder/**/*.parquet".
-            min_size_mb (int): Min size of the files to remove.
-                Defaults to 0.
-            max_size_mb (int): Max size of the files to remove.
-                Defaults to 1.
-            exclude (string): Paths separated by commas to exclude.
-                Defaults to ""
-            include_only (string): Paths to only include if they are matched by the function.
-                Defaults to ""
-            ndays_past (int): Number of days past that the file must be old to remove.
-                Defaults to 1000
-            start_date (string): Date in the format YYYY-MM-DD that file's creation date must be greater to remove.
-                Defaults to '1970-01-02'
-            end_date (string): Date in the format YYYY-MM-DD that the file's creation date must be less to remove.
-                Defaults to '2050-01-01'
-            nfiles (int): Max number of files to remove.
-                Defaults to 99999999
-            dry (Boolean)=1: Flag to test only
-                Defaults to 0
-                
+            dirin (str)        : Path with wildcards to match folder name. (Default to "folder/**/*.parquet".)
+            min_size_mb (int)  : Min size of the files. (Default to 0.)
+            max_size_mb (int)  : Max size of the files. (Default to 1.)
+            exclude (str)      : Paths separated by commas to exclude. (Default to "".)
+            include_only (str) : Paths to only include. (Default to "".)
+            ndays_past (int)   : Number of days past that the file must be old. (Defaults to 1000.)
+            start_date (str)   : Start date of the file creation, format "YYYY-MM-DD". (Default to '1970-01-02'.)
+            end_date (str)     : End date of the file creation, format "YYYY-MM-DD". (Default to '2050-01-01'.)
+            nfiles (int)       : Max number of files to remove. (Default to 99999999.)
+            dry (Bool)         : Flag to test. (Default to 0.)
         Example:
-            Deleting all files in a specified folder::
-                from utilmy import oos
-                
-                path = "/home/user/Desktop/example/*"
-                oos.os_remove(path, ndays_past=0)
-                #All the files in "example" are deleted
-        
+            from utilmy import oos
+            path = "/home/user/Desktop/example/*"
+            oos.os_remove(path, ndays_past=0)
+            #All the files in "example" are deleted
     """
     import os, sys, time, glob, datetime as dt
 
@@ -1231,23 +1218,18 @@ def os_file_info(dirin, returnval='list', date_format='unix'):
 def os_walk(path, pattern="*", dirlevel=50):
     """  Get files from  sub-folder, same than glob_glob
     Docs::
+
         Args:
-        path (string): Path of the file to get all its sub-folder paths.
-        pattern (string): Pattern with wildcards like used in Unix shells.
-            Defaults to "*".
-        dirlevel (int): Level of sub-folders or sub-directories to get.
-            Defaults to 50.
-            Example: 
-                dirlevel=0 : root directory
-                dirlevel=1 : 1 path below
-        Returns:
-            Returns dict of  ['file'  , 'dir'].
-        Example:
-            from utilmy import oos
-            path = "/home/username/Desktop/example"
-            sub_folders = oos.os_walk(path=path)
-            print("Sub folders:",sub_folders)
-            # All the sub-folders of the folder named example
+            path (str)    : Directory path.
+            pattern (str) : Pattern with wildcards like those used in Unix shells. (Defaults to "*".)
+            dirlevel (int): Max Level of sub-directories, (0=root dir, 1= one path below, etc.). (Defaults to 50.)
+            Returns:
+                Returns dict of  ['file' , 'dir'].
+            Example:
+                from utilmy import oos
+                path = "/tmp/example"
+                sub_folders = oos.os_walk(path=path)
+                print("Subfolders:", sub_folders)
     """
     import fnmatch, os, numpy as np
 
@@ -1362,32 +1344,27 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 ###################################################################################################
 def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
-    """  search inside the files
+    """  search inside the files with a max dir level.
     Docs::
+
         Args:
-            srch_pattern (:obj:`list` of :obj:'str'): List of strings to match with the content of the files.
-            Defaults to None.
-            mode (string): To search content using the srch.
-            Defaults to "str".
-            dir1 (str): Folder/Directory name to search its content.
-            Defaults to "".
-            file_pattern (str): File pattern to match with the content of the directory.
-            Defaults to "*.*".
-            dirlevel (int): Max dir level to search content.
-            Defaults to 1.
+            srch_pattern (list of str) : Strings to match the file's content. (Defaults to None.)
+            mode (str)                 : Mode to search, ("str" or "regex"). (Defaults to "str".)
+            dir1 (str)                 : Directory name to search its content. (Defaults to "".)
+            file_pattern (str)         : File pattern to match the content. (Defaults to "*.*".)
+            dirlevel (int)             : Max dir level to search. (Defaults to 1.)
         Returns:
-            Returns a panda dataframe with all the matches, the columns are the folllowing:
-            1.search: Word that was matched
-            2.filename: Directory where the match was found
-            3.lineno: Number of line where the match was found
-            4.pos: Position in the line where the match was found
-            5.line: The line where the match was found
+            Returns a df with the matches, the columns are the following:
+                1.search: Word of the matching.
+                2.filename: Directory of the matching.
+                3.lineno: Number line of the matching.
+                4.pos: Position of the matching.
+                5.line: Line of the matching.
         Examples:
-        
             from utilmy import oos
-            path = "/home/necromancer/Desktop/New"
+            path = "/tmp/folder"
             content = oos.os_search_content(dir1=path,file_pattern="*")
-            # "content" is the dataframe
+            print(content) #Displays a df
     """
     import pandas as pd
     if srch_pattern is None:
@@ -1404,25 +1381,25 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
 
 def z_os_search_fast(fname, texts=None, mode="regex/str"):
     """function z_os_search_fast
+    search inside all files.
+    
     Docs::
+
         Args:
-            fname (string): Path of the file to search texts that match.
-            texts (:obj:`list` of :obj:'str'): List of words or regex to search in the file.
-            mode (string): To take the argument called "texts" as a list of text or a list of regex.
-                There are two allowed values:
-                - "regex"
-                - "str"
+            fname (str)         : Path of the file.
+            texts (list of str) : Strings or regex to search.
+            mode (str)          : Mode to search. ("str" or "regex"). (default to "regex/str".)
         Returns:
-            Return a list of tuples that each tuple has the following values of each match:
-                1.First value: Word that was matched.
-                2.Second value: Directory where the match was found.
-                3.Third value: Number of line where the match was found.
-                4.Fourth value: Position in the line where the match was found.
-                5.Fifth value: The line where the match was found.
+            Return a list of tuples. each tuple has the following values of each matching:
+                1. Word of the matching.
+                2. Directory of the matching.
+                3. Number line of the matching.
+                4. Position of the matching.
+                5. Line of the matching.
         Examples:
             from utilmy import oos
-            path = "/home/username/Desktop/example/test"
-            searching = oos.z_os_search_fast(fname=path,texts=["dummy"], mode="str")
+            path = "/tmp/file"
+            searching = oos.z_os_search_fast(fname=path,texts=["dummy"],mode="str")
             print("Searching result:", searching)
     """
     import re
