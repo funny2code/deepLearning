@@ -43,20 +43,13 @@ githash = get_current_githash()
 #####################################################################################
 ss1 = f"""
 
-1000's of utilities functions.
+Utilities function: load/save sessions, ....
 
 
 Stats usage:
-   > 1 million Donwload !
    https://pepy.tech/project/utilmy
 
    https://pypistats.org/packages/utilmy
-
-
-
-Doc Access:
-   https://tinyurl.com/2p848smu
-
 
    https://groups.google.com/g/utilmy
 
