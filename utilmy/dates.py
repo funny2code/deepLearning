@@ -105,6 +105,7 @@ def pd_random_daterange(start, end, size):
     """pd_random_daterange is used to get random dates between start and end date.
 
     Docs::
+
         Args:
             Start (pd.to_datetime):   Starting date
             End (pd.to_datetime):     Ending date
@@ -137,6 +138,7 @@ def pd_date_split(df, coldate =  'time_key', prefix_col ="",sep="/" ,verbose=Fal
     """function pd_date_split to split date into different formate.
 
     Docs::
+
         Args:
             df (pd):          df is the random date
             coldate (str):    The name we want to give to the random date. (Ex: 'Birthdate')
@@ -196,6 +198,7 @@ def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
     """ date_to_timezone is used to get date and time for particular timezone
 
         Docs::
+
             Args:
                 tdate (datetime):    date to convert to timezone
                 fmt (str):      formate of date and time (Ex: YYYYMMDD-HH:MM)
@@ -227,6 +230,7 @@ def date_is_holiday(array):
     """function date_is_holiday to check the holiday on array of pd.date format.
 
         Docs::
+
             Args:
                 array (list):   array of pd.date format to check weather it is holiday or not
                                 ( Ex. date_is_holiday([ pd.to_datetime("2015/1/1") ]) )
@@ -250,6 +254,7 @@ def date_weekmonth2(d):
      """function date_weekmonth2 to get the week of the month on given date.
 
     Docs::
+
         Args:
              d(datetime):   date to find the week of the month (Ex: datetime.datetime(2020, 5, 17))
         Returns:   week of the month on given date
@@ -280,6 +285,7 @@ def date_weekyear2(dt) :
     """function date_weekyear2 to get the week of the year on given date.
 
     Docs::
+
         Args:
             dt (datetime):  date to get the week of the year (Ex: datetime.datetime(2020, 5, 17))
         Returns: return week of that date in that year
@@ -297,6 +303,7 @@ def date_weekday_excel(x) :
     """method returns the day of the week as an integer, where Monday is 1 and Sunday is 7
 
     Docs::
+
         Args:
             x (str):   date in string format (Ex: '20200517')
         Returns: weekday of the date
@@ -312,6 +319,7 @@ def date_weekyear_excel(x) :
     """function is used to return a ISO Week Number.
 
     Docs::
+    
         Args:
               x (str): date in string format (Ex: '20200517')
         Returns: ISO Week Number
@@ -325,6 +333,7 @@ def date_generate(start='2018-01-01', ndays=100) :
     """function to generate list of n(ndays) consecutive days from the start date.
 
     Docs::
+
         Args:
             start (str):   Starting Date default to '2018-01-01'
             ndays (int):   Number of dates to generate (default to 100)
