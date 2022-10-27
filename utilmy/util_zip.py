@@ -137,23 +137,20 @@ def test2():
     assert filecmp.cmp(file_path, unzipped_file_path + file_name), "FAILED -> unzip(); Unzipped file is not equal to initial"
 
     log("####### zip2() ..")
-
     file_name = "zip2_test.txt"
-
     file_path = dirtmp + file_name
-
     path_zip = dirtmp + "/test_zip2.zip"
-
     uu.to_file("zip2() function test", file_path)
-
-    dirout = zip2(file_path, path_zip)
-
+    dirout = zip2(
+        dirin=file_path, 
+        dirout=path_zip
+        )
     assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
-
     path_zip = dirtmp + "/test_zip2.tar.gz"
-    
-    dirout = zip2(file_path, path_zip)
-
+    dirout = zip2(
+        dirin=file_path, 
+        dirout=path_zip
+        )
     assert exists(dirout), "FAILED -> zip2(); Tar file haven't been created"
     
 
