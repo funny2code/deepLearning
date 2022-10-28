@@ -102,15 +102,29 @@ def test2():
 
 
 def pd_random_daterange(start, end, size):
-    """function pd_random_daterange
-    Args:
-        start:   
-        end:   
-        size:   
-    Returns:
-        
+    """pd_random_daterange is used to get random dates between start and end date.
+
+    Docs::
+
+        Args:
+            Start (pd.to_datetime):   Starting date
+            End (pd.to_datetime):     Ending date
+            Size (int):    Number of random dates we want to generate.
+        Returns: Return the "n" random dates between start and end dates
+        Example: from utilmy.dates import pd_random_daterange
+                 df = pd.DataFrame(columns=['Birthdate'])
+                 df['Birthdate'] = pd_random_daterange(start=pd.to_datetime('2000-01-01'), end=pd.to_datetime('2022-01-01'), size=3)
+                 print(df)
+
+                 Output:        Birthdate
+                             0 2010-08-12
+                             1 2009-05-22
+                             2 2021-09-22
+
+
     """
     divide_by = 24 * 60 * 60 * 10**9
+    print(".value", start.value)
     start_u = start.value // divide_by
     end_u = end.value // divide_by
     return pd.to_datetime(np.random.randint(start_u, end_u, size), unit="D")
@@ -121,14 +135,30 @@ def pd_random_daterange(start, end, size):
 ####################################################################################################
 ##### Utilities for date  ##########################################################################
 def pd_date_split(df, coldate =  'time_key', prefix_col ="",sep="/" ,verbose=False ):
-    """function pd_date_split
-    Args:
-        df:   
-        coldate :   
-        prefix_col :   
-        sep:   
-        verbose:   
-    Returns:
+    """function pd_date_split to split date into different formate.
+
+    Docs::
+
+        Args:
+            df (pd):          df is the random date
+            coldate (str):    The name we want to give to the random date. (Ex: 'Birthdate')
+            prefix_col (str): The space we leave in prefix of each date.
+            sep (str):         separation between (Year,week), (year,Month), (year, quarter)
+                         (Ex: year quarter 2021/3, '/' is separation)
+            verbose (bool):   If True, print the output.
+        Returns: Return date in different formate.
+
+        Example:    from utilmy.dates import pd_date_split
+
+                    df2= pd_date_split(df, coldate ='Birthdate', sep='/')
+                    print(df2)
+
+
+                    Output:      Birthdate        date     year   month   day   weekday   weekmonth   weekmonth2   weekyeariso   weekyear2   quarter   yearweek   yearmonth  yearqarter   isholiday
+                                2021-11-26  2021-11-26     2021      11    26         4           4            4            47          48         3    2021/47     2021/11      2021/3          0
+
+
+
         
     """
     import pandas as pd
@@ -165,8 +195,23 @@ def pd_date_split(df, coldate =  'time_key', prefix_col ="",sep="/" ,verbose=Fal
 
 
 def date_to_timezone(tdate,  fmt="%Y%m%d-%H:%M", timezone='Asia/Tokyo'):
-    """
-       dt = datetime.datetime.now(timz('UTC'))
+    """ date_to_timezone is used to get date and time for particular timezone
+
+        Docs::
+
+            Args:
+                tdate (datetime):    date to convert to timezone
+                fmt (str):      formate of date and time (Ex: YYYYMMDD-HH:MM)
+                timezone (str): timezone for which we want to find time and date (Ex: 'Asia/Tokyo')
+
+            Returns: return date and time according to timezone
+
+            Example:   from utilmy.dates import date_to_timezone
+                       import datetime
+                       res= date_to_timezone(datetime.datetime.now())
+                       print(res)
+
+                       Output:   20221027-15:04
     """
     from pytz import timezone as tzone
     import datetime
@@ -182,8 +227,23 @@ from utilmy.utilmy_base import date_now
 
 
 def date_is_holiday(array):
-    """
-      is_holiday([ pd.to_datetime("2015/1/1") ] * 10)
+    """function date_is_holiday to check the holiday on array of pd.date format.
+
+        Docs::
+
+            Args:
+                array (list):   array of pd.date format to check weather it is holiday or not
+                                ( Ex. date_is_holiday([ pd.to_datetime("2015/1/1") ]) )
+
+            Returns:    1 if the date is holiday
+                        0 if the date is not holiday
+
+            Example:    from utilmy.dates import  date_is_holiday
+                        res = date_is_holiday([pd.to_datetime('2000-01-01')])
+                        print(res)
+
+                        Output: [1]
+
     """
     import holidays , numpy as np
     jp_holidays = holidays.CountryHoliday('JP')
@@ -191,12 +251,20 @@ def date_is_holiday(array):
 
 
 def date_weekmonth2(d):
-     """function date_weekmonth2
-     Args:
-         d:   
-     Returns:
-         
-     """
+     """function date_weekmonth2 to get the week of the month on given date.
+
+    Docs::
+
+        Args:
+             d(datetime):   date to find the week of the month (Ex: datetime.datetime(2020, 5, 17))
+        Returns:   week of the month on given date
+
+        Example:    from utilmy.dates import  date_weekmonth2
+                    res = date_weekmonth2(datetime.datetime(2020, 5, 17))
+                    print(res)
+
+                    Output: 3
+        """
      w = (d.day-1)//7+1
      if w < 0 or w > 5 :
          return -1
@@ -214,22 +282,32 @@ def date_weekmonth(date_value):
 
 
 def date_weekyear2(dt) :
-    """function date_weekyear2
-    Args:
-        dt:   
-    Returns:
-        
-    """
+    """function date_weekyear2 to get the week of the year on given date.
+
+    Docs::
+
+        Args:
+            dt (datetime):  date to get the week of the year (Ex: datetime.datetime(2020, 5, 17))
+        Returns: return week of that date in that year
+
+        Example:    from utilmy.dates import  date_weekyear2
+                    res = date_weekyear2(datetime.datetime(2020, 5, 17))
+                    print(res)
+
+                    Output: 20
+        """
     return ((dt - datetime.datetime(dt.year,1,1)).days // 7) + 1
 
 
 def date_weekday_excel(x) :
-    """function date_weekday_excel
-    Args:
-        x:   
-    Returns:
-        
-    """
+    """method returns the day of the week as an integer, where Monday is 1 and Sunday is 7
+
+    Docs::
+
+        Args:
+            x (str):   date in string format (Ex: '20200517')
+        Returns: weekday of the date
+        """
     import datetime
     date = datetime.datetime.strptime(x,"%Y%m%d")
     wday = date.weekday()
@@ -238,11 +316,13 @@ def date_weekday_excel(x) :
 
 
 def date_weekyear_excel(x) :
-    """function date_weekyear_excel
-    Args:
-        x:   
-    Returns:
-        
+    """function is used to return a ISO Week Number.
+
+    Docs::
+    
+        Args:
+              x (str): date in string format (Ex: '20200517')
+        Returns: ISO Week Number
     """
     import datetime
     date = datetime.datetime.strptime(x,"%Y%m%d")
@@ -250,13 +330,16 @@ def date_weekyear_excel(x) :
 
 
 def date_generate(start='2018-01-01', ndays=100) :
-    """function date_generate
-    Args:
-        start:   
-        ndays:   
-    Returns:
-        
-    """
+    """function to generate list of n(ndays) consecutive days from the start date.
+
+    Docs::
+
+        Args:
+            start (str):   Starting Date default to '2018-01-01'
+            ndays (int):   Number of dates to generate (default to 100)
+        Returns: List of generated dates
+
+        """
     from dateutil.relativedelta import relativedelta
     start0 = datetime.datetime.strptime(start, "%Y-%m-%d")
     date_list = [start0 + relativedelta(days=x) for x in range(0, ndays)]
