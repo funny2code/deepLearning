@@ -2,6 +2,7 @@
 """  Launch app
 Doc::
    
+   ### pip install fire
     cd folder
     python app.py  main   --dir_html0  assets/html
 
