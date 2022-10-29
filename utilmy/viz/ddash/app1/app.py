@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
+"""  Launch app
+Doc::
+   
+    cd folder
+    python app.py  main   --dir_html0  assets/html
 
+
+ 
+"""
 from dash import Dash, html
 from dash_treeview_antd import TreeView
 from dash.dependencies import Input, Output
@@ -27,19 +36,15 @@ def add_sidebar():
 
 
     treeview = {
-                'title': 'Parent',
-                'key':'0',
+                'title': 'Parent', 'key':'0',
                 'children': [{
-                    'title': 'Child', 
-                    'key': '01',
+                    'title': 'Child',   'key': '01',
                     'children': [
                         {'title': 'Subchild1', 'key': 'page1.html'},
                         {'title': 'Subchild2', 'key': 'page2.html'},
                     ],
                 },
-                {
-                    'title': 'Child2', 
-                    'key': '02',
+                {   'title': 'Child2',   'key': '02',
                     'children': [
                         {'title': 'Subchild2-1', 'key': 'page2_1.html'},
                         {'title': 'Subchild2-2', 'key': 'page2_2.html'},
@@ -49,8 +54,7 @@ def add_sidebar():
             }
 
     sidebar_content = html.Div([
-        dbc.Row([   dbc.Col([
-                    TreeView(
+        dbc.Row([   dbc.Col([  TreeView(
                             id='input',
                             multiple=False,
                             checkable=False,
@@ -58,9 +62,7 @@ def add_sidebar():
                             selected=[],
                             expanded=[],
                             data=treeview
-                        )
-                    ])
-                ])
+                        )  ])  ])
     ], style=SIDEBAR_STYLE)
     return sidebar_content
 
@@ -105,7 +107,16 @@ def main_page():
 
 
 
-def main():
+def main(dir_html0="assets/html/", dir_log=""):
+    """ Run main app
+
+    Args:
+        dir_html0 (str, optional): _description_. Defaults to "assets/html/".
+
+    """
+    global dir_html
+
+    dir_html = dir_html0
     main_page()
     app.run_server(debug=True)
 
@@ -113,4 +124,5 @@ def main():
 
 
 if __name__ == '__main__':
-     main()
+     import fire
+     fire.Fire()
