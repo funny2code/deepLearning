@@ -25,7 +25,7 @@ dir_html     = "assets/html/"
 
 ###################################################################
 ######  Utils #####################################################
-def add_sidebar():
+def sidebar_add_v1():
     """ Add sidebar style arguments for the sidebar.
 
     Returns:
@@ -78,7 +78,7 @@ def add_sidebar():
 
 
 @app.callback(Output('output', 'src'), [Input('input', 'selected')])
-def render_iframe(selected):
+def iframe_render(selected):
     global page_default, dir_html
 
     if selected == []:
@@ -95,7 +95,7 @@ def render_iframe(selected):
 ###################################################################
 def main_page():
 
-    sidebar_content = add_sidebar()
+    sidebar_content = sidebar_add_v1()
 
 
     ###### the style arguments for the main content page.
