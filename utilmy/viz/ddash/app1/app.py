@@ -15,13 +15,21 @@ import dash_bootstrap_components as dbc
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'Simple render html'
-temp_selected = 'main.html'
+
+### Main page ressource
+page_default = 'assets/html/main.html'
+dir_html     = "assets/html/"
+
 
 
 ###################################################################
 ######  Utils #####################################################
 def add_sidebar():
-    # the style arguments for the sidebar.
+    """ Add sidebar style arguments for the sidebar.
+
+    Returns:
+        _type_: _description_
+    """
     SIDEBAR_STYLE = {
         'position': 'fixed',
         'top': 0,
@@ -70,15 +78,16 @@ def add_sidebar():
 
 @app.callback(Output('output', 'src'), [Input('input', 'selected')])
 def render_iframe(selected):
-    global temp_selected
+    global page_default, dir_html
 
     if selected == []:
-        return f'assets/html/{temp_selected}'
+        return f'{page_default}'
+
     elif selected[0].endswith('.html'):
-            temp_selected = selected[0]
-            return f'assets/html/{selected[0]}'
+            page_default = selected[0]
+            return f'{dir_html}/{selected[0]}'
     else:
-        return f'assets/html/{temp_selected}'
+        return f'{page_default}'
 
 
 
@@ -88,7 +97,7 @@ def main_page():
     sidebar_content = add_sidebar()
 
 
-    # the style arguments for the main content page.
+    ###### the style arguments for the main content page.
     CONTENT_STYLE = {
         'marginLeft': '25%',
         'marginRight': '5%',
@@ -107,7 +116,7 @@ def main_page():
 
 
 
-def main(dir_html0="assets/html/", dir_log=""):
+def main(dir_html0="", dir_log=""):
     """ Run main app
 
     Args:
@@ -115,8 +124,9 @@ def main(dir_html0="assets/html/", dir_log=""):
 
     """
     global dir_html
+    dir_html = dir_html0 if dir_html0 != "" else dir_html
 
-    dir_html = dir_html0
+
     main_page()
     app.run_server(debug=True)
 
@@ -126,3 +136,5 @@ def main(dir_html0="assets/html/", dir_log=""):
 if __name__ == '__main__':
      import fire
      fire.Fire()
+
+
