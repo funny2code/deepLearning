@@ -48,7 +48,7 @@ def test1():
 
 
     log("####### dataset_download_test() ..")
-    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", './testdata/tmp/test/dataset/')
+    test_file_path = dataset_donwload("https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz", dirtmp + "dataset/")
     f = os.path.exists(os.path.abspath(test_file_path))
     assert f == True, "The file made by dataset_download_test doesn't exist"
 
@@ -72,7 +72,7 @@ def test1():
 
     is_extracted  = os_extract_archive(
         file_path = path_zip,
-        path      = drepo + "testdata/tmp/zip_test"
+        path      = dirtmp + "testdata/tmp/zip_test"
         #,archive_format = "auto"
         )
     assert is_extracted == True, "The zip wasn't extracted"
@@ -136,6 +136,18 @@ def test2():
 
     assert filecmp.cmp(file_path, unzipped_file_path + file_name), "FAILED -> unzip(); Unzipped file is not equal to initial"
 
+    log("####### zip2() ..")
+    file_name = "zip2_test.txt"
+    file_path = dirtmp + file_name
+    path_zip = dirtmp + "/test_zip2.zip"
+    uu.to_file("zip2() function test", file_path)
+    dirout = zip2(dirin=file_path, dirout=path_zip)
+    assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    path_zip = dirtmp + "/test_zip2.tar.gz"
+    dirout = zip2(dirin=file_path, dirout=path_zip)
+    assert exists(dirout), "FAILED -> zip2(); Tar file haven't been created"
+    
+
 
 
 
@@ -173,6 +185,43 @@ def zip2(dirin:str="mypath", dirout:str="myfile.zip", root_dir:Optional[str]='/'
                 dirin = dirin,
                 dirout = dirout
             )   
+
+            # Zip small files.
+            from utilmy import util_zip
+            dirin = "/tmp/dataset/*"
+            dirout = "/tmp/result.zip"
+            max_size_mb = 100
+            util_zip.zip2(
+                dirin = dirin,
+                dirout = dirout,
+                max_size_mb = max_size_mb
+            )   
+
+            # Zip files that were created 1 month ago.
+            from utilmy import util_zip
+            from datetime import date
+            from dateutil.relativedelta import relativedelta
+            dirin = "/tmp/dataset/*"
+            dirout = "/tmp/result.zip"
+            now = date.today()
+            start_date = (now - relativedelta(months=1)).strftime('%Y-%m-%d')
+            end_date = (now + relativedelta(days=1)).strftime('%Y-%m-%d')
+            util_zip.zip2(
+                dirin = dirin,
+                dirout = dirout,
+                start_date = start_date,
+                end_date = end_date
+            )
+
+            #Zip only 50 files
+            from utilmy import util_zip
+            dirin = "/tmp/dataset/*"
+            dirout = "/tmp/result.zip"
+            util_zip.zip2(
+                dirin = dirin,
+                dirout = dirout,
+                nfiles = 50
+            )
 
         SuperFastPython.com
         # create a zip file and add files concurrently with threads without a lock
