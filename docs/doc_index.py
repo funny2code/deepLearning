@@ -6356,6 +6356,7 @@ test2()
 test_all()
 unzip(dirin, dirout)
 zip(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '/', format = 'zip')
+zip2(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '/', exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
 
 
 

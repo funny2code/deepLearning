@@ -5288,3 +5288,158 @@ sorry, the line was cut.
 ^
 45    E999 SyntaxError: invalid syntax
 45
+./zadmin.py:50:27: E999 SyntaxError: invalid syntax
+./utilmy/tools/mybash/mybash/github_getallrepo.py:44:15: E999 SyntaxError: invalid syntax
+        print "Usage: [HTTP_URLS=1] python2.7 {} account_name [personal_token]".format(sys.argv[0])
+              ^
+./utilmy/db/qdrant/dbvector.py:42:28: E999 TabError: inconsistent use of tabs and spaces in indentation
+./utilmy/db/qdrant/qdrant_example.py:77:8: E999 SyntaxError: invalid syntax
+docker pull generall/qdrant
+       ^
+./utilmy/nlp/util_embedding.py:16:42: E999 SyntaxError: invalid syntax
+import matplotlib.pyplot as plt; seaborn as sns
+                                         ^
+./utilmy/zzml/mlmodels/distributed.py:50:26: E999 IndentationError: unindent does not match any outer indentation level
+./utilmy/zzml/mlmodels/dataloader.py:318:15: E999 IndentationError: unindent does not match any outer indentation level
+./utilmy/zzml/mlmodels/data.py:121:7: E999 SyntaxError: invalid syntax
+./utilmy/zzml/mlmodels/models.py:92:11: E999 IndentationError: unindent does not match any outer indentation level
+./utilmy/zzml/mlmodels/utils/bayesian.py:650:52: E999 SyntaxError: invalid syntax
+./utilmy/zzml/mlmodels/template/00_template_keras.py:68:5: E999 IndentationError: expected an indented block
+    return df, linear_cols, dnn_cols, train, test, target
+    ^
+./utilmy/zzml/mlmodels/model_sklearn/model_sklearn/model.py:68:108: E999 SyntaxError: invalid syntax
+        self.model_pars, self.compute_pars, self.data_pars = deepcopy(model_pars), deepcopy(compute_pars), , deepcopy(data_pars)
+                                                                                                           ^
+./utilmy/zzml/mlmodels/model_sklearn/model_sklearn/myprocessor.py:53:4: E999 IndentationError: unexpected indent
+    task   = kw['task_type']
+   ^
+./utilmy/zzml/mlmodels/model_sklearn/model_lightgbm/model.py:319:5: E999 SyntaxError: invalid syntax
+    else:
+    ^
+./utilmy/zzml/mlmodels/example/vision_mnist.py:15:1: E999 SyntaxError: invalid syntax
+!git clone https://github.com/ahmed3bbas/mlmodels.git
+^
+./utilmy/zzml/mlmodels/preprocess/ztemp.py:6:26: E999 SyntaxError: invalid character in identifier
+xxx = data_info.get( “xxx”, arg.get(“xxxx”, -1))
+                         ^
+./utilmy/zzml/mlmodels/model_gluon/gluonts_model.py:203:33: E999 SyntaxError: invalid syntax
+./utilmy/zzml/mlmodels/model_tf/rl/0_template_rl.py:2:3: E999 SyntaxError: EOL while scanning string literal
+"""
+RF framework
+https://github.com/google/dopamine/tree/master/docs
+https://github.com/deepmind/trfl
+
+
+""""
+  ^
+./utilmy/zzml/mlmodels/model_tf/raw/tfcode2/hybrid/GAN-Sentence/main.py:59:8: E999 SyntaxError: invalid syntax
+	print 'epoch: ' + str(i + 1) + ', discriminator loss: ' + str(disc_loss) + ', generator loss: ' + str(gen_loss) + ', s/epoch: ' + str(time.time() - last_time)
+	      ^
+./utilmy/cloud/aws/autoscale_aws/test/tasks/task_aws_template/01_hyperparams_generator_localpc.py:12:7: E999 SyntaxError: invalid syntax
+print 'Directory Folder', DIRCWD
+      ^
+./utilmy/cloud/aws/autoscale_aws/test/tasks/task_aws_template/05_batch_getresults_from_aws_locapc.py:12:7: E999 SyntaxError: invalid syntax
+print 'Directory Folder', DIRCWD
+      ^
+./utilmy/cloud/aws/autoscale_aws/test/tasks/task_aws_template/00_AWS_BATCH_localpc.py:2:1: E999 SyntaxError: invalid syntax
+./utilmy/cloud/aws/autoscale_aws/test/tasks/task_aws_template/batch_b_subprocess_launch.py:26:16: E999 SyntaxError: invalid syntax
+IPYTHON_PATH =  
+               ^
+./utilmy/cloud/aws/autoscale_aws/test/tasks/task_aws_template/subprocess_script.py:56:7: E999 SyntaxError: invalid syntax
+print 'backtest period ', tt0,tt1, t0, t1
+      ^
+./utilmy/cloud/aws/autoscale_aws/test/zarchive/batch_local_aws_cli.py:107:6: E999 SyntaxError: EOL while scanning string literal
+  """"
+      dont retrieve existing folder on disk.
+
+
+  """"
+     ^
+./utilmy/webscraper/scrape_batch.py:25:4: E999 TabError: inconsistent use of tabs and spaces in indentation
+	"""
+      HTML --> return pandas dataframe
+
+      columns = 
+                <th>logic ID</th>
+                <th>access</th>
+                <th>impression</th>
+                <th>click</th>
+                <th>purchase</th>
+                <th>in-shop</th>
+                <th>gms</th>
+                <th>gms/purchase</th>
+                <th>in-shop</th>
+                <th>cost</th>
+                <th>exposure</th>
+                <th>CTR</th>
+                <th>CVR</th>
+                <th>in-shop</th>
+                datetime   (YYYY MM DD HH:SS:MM)
+
+
+
+	"""
+	  ^
+./utilmy/tabular/util_activelearning.py:366:5: E999 SyntaxError: invalid syntax
+    %matplotlib inline
+    ^
+./utilmy/graph/util_graph.py:139:27: E999 SyntaxError: invalid syntax
+    def load(self, dirin, from='networkit/networkx'):
+                          ^
+./utilmy/sspark/src/util_trick.py:11:8: E999 SyntaxError: invalid syntax
+    1. Standalone function:
+       ^
+./utilmy/optim/zold/gp_formulae.py:143:9: E999 IndentationError: expected an indented block
+        rand = sample(list(dict_full), 1)
+        ^
+./utilmy/optim/zold/gp.py:141:9: E999 IndentationError: expected an indented block
+        rand = sample(list(dict_full), 1)
+        ^
+./utilmy/optim/zold/gp_dcgp.py:166:9: E999 IndentationError: expected an indented block
+        rand = random.sample(list(dict_full), 1)
+        ^
+./utilmy/deeplearning/ttorch/models/graphnlp.py:215:19: E999 SyntaxError: invalid syntax
+      train_loss = 
+                  ^
+./utilmy/deeplearning/ttorch/zsave/zrule_encoder2.py:44:17: E999 SyntaxError: invalid syntax
+./utilmy/deeplearning/ttorch/zsave/model_ensemble_detail.py:723:12: E999 SyntaxError: invalid syntax
+sorry, the line was cut. 
+           ^
+./utilmy/deeplearning/kkeras/util_dataloader_tab.py:63:42: E999 SyntaxError: invalid syntax
+    input_layer = pd_to_tf_input_layer(df:pd.DataFrame, 
+                                         ^
+./utilmy/deeplearning/kkeras/zkeras_torch_sentence.py:43:22: E999 SyntaxError: invalid syntax
+  sentrans_train(    , cc=cc)
+                     ^
+./utilmy/recsys/vectors.py:52:5: E999 IndentationError: expected an indented block
+    def table_create(self, table='test', vector_size=128, distance='Euclid'):
+    ^
+./utilmy/recsys/util_sequencepattern.py:77:33: E999 SyntaxError: closing parenthesis ')' does not match opening parenthesis '['
+./utilmy/recsys/util_tfranking.py:83:5: E999 SyntaxError: invalid syntax
+    !pip install -q tensorflow
+    ^
+./utilmy/recsys/ranking/optim_rank.py:195:8: E999 SyntaxError: EOL while scanning string literal
+    """"
+        # evaluate each rank aggregation algorithm by using spearman's rho's and kendall-tau's metrics
+        # for varying levels of ncorrect in the generated rankings    
+    
+    """"
+       ^
+./utilmy/recsys/ranking/util_rankmerge.py:32:8: E999 SyntaxError: EOL while scanning string literal
+    """"
+        # evaluate each rank aggregation algorithm by using spearman's rho's and kendall-tau's metrics
+        # for varying levels of ncorrect in the generated rankings    
+    
+    """"
+       ^
+./utilmy/recsys/zrecs/zprepro_recs.py:78:12: E999 SyntaxError: invalid syntax
+    global = None  ; clientdrant = None ; ok_global = None
+           ^
+./utilmy/recsys/bandits/aabandit_design.py:6:56: E999 SyntaxError: invalid syntax
+-------------------------functions----------------------
+                                                       ^
+./utilmy/recsys/bandits/recostep_offline_replayer_eval_movielens.py:46:1: E999 SyntaxError: invalid syntax
+!wget http://files.grouplens.org/datasets/movielens/ml-100k.zip
+^
+45    E999 SyntaxError: invalid syntax
+45
