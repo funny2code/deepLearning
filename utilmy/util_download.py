@@ -50,6 +50,15 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
+    log("#######   donwload_and_extract()")
+    url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
+    dirout = dirtmp + "/download_and_extract_test"    
+    extracted_dir_path = donwload_and_extract(url=url,dirout=dirout)
+    file_path = dirout + "/mnist_png.tar.gz"
+    assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
+    assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
+
+
 
 
 #############################################################################################
