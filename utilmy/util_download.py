@@ -34,6 +34,22 @@ def test1() -> None:
     d = Box({})
     dirtmp ="./ztmp/"
 
+    #import utilmy as uu
+    #drepo, dirtmp = uu.dir_testinfo()
+
+    #log("#######   download_github()")
+    #TODO: This test has a bug
+    #url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
+    # Without unzipping the file
+    #dirout = dirtmp + "/download_github_test1"
+    #file_path = download_github(url=url,dirout=dirout,unzip=False)
+    #assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
+    # Unzipping the file
+    #dirout = dirtmp + "/download_github_test2"
+    #file_path = download_github(url=url,dirout=dirout)
+    #csv_path = dirout + "/features.csv"
+    #assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
+    #assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
 
 
