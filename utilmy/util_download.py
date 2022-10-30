@@ -34,22 +34,21 @@ def test1() -> None:
     d = Box({})
     dirtmp ="./ztmp/"
 
-    #import utilmy as uu
-    #drepo, dirtmp = uu.dir_testinfo()
+    import utilmy as uu
+    drepo, dirtmp = uu.dir_testinfo()
 
-    #log("#######   download_github()")
-    #TODO: This test has a bug
-    #url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
+    log("#######   download_github()")
+    url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
     # Without unzipping the file
-    #dirout = dirtmp + "/download_github_test1"
-    #file_path = download_github(url=url,dirout=dirout,unzip=False)
-    #assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
+    dirout = dirtmp + "/download_github_test1"
+    file_path = download_github(url=url,dirout=dirout,unzip=False)
+    assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     # Unzipping the file
-    #dirout = dirtmp + "/download_github_test2"
-    #file_path = download_github(url=url,dirout=dirout)
-    #csv_path = dirout + "/features.csv"
-    #assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
-    #assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
+    dirout = dirtmp + "/download_github_test2"
+    file_path = download_github(url=url,dirout=dirout)
+    csv_path = dirout + "/features.csv"
+    assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
+    assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
 
 
@@ -107,8 +106,8 @@ def download_github(url="https://github.com/arita37/dsa2_data/blob/main/input/ti
         flag = os.path.exists(fileout_fullname)
         if(flag):
             print("Dataset is Downloaded")
-            zip_file = ZipFile(fname)
-            zip_file.extractall()
+            zip_file = ZipFile(fileout_fullname)
+            zip_file.extractall(dirout2)
         else:
             print("dataset is already presented")
 
