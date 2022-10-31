@@ -2,36 +2,62 @@
 """  Launch app
 Doc::
    
-   ### pip install fire
-    cd folder
-    python app.py  main   --dir_html0  assets/html
+   ### Dependencies
+        #### Libraries:
+        ``` pip install fire
+            pip install dash_treeview_antd
+        ```
+        #### Data:
+            `cd html or dash pages to specified folder`
 
+    ### Command to run
+        - Launch html viz
+            `python app.py main --content_type html --dir_template assets/html --sidebar_treeview tree_view_dict`
+        - Launch links viz
+            `python app.py main --sidebar_treeview tree_view_dict`
+        - Launch dash pages viz
+            `python app.py main --content_type dash --dir_template pages/ --sidebar_treeview tree_view_dict`
 
- 
 """
+import dash_bootstrap_components as dbc
 from dash import Dash, html
 from dash_treeview_antd import TreeView
 from dash.dependencies import Input, Output
-import dash_bootstrap_components as dbc
+from fire import Fire
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
 app.title = 'Simple render html'
 
-### Main page ressource
-page_default = 'assets/html/main.html'
-dir_html     = "assets/html/"
+### Main page resource
+CONTENT_DEFAULT = {
+    'html': {
+        'path': 'assets/html',
+        'page_default': 'main.html'
+        },
+    'dash': {
+        'path':'pages/',
+        'page_default': 'main.py'
+        },
+    'links': {
+        'path': None,
+        'page_default': 'about:blank'
+        }
+}
 
+dir_path     = "assets/html/"
+page_default = 'assets/html/main.html'
 
 
 ###################################################################
 ######  Utils #####################################################
-def sidebar_add_v1():
-    """ Add sidebar style arguments for the sidebar.
+def sidebar_v1(tree_view="", style=""):
+    """ Compose Sidebar v1 layout component.
 
     Returns:
-        _type_: _description_
+        _type_: (dash.html.Div.Divz) Sidebar v1 Div Component
     """
-    SIDEBAR_STYLE = {
+
+    SIDEBAR_STYLE_DEFAULT = {
         'position': 'fixed',
         'top': 0,
         'left': 0,
@@ -44,88 +70,104 @@ def sidebar_add_v1():
     }
 
 
-    treeview = {
-                'title': 'Parent', 'key':'0',
-                'children': [{
-                    'title': 'Child',   'key': '01',
-                    'children': [
-                        {'title': 'Subchild1', 'key': 'page1.html'},
-                        {'title': 'Subchild2', 'key': 'page2.html'},
-                    ],
-                },
-                {   'title': 'Child2',   'key': '02',
-                    'children': [
-                        {'title': 'Subchild2-1', 'key': 'page2_1.html'},
-                        {'title': 'Subchild2-2', 'key': 'page2_2.html'},
-                        {'title': 'Subchild2-3', 'key': 'page2_3.html'},
-                    ],
-                }]
-            }
+    TREE_VIEW_DEFAULT = {
+                        'title': 'Parent', 'key':'0',
+                        'children': [{
+                            'title': 'Child',   'key': '01',
+                            'children': [
+                                {'title': 'Subchild1', 'key': 'page1.html'},
+                                {'title': 'Subchild2', 'key': 'page2.html'},
+                            ],
+                        },
+                        {   'title': 'Child2',   'key': '02',
+                            'children': [
+                                {'title': 'Subchild2-1', 'key': 'page2_1.html'},
+                                {'title': 'Subchild2-2', 'key': 'page2_2.html'},
+                                {'title': 'Subchild2-3', 'key': 'page2_3.html'},
+                            ],
+                        }]
+                    }
 
-    sidebar_content = html.Div([
-        dbc.Row([   dbc.Col([  TreeView(
+    tree_view = tree_view or TREE_VIEW_DEFAULT
+    style = style or SIDEBAR_STYLE_DEFAULT
+
+    sidebar_content = html.Div( 
+                        TreeView(
                             id='input',
                             multiple=False,
                             checkable=False,
                             checked=False,
                             selected=[],
                             expanded=[],
-                            data=treeview
-                        )  ])  ])
-    ], style=SIDEBAR_STYLE)
+                            data=tree_view
+                        ), style=style  
+                    )
     return sidebar_content
 
 
+@app.callback(Output('output', 'content_placeholder'), [Input('input', 'selected')])
+def render(selected):
+    global page_default, dir_path
+    
+    def iframe_render(selected):
+        """ Handle raw .html and external links using Iframe """
+        ...
+    
+    def dash_page_render(selected):
+        """ Handle dash page rendering"""
+        ...
+    
 
-@app.callback(Output('output', 'src'), [Input('input', 'selected')])
-def iframe_render(selected):
-    global page_default, dir_html
 
-    if selected == []:
-        return f'{page_default}'
 
-    elif selected[0].endswith('.html'):
-            page_default = selected[0]
-            return f'{dir_html}/{selected[0]}'
-    else:
-        return f'{page_default}'
+# def iframe_render(selected):
+#     global page_default, dir_html
+
+#     if selected == []:
+#         return f'{page_default}'
+
+#     elif selected[0].endswith('.html'):
+#             page_default = selected[0]
+#             return f'{dir_html}/{selected[0]}'
+#     else:
+#         return f'{page_default}'
 
 
 
 ###################################################################
 def main_page():
 
-    sidebar_content = sidebar_add_v1()
+    sidebar_content = sidebar_v1()
 
-
-    ###### the style arguments for the main content page.
     CONTENT_STYLE = {
-        'marginLeft': '25%',
-        'marginRight': '5%',
-        'top': '10px',
-        'padding': '20px 10px'
+        'marginLeft': '20%',
+        'height': '100vh'
     }
-    main_content = html.Div([
-        dbc.Row([  html.Iframe(id="output")])], style=CONTENT_STYLE)
-
-
+    main_content = html.Div(id="content_placeholder", style=CONTENT_STYLE)
 
     app.layout = html.Div([sidebar_content, main_content])
 
 
 
-
-
-
-def main(dir_html0="", dir_log=""):
+def main(content_type="links", dir_template="", dir_log="", sidebar_treeview=""):
     """ Run main app
 
     Args:
-        dir_html0 (str, optional): _description_. Defaults to "assets/html/".
+        content_type ({'html', 'dash', 'links'}, optional):
+            The content type to be loaded. Default to 'html'.
+        dir_template (str, optional): 
+            _description_. Defaults to "None".
+
+    Raises:
+        ValueError
+            Raised if `content_type` is not 'html', 'dash', or 'links'.
 
     """
-    global dir_html
-    dir_html = dir_html0 if dir_html0 != "" else dir_html
+    content_type = content_type.lower()
+    if content_type not in CONTENT_DEFAULT.keys():
+        raise ValueError('content_type must be "html", "dash", or "links"')
+    
+    dir_path = dir_template or CONTENT_DEFAULT[content_type]['path']
 
 
     main_page()
@@ -133,9 +175,7 @@ def main(dir_html0="", dir_log=""):
 
 
 
-
 if __name__ == '__main__':
-     import fire
-     fire.Fire()
+     Fire()
 
 
