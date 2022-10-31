@@ -34,6 +34,7 @@ def test1() -> None:
     d = Box({})
     dirtmp ="./ztmp/"
 
+    import zipfile, tarfile
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -57,6 +58,28 @@ def test1() -> None:
     file_path = dirout + "/mnist_png.tar.gz"
     assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
     assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
+
+    log("#######   os_extract_archive()")
+    dir_path = dirtmp + "/extract_test/"
+    path_zip = dir_path + "test.zip"
+    uu.to_file("Dummy test", dir_path + "/zip_test.txt")
+    zf = zipfile.ZipFile(path_zip, "w")
+    zf.write(dir_path + "/zip_test.txt", "zip_test.txt")
+    zf.close()
+    dirout = dir_path + "zip_extracted/"
+    is_extracted  = os_extract_archive(file_path=path_zip,dirout=dirout)
+    assert is_extracted == True, "FAILED -> os_extract_archive(); The zip file wasn't extracted"
+    assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
+    path_tar = dir_path + "test.tar.gz"
+    tar = tarfile.TarFile(path_tar, "w")
+    tar.add(dir_path + "/zip_test.txt", "zip_test.txt")
+    tar.close()
+    dirout = dir_path + "tar_extracted/"
+    is_extracted  = os_extract_archive(file_path=path_tar,dirout=dirout)
+    assert is_extracted == True, "FAILED -> os_extract_archive(); The tar file wasn't extracted"
+    assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
+
+
 
 
 
