@@ -5,91 +5,84 @@ Doc::
    ### Dependencies
         #### Libraries:
         ``` pip install fire
+            pip install dash_bootstrap_components
             pip install dash_treeview_antd
+            pip install orjson
         ```
         #### Data:
-            `cd html or dash pages to specified folder`
+            - For Html
+                `copy .html files to assets/html/`
+            - For Dash Pages
+                `copy pages.py files to pages/ folder`
+
+        #### Layout Json:
+            Base Format:
+                ```
+                {
+                    "main_content" : {
+                        <MAIN_CONTENT_STYLE>
+                    },
+                    "sidebar_content":{
+                        "version": <SIDEBAR_VERSION>,
+                        "data": {
+                            "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
+                            "children": [{
+                                "title": "Child",   "key": "<NUMBER>",
+                                "children": [...]
+
+                            }]
+                        },
+                        "style": {
+                            <SIDEBAR_STYLE>
+                        }
+                    }
+                }
+                ```
+            
+            Save .json to assets folder
+
 
     ### Command to run
         - Launch html viz
-            `python app.py main --content_type html --dir_template assets/html --sidebar_treeview tree_view_dict`
+            `python app.py main --content_type html --content_layout assets/content_layout.json --homepage main.html`
         - Launch links viz
-            `python app.py main --sidebar_treeview tree_view_dict`
+            `python app.py main --content_layout links_example.json
         - Launch dash pages viz
-            `python app.py main --content_type dash --dir_template pages/ --sidebar_treeview tree_view_dict`
+            `python app.py main` // under development
 
 """
 import dash_bootstrap_components as dbc
+import orjson
 from dash import Dash, html
+from dash.dcc import Store
+from dash.dependencies import ClientsideFunction, Input, Output
 from dash_treeview_antd import TreeView
-from dash.dependencies import Input, Output
 from fire import Fire
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], use_pages=True)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.title = 'Simple render html'
 
 ### Main page resource
-CONTENT_DEFAULT = {
-    'html': {
-        'path': 'assets/html',
-        'page_default': 'main.html'
-        },
-    'dash': {
-        'path':'pages/',
-        'page_default': 'main.py'
-        },
-    'links': {
-        'path': None,
-        'page_default': 'about:blank'
-        }
-}
-
-dir_path     = "assets/html/"
-page_default = 'assets/html/main.html'
-
 
 ###################################################################
 ######  Utils #####################################################
-def sidebar_v1(tree_view="", style=""):
+def sidebar_v1(sidebar):
     """ Compose Sidebar v1 layout component.
+    Args:
+        _type_: (dict) Sidebar data and style
 
     Returns:
-        _type_: (dash.html.Div.Divz) Sidebar v1 Div Component
+        _type_: (dash.html.Div.Div) Sidebar v1 Div Component
+
+    Raises:
+        ValueError
+            Raised if `data` or `style` is not exist in `sidebar_content` json.
     """
-
-    SIDEBAR_STYLE_DEFAULT = {
-        'position': 'fixed',
-        'top': 0,
-        'left': 0,
-        'bottom': 0,
-        'width': '20%',
-        'padding': '20px 10px',
-        'backgroundColor': '#f8f9fa',
-        'verticalAlign': 'middle',
-        'alignItems': 'center'
-    }
-
-
-    TREE_VIEW_DEFAULT = {
-                        'title': 'Parent', 'key':'0',
-                        'children': [{
-                            'title': 'Child',   'key': '01',
-                            'children': [
-                                {'title': 'Subchild1', 'key': 'page1.html'},
-                                {'title': 'Subchild2', 'key': 'page2.html'},
-                            ],
-                        },
-                        {   'title': 'Child2',   'key': '02',
-                            'children': [
-                                {'title': 'Subchild2-1', 'key': 'page2_1.html'},
-                                {'title': 'Subchild2-2', 'key': 'page2_2.html'},
-                                {'title': 'Subchild2-3', 'key': 'page2_3.html'},
-                            ],
-                        }]
-                    }
-
-    tree_view = tree_view or TREE_VIEW_DEFAULT
-    style = style or SIDEBAR_STYLE_DEFAULT
+    if 'data' not in sidebar.keys():
+        raise ValueError('data key not found in json file')
+    
+    if 'style' not in sidebar.keys():
+        raise ValueError('style key not found in json file')
 
     sidebar_content = html.Div( 
                         TreeView(
@@ -99,83 +92,87 @@ def sidebar_v1(tree_view="", style=""):
                             checked=False,
                             selected=[],
                             expanded=[],
-                            data=tree_view
-                        ), style=style  
+                            data=sidebar['data']
+                        ), style=sidebar['style']
                     )
     return sidebar_content
 
-
-@app.callback(Output('output', 'content_placeholder'), [Input('input', 'selected')])
-def render(selected):
-    global page_default, dir_path
-    
-    def iframe_render(selected):
-        """ Handle raw .html and external links using Iframe """
-        ...
-    
-    def dash_page_render(selected):
-        """ Handle dash page rendering"""
-        ...
-    
-
-
-
-# def iframe_render(selected):
-#     global page_default, dir_html
-
-#     if selected == []:
-#         return f'{page_default}'
-
-#     elif selected[0].endswith('.html'):
-#             page_default = selected[0]
-#             return f'{dir_html}/{selected[0]}'
-#     else:
-#         return f'{page_default}'
-
-
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='render'
+    ),
+    Output('output', 'src'),
+    [Input('content-type', 'data'),
+    Input('input', 'selected'),
+    Input('homepage', 'data')]
+)
+        
 
 ###################################################################
-def main_page():
+def render_page(content_type, content_layout, homepage):
+    """
+    Main Render Page
 
-    sidebar_content = sidebar_v1()
+    Raises:
+        ValueError
+            - Raised if `sidebar_content` is not found in layout json.
+            - Raised if `version` is not found in `sidebar_content` section.  
+    
+    """
+    SIDEBAR_VER = {1: sidebar_v1} # Scalable sidebar
 
-    CONTENT_STYLE = {
-        'marginLeft': '20%',
-        'height': '100vh'
-    }
-    main_content = html.Div(id="content_placeholder", style=CONTENT_STYLE)
+    if 'sidebar_content' not in content_layout.keys():
+        raise ValueError('sidebar_content key not found in layout json')
+    
+    if 'version' not in content_layout['sidebar_content'].keys():
+        raise ValueError('version key not found in sidebar_content section')
+        
+    version = content_layout['sidebar_content']['version'] 
 
-    app.layout = html.Div([sidebar_content, main_content])
+    sidebar_content = SIDEBAR_VER[version](content_layout['sidebar_content'])
+    main_content = html.Div(html.Iframe(id="output", height='100%', width='100%'), style=content_layout['main_content'])
+
+    app.layout = html.Div([
+                            sidebar_content, 
+                            main_content,
+                            Store(id='content-type', storage_type='session', data=content_type),
+                            Store(id='homepage', storage_type='session', data=homepage)
+                        ])
 
 
-
-def main(content_type="links", dir_template="", dir_log="", sidebar_treeview=""):
+def main(content_type="links", content_layout="assets/content_layout.json", homepage="", debug=True, dir_log=""):
     """ Run main app
 
     Args:
         content_type ({'html', 'dash', 'links'}, optional):
             The content type to be loaded. Default to 'html'.
-        dir_template (str, optional): 
-            _description_. Defaults to "None".
+        content_layout (dict, optional):
+            The content layout in JSON format. Default to 'assets/content_layout.json'.
+        homepage (str, optional): 
+            Set Homepage Location. Defaults to "None".
+        debug (boolean, optional):
+            Set dash debug options. Default to 'True'
 
     Raises:
         ValueError
             Raised if `content_type` is not 'html', 'dash', or 'links'.
 
     """
+
     content_type = content_type.lower()
-    if content_type not in CONTENT_DEFAULT.keys():
-        raise ValueError('content_type must be "html", "dash", or "links"')
+    if content_type not in ['links', 'html', 'dash']:
+        raise ValueError('content_type must be "links", "html", or "dash"')
     
-    dir_path = dir_template or CONTENT_DEFAULT[content_type]['path']
+    with open(fr"{content_layout}", "rb") as f:
+        content_layout = orjson.loads(f.read())
 
+    homepage = homepage or content_layout['sidebar_content']['data']['key']
+   
+    render_page(content_type, content_layout, homepage)
 
-    main_page()
-    app.run_server(debug=True)
-
+    app.run_server(debug=debug)
 
 
 if __name__ == '__main__':
      Fire()
-
-
