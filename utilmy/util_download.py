@@ -51,13 +51,13 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
-    # log("#######   donwload_and_extract()")
-    # url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
-    # dirout = dirtmp + "/download_and_extract_test"    
-    # extracted_dir_path = donwload_and_extract(url=url,dirout=dirout)
-    # file_path = dirout + "/mnist_png.tar.gz"
-    # assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
-    # assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
+    log("#######   donwload_and_extract()")
+    url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
+    dirout = dirtmp + "/download_and_extract_test"    
+    extracted_dir_path = donwload_and_extract(url=url,dirout=dirout)
+    file_path = dirout + "/mnist_png.tar.gz"
+    assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
+    assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
 
     log("#######   os_extract_archive()")
     # Extracting zip file
@@ -92,6 +92,14 @@ def test1() -> None:
     line = file.readline()
     assert line==str_test+"\n", "FAILED -> to_file(); The file doesn't have the expected content"
 
+    #log("#######   download_with_progress()")
+    #TODO: This test has a bug
+    #url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
+    #test_dir = dirtmp + "download_with_progress_test/"
+    #os.makedirs(test_dir,exist_ok=True)
+    #fileout = test_dir + "features.zip"
+    #download_with_progress(url=url,fileout=fileout)
+    #assert os.path.exists(fileout), "FAILED -> download_with_progress(); The file wasn't downloaded"
 
 
 
