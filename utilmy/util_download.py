@@ -51,15 +51,16 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
-    log("#######   donwload_and_extract()")
-    url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
-    dirout = dirtmp + "/download_and_extract_test"    
-    extracted_dir_path = donwload_and_extract(url=url,dirout=dirout)
-    file_path = dirout + "/mnist_png.tar.gz"
-    assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
-    assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
+    # log("#######   donwload_and_extract()")
+    # url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
+    # dirout = dirtmp + "/download_and_extract_test"    
+    # extracted_dir_path = donwload_and_extract(url=url,dirout=dirout)
+    # file_path = dirout + "/mnist_png.tar.gz"
+    # assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
+    # assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
 
     log("#######   os_extract_archive()")
+    # Extracting zip file
     dir_path = dirtmp + "/extract_test/"
     path_zip = dir_path + "test.zip"
     uu.to_file("Dummy test", dir_path + "/zip_test.txt")
@@ -70,6 +71,7 @@ def test1() -> None:
     is_extracted  = os_extract_archive(file_path=path_zip,dirout=dirout)
     assert is_extracted == True, "FAILED -> os_extract_archive(); The zip file wasn't extracted"
     assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
+    # Extracting tar file
     path_tar = dir_path + "test.tar.gz"
     tar = tarfile.TarFile(path_tar, "w")
     tar.add(dir_path + "/zip_test.txt", "zip_test.txt")
@@ -79,7 +81,16 @@ def test1() -> None:
     assert is_extracted == True, "FAILED -> os_extract_archive(); The tar file wasn't extracted"
     assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
 
-
+    log("#######   to_file()")
+    path_file = dirtmp + "to_file_test.txt"
+    if os.path.exists(path_file):
+        os.remove(path_file)
+    str_test = "Dummy test"
+    to_file(s=str_test,filep=path_file)
+    assert os.path.exists(path_file), "FAILED -> to_file(); The file wasn't created"
+    file = open(path_file,"r")
+    line = file.readline()
+    assert line==str_test+"\n", "FAILED -> to_file(); The file doesn't have the expected content"
 
 
 
