@@ -92,14 +92,13 @@ def test1() -> None:
     line = file.readline()
     assert line==str_test+"\n", "FAILED -> to_file(); The file doesn't have the expected content"
 
-    #log("#######   download_with_progress()")
-    #TODO: This test has a bug
-    #url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
-    #test_dir = dirtmp + "download_with_progress_test/"
-    #os.makedirs(test_dir,exist_ok=True)
-    #fileout = test_dir + "features.zip"
-    #download_with_progress(url=url,fileout=fileout)
-    #assert os.path.exists(fileout), "FAILED -> download_with_progress(); The file wasn't downloaded"
+    log("#######   download_with_progress()")
+    url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
+    test_dir = dirtmp + "download_with_progress_test/"
+    os.makedirs(test_dir,exist_ok=True)
+    fileout = test_dir + "features.zip"
+    download_with_progress(url=url,fileout=fileout)
+    assert os.path.exists(fileout), "FAILED -> download_with_progress(); The file wasn't downloaded"
 
 
 
@@ -645,7 +644,7 @@ def download_with_progress(url, fileout):
     url: url from which to download from
     :fileout: file path for saving data
     """
-    import tqdm
+    from tqdm import tqdm
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()
