@@ -16,11 +16,11 @@ from box import Box
 #############################################################################################
 from utilmy.utilmy_base import log, log2
 
-try: 
-    import gdown, pydrive, googleapiclient
-except:
-    print("pip install gdown pydrive google-api-python-client")
-    1/0 #### graceful stop
+# try: 
+#     import gdown, pydrive, googleapiclient
+# except:
+#     print("pip install gdown pydrive google-api-python-client")
+#     1/0 #### graceful stop
 
 def help():
     """function help        """
@@ -58,18 +58,18 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
-    log("####### download_google()")
-    # Without unzipping the file
-    url = "https://drive.google.com/file/d/1iFrhCPWRITarabHfBZvR-V9B2yTlbVhH/view?usp=sharing"
-    fileout = dirtmp + "/download_google_test1"
-    file_path = download_google(url_or_id=url,fileout=fileout,unzip=False)
-    assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
-    # Unzipping the file
-    fileout = dirtmp + "/download_google_test2"
-    file_path = download_google(url_or_id=url,fileout=fileout)
-    extracted_file_path = fileout + "/features.csv"
-    assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
-    assert os.path.exists(extracted_file_path), "FAILED -> download_google(); The file wasn't unzipped"
+    # log("####### download_google()")
+    # # Without unzipping the file
+    # url = "https://drive.google.com/file/d/1iFrhCPWRITarabHfBZvR-V9B2yTlbVhH/view?usp=sharing"
+    # fileout = dirtmp + "/download_google_test1"
+    # file_path = download_google(url_or_id=url,fileout=fileout,unzip=False)
+    # assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
+    # # Unzipping the file
+    # fileout = dirtmp + "/download_google_test2"
+    # file_path = download_google(url_or_id=url,fileout=fileout)
+    # extracted_file_path = fileout + "/features.csv"
+    # assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
+    # assert os.path.exists(extracted_file_path), "FAILED -> download_google(); The file wasn't unzipped"
 
     log("#######   donwload_and_extract()")
     url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
