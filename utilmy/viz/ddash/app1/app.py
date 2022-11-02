@@ -1,71 +1,122 @@
 # -*- coding: utf-8 -*-
 """  Launch app
 Doc::
-   
-   ### Dependencies
-        #### Libraries:
-        ``` pip install fire
-            pip install dash_bootstrap_components
-            pip install dash_treeview_antd
-            pip install orjson
-        ```
-        #### Data:
-            - For Html
-                `copy .html files to assets/html/`
-            - For Dash Pages
-                `copy pages.py files to pages/ folder`
 
-        #### Layout Json:
-            Base Format:
-                ```
-                {
-                    "main_content" : {
-                        <MAIN_CONTENT_STYLE>
-                    },
-                    "sidebar_content":{
-                        "version": <SIDEBAR_VERSION>,
-                        "data": {
-                            "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
-                            "children": [{
-                                "title": "Child",   "key": "<NUMBER>",
-                                "children": [...]
+### Dependencies
+1. Libraries
+    
+``` 
+    pip install fire
+    pip install dash_bootstrap_components
+    pip install dash_treeview_antd
+    pip install orjson
+```
+2. Data
+- For Html:
+    `copy .html files to assets/html/`
+- For Dash Pages:
+    `copy pages.py files to pages/ folder`
 
-                            }]
-                        },
-                        "style": {
-                            <SIDEBAR_STYLE>
-                        }
-                    }
-                }
-                ```
-            
-            Save .json to assets folder
+3. Layout Json
+Base Format:
+```
+{
+    "main_content" : {
+        <MAIN_CONTENT_STYLE>
+    },
+    "sidebar_content":{
+        "version": <SIDEBAR_VERSION>,
+        "data": {
+            "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
+            "children": [{
+                "title": "Child",   "key": "<NUMBER>",
+                "children": [...]
+
+            }]
+        },
+        "style": {
+            <SIDEBAR_STYLE>
+        }
+    }
+}
+```
+
+- `<MAIN_CONTENT_STYLE>` : CSS Style in JSON Format, Applied to main content. ex :      
+
+        {   
+            "marginLeft": "20%",
+            "height": "100vh",
+            "padding":"30px"    
+        }`
+- `<SIDEBAR_VERSION>` : Number. The latest Update only support for version 1.
+- `<LINKS or HTML FILENAME or DASH FILENAME>` : key with this 3 types of `target-render` will automatically loaded in main content
+
+    Valid links example: 
+    ```
+    http://www.plotly.com
+    https://www.plotly.com
+    http://plotly.com
+    www.plotly.com
+    ```
+    
+    Invalid links: ```plotly.com```
+
+- `<NUMBER>` : key with Number will flagged as non `target-render`
+- `<SIDEBAR_STYLE>` : CSS Style in JSON Format
 
 
-    ### Command to run
-        - Launch html viz
-            `python app.py main --content_type html --content_layout assets/content_layout.json --homepage main.html`
-        - Launch links viz
-            `python app.py main --content_layout links_example.json
-        - Launch dash pages viz
-            `python app.py main` // under development
+Save layout .json to *assets* folder
 
+
+### Command to run
+- Launch links viz: `python app.py main --content_layout links_example.json`
+- Launch html viz: `python app.py main --content_type html --content_layout assets/content_layout.json --homepage main.html`
+- Launch dash pages viz: `python app.py main --content_type dash --content_layout assets/dash_example.json --homepage main_page.py ` 
 """
+
 import dash_bootstrap_components as dbc
 import orjson
+import importlib
+import os
 from dash import Dash, html
 from dash.dcc import Store
 from dash.dependencies import ClientsideFunction, Input, Output
 from dash_treeview_antd import TreeView
 from fire import Fire
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash( __name__, 
+            external_stylesheets=[dbc.themes.BOOTSTRAP],
+            suppress_callback_exceptions=True
+            )
 app.title = 'Simple render html'
+
+pages = {}
 
 ### Main page resource
 
 ###################################################################
 ######  Utils #####################################################
+app.clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='render'
+    ),
+    Output('target-render', 'data'),
+    [Input('content-type', 'data'),
+    Input('input', 'selected'),
+    Input('homepage', 'data')]
+)
+
+
+@app.callback(Output('output', 'children'), Input('target-render', 'data'), prevent_initial_call=True)
+def html_components(data):
+    if data.endswith('.py'):
+        page = data.split('/')[-1][:-len('.py')]
+        return pages[page].layout
+    return html.Iframe(src=data, width='100%', height='100%')
+        
+
+###################################################################
 def sidebar_v1(sidebar):
     """ Compose Sidebar v1 layout component.
     Args:
@@ -97,19 +148,6 @@ def sidebar_v1(sidebar):
                     )
     return sidebar_content
 
-app.clientside_callback(
-    ClientsideFunction(
-        namespace='clientside',
-        function_name='render'
-    ),
-    Output('output', 'src'),
-    [Input('content-type', 'data'),
-    Input('input', 'selected'),
-    Input('homepage', 'data')]
-)
-        
-
-###################################################################
 def render_page(content_type, content_layout, homepage):
     """
     Main Render Page
@@ -131,22 +169,22 @@ def render_page(content_type, content_layout, homepage):
     version = content_layout['sidebar_content']['version'] 
 
     sidebar_content = SIDEBAR_VER[version](content_layout['sidebar_content'])
-    main_content = html.Div(html.Iframe(id="output", height='100%', width='100%'), style=content_layout['main_content'])
+    main_content = html.Div(id="output", style=content_layout['main_content'])
 
     app.layout = html.Div([
                             sidebar_content, 
                             main_content,
                             Store(id='content-type', storage_type='session', data=content_type),
-                            Store(id='homepage', storage_type='session', data=homepage)
-                        ])
-
+                            Store(id='homepage', storage_type='session', data=homepage),
+                            Store(id='target-render'), 
+                            ])
 
 def main(content_type="links", content_layout="assets/content_layout.json", homepage="", debug=True, dir_log=""):
     """ Run main app
 
     Args:
         content_type ({'html', 'dash', 'links'}, optional):
-            The content type to be loaded. Default to 'html'.
+            The content type to be loaded. Default to 'links'.
         content_layout (dict, optional):
             The content layout in JSON format. Default to 'assets/content_layout.json'.
         homepage (str, optional): 
@@ -156,13 +194,21 @@ def main(content_type="links", content_layout="assets/content_layout.json", home
 
     Raises:
         ValueError
-            Raised if `content_type` is not 'html', 'dash', or 'links'.
-
+            Raised if `content_type` is not 'links', 'html', or 'dash'.
     """
+    global pages
 
     content_type = content_type.lower()
     if content_type not in ['links', 'html', 'dash']:
         raise ValueError('content_type must be "links", "html", or "dash"')
+
+    if content_type == 'dash':
+        try:
+            for page in [f for f in os.listdir('pages') if f.endswith('.py')]:
+                page = page[:-3]
+                pages[page] = importlib.import_module('pages.' + page)
+        except:
+            print('Error importing dash page module')
     
     with open(fr"{content_layout}", "rb") as f:
         content_layout = orjson.loads(f.read())

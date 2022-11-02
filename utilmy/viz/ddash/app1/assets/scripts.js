@@ -31,7 +31,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
                     } 
                     
                 } else if (contentType == 'dash') {
-                    // pass
+                        return `${PATH[contentType]}${target}`
                 }
             }
             

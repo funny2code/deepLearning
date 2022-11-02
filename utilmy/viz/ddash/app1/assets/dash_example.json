@@ -2,26 +2,18 @@
     "main_content" : {
         "marginLeft": "20%",
         "height": "100vh",
-        "padding": "30px"
+        "padding":"30px"
     },
     "sidebar_content":{
         "version": 1,
         "data": {
-                "title": "Home", "key":"main.html",
+                "title": "Home", "key":"main_page.py",
                 "children": [{
                     "title": "Child",   "key": "01",
                     "children": [
-                        {"title": "Subchild1", "key": "page1.html"},
-                        {"title": "Subchild2", "key": "page2.html"}
+                        {"title": "Subchild1", "key": "page1.py"},
+                        {"title": "Subchild2", "key": "page2.py"}
                     ]
-                },
-                {   "title": "Child2",   "key": "02",
-                    "children": [
-                        {"title": "Subchild2-1", "key": "page2_1.html"},
-                        {"title": "Subchild2-2", "key": "page2_2.html"},
-                        {"title": "Subchild2-3", "key": "page2_3.html"}
-                    ]
-                    
                 }]
             },
         "style": {
