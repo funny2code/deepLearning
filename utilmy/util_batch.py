@@ -190,7 +190,6 @@ def test1():
     is_week_in = now_weekday_isin(day_week=[now_weekday], timezone="utc")
     assert is_week_in == True, "This isn't correct weekday"
 
-
     log("#######   now_hour_between()...")
     # UTC time now.
     tzone = datetime.timezone.utc
@@ -203,12 +202,10 @@ def test1():
         tzone = pytz.timezone('Asia/Tokyo')
         tzone_text = 'Asia/Tokyo'
         now_hour = datetime.datetime.now(tz=tzone)
-
     format_time = "%H:%M"
     # Hours with 1 hour more and 1 hour less difference.
     first_hour = (now_hour + datetime.timedelta(hours=-1)).time().strftime("%H:%M")
     second_hour = (now_hour + datetime.timedelta(hours=1)).strftime("%H:%M")
-
     is_hour_between = now_hour_between(
         hour1=first_hour,
         hour2=second_hour,
@@ -247,15 +244,11 @@ def test1():
 
     log("#######   Index0...")
     test_index_path = dirtmp + "test.txt"
-    
     index = Index0(findex=test_index_path)
-    
     test_flist = ["test.txt","#This is a comment","folder/test.txt", "tes"]
     expected_flist = ["test.txt", "folder/test.txt"]
-    
     index.save_filter(val=test_flist)
     result_list = index.read()
-    
     assert result_list == expected_flist, "The lists aren't the same"
 
 
