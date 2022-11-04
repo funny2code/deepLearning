@@ -3,19 +3,14 @@
 Doc::
 
     ### Dependencies
-    1. Libraries
-        
-     
         pip install fire
         pip install dash_bootstrap_components
         pip install dash_treeview_antd
-        pip install orjson
     
     2. Data
-    - For Html:
         copy .html files to assets/html/
-    - For Dash Pages:
-        copy pages.py files to pages/ folder
+        copy pages.py files to pages/ folder      - For Dash Pages:
+
     
     3. Layout Json
     Base Format:
@@ -77,14 +72,11 @@ Doc::
 """
 
 import dash_bootstrap_components as dbc
-import json
-import importlib
-import os
+import os, importlib, json
 from dash import Dash, html
 from dash.dcc import Store
 from dash.dependencies import ClientsideFunction, Input, Output
 from dash_treeview_antd import TreeView
-from fire import Fire
 
 app = Dash( __name__, 
             external_stylesheets=[dbc.themes.BOOTSTRAP],
@@ -96,32 +88,36 @@ pages = {}
 
 
 
-layout_default =  {
-        "main_content" : {
-           ""
-        },
-        "sidebar_content":{
-            "version":  "",
-            "data": {
-                "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
-                "children": [{
-                    "title": "Child",   "key": "<NUMBER>",
-                    "children": [...]
-
-                }]
-            },
-            "style": {
+#####################################################################
+def test1():
+    layout_default =  {
+            "main_content" : {
                ""
+            },
+            "sidebar_content":{
+                "version":  "",
+                "data": {
+                    "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
+                    "children": [{
+                        "title": "Child",   "key": "<NUMBER>",
+                        "children": [...]
+
+                    }]
+                },
+                "style": {
+                   ""
+                }
             }
         }
-    }
+
+    main(content_type="links", content_layout="assets/content_layout.json", homepage="", debug=True, dir_log="")
 
 
 
 
-### Main page resource
 ###################################################################
 ######  Utils #####################################################
+### Main page resource
 app.clientside_callback(
     ClientsideFunction(
         namespace='clientside',
@@ -252,4 +248,6 @@ def main(content_type="links", content_layout="assets/content_layout.json", home
 
 
 if __name__ == '__main__':
-     Fire()
+     import fire
+     fire.Fire()
+
