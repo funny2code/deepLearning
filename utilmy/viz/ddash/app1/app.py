@@ -95,6 +95,30 @@ app.title = 'Simple render html'
 pages = {}
 
 
+
+layout_default =  {
+        "main_content" : {
+           ""
+        },
+        "sidebar_content":{
+            "version":  "",
+            "data": {
+                "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
+                "children": [{
+                    "title": "Child",   "key": "<NUMBER>",
+                    "children": [...]
+
+                }]
+            },
+            "style": {
+               ""
+            }
+        }
+    }
+
+
+
+
 ### Main page resource
 ###################################################################
 ######  Utils #####################################################
