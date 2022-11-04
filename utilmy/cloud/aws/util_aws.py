@@ -5,7 +5,14 @@ Docs::
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
 
 
-
+   ### Read from S3
+   https://stackoverflow.com/questions/45082832/how-to-read-partitioned-parquet-files-from-s3-using-pyarrow-in-python
+   
+   
+   https://pypi.org/project/smart-open/6.2.0/
+   
+   
+   
 
 
 """
