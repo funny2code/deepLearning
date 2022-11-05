@@ -139,16 +139,105 @@ def test2():
     log("####### zip2() ..")
     file_name = "zip2_test.txt"
     file_path = dirtmp + file_name
+    # Creating Zip file
     path_zip = dirtmp + "/test_zip2.zip"
-    uu.to_file("zip2() function test", file_path)
+    uu.to_file("zip2() function test", file_path)   
     dirout = zip2(dirin=file_path, dirout=path_zip)
     assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+
+    # Creating Tar file
     path_zip = dirtmp + "/test_zip2.tar.gz"
     dirout = zip2(dirin=file_path, dirout=path_zip)
     assert exists(dirout), "FAILED -> zip2(); Tar file haven't been created"
     
+    # Using the argument exclude
+    dir_path = dirtmp + "zip2_test/"
+    dir_text_path = dir_path + "test_text/"
+    os.makedirs(dir_path,exist_ok=True)
+    os.makedirs(dir_text_path,exist_ok=True)
+    uu.to_file("first text file", dir_text_path + "zip2_test1.txt")
+    uu.to_file("second text file", dir_text_path + "zip2_test2.txt")
+    path_zip = dir_path + "test_zip2.zip"
+    dirout = zip2(dirin=dir_text_path+"*", dirout=path_zip, exclude="zip2_test2")
+    assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    zf = zipfile.ZipFile(path_zip)
+    file_list = zf.namelist()
+    assert not "zip2_test2.txt" in file_list, "FAILED -> zip2(); It didn't exclude files"
+    
+    # Using the argument include_only
+    dir_path = dirtmp + "zip2_test2/"
+    dir_text_path = dir_path + "test_text/"
+    os.makedirs(dir_path,exist_ok=True)
+    os.makedirs(dir_text_path,exist_ok=True)
+    uu.to_file("first text file", dir_text_path + "zip2_test1.txt")
+    uu.to_file("second text file", dir_text_path + "zip2_test2.txt")
+    path_zip = dir_path + "test_zip2.zip"
+    dirout = zip2(dirin=dir_text_path+"*", dirout=path_zip, include_only="zip2_test2.txt")
+    assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    zf = zipfile.ZipFile(path_zip)
+    file_list = zf.namelist()
+    assert not "zip2_test1.txt" in file_list, "FAILED -> zip2(); It didn't only include a file"
+    
+    # Using the arguments min_size and max_size
+    dir_path = dirtmp + "zip2_test3/"
+    dir_text_path = dir_path + "test_text/"
+    os.makedirs(dir_path,exist_ok=True)
+    os.makedirs(dir_text_path,exist_ok=True)
+    min_size_mb = 1 
+    max_size_mb = 2   
+    # https://stackoverflow.com/questions/8816059/create-file-of-particular-size-in-python
+    f = open(dir_text_path + "test_file.txt","wb")
+    f.seek(2000000-1)
+    f.write(b"\0")
+    f.close()
+    f = open(dir_text_path + "test_file2.txt","wb")
+    f.seek(100000-1)
+    f.write(b"\0")
+    f.close()
+    f = open(dir_text_path + "test_file3.txt","wb")
+    f.seek(3000000-1)
+    f.write(b"\0")
+    f.close()
+    path_zip = dir_path + "test_zip2.zip"
+    dirout = zip2(dirin=dir_text_path+"*", dirout=path_zip, min_size_mb=min_size_mb,max_size_mb=max_size_mb)
+    assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    zf = zipfile.ZipFile(path_zip)
+    file_list = zf.namelist()
+    assert file_list==["test_file.txt"], "FAILED -> zip2(); It didn't select files of specific size"
 
+    #TODO: Create test using the arguments start_date and end_date
+    # It seems that the only way is using the package "filedate" to create files with different creation date 
+    # https://improveandrepeat.com/2022/04/python-friday-120-modify-the-create-date-of-a-file/
+    
+    # Using the argument nfiles
+    dir_path = dirtmp + "zip2_test4/"
+    dir_text_path = dir_path + "test_text/"
+    os.makedirs(dir_path,exist_ok=True)
+    os.makedirs(dir_text_path,exist_ok=True)
+    uu.to_file("Dummy string", dir_text_path + "test_file.txt")
+    uu.to_file("Dummy string", dir_text_path + "test_file2.txt")
+    uu.to_file("Dummy string", dir_text_path + "test_file3.txt")
+    uu.to_file("Dummy string", dir_text_path + "test_file4.txt")
+    path_zip = dir_path + "test_zip2.zip"
+    dirout = zip2(dirin=dir_text_path+"*", dirout=path_zip, nfiles=3)
+    assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    zf = zipfile.ZipFile(path_zip)
+    file_list = zf.namelist()
+    assert len(file_list)==3, "FAILED -> zip2(); There are more or less than 3 files"
 
+    # Using the argument root_dir
+    # TODO: This test has a bug
+    # dir_path = dirtmp + "zip2_test4/"
+    # dir_text_path = dir_path + "test_text/"
+    # os.makedirs(dir_path,exist_ok=True)
+    # os.makedirs(dir_text_path,exist_ok=True)
+    # uu.to_file("Dummy string", dir_text_path + "test_file.txt")
+    # path_zip = dir_path + "test_zip2.zip"
+    # dirout = zip2(dirin="test_text/", dirout=path_zip, root_dir=dir_path)
+    # assert exists(dirout), "FAILED -> zip2(); Zip file haven't been created"
+    # zf = zipfile.ZipFile(path_zip)
+    # file_list = zf.namelist()
+    # assert len(file_list)>0, "FAILED -> zip2(); The argument root_dir doesn't work"
 
 
 
