@@ -64,9 +64,9 @@ Doc::
     
     
     ### Command to run
-    - Launch links viz: python app.py main --content_layout links_example.json
-    - Launch html viz: python app.py main --content_type html --content_layout assets/content_layout.json --homepage main.html
-    - Launch dash pages viz: python app.py main --content_type dash --content_layout assets/dash_example.json --homepage main_page.py  
+    - Launch links viz: python app.py main --content_layout assets/links_layout.json
+    - Launch html viz: python app.py main --content_layout assets/html_layout.json --homepage main.html
+    - Launch dash pages viz: python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
     
 
 """
@@ -110,7 +110,7 @@ def test1():
             }
         }
 
-    main(content_type="links", content_layout="assets/content_layout.json", homepage="", debug=True, dir_log="")
+    main(content_layout="assets/mixed_layout.json", homepage="", debug=True, dir_log="")
 
 
 
@@ -124,8 +124,7 @@ app.clientside_callback(
         function_name='render'
     ),
     Output('target-render', 'data'),
-    [Input('content-type', 'data'),
-    Input('input', 'selected'),
+    [Input('input', 'selected'),
     Input('homepage', 'data')]
 )
 
@@ -173,7 +172,7 @@ def sidebar_v1(sidebar):
     return sidebar_content
 
 
-def render_page(content_type, content_layout, homepage):
+def render_page(content_layout, homepage):
     """Main Render Page
     Docs::
 
@@ -199,21 +198,18 @@ def render_page(content_type, content_layout, homepage):
     app.layout = html.Div([
                             sidebar_content, 
                             main_content,
-                            Store(id='content-type', storage_type='session', data=content_type),
                             Store(id='homepage', storage_type='session', data=homepage),
                             Store(id='target-render'), 
                             ])
 
 
-def main(content_type="links", content_layout="assets/content_layout.json", homepage="", debug=True, dir_log=""):
+def main(content_layout="assets/html_layout.json", homepage="", debug=True, dir_log=""):
     """ Run main app
     Docs::
 
         Args:
-            content_type ({'html', 'dash', 'links'}, optional):
-                The content type to be loaded. Default to 'links'.
             content_layout (dict, optional):
-                The content layout in JSON format. Default to 'assets/content_layout.json'.
+                The content layout in JSON format. Default to 'assets/html_layout.json'.
             homepage (str, optional): 
                 Set Homepage Location. Defaults to "None".
             debug (boolean, optional):
@@ -225,24 +221,19 @@ def main(content_type="links", content_layout="assets/content_layout.json", home
     """
     global pages
 
-    content_type = content_type.lower()
-    if content_type not in ['links', 'html', 'dash']:
-        raise ValueError('content_type must be "links", "html", or "dash"')
-
-    if content_type == 'dash':
-        try:
-            for page in [f for f in os.listdir('pages') if f.endswith('.py')]:
-                page = page[:-3]
-                pages[page] = importlib.import_module('pages.' + page)
-        except:
-            print('Error importing dash page module')
+    try:
+        for page in [f for f in os.listdir('pages') if f.endswith('.py')]:
+            page = page[:-3]
+            pages[page] = importlib.import_module('pages.' + page)
+    except Exception as e:
+        print(f'Error importing dash page module. {e}')
     
     with open(fr"{content_layout}", "rb") as f:
         content_layout = json.loads(f.read())
 
     homepage = homepage or content_layout['sidebar_content']['data']['key']
    
-    render_page(content_type, content_layout, homepage)
+    render_page(content_layout, homepage)
 
     app.run_server(debug=debug)
 

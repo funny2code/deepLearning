@@ -4,37 +4,38 @@ const PATH = {
     'dash':'pages/'
 }
 
+const html = 'html'
 const NUMERIC = new RegExp(/^[0-9]*$/)
 const VALID_LINKS = new RegExp('^(http[s]?:\\/\\/(www\\.)?|www\\.){1}([0-9A-Za-z-\\.@:%_\+~#=]+)+((\\.[a-zA-Z]{2,3})+)(/(.)*)?(\\?(.)*)?')
 
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
-        render: function(contentType, targetRender, homePage) {
+        render: function(targetRender, homePage) {
             if (targetRender.length == 0){
-                if (contentType == 'links'){
-                    homePage = VALID_LINKS.test(homePage) ? homePage : PATH[contentType]
+
+                if (VALID_LINKS.test(homePage)){
                     return homePage
+                } else if (homePage.endsWith(html)) {
+                    return `${PATH[html]}${homePage}` 
+                } else if (homePage.endsWith('.py')) {
+                    return `${PATH['dash']}${homePage}`
                 }
-                return `${PATH[contentType]}${homePage}`
+            } else {
+                let target = targetRender[0]
+                if (!NUMERIC.test(target)){
+    
+                    if (VALID_LINKS.test(target)){
+                        return target 
+                    } else if (target.endsWith(html)){
+                        return `${PATH[html]}${target}`
+                    } else if (target.endsWith('.py')) {
+                        return `${PATH['dash']}${target}`
+                    }
+    
+                }
+
             }
 
-            let target = targetRender[0]
-            if (!NUMERIC.test(target)){
-               
-                if (contentType == 'links'){
-                    if (VALID_LINKS.test(target)){
-                        return target
-                    } 
-                } else if ((contentType == 'html')){
-                    if (target.endsWith('.html')) {
-                        return `${PATH[contentType]}${target}`
-                    } 
-                    
-                } else if (contentType == 'dash') {
-                        return `${PATH[contentType]}${target}`
-                }
-            }
-            
             return dash_clientside.no_update 
             
         }
