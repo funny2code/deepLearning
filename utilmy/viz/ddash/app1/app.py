@@ -91,13 +91,52 @@ except : pass
 
 
 #####################################################################
-def test1():
+def test1(homepage="main_page.py"):
+    """  python  app.py test1
+    Docs::    
+    
+        homepage (str, optional): _description_. Defaults to "main_page.py".
+    """
     import utilmy as uu  
     dir_repo, dir_tmp = uu.dir_testinfo()
-    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  "
+    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
 
 
+def test2(homepage="main.html"):
+    """  python  app.py test2
+    Docs::    
+    
+        homepage (str, optional): _description_. Defaults to "main.html".
+    """
+    import utilmy as uu
+    dir_repo, dir_tmp = uu.dir_testinfo()
+    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/html_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py'  "
+    os.system(cmd)
+    
+
+def test3(homepage="about:blank"):
+    """  python  app.py test3
+    Docs::    
+    
+        homepage (str, optional): _description_. Defaults to "about:blank".
+    """
+    import utilmy as uu
+    dir_repo, dir_tmp = uu.dir_testinfo()
+    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/links_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
+    os.system(cmd)
+
+
+def test4(homepage="main_page.py"):
+    """  python  app.py test4
+    Docs::    
+    
+        homepage (str, optional): _description_. Defaults to "main_page.py".
+    """
+    import utilmy as uu
+    dir_repo, dir_tmp = uu.dir_testinfo()
+    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/mixed_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
+    os.system(cmd)
 
 
 ###################################################################
