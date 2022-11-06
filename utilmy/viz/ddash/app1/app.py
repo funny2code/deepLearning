@@ -73,7 +73,7 @@ Doc::
 app = None
 try :
     import dash_bootstrap_components as dbc
-    import os, importlib, json
+    import os, shutil, importlib, json
     from dash import Dash, html
     from dash.dcc import Store
     from dash.dependencies import ClientsideFunction, Input, Output
@@ -106,19 +106,18 @@ def export(name="app1", dirout=""):
     Docs::    
     
         name (str, optional): _description_. Defaults to "app1".
-        dirout (str, optional): _description_. Defaults to "".
+        dirout (str, optional): _description_. Defaults to Current Working Directory.
     """
     import utilmy
     
     dirout = dirout or os.getcwd()
+    dirout = dirout + '/' + name
+
     dir_repo, dir_tmp = utilmy.dir_testinfo()
-    os.copy( dir_repo + "/viz/ddash/app1/", dirout )
-
-
-
-
-
-
+    
+    if not os.path.exists(dirout):
+        os.mkdir(dirout)
+    shutil.copytree( dir_repo + "/viz/ddash/app1/", dirout, dirs_exist_ok=True )
 
 
 ###################################################################
