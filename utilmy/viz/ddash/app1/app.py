@@ -7,6 +7,7 @@ Doc::
     
     
     Command to run
+        cd utilmy/viz/ddash/app1
         - Launch links viz:       python app.py main --content_layout assets/links_layout.json
         - Launch html viz:        python app.py main --content_layout assets/html_layout.json --homepage main.html
         - Launch dash pages viz:  python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
@@ -95,6 +96,25 @@ def test1():
     dir_repo, dir_tmp = uu.dir_testinfo()
     cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  "
     os.system(cmd)
+
+
+
+
+###################################################################
+def export(name="app1", dirout=""):
+    """  python  app.py export
+    Docs::    
+    
+        name (str, optional): _description_. Defaults to "app1".
+        dirout (str, optional): _description_. Defaults to "".
+    """
+    import utilmy
+    
+    dirout = dirout or os.getcwd()
+    dir_repo, dir_tmp = utilmy.dir_testinfo()
+    os.copy( dir_repo + "/viz/ddash/app1/", dirout )
+
+
 
 
 
