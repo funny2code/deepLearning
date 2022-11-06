@@ -2,73 +2,69 @@
 """  Launch app
 Doc::
 
-    ### Dependencies
+    Dependencies
         pip install fire
         pip install dash_bootstrap_components
         pip install dash_treeview_antd
+    
+    
+    Command to run
+        - Launch links viz: python app.py main --content_layout assets/links_layout.json
+        - Launch html viz: python app.py main --content_layout assets/html_layout.json --homepage main.html
+        - Launch dash pages viz: python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
+    
     
     2. Data
         copy .html files to assets/html/
         copy pages.py files to pages/ folder      - For Dash Pages:
 
     
-    3. Layout Json
-    Base Format:
-    
-    {
-        "main_content" : {
-            <MAIN_CONTENT_STYLE>
-        },
-        "sidebar_content":{
-            "version": <SIDEBAR_VERSION>,
-            "data": {
-                "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
-                "children": [{
-                    "title": "Child",   "key": "<NUMBER>",
-                    "children": [...]
-    
-                }]
+    3. Layout Json, Example,     Save layout .json to *assets* folder    
+        {
+            "main_content" : {
+                <MAIN_CONTENT_STYLE>
             },
-            "style": {
-                <SIDEBAR_STYLE>
+            "sidebar_content":{
+                "version": <SIDEBAR_VERSION>,
+                "data": {
+                    "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
+                    "children": [{
+                        "title": "Child",   "key": "<NUMBER>",
+                        "children": [...]
+        
+                    }]
+                },
+                "style": {
+                    <SIDEBAR_STYLE>
+                }
             }
         }
-    }
     
     
-    - <MAIN_CONTENT_STYLE> : CSS Style in JSON Format, Applied to main content. ex :      
-    
-            {   
-                "marginLeft": "20%",
-                "height": "100vh",
-                "padding":"30px"    
-            }
-    - <SIDEBAR_VERSION> : Number. The latest Update only support for version 1.
-    - <LINKS or HTML FILENAME or DASH FILENAME> : key with this 3 types of target-render will automatically loaded in main content
-    
-        Valid links example: 
+        - <MAIN_CONTENT_STYLE> : CSS Style in JSON Format, Applied to main content. ex :      
         
-        http://www.plotly.com
-        https://www.plotly.com
-        http://plotly.com
-        www.plotly.com
+                {   
+                    "marginLeft": "20%",
+                    "height": "100vh",
+                    "padding":"30px"    
+                }
+        - <SIDEBAR_VERSION>    : Number. The latest Update only support for version 1.
+        - <LINKS or HTML FILENAME or DASH FILENAME> : key with this 3 types of target-render will automatically loaded in main content
         
+            Valid links example: 
+            
+            http://www.plotly.com
+            https://www.plotly.com
+            http://plotly.com
+            www.plotly.com
+            
+            
+            Invalid links: plotly.com
         
-        Invalid links: plotly.com
-    
-    - <NUMBER> : key with Number will flagged as non target-render
-    - <SIDEBAR_STYLE> : CSS Style in JSON Format
+        - <NUMBER>        : key with Number will flagged as non target-render
+        - <SIDEBAR_STYLE> : CSS Style in JSON Format
     
     
-    Save layout .json to *assets* folder
-    
-    
-    ### Command to run
-    - Launch links viz: python app.py main --content_layout assets/links_layout.json
-    - Launch html viz: python app.py main --content_layout assets/html_layout.json --homepage main.html
-    - Launch dash pages viz: python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
-    
-
 """
 
 import dash_bootstrap_components as dbc
