@@ -66,22 +66,23 @@ Doc::
     
     
 """
+app = None
+try :
+    import dash_bootstrap_components as dbc
+    import os, importlib, json
+    from dash import Dash, html
+    from dash.dcc import Store
+    from dash.dependencies import ClientsideFunction, Input, Output
+    from dash_treeview_antd import TreeView
 
-import dash_bootstrap_components as dbc
-import os, importlib, json
-from dash import Dash, html
-from dash.dcc import Store
-from dash.dependencies import ClientsideFunction, Input, Output
-from dash_treeview_antd import TreeView
+    app = Dash( __name__, 
+                external_stylesheets=[dbc.themes.BOOTSTRAP],
+                suppress_callback_exceptions=True
+                )
+    app.title = 'Simple render html'
 
-app = Dash( __name__, 
-            external_stylesheets=[dbc.themes.BOOTSTRAP],
-            suppress_callback_exceptions=True
-            )
-app.title = 'Simple render html'
-
-pages = {}
-
+    pages = {}
+except : pass
 
 
 #####################################################################
