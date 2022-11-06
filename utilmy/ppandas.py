@@ -136,48 +136,36 @@ def test1():
     pd_show(df_str)
 
     log("####### pd_schema_enforce() ..")
-
     test_dictionary = dict(
         name=["Mathew", "sarah", "michael"], 
         age=[21, 21, 35],
     )   
-
     dataframe = pd.DataFrame(test_dictionary)
-
     previous_dtype = str(dataframe["age"].dtypes)
-
     log("Previous dtype:",previous_dtype)
-
     dtype1 = {
         "age":"string",
     }
-
     parsed_dataframe = pd_schema_enforce(df=dataframe,dtype_dict = dtype1)
-
     log("dtype now:", str(parsed_dataframe["age"].dtypes))
     assert str(parsed_dataframe["age"].dtypes) == "string", "Incorrect dtype"
 
     log("####### pd_to_mapdict() ..")
-
     test_dict = dict(
         name=["mathew", "sarah", "michael"], 
         age=[21, 21, 35]
     )
-
     expected_dict = dict(
         mathew=21,
         sarah=21,
         michael=35
     )
-
     df = pd.DataFrame(test_dict)
-    
     result_dict = pd_to_mapdict(
         df=df,colkey="name",
         colval="age",
         colval_type="int"
     )
-
     assert result_dict == expected_dict, "The dictionaries aren't the same"
     
     #log("####### pd_to_hiveparquet() ..")
@@ -186,22 +174,12 @@ def test1():
     #     name=["Mathew", "sarah", "michael"], 
     #     age=[21, 21, 35]
     # )
-
     # test_dirout = dirtmp + "hiveparquet"
-
     # dataframe = pd.DataFrame(test_dictionary)
-
     # df = pd_to_hiveparquet(dirin=dataframe,dirout=test_dirout)
-
     # parquet_path = test_dirout + "/part.0.parquet"
-
     # parquet_df = pd.read_parquet(parquet_path)
-
     # assert parquet_df.equals(df), "The dataframes aren't the same"
-
-
-
-
 
 def test2():
 

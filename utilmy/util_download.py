@@ -15,6 +15,13 @@ from box import Box
 
 #############################################################################################
 from utilmy.utilmy_base import log, log2
+
+# try: 
+#     import gdown, pydrive, googleapiclient
+# except:
+#     print("pip install gdown pydrive google-api-python-client")
+#     1/0 #### graceful stop
+
 def help():
     """function help        """
     from utilmy import help_create
@@ -34,6 +41,7 @@ def test1() -> None:
     d = Box({})
     dirtmp ="./ztmp/"
 
+    import zipfile, tarfile
     import utilmy as uu
     drepo, dirtmp = uu.dir_testinfo()
 
@@ -50,6 +58,19 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> download_github(); The file wasn't downloaded"
     assert os.path.exists(csv_path), "FAILED -> download_github(); The file wasn't unzipped"
 
+    # log("####### download_google()")
+    # # Without unzipping the file
+    # url = "https://drive.google.com/file/d/1iFrhCPWRITarabHfBZvR-V9B2yTlbVhH/view?usp=sharing"
+    # fileout = dirtmp + "/download_google_test1"
+    # file_path = download_google(url_or_id=url,fileout=fileout,unzip=False)
+    # assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
+    # # Unzipping the file
+    # fileout = dirtmp + "/download_google_test2"
+    # file_path = download_google(url_or_id=url,fileout=fileout)
+    # extracted_file_path = fileout + "/features.csv"
+    # assert os.path.exists(file_path), "FAILED -> download_google(); The file wasn't downloaded"
+    # assert os.path.exists(extracted_file_path), "FAILED -> download_google(); The file wasn't unzipped"
+
     log("#######   donwload_and_extract()")
     url = "https://github.com/arita37/mnist_png/raw/master/mnist_png.tar.gz"
     dirout = dirtmp + "/download_and_extract_test"    
@@ -58,6 +79,46 @@ def test1() -> None:
     assert os.path.exists(file_path), "FAILED -> donwload_and_extract(); The file wasn't downloaded"
     assert os.path.exists(extracted_dir_path), "FAILED -> donwload_and_extract(); The file wasn't extracted"
 
+    log("#######   os_extract_archive()")
+    # Extracting zip file
+    dir_path = dirtmp + "/extract_test/"
+    path_zip = dir_path + "test.zip"
+    uu.to_file("Dummy test", dir_path + "/zip_test.txt")
+    zf = zipfile.ZipFile(path_zip, "w")
+    zf.write(dir_path + "/zip_test.txt", "zip_test.txt")
+    zf.close()
+    dirout = dir_path + "zip_extracted/"
+    is_extracted  = os_extract_archive(file_path=path_zip,dirout=dirout)
+    assert is_extracted == True, "FAILED -> os_extract_archive(); The zip file wasn't extracted"
+    assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
+    # Extracting tar file
+    path_tar = dir_path + "test.tar.gz"
+    tar = tarfile.TarFile(path_tar, "w")
+    tar.add(dir_path + "/zip_test.txt", "zip_test.txt")
+    tar.close()
+    dirout = dir_path + "tar_extracted/"
+    is_extracted  = os_extract_archive(file_path=path_tar,dirout=dirout)
+    assert is_extracted == True, "FAILED -> os_extract_archive(); The tar file wasn't extracted"
+    assert os.path.exists(dirout + "zip_test.txt"), "FAILED -> os_extract_archive(); The extracted file doesn't exist"
+
+    log("#######   to_file()")
+    path_file = dirtmp + "to_file_test.txt"
+    if os.path.exists(path_file):
+        os.remove(path_file)
+    str_test = "Dummy test"
+    to_file(s=str_test,filep=path_file)
+    assert os.path.exists(path_file), "FAILED -> to_file(); The file wasn't created"
+    file = open(path_file,"r")
+    line = file.readline()
+    assert line==str_test+"\n", "FAILED -> to_file(); The file doesn't have the expected content"
+
+    log("#######   download_with_progress()")
+    url = "https://github.com/arita37/zdata/blob/master/input/titanic/train/features.zip"
+    test_dir = dirtmp + "download_with_progress_test/"
+    os.makedirs(test_dir,exist_ok=True)
+    fileout = test_dir + "features.zip"
+    download_with_progress(url=url,fileout=fileout)
+    assert os.path.exists(fileout), "FAILED -> download_with_progress(); The file wasn't downloaded"
 
 
 
@@ -603,7 +664,7 @@ def download_with_progress(url, fileout):
     url: url from which to download from
     :fileout: file path for saving data
     """
-    import tqdm
+    from tqdm import tqdm
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status()
