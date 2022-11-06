@@ -25,7 +25,7 @@ Commands:
 import fire, argparse, os, sys
 
 #############################################################################################
-from utilmy.utilmy_base import log, os_system
+from utilmy.utilmy_base import direpo, log, os_system
 
 #############################################################################################
 try :
@@ -112,6 +112,23 @@ def run_cli_utilmy():
 
         cmd = f"{dir_utilmy}/{dirfile}  {fun_name}  "
         os.system(cmd) ; return
+
+
+
+    if do == 'dash_template':
+         ### utilmy  dash_template  app1  --dirout   mydir/
+         import utilmy as uu
+         import shutil
+
+         dir_repo = uu.direpo()
+         
+         temp_name = args.arg1
+         dirin     = dir_repo + f"/viz/ddash/{temp_name}/"
+         dirout    = args.dirout or uu.os_getcwd()  + f"/{temp_name}"
+         uu.os_makedirs(dirout)
+         shutil.copytree(dirin, dirout)          
+
+
 
     ### Print Help    
     # print(HELP1)
