@@ -3,15 +3,13 @@
 Doc::
 
     Dependencies
-        pip install fire
-        pip install dash_bootstrap_components
-        pip install dash_treeview_antd
+        pip install fire dash dash_bootstrap_components dash_treeview_antd
     
     
     Command to run
-        - Launch links viz: python app.py main --content_layout assets/links_layout.json
-        - Launch html viz: python app.py main --content_layout assets/html_layout.json --homepage main.html
-        - Launch dash pages viz: python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
+        - Launch links viz:       python app.py main --content_layout assets/links_layout.json
+        - Launch html viz:        python app.py main --content_layout assets/html_layout.json --homepage main.html
+        - Launch dash pages viz:  python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
     
     
     2. Data
@@ -21,48 +19,53 @@ Doc::
     
     3. Layout Json, Example,     Save layout .json to *assets* folder    
         {
-            "main_content" : {
-                <MAIN_CONTENT_STYLE>
+            "main_content" : {   #### CSS Style in JSON Format, Applied to main content. ex :   
+                "marginLeft": "20%",
+                "height":     "100vh"
             },
+
+
+            ####  key with this 3 types of target-render will automatically loaded in main content
             "sidebar_content":{
-                "version": <SIDEBAR_VERSION>,
-                "data": {
-                    "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
-                    "children": [{
-                        "title": "Child",   "key": "<NUMBER>",
-                        "children": [...]
-        
-                    }]
-                },
-                "style": {
-                    <SIDEBAR_STYLE>
+                "version": 1,   ### Number. The latest Update only support for version 1.
+                "data": { "title": "Home", 
+                          "key":"https://gallery.plotly.host/bball-shot-explorer",
+                                "children": [{
+                                    "title": "Child",   "key": "01",
+                                    "children": [
+                                        {"title": "link1", "key": "https://dash.gallery/self-driving/"}
+                                    ]   },
+
+
+                        { "title": "Child2",   
+                          "key": "02",
+                                "children": [
+                                    {"title": "html-1", "key": "page1.html"},
+                                    {"title": "html-2", "key": "page2.html"},
+                                    {"title": "html-3", "key": "page2_1.html"},
+
+                                    {"title": "dash-1", "key": "page1.py"},
+                                    {"title": "dash-2", "key": "page2.py"}
+                                ]  }]
+                    },
+
+                "style": {  ###  CSS Style in JSON Format
+                    "position": "fixed",
+                    "top": 0,
+                    "left": 0,
+                    "bottom": 0,
+                    "width": "20%",
+                    "padding": "20px 10px",
+                    "backgroundColor": "#f8f9fa",
+                    "verticalAlign": "middle",
+                    "alignItems": "center"
                 }
+                
             }
         }
-    
-    
-        - <MAIN_CONTENT_STYLE> : CSS Style in JSON Format, Applied to main content. ex :      
-        
-                {   
-                    "marginLeft": "20%",
-                    "height": "100vh",
-                    "padding":"30px"    
-                }
-        - <SIDEBAR_VERSION>    : Number. The latest Update only support for version 1.
-        - <LINKS or HTML FILENAME or DASH FILENAME> : key with this 3 types of target-render will automatically loaded in main content
-        
-            Valid links example: 
-            
-            http://www.plotly.com
-            https://www.plotly.com
-            http://plotly.com
-            www.plotly.com
-            
-            
-            Invalid links: plotly.com
+
         
         - <NUMBER>        : key with Number will flagged as non target-render
-        - <SIDEBAR_STYLE> : CSS Style in JSON Format
     
     
 """
@@ -85,29 +88,15 @@ try :
 except : pass
 
 
+
 #####################################################################
 def test1():
-    layout_default =  {
-            "main_content" : {
-               ""
-            },
-            "sidebar_content":{
-                "version":  "",
-                "data": {
-                    "title": "Home", "key":"<LINKS or HTML FILENAME or DASH FILENAME>",
-                    "children": [{
-                        "title": "Child",   "key": "<NUMBER>",
-                        "children": [...]
+    import utilmy as uu  
+    dir_repo, dir_tmp = uu.dir_testinfo()
+    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  "
+    os.system(cmd)
 
-                    }]
-                },
-                "style": {
-                   ""
-                }
-            }
-        }
 
-    main(content_layout="assets/mixed_layout.json", homepage="", debug=True, dir_log="")
 
 
 
