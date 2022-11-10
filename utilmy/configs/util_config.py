@@ -36,9 +36,9 @@ def test1():
     flist = test_create_file(dirout=None)
     for xi in flist:
         cfg_dict = config_load(xi )
-
-        if len(cfg_dict) > 2 :
+        if len(cfg_dict) > 2 or len(cfg_dict.database) > 2:
             log( str(xi) +", " + str(cfg_dict) +'', "\n")
+            log("It passes!")
         else :
             raise Exception( f" dict is empty {xi}"  )
 
@@ -170,22 +170,22 @@ def test_create_file(dirout=None):
     flist = []
 
     ##### create config.yaml
-    with open( dir_cur + "config.yaml", mode="w") as fp:
+    with open( dir_cur + "/config.yaml", mode="w") as fp:
         ddict['list1'] = [1,2]
         yaml.dump(ddict, fp, default_flow_style=False)
-        flist.append(dir_cur + "config.yaml")
+        flist.append(dir_cur + "/config.yaml")
 
 
     #### create config.json
-    with open( dir_cur + "config.json", mode="w") as fp:
+    with open( dir_cur + "/config.json", mode="w") as fp:
         json.dump(ddict, fp,indent=3)
-        flist.append(dir_cur + "config.json")
+        flist.append(dir_cur + "/config.json")
 
 
     #### create config.toml
-    with open( dir_cur + "config.toml", "w") as toml_file:
+    with open( dir_cur + "/config.toml", "w") as toml_file:
         toml.dump(ddict, toml_file)
-        flist.append(dir_cur + "config.toml")
+        flist.append(dir_cur + "/config.toml")
 
     ### create  config.ini
     data_ini="""[APP]
@@ -196,18 +196,20 @@ def test_create_file(dirout=None):
             USERNAME = root
             PASSWORD = p@ssw0rd
     """
-    with open( dir_cur + "config.ini", "w") as fp:
+    with open( dir_cur + "/config.ini", "w") as fp:
         fp.write(data_ini)
-        flist.append(dir_cur + "config.ini")
+        flist.append(dir_cur + "/config.ini")
 
 
-    ### create  config.properties
-    properties="""db.user=mkyong
-db.password=password
-db.url=localhost"""
-    with open( dir_cur + "config.properties", "w") as fp:
+    ## create  config.properties
+    properties="""[database]
+            db.user=mkyong
+            db.password=password
+            db.url=localhost
+    """
+    with open( dir_cur + "/config.properties", "w") as fp:
         fp.write(properties)
-        flist.append(dir_cur + "config.properties")
+        flist.append(dir_cur + "/config.properties")
 
     return flist
 
