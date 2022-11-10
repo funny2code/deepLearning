@@ -255,8 +255,8 @@ def config_load(
     import pathlib
 
     #########Default value setup ###########################################
+    config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
     if path_default is None:
-        config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
         path_default = os.path.dirname(config_path_default)
 
     if config_default is None:
@@ -270,10 +270,10 @@ def config_load(
         config_path = pathlib.Path(config_path)
 
     ######### Load Config ##################################################
+    import yaml
     try:
         log("Config: Loading ", config_path)
         if config_path.suffix in {".yaml", ".yml"}  :
-            import yaml
             #Load the yaml config file
             with open(config_path, "r") as yamlfile:
                 config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)
