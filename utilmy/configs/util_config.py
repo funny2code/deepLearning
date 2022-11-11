@@ -38,7 +38,6 @@ def test1():
         cfg_dict = config_load(xi )
         if len(cfg_dict) > 2 or len(cfg_dict.database) > 2:
             log( str(xi) +", " + str(cfg_dict) +'', "\n")
-            log("It passes!")
         else :
             raise Exception( f" dict is empty {xi}"  )
 
@@ -48,26 +47,29 @@ def test1():
     log("# test to_dataclass")
     cfg_dict = config_load(xi, to_dataclass=True)
     log(cfg_dict.details )
+    assert len(cfg_dict.details) == 4, "FAILED -> config_load(); The parameter to_dataclass doesn't work"
 
-
-    log('test config_field_name')
+    log('\ntest config_field_name')
     cfg_dict = config_load(xi, config_field_name='details')
-    assert len(cfg_dict) > 0
+    assert len(cfg_dict) > 0, "FAILED -> config_load(); The parameter config_field_name doesn't work"
 
+    log('\nENV variables')
+    path = 'default_output_config/config.yaml'
+    os.environ['myconfig'] = path
+    cfg_dict = config_load(None, environ_path_default='myconfig', save_default=True)
+    assert len(cfg_dict) > 1, "FAILED -> config_load(); The return value isn't expected"
+    assert os.path.exists(os.path.abspath(path)), "FAILED -> config_load(); The config wasn't saved"
 
-    log('ENV varibales')
-    os.environ['myconfig'] = 'default_output_config/config.yaml'
-    cfg_dict = config_load(None, environ_path_default='myconfig',save_default=True)
-    assert len(cfg_dict) > 1
-
-
-    log('test path_default and save_default')
-    cfg_dict = config_load(None,path_default='default_output_config/config.yaml',save_default=True)
-    # assert os.path.exists( )
+    log('\ntest path_default and save_default')
+    path = 'default_output_config/config.yaml'
+    cfg_dict = config_load(None,path_default=path,save_default=True)
+    assert len(cfg_dict) > 1, "FAILED -> config_load(); cfg_dict is empty"
+    assert os.path.exists(os.path.abspath(path)), "FAILED -> config_load(); The config wasn't saved"
 
     log('\ntest config_default')
     config_default= {"field1": "test config_default", "field2": {"version":"1.0"},"field3":"data"}
     cfg_dict = config_load(None,config_default=config_default)
+    assert cfg_dict == config_default, "FAILED -> config_load(); The return value isn't expected"
 
 
 
