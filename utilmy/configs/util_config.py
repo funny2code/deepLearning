@@ -257,9 +257,12 @@ def config_load(
     import pathlib
 
     #########Default value setup ###########################################
-    config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
     if path_default is None:
+        config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
         path_default = os.path.dirname(config_path_default)
+    else:
+        config_path_default = path_default
+        path_default = os.path.dirname(path_default)
 
     if config_default is None:
         config_default = {"field1": "test", "field2": {"version":"1.0"}}
