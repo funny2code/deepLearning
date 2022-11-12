@@ -36,8 +36,7 @@ def test1():
     flist = test_create_file(dirout=None)
     for xi in flist:
         cfg_dict = config_load(xi )
-
-        if len(cfg_dict) > 2 :
+        if len(cfg_dict) > 2 or len(cfg_dict.database) > 2:
             log( str(xi) +", " + str(cfg_dict) +'', "\n")
         else :
             raise Exception( f" dict is empty {xi}"  )
@@ -48,26 +47,29 @@ def test1():
     log("# test to_dataclass")
     cfg_dict = config_load(xi, to_dataclass=True)
     log(cfg_dict.details )
+    assert len(cfg_dict.details) == 4, "FAILED -> config_load(); The parameter to_dataclass doesn't work"
 
-
-    log('test config_field_name')
+    log('\ntest config_field_name')
     cfg_dict = config_load(xi, config_field_name='details')
-    assert len(cfg_dict) > 0
+    assert len(cfg_dict) > 0, "FAILED -> config_load(); The parameter config_field_name doesn't work"
 
+    log('\nENV variables')
+    path = 'default_output_config/config.yaml'
+    os.environ['myconfig'] = path
+    cfg_dict = config_load(None, environ_path_default='myconfig', save_default=True)
+    assert len(cfg_dict) > 1, "FAILED -> config_load(); The return value isn't expected"
+    assert os.path.exists(os.path.abspath(path)), "FAILED -> config_load(); The config wasn't saved"
 
-    log('ENV varibales')
-    os.environ['myconfig'] = 'default_output_config/config.yaml'
-    cfg_dict = config_load(None, environ_path_default='myconfig',save_default=True)
-    assert len(cfg_dict) > 1
-
-
-    log('test path_default and save_default')
-    cfg_dict = config_load(None,path_default='default_output_config/config.yaml',save_default=True)
-    # assert os.path.exists( )
+    log('\ntest path_default and save_default')
+    path = 'default_output_config/config.yaml'
+    cfg_dict = config_load(None,path_default=path,save_default=True)
+    assert len(cfg_dict) > 1, "FAILED -> config_load(); cfg_dict is empty"
+    assert os.path.exists(os.path.abspath(path)), "FAILED -> config_load(); The config wasn't saved"
 
     log('\ntest config_default')
     config_default= {"field1": "test config_default", "field2": {"version":"1.0"},"field3":"data"}
     cfg_dict = config_load(None,config_default=config_default)
+    assert cfg_dict == config_default, "FAILED -> config_load(); The return value isn't expected"
 
 
 
@@ -170,22 +172,22 @@ def test_create_file(dirout=None):
     flist = []
 
     ##### create config.yaml
-    with open( dir_cur + "config.yaml", mode="w") as fp:
+    with open( dir_cur + "/config.yaml", mode="w") as fp:
         ddict['list1'] = [1,2]
         yaml.dump(ddict, fp, default_flow_style=False)
-        flist.append(dir_cur + "config.yaml")
+        flist.append(dir_cur + "/config.yaml")
 
 
     #### create config.json
-    with open( dir_cur + "config.json", mode="w") as fp:
+    with open( dir_cur + "/config.json", mode="w") as fp:
         json.dump(ddict, fp,indent=3)
-        flist.append(dir_cur + "config.json")
+        flist.append(dir_cur + "/config.json")
 
 
     #### create config.toml
-    with open( dir_cur + "config.toml", "w") as toml_file:
+    with open( dir_cur + "/config.toml", "w") as toml_file:
         toml.dump(ddict, toml_file)
-        flist.append(dir_cur + "config.toml")
+        flist.append(dir_cur + "/config.toml")
 
     ### create  config.ini
     data_ini="""[APP]
@@ -196,18 +198,20 @@ def test_create_file(dirout=None):
             USERNAME = root
             PASSWORD = p@ssw0rd
     """
-    with open( dir_cur + "config.ini", "w") as fp:
+    with open( dir_cur + "/config.ini", "w") as fp:
         fp.write(data_ini)
-        flist.append(dir_cur + "config.ini")
+        flist.append(dir_cur + "/config.ini")
 
 
-    ### create  config.properties
-    properties="""db.user=mkyong
-db.password=password
-db.url=localhost"""
-    with open( dir_cur + "config.properties", "w") as fp:
+    ## create  config.properties
+    properties="""[database]
+            db.user=mkyong
+            db.password=password
+            db.url=localhost
+    """
+    with open( dir_cur + "/config.properties", "w") as fp:
         fp.write(properties)
-        flist.append(dir_cur + "config.properties")
+        flist.append(dir_cur + "/config.properties")
 
     return flist
 
@@ -258,6 +262,9 @@ def config_load(
     if path_default is None:
         config_path_default = os.environ.get(environ_path_default, str(os.path.dirname( os.path.abspath(__file__) )) + "/myconfig/config.yaml"  )
         path_default = os.path.dirname(config_path_default)
+    else:
+        config_path_default = path_default
+        path_default = os.path.dirname(path_default)
 
     if config_default is None:
         config_default = {"field1": "test", "field2": {"version":"1.0"}}
@@ -270,10 +277,10 @@ def config_load(
         config_path = pathlib.Path(config_path)
 
     ######### Load Config ##################################################
+    import yaml
     try:
         log("Config: Loading ", config_path)
         if config_path.suffix in {".yaml", ".yml"}  :
-            import yaml
             #Load the yaml config file
             with open(config_path, "r") as yamlfile:
                 config_data = yaml.load(yamlfile, Loader=yaml.FullLoader)

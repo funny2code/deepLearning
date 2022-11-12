@@ -17,7 +17,7 @@ Int_none  = Union[None,int]
 Path_type = Union[str, bytes, os.PathLike]
 
 try:
-    import numpy.typing
+    import numpy
     npArrayLike = numpy.typing.ArrayLike
 except ImportError:
     npArrayLike = Any
