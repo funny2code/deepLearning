@@ -36,7 +36,7 @@ def test1():
     flist = test_create_file(dirout=None)
     for xi in flist:
         cfg_dict = config_load(xi )
-        if len(cfg_dict) > 2 or len(cfg_dict.database) > 2:
+        if len(cfg_dict) > 2 or len(cfg_dict.get("database",dict())) > 2:
             log( str(xi) +", " + str(cfg_dict) +'', "\n")
         else :
             raise Exception( f" dict is empty {xi}"  )
@@ -183,6 +183,19 @@ def test_create_file(dirout=None):
         json.dump(ddict, fp,indent=3)
         flist.append(dir_cur + "/config.json")
 
+    # #### create config.conf
+    # TODO: the function config_load doesn't support conf files
+    # data_ini="""[APP]
+    #         ENVIRONMENT = development
+    #         DEBUG = False
+
+    #         [DATABASE]
+    #         USERNAME = root
+    #         PASSWORD = p@ssw0rd
+    # """
+    # with open( dir_cur + "/config.conf", "w") as fp:
+    #     fp.write(data_ini)
+    #     flist.append(dir_cur + "/config.conf")
 
     #### create config.toml
     with open( dir_cur + "/config.toml", "w") as toml_file:
