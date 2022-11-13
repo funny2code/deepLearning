@@ -107,7 +107,8 @@ def test2(homepage="main.html"):
     """  python  app.py test2
     Docs::    
     
-        homepage (str, optional): _description_. Defaults to "main.html".
+        python app.py main --content_layout assets/html_layout.json --homepage main.html
+        
     """
     import utilmy as uu
     dir_repo, dir_tmp = uu.dir_testinfo()
@@ -131,7 +132,8 @@ def test4(homepage="main_page.py"):
     """  python  app.py test4
     Docs::    
     
-        homepage (str, optional): _description_. Defaults to "main_page.py".
+        python app.py main --content_layout assets/mixed_layout.json --homepage main_page.py
+        
     """
     import utilmy as uu
     dir_repo, dir_tmp = uu.dir_testinfo()
@@ -154,8 +156,7 @@ def export(name="app1", dirout=""):
 
     dir_repo, dir_tmp = utilmy.dir_testinfo()
     
-    if not os.path.exists(dirout):
-        os.mkdir(dirout)
+    os.makedirs(dirout, exist_ok=True)
     shutil.copytree( dir_repo + "/viz/ddash/app1/", dirout, dirs_exist_ok=True )
 
 
