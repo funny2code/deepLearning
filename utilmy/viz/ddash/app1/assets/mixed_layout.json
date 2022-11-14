@@ -4,6 +4,7 @@
         "height":     "100vh"
     },
 
+
     "sidebar_content":{
         "version": 1,
         "data": { "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer",
@@ -12,6 +13,8 @@
                             "children": [
                                 {"title": "link1", "key": "https://dash.gallery/self-driving/"}
                             ]   },
+
+
 
 
                 { "title": "Child2",   "key": "02",
@@ -25,6 +28,7 @@
                         ]  }]
             },
 
+            
         "style": {
             "position": "fixed",
             "top": 0,
