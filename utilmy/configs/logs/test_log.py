@@ -2,7 +2,7 @@
 """ Test for universal logger
 
 """
-import sys, os, logging
+import sys, os, logging, json
 
 
 ##############################################################################
@@ -19,6 +19,9 @@ def test1():
     """
     os.environ['log_verbosity']='10'
     os.environ['log_type']='base'
+
+    with open("config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 10, 'log_type': 'base'}, indent=4))
 
     from util_log import log3, log2, log, logw, loge, logc, logr
     log3("debug2")
@@ -44,7 +47,14 @@ def test2():
     os.environ['log_verbosity']='10'
     os.environ['log_type']='loguru'
 
+    with open("config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 10, 'log_type': 'loguru'}, indent=4))
+
     import util_log
+
+    import importlib
+    importlib.reload(util_log)
+
     from util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
@@ -70,10 +80,16 @@ def test_logging():
     os.environ['log_verbosity']='10'
     os.environ['log_type']='logging'
 
+    with open("config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 10, 'log_type': 'logging'}, indent=4))
+
+    import util_log
+
+    import importlib
+    importlib.reload(util_log)
+
     from util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
-    from util_log import FORMATTER_1,FORMATTER_2,FORMATTER_3,FORMATTER_4,FORMATTER_5
-    
-   
+    from util_log import FORMATTER_1, FORMATTER_2, FORMATTER_3, FORMATTER_4, FORMATTER_5
 
     s='test logger_name'
     print('\ntest logger_name')

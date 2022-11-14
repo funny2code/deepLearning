@@ -32,18 +32,17 @@ from pathlib import Path
 
 ######################################################################################
 ##### Global settting  ###############################################################
-LOG_CONFIG_PATH  = os.environ.get('log_config_path', None )
 LOG_CONFIG = {}
-if LOG_CONFIG_PATH is not None :
-    try :
-       with open(LOG_CONFIG_PATH, mode='r') as fp :
-          LOG_CONFIG = json.load(fp)
-    except Exception as e:
-        print('Cannot open config file, using default config', e)
+try:
+    with open("config.json", mode='r') as f:
+        LOG_CONFIG = json.load(f)
+        print(LOG_CONFIG)
+except Exception as e:
+    print('Cannot open config file, using default config', e)
 
 
-VERBOSITY   = os.environ.get('log_verbosity', 10)    if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
-LOG_TYPE    = os.environ.get('log_type',   'base')   if 'log_type'      not in LOG_CONFIG else LOG_CONFIG['log_type']
+VERBOSITY   = os.environ.get('log_verbosity', 10)  if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
+LOG_TYPE    = os.environ.get('log_type',  'base')  if 'log_type'      not in LOG_CONFIG else LOG_CONFIG['log_type']
 
 THISFILE_PATH = Path(__file__).resolve().parent
 
