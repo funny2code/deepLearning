@@ -10,7 +10,7 @@ Doc::
         cd utilmy/viz/ddash/app1
         - Launch links viz:       python app.py main --content_layout assets/links_layout.json
         - Launch html viz:        python app.py main --content_layout assets/html_layout.json --homepage main.html
-        - Launch dash pages viz:  python app.py main --content_layout assets/dash_layout.json --homepage main_page.py  
+        - Launch dash pages viz:  python app.py main --content_layout assets/dash_layout.json --homepage main_page.p
     
     
     2. Data
@@ -311,15 +311,7 @@ def main(content_layout="assets/html_layout.json", homepage="", debug=True, dir_
 
 
 
-
-
-
-
-
-
-
-
-
+##########################################################################################
 if __name__ == '__main__':
      import fire
      fire.Fire()
