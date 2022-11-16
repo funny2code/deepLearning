@@ -23,7 +23,6 @@ app = None
 try :
     import dash_bootstrap_components as dbc
     import os, shutil, importlib, jsonc
-    import utilmy as uu 
     from dash import Dash, html
     from dash.dcc import Store
     from dash.dependencies import ClientsideFunction, Input, Output
@@ -47,7 +46,7 @@ def test1():
     
         python app.py main --content_layout assets/dash_layout.json
     """
-    
+    import utilmy as uu 
     dir_repo, _ = uu.dir_testinfo()
     cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
@@ -60,7 +59,7 @@ def test2():
         python app.py main --content_layout assets/html_layout.json
         
     """
-    
+    import utilmy as uu 
     dir_repo, _ = uu.dir_testinfo()
     cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/html_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py'  "
     os.system(cmd)
@@ -73,7 +72,7 @@ def test3():
         python app.py main --content_layout assets/links_layout.json 
 
     """
-    
+    import utilmy as uu 
     dir_repo, _ = uu.dir_testinfo()
     cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/links_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
@@ -86,7 +85,7 @@ def test4():
         python app.py main --content_layout assets/mixed_layout.json
         
     """
-
+    import utilmy as uu 
     dir_repo, _ = uu.dir_testinfo()
     cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/mixed_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
