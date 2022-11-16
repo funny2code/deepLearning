@@ -1,13 +1,19 @@
 {
-    "main_content" : {
+    "main_content" : { // CSS Style in JSON Format, Applied to main content
         "marginLeft": "20%",
         "height": "100vh",
         "padding": "30px"
     },
     "sidebar_content":{
-        "version": 1,
+        "version": 1, // Type: Number. Only support for version 1
         "data": {
-                "title": "Home", "key":"main.html",
+                /*
+                    title   :   menu's display text
+                    children:   add child menu
+                    key     :   target file or url to render. Fill Number to flag as non render target.
+                */
+            
+                "title": "Home", "key":"main.html", // First key value assigned as Homepage
                 "children": [{
                     "title": "Child",   "key": "01",
                     "children": [
@@ -24,7 +30,7 @@
                     
                 }]
             },
-        "style": {
+        "style": { // CSS Style in JSON Format, Applied to sidebar content
             "position": "fixed",
             "top": 0,
             "left": 0,

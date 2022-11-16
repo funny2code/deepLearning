@@ -1,28 +1,29 @@
-const PATH = {
-    'links':'about:blank',
-    'html':'assets/html/',
-    'dash':'pages/'
-}
+const PATH              = {
+                            'html':'assets/html/',
+                            'dash':'pages/'
+                         }
+const html              = 'html'
+const NUMERIC           = new RegExp(/^[0-9]*$/)
+const VALID_LINKS       = new RegExp('^(http[s]?:\\/\\/(www\\.)?|www\\.){1}([0-9A-Za-z-\\.@:%_\+~#=]+)+((\\.[a-zA-Z]{2,3})+)(/(.)*)?(\\?(.)*)?')
 
-const html = 'html'
-const NUMERIC = new RegExp(/^[0-9]*$/)
-const VALID_LINKS = new RegExp('^(http[s]?:\\/\\/(www\\.)?|www\\.){1}([0-9A-Za-z-\\.@:%_\+~#=]+)+((\\.[a-zA-Z]{2,3})+)(/(.)*)?(\\?(.)*)?')
-
-window.dash_clientside = Object.assign({}, window.dash_clientside, {
+window.dash_clientside  = Object.assign({}, window.dash_clientside, {
     clientside: {
         render: function(targetRender, homePage) {
             if (targetRender.length == 0){
+                // Handle Initial targetRender to homePage
 
                 if (VALID_LINKS.test(homePage)){
                     return homePage
                 } else if (homePage.endsWith(html)) {
+                    console.log(`${PATH[html]}${homePage}`)
                     return `${PATH[html]}${homePage}` 
                 } else if (homePage.endsWith('.py')) {
                     return `${PATH['dash']}${homePage}`
                 }
             } else {
                 let target = targetRender[0]
-                if (!NUMERIC.test(target)){
+
+                if (!NUMERIC.test(target)){ // Filter targetRender not Number
     
                     if (VALID_LINKS.test(target)){
                         return target 
