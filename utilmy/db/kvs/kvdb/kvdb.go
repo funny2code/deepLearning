@@ -9,7 +9,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-func RunSetXClientsYTimes(x int, y int, port string) {
+func RunSetXClientsYTimes(x, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
@@ -34,7 +34,7 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 	wg.Wait()
 }
 
-func RunGetXClientsYTimes(x int, y int, port string) {
+func RunGetXClientsYTimes(x, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
