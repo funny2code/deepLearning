@@ -16,6 +16,3 @@ plotly==5.11.0
 tenacity==8.1.0
 Werkzeug==2.2.2
 zipp==3.10.0
-utilmy==0.1.16677380
-json-with-comments==1.1.0
-fire==0.4.0
