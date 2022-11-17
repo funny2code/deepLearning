@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """  Launch app
-Doc::
+Docs::
 
     Dependencies
-        pip install fire dash dash_bootstrap_components dash_treeview_antd json-with-comments
+        pip install fire dash dash_bootstrap_components dash_treeview_antd jsoncomment
        
     Data
         copy .html files to assets/html/
@@ -22,11 +22,12 @@ Doc::
 app = None
 try :
     import dash_bootstrap_components as dbc
-    import os, shutil, importlib, jsonc
+    import os, shutil, importlib
     from dash import Dash, html
     from dash.dcc import Store
     from dash.dependencies import ClientsideFunction, Input, Output
     from dash_treeview_antd import TreeView
+    from jsoncomment import JsonComment
 
     app         = Dash( __name__, 
                         external_stylesheets=[dbc.themes.BOOTSTRAP],
@@ -34,6 +35,7 @@ try :
                     )
     app.title   = 'Simple render html'
     pages       = {}
+    json        = JsonComment()
 except : ...
 
 
@@ -248,7 +250,7 @@ def main(content_layout="assets/html_layout.json", debug=True):
         print(f'Error importing dash page module. {e}')
     
     with open(f"{content_layout}", "r") as f:
-        content_layout  = jsonc.loads(f.read())
+        content_layout  = json.loads(f.read())
    
     page_render_main(content_layout)
 
