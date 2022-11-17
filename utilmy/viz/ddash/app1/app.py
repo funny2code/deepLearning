@@ -187,8 +187,9 @@ def sidebar_v1(sidebar:dict):
                             ), 
                                 style       = sidebar['style']
                         )
-    except:
-       raise ValueError('style or data key not found in json file') 
+    except Exception as e:
+        print(f'Sidebar issue. Details:\n {e}')
+        raise ValueError('style or data key not found in json file') 
     else:
         return sidebar_content
 
@@ -213,7 +214,7 @@ def page_render_main(content_layout:dict):
        sidebar_content = SIDEBAR_VER[version](content_layout['sidebar_content'])
        homepage        = content_layout['sidebar_content']['data']['key']
     except Exception as e : 
-        print('Sidebar issue', e )
+        print(f'Content Layout issue. Details:\n {e}')
         raise ValueError("version, sidebar_content or homepage is not found in layout") 
 
 
@@ -246,14 +247,13 @@ def main(content_layout="assets/html_layout.json", debug=True):
         for page in [f for f in os.listdir('pages') if f.endswith('.py')]:
             page        = page[:-3]
             pages[page] = importlib.import_module('pages.' + page)
+        
+        content_layout  = json.loadf(content_layout)
     except Exception as e:
-        print(f'Error importing dash page module. {e}')
+        print(f'Error importing dash page module or json. Details:\n {e}')
     
-    with open(f"{content_layout}", "r") as f:
-        content_layout  = json.loads(f.read())
-   
     page_render_main(content_layout)
-
+    
     app.run_server(debug=debug)
 
 
