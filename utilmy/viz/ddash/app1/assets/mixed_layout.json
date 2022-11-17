@@ -1,18 +1,27 @@
+/*******************************************************************************
+***                                                                          ***
+***                    JSON Content_Layout Example                           ***
+***                                                                          ***
+*******************************************************************************/
+
 {
-    "main_content" : { // CSS Style in JSON Format, Applied to main content
+    "main_content" : { 
+        // CSS Style in JSON Format, Applied to main content
         "marginLeft": "20%",
         "height":     "100vh"
     },
 
     "sidebar_content":{
-        "version": 1, // Type: Number. Only support for version 1
+        "version": 1, 
+        // Type: Number. Only support for version 1
         "data": { 
                 /*
                     title   :   menu's display text
                     children:   add child menu
                     key     :   target file or url to render. Fill Number to flag as non render target.
                 */
-                "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer", // First key value assigned as Homepage
+                "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer", 
+                // First key value assigned as Homepage
                 "children": [{
                     "title": "Child",   "key": "01",
                     "children": [
@@ -31,7 +40,8 @@
                 }]
             },
 
-        "style": { // CSS Style in JSON Format, Applied to sidebar content
+        "style": { 
+            // CSS Style in JSON Format, Applied to sidebar content
             "position": "fixed",
             "top": 0,
             "left": 0,
