@@ -13,14 +13,10 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
 
-var keyVal map[string]string
-
-func initKeyVal(n int) {
-	keyVal = make(map[string]string)
-	for i := 0; i < n; i++ {
-		keyVal[GenerateRandomString(10)] = GenerateRandomString(100)
-	}
-}
+var (
+	keys map[int][]string = map[int][]string{}
+	vals map[int][]string = map[int][]string{}
+)
 
 func GenerateRandomString(n int) string {
 	sb := strings.Builder{}
@@ -31,13 +27,24 @@ func GenerateRandomString(n int) string {
 	return sb.String()
 }
 
+func CreateKeyValForUser(x int, y int) {
+	for i := 0; i < x; i++ {
+		keys[i] = make([]string, y)
+		vals[i] = make([]string, y)
+		for j := 0; j < y; j++ {
+			keys[i][j] = GenerateRandomString(10)
+			vals[i][j] = GenerateRandomString(500)
+		}
+	}
+}
+
 func RunSetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
-	initKeyVal(y)
+	CreateKeyValForUser(x, y)
 
 	for i := 0; i < x; i++ {
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			defer wg.Done()
 			client := redis.NewClient(&redis.Options{
 				Addr:     "localhost:" + port,
@@ -46,13 +53,13 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 			})
 
 			ctx := context.Background()
-			for key, value := range keyVal {
-				err := client.Set(ctx, key, value, 0).Err()
+			for j := 0; j < y; j++ {
+				err := client.Set(ctx, keys[i][j], vals[i][j], 0).Err()
 				if err != nil {
 					panic(err)
 				}
 			}
-		}()
+		}(i)
 	}
 	wg.Wait()
 }
@@ -62,7 +69,7 @@ func RunGetXClientsYTimes(x int, y int, port string) {
 
 	for i := 0; i < x; i++ {
 		wg.Add(1)
-		go func() {
+		go func(i int) {
 			defer wg.Done()
 			client := redis.NewClient(&redis.Options{
 				Addr:     "localhost:" + port,
@@ -72,13 +79,13 @@ func RunGetXClientsYTimes(x int, y int, port string) {
 
 			ctx := context.Background()
 
-			for key, val := range keyVal {
-				res := client.Get(ctx, key)
-				if res.Val() != val {
+			for j := 0; j < y; j++ {
+				res := client.Get(ctx, keys[i][j])
+				if res.Val() != vals[i][j] {
 					panic(res)
 				}
 			}
-		}()
+		}(i)
 	}
 	wg.Wait()
 }
