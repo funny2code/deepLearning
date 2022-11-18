@@ -1,161 +1,111 @@
-# -*- coding: utf-8 -*-
 """  Launch app
-Doc::
+Docs::
 
     Dependencies
-        pip install fire dash dash_bootstrap_components dash_treeview_antd
-    
+        pip install fire dash dash_bootstrap_components dash_treeview_antd jsoncomment
+       
+    Data
+        copy .html files to assets/html/
+        copy pages.py files to pages/ folder
     
     Command to run
         cd utilmy/viz/ddash/app1
-        - Launch links viz:       python app.py main --content_layout assets/links_layout.json
-        - Launch html viz:        python app.py main --content_layout assets/html_layout.json --homepage main.html
-        - Launch dash pages viz:  python app.py main --content_layout assets/dash_layout.json --homepage main_page.p
-    
-    
-    2. Data
-        copy .html files to assets/html/
-        copy pages.py files to pages/ folder      - For Dash Pages:
 
-    
-    3. Layout Json, Example,     Save layout .json to *assets* folder    
-        {
-            "main_content" : {   #### CSS Style in JSON Format, Applied to main content. ex :   
-                "marginLeft": "20%",
-                "height":     "100vh"
-            },
-
-
-            ####  key with this 3 types of target-render will automatically loaded in main content
-            "sidebar_content":{
-                "version": 1,   ### Number. The latest Update only support for version 1.
-                "data": { "title": "Home", 
-                          "key":"https://gallery.plotly.host/bball-shot-explorer",
-                                "children": [{
-                                    "title": "Child",   "key": "01",
-                                    "children": [
-                                        {"title": "link1", "key": "https://dash.gallery/self-driving/"}
-                                    ]   },
-
-
-                        { "title": "Child2",   
-                          "key": "02",
-                                "children": [
-                                    {"title": "html-1", "key": "page1.html"},
-                                    {"title": "html-2", "key": "page2.html"},
-                                    {"title": "html-3", "key": "page2_1.html"},
-
-                                    {"title": "dash-1", "key": "page1.py"},
-                                    {"title": "dash-2", "key": "page2.py"}
-                                ]  }]
-                    },
-
-                "style": {  ###  CSS Style in JSON Format
-                    "position": "fixed",
-                    "top": 0,
-                    "left": 0,
-                    "bottom": 0,
-                    "width": "20%",
-                    "padding": "20px 10px",
-                    "backgroundColor": "#f8f9fa",
-                    "verticalAlign": "middle",
-                    "alignItems": "center"
-                }
-                
-            }
-        }
-
-        
-        - <NUMBER>        : key with Number will flagged as non target-render
-    
+        - Launch links viz      :   python app.py main --content_layout assets/links_layout.json
+        - Launch html viz       :   python app.py main --content_layout assets/html_layout.json
+        - Launch dash pages viz :   python app.py main --content_layout assets/dash_layout.json
+        - Launch mixed viz      :   python app.py main --content_layout assets/mixed_layout.json   
     
 """
+
 app = None
 try :
     import dash_bootstrap_components as dbc
-    import os, shutil, importlib, json
+    import os, shutil, importlib
     from dash import Dash, html
     from dash.dcc import Store
     from dash.dependencies import ClientsideFunction, Input, Output
     from dash_treeview_antd import TreeView
+    from jsoncomment import JsonComment
 
-    app = Dash( __name__, 
-                external_stylesheets=[dbc.themes.BOOTSTRAP],
-                suppress_callback_exceptions=True
-                )
-    app.title = 'Simple render html'
-
-    pages = {}
-except : pass
-
-
+    app         = Dash( __name__, 
+                        external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/jsoneditor.min.css'],
+                        suppress_callback_exceptions=True
+                    )
+    app.title   = 'Simple render html'
+    pages       = {}
+    json        = JsonComment()
+except : ...
 
 
-#####################################################################
-def test1(homepage="main_page.py"):
-    """  python  app.py test1
+
+
+##########################################################################################
+def test1():
+    """  Test Dash Render. command: python app.py test1
     Docs::    
     
-        homepage (str, optional): _description_. Defaults to "main_page.py".
+        python app.py main --content_layout assets/dash_layout.json
     """
-    import utilmy as uu  
-    dir_repo, dir_tmp = uu.dir_testinfo()
-    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
+    import utilmy as uu 
+    dir_repo, _ = uu.dir_testinfo()
+    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
 
 
-def test2(homepage="main.html"):
-    """  python  app.py test2
+def test2():
+    """  Test Html Render. command: python app.py test2
     Docs::    
     
-        python app.py main --content_layout assets/html_layout.json --homepage main.html
+        python app.py main --content_layout assets/html_layout.json
         
     """
-    import utilmy as uu
-    dir_repo, dir_tmp = uu.dir_testinfo()
-    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/html_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py'  "
+    import utilmy as uu 
+    dir_repo, _ = uu.dir_testinfo()
+    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/html_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py'  "
     os.system(cmd)
     
 
-def test3(homepage="about:blank"):
-    """  python  app.py test3
+def test3():
+    """  Test Links Render. command: python app.py test3
     Docs::    
-    
-        homepage (str, optional): _description_. Defaults to "about:blank".
+
+        python app.py main --content_layout assets/links_layout.json 
+
     """
-    import utilmy as uu
-    dir_repo, dir_tmp = uu.dir_testinfo()
-    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/links_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
+    import utilmy as uu 
+    dir_repo, _ = uu.dir_testinfo()
+    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/links_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
 
 
-def test4(homepage="main_page.py"):
-    """  python  app.py test4
+def test4():
+    """  Test Mixed Render. command: python app.py test4
     Docs::    
     
-        python app.py main --content_layout assets/mixed_layout.json --homepage main_page.py
+        python app.py main --content_layout assets/mixed_layout.json
         
     """
-    import utilmy as uu
-    dir_repo, dir_tmp = uu.dir_testinfo()
-    cmd = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/mixed_layout.json --homepage {homepage} & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
+    import utilmy as uu 
+    dir_repo, _ = uu.dir_testinfo()
+    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/mixed_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
     os.system(cmd)
 
 
-###################################################################
+##########################################################################################
 def export(name="app1", dirout=""):
-    """  python  app.py export
+    """  Export script dir to target dir. command: python app.py export
     Docs::    
-    
-        name (str, optional): _description_. Defaults to "app1".
-        dirout (str, optional): _description_. Defaults to Current Working Directory.
+        Args:
+            name (str, optional): _description_. Defaults to "app1".
+            dirout (str, optional): _description_. Defaults to Current Working Directory.
     """
     import utilmy
     
-    dirout = dirout or os.getcwd()
-    dirout = dirout + '/' + name
+    dirout      = dirout or os.getcwd()
+    dirout      = dirout + '/' + name
 
-    dir_repo, dir_tmp = utilmy.dir_testinfo()
+    dir_repo, _ = utilmy.dir_testinfo()
     
     os.makedirs(dirout, exist_ok=True)
     shutil.copytree( dir_repo + "/viz/ddash/app1/", dirout, dirs_exist_ok=True )
@@ -163,152 +113,158 @@ def export(name="app1", dirout=""):
 
 
 
-###################################################################
-######  Callback  #####################################################
-### Main page resource
-### Callback Global for Javascript part
+##########################################################################################
+################################# Callbacks ##############################################
+### Callback validation in Javascript (assets/scripts.js)
 """
-
+    Validate target file or url, Construct path to target file
+    and Invoke page_render_html callback. 
 
 """
 app.clientside_callback(
     ClientsideFunction(
-        namespace='clientside',
-        function_name='render'
-    ),
-    Output('target-render', 'data'),
-    [Input('input', 'selected'),
-    Input('homepage', 'data')]
+        namespace       = 'clientside',
+        function_name   = 'render'
+    ), 
+        Output('target-render', 'data')
+    ,
+    [
+        Input('input',    'selected'),
+        Input('forms',    'selected'),
+        Input('homepage', 'data')
+    ]
 )
 
 
+### Callback Render
+@app.callback(
+                Output('output',       'children'), 
+                Input('target-render', 'data'), 
+                prevent_initial_call   = True
+            )
+def page_render_html(data:str):
+    """  Generate static HTML page via Iframe or Dash Layout
+    Docs::
 
+        Args:
+            _type_: (str) path to target file
 
-@app.callback(Output('output', 'children'), Input('target-render', 'data'), prevent_initial_call=True)
-def page_render_html(data):
-    """  Generate static HTML page or Dash Layout
-
+        Returns:
+            _type_: (dash.html.Div) Iframe Layout or Dash Html Layout
 
     """
+    
     if data.endswith('.py'):
-        page = data.split('/')[-1][:-len('.py')]
-        return pages[page].layout
+        page    = data.split('/')[-1][:-len('.py')]
+        return  pages[page].layout
     return html.Iframe(src=data, width='100%', height='100%')
         
 
-
-
-
-###################################################################
+##########################################################################################
 def sidebar_v1(sidebar:dict):
     """ Compose Sidebar v1 layout component.
     Docs::
 
         Args:
-            _type_: (dict) Sidebar data and style
+            _type_      : (dict) Sidebar data and style
 
         Returns:
-            _type_: (dash.html.Div.Div) Sidebar v1 Div Component
+            _type_      : (dash.html.Div) Sidebar v1 Div Component
 
         Raises:
-            ValueError
-                Raised if data or style is not exist in sidebar_content json.
+            _ValueError_: Raised if data or style is not exist in sidebar_content dict.
     """
-    if 'data' not in sidebar.keys():
-        raise ValueError('data key not found in json file')
-    
-    if 'style' not in sidebar.keys():
-        raise ValueError('style key not found in json file')
 
-    sidebar_content = html.Div( 
-                        TreeView(
-                            id='input',
-                            multiple=False,
-                            checkable=False,
-                            checked=False,
-                            selected=[],
-                            expanded=[],
-                            data=sidebar['data']
-                        ), style=sidebar['style']
-                    )
-    return sidebar_content
-
-
+    try:
+        sidebar_content = html.Div([ 
+                            TreeView(
+                                id          = 'input',
+                                multiple    = False,
+                                checkable   = False,
+                                checked     = False,
+                                selected    = [],
+                                expanded    = [],
+                                data        = sidebar['data']
+                            ), 
+                            TreeView(
+                                id          = 'forms',
+                                multiple    = False,
+                                checkable   = False,
+                                checked     = False,
+                                selected    = [],
+                                expanded    = [],
+                                data        = { "title": "Upload JSON", "key":"forms.py" }
+                            )],
+                                style       = sidebar['style']
+                        )
+    except Exception as e:
+        print(f'Sidebar issue. Details:\n {e}')
+        raise ValueError('style or data key not found in json file') 
+    else:
+        return sidebar_content
 
 
 
 ##########################################################################################
-def page_render_main(content_layout, homepage):
+def page_render_main(content_layout:dict):
     """  Will generate the Whole page of the App : Side Bar + main
     Docs::
+        Args:
+            _type_      : (dict) content layout
 
-       content_layout :  dir to json file
-
-
-        Raises:
-            ValueError
-                - Raised if sidebar_content is not found in layout json.
-                - Raised if version is not found in sidebar_content section.
+        Raises: 
+            _ValueError_: Raised if version, sidebar_content or homepage is not found in layout dict.
     
     """
 
-    #### Side Generator
-    SIDEBAR_VER = {1: sidebar_v1} # Scalable sidebar
+    #### Sidebar Generator
+    SIDEBAR_VER        = { 1: sidebar_v1 } # Scalable sidebar
     try :    
        version         = content_layout['sidebar_content']['version'] 
        sidebar_content = SIDEBAR_VER[version](content_layout['sidebar_content'])
+       homepage        = content_layout['sidebar_content']['data']['key']
     except Exception as e : 
-        print('Side Bar issue', e )
-        raise ValueError("  content_layout['sidebar_content']['version']   ") 
+        print(f'Content Layout issue. Details:\n {e}')
+        raise ValueError("version, sidebar_content or homepage is not found in layout") 
 
 
     #### Main content
     main_content    = html.Div(id="output", style=content_layout['main_content'])
 
-    #### Whole : Main + Sidebar
-    app.layout = html.Div([ sidebar_content, 
-                            main_content,
-                            Store(id='homepage', storage_type='session', data=homepage),
-                            Store(id='target-render'), 
+    #### All = Main + Sidebar
+    app.layout      = html.Div([ 
+                                sidebar_content, 
+                                main_content,
+                                Store(id='homepage', storage_type='session', data=homepage),
+                                Store(id='target-render')
                             ])
 
 
-
-def main(content_layout="assets/html_layout.json", homepage="", debug=True, dir_log=""):
+def main(content_layout="assets/html_layout.json", debug=True):
     """ Run main Server Dash App
     Docs::
 
         Args:
-            content_layout  json       :  Content layout in JSON format. Default to 'assets/html_layout.json'.
-            homepage (str, optional)   :  Set Homepage Location. 
-            debug (boolean, optional)  :  Set dash debug options. 
+            content_layout  (json)      :   Content layout in JSON format. Default to 'assets/html_layout.json'.
+            debug (boolean, optional)   :   Set dash debug options. 
     
+        Sample layout stored in         :  assets/html_layout.json
 
-        Sample layout is here in:  assets/html_layout.json
-
-        Raises:
-            ValueError
-                Raised if content_type is not 'links', 'html', or 'dash'.
     """
     global pages
 
     try:
         for page in [f for f in os.listdir('pages') if f.endswith('.py')]:
-            page = page[:-3]
+            page        = page[:-3]
             pages[page] = importlib.import_module('pages.' + page)
+        
+        content_layout  = json.loadf(content_layout)
     except Exception as e:
-        print(f'Error importing dash page module. {e}')
+        print(f'Error importing dash page module or json. Details:\n {e}')
     
-    with open(fr"{content_layout}", "rb") as f:
-        content_layout = json.loads(f.read())
-
-    homepage = homepage or content_layout['sidebar_content']['data']['key']
-   
-    page_render_main(content_layout, homepage)
-
+    page_render_main(content_layout)
+    
     app.run_server(debug=debug)
-
-
 
 
 ##########################################################################################
