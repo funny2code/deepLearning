@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """  Launch app
 Docs::
 
@@ -30,7 +29,7 @@ try :
     from jsoncomment import JsonComment
 
     app         = Dash( __name__, 
-                        external_stylesheets=[dbc.themes.BOOTSTRAP],
+                        external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/jsoneditor.min.css'],
                         suppress_callback_exceptions=True
                     )
     app.title   = 'Simple render html'
@@ -126,14 +125,15 @@ app.clientside_callback(
     ClientsideFunction(
         namespace       = 'clientside',
         function_name   = 'render'
-    ),
-        Output('target-render', 'data'),
+    ), 
+        Output('target-render', 'data')
+    ,
     [
         Input('input',    'selected'),
+        Input('forms',    'selected'),
         Input('homepage', 'data')
     ]
 )
-
 
 
 ### Callback Render
@@ -153,6 +153,7 @@ def page_render_html(data:str):
             _type_: (dash.html.Div) Iframe Layout or Dash Html Layout
 
     """
+    
     if data.endswith('.py'):
         page    = data.split('/')[-1][:-len('.py')]
         return  pages[page].layout
@@ -175,7 +176,7 @@ def sidebar_v1(sidebar:dict):
     """
 
     try:
-        sidebar_content = html.Div( 
+        sidebar_content = html.Div([ 
                             TreeView(
                                 id          = 'input',
                                 multiple    = False,
@@ -185,6 +186,15 @@ def sidebar_v1(sidebar:dict):
                                 expanded    = [],
                                 data        = sidebar['data']
                             ), 
+                            TreeView(
+                                id          = 'forms',
+                                multiple    = False,
+                                checkable   = False,
+                                checked     = False,
+                                selected    = [],
+                                expanded    = [],
+                                data        = { "title": "Upload JSON", "key":"forms.py" }
+                            )],
                                 style       = sidebar['style']
                         )
     except Exception as e:
@@ -226,7 +236,7 @@ def page_render_main(content_layout:dict):
                                 sidebar_content, 
                                 main_content,
                                 Store(id='homepage', storage_type='session', data=homepage),
-                                Store(id='target-render'), 
+                                Store(id='target-render')
                             ])
 
 
@@ -261,3 +271,4 @@ def main(content_layout="assets/html_layout.json", debug=True):
 if __name__ == '__main__':
      import fire
      fire.Fire()
+
