@@ -38,3 +38,19 @@
 |SetDragonfly           |3.71s   |
 |GetDragonfly           |1.57s   |
 
+
+### example3
+- cpu: 11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
+- 4 clients
+- 50.000 operations / client
+- 10 length of key and 500 length of value
+
+|name                   |time    |
+|---                    |---     |
+|SetRedis               |2.62s   |
+|GetRedis               |2.17s   |
+|SetKeydDb              |2.82s   |
+|GetKeyDb               |2.32s   |
+|SetDragonfly           |3.70s   |
+|GetDragonfly           |2.93s   |
+
