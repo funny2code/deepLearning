@@ -2,17 +2,25 @@ package kvdb
 
 import (
 	"context"
+	"math/rand"
 	"net"
+	"strings"
 	"sync"
 
 	"github.com/No3371/go-skytable"
 	"github.com/go-redis/redis/v8"
 )
 
-var (
-	key   = "10charrrrr"
-	value = "500charrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
-)
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
+
+func GenerateRandomString(n int) string {
+	sb := strings.Builder{}
+	sb.Grow(n)
+	for i := 0; i < n; i++ {
+		sb.WriteByte(charset[rand.Intn(len(charset))])
+	}
+	return sb.String()
+}
 
 func RunSetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
@@ -27,6 +35,9 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 				DB:       0,  // use default DB
 			})
 
+			key := GenerateRandomString(10)
+			value := GenerateRandomString(100)
+
 			ctx := context.Background()
 			for j := 0; j < y; j++ {
 				err := client.Set(ctx, key, value, 0).Err()
@@ -39,7 +50,7 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 	wg.Wait()
 }
 
-func RunGetXClientsYTimes(x int, y int, port string) {
+func RunSetGetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
@@ -53,12 +64,14 @@ func RunGetXClientsYTimes(x int, y int, port string) {
 			})
 
 			ctx := context.Background()
-			err := client.Set(ctx, key, value, 0).Err()
-			if err != nil {
-				panic(err)
-			}
 
 			for j := 0; j < y; j++ {
+				key := GenerateRandomString(10)
+				value := GenerateRandomString(100)
+				err := client.Set(ctx, key, value, 0).Err()
+				if err != nil {
+					panic(err)
+				}
 				res := client.Get(ctx, key)
 				if res.Val() != value {
 					panic(res)

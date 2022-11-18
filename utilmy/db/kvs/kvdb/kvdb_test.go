@@ -7,39 +7,39 @@ import (
 )
 
 func BenchmarkSetRedis(b *testing.B) {
-	clientCount := 20
+	clientCount := 100
 	setCount := 10000
 	kvdb.RunSetXClientsYTimes(clientCount, setCount, "6379")
 }
 
-func BenchmarkGetRedis(b *testing.B) {
-	clientCount := 20
+func BenchmarkSetGetRedis(b *testing.B) {
+	clientCount := 100
 	getCount := 10000
-	kvdb.RunGetXClientsYTimes(clientCount, getCount, "6379")
+	kvdb.RunSetGetXClientsYTimes(clientCount, getCount, "6379")
 }
 
 func BenchmarkSetKeydDb(b *testing.B) {
-	clientCount := 20
+	clientCount := 100
 	setCount := 10000
 	kvdb.RunSetXClientsYTimes(clientCount, setCount, "6380")
 }
 
-func BenchmarkGetKeyDb(b *testing.B) {
-	clientCount := 20
+func BenchmarkSetGetKeyDb(b *testing.B) {
+	clientCount := 100
 	getCount := 10000
-	kvdb.RunGetXClientsYTimes(clientCount, getCount, "6380")
+	kvdb.RunSetGetXClientsYTimes(clientCount, getCount, "6380")
 }
 
 func BenchmarkSetDragonfly(b *testing.B) {
-	clientCount := 20
+	clientCount := 100
 	setCount := 10000
 	kvdb.RunSetXClientsYTimes(clientCount, setCount, "6381")
 }
 
-func BenchmarkGetDragonfly(b *testing.B) {
-	clientCount := 20
+func BenchmarkSetGetDragonfly(b *testing.B) {
+	clientCount := 100
 	getCount := 10000
-	kvdb.RunGetXClientsYTimes(clientCount, getCount, "6381")
+	kvdb.RunSetGetXClientsYTimes(clientCount, getCount, "6381")
 }
 
 // func BenchmarkSetSkyTable(b *testing.B) {
@@ -48,7 +48,7 @@ func BenchmarkGetDragonfly(b *testing.B) {
 // 	kvdb.SkyTableRunSetXClientsYTimes(clientCount, setCount)
 // }
 
-// func BenchmarkGetSkyTable(b *testing.B) {
+// func BenchmarkSetGetSkyTable(b *testing.B) {
 // 	clientCount := 20
 // 	getCount := 10000
 // 	kvdb.SkyTableRunGetXClientsYTimes(clientCount, getCount)
