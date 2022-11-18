@@ -9,7 +9,12 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-func RunSetXClientsYTimes(x, y int, port string) {
+var (
+	key   = "10charrrrr"
+	value = "500charrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+)
+
+func RunSetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
@@ -24,7 +29,7 @@ func RunSetXClientsYTimes(x, y int, port string) {
 
 			ctx := context.Background()
 			for j := 0; j < y; j++ {
-				err := client.Set(ctx, "foo", "bar", 0).Err()
+				err := client.Set(ctx, key, value, 0).Err()
 				if err != nil {
 					panic(err)
 				}
@@ -34,7 +39,7 @@ func RunSetXClientsYTimes(x, y int, port string) {
 	wg.Wait()
 }
 
-func RunGetXClientsYTimes(x, y int, port string) {
+func RunGetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
@@ -48,14 +53,14 @@ func RunGetXClientsYTimes(x, y int, port string) {
 			})
 
 			ctx := context.Background()
-			err := client.Set(ctx, "foo", "bar", 0).Err()
+			err := client.Set(ctx, key, value, 0).Err()
 			if err != nil {
 				panic(err)
 			}
 
 			for j := 0; j < y; j++ {
-				res := client.Get(ctx, "foo")
-				if res.Val() != "bar" {
+				res := client.Get(ctx, key)
+				if res.Val() != value {
 					panic(res)
 				}
 			}
