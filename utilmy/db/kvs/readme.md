@@ -16,12 +16,12 @@
 
 |name                 |time    |
 |---                  |---     |
-|SetRedis             |88.7s   |
-|GetRedis             |6.67s   |
-|SetKeydDb            |88.6s   |
-|GetKeyDb             |5.41s   |
-|SetDragonfly         |88.3s   |
-|GetDragonfly         |5.63s   |
+|SetRedis             |7.78s   |
+|GetRedis             |7.29s   |
+|SetKeydDb            |8.31s   |
+|GetKeyDb             |5.47s   |
+|SetDragonfly         |6.21s   |
+|GetDragonfly         |6.33s   |
 
 ### example2
 - cpu: 11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
@@ -31,9 +31,10 @@
 
 |name                   |time    |
 |---                    |---     |
-|SetRedis               |9.82s   |
-|GetRedis               |1.37s   |
-|SetKeydDb              |11.2s   |
-|GetKeyDb               |1.57s   |
-|SetDragonfly           |9.80s   |
-|GetDragonfly           |1.61s   |
+|SetRedis               |1.67s   |
+|GetRedis               |1.49s   |
+|SetKeydDb              |1.93s   |
+|GetKeyDb               |1.74s   |
+|SetDragonfly           |3.71s   |
+|GetDragonfly           |1.57s   |
+

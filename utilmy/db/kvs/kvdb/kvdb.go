@@ -29,6 +29,10 @@ func GenerateRandomString(n int) string {
 
 func RunSetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
+	for j := 0; j < y; j++ {
+		keys = append(keys, GenerateRandomString(10))
+		vals = append(vals, GenerateRandomString(500))
+	}
 
 	for i := 0; i < x; i++ {
 		wg.Add(1)
@@ -40,14 +44,9 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 				DB:       0,  // use default DB
 			})
 
-			for j := 0; j < y; j++ {
-				keys = append(keys, GenerateRandomString(10))
-				vals = append(vals, GenerateRandomString(500))
-			}
-
 			ctx := context.Background()
 			for j := 0; j < y; j++ {
-				err := client.Set(ctx, keys[j], vals[j], 0).Err()
+				err := client.Set(ctx, keys[rand.Intn(y)], vals[rand.Intn(y)], 0).Err()
 				if err != nil {
 					panic(err)
 				}
@@ -73,7 +72,7 @@ func RunGetXClientsYTimes(x int, y int, port string) {
 			ctx := context.Background()
 
 			for j := 0; j < y; j++ {
-				client.Get(ctx, keys[j])
+				client.Get(ctx, keys[rand.Intn(y)])
 			}
 		}()
 	}
