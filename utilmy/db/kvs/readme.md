@@ -16,12 +16,12 @@
 
 |name                 |time    |
 |---                  |---     |
-|SetRedis             |6.96s   |
-|SetAndGetRedis       |15.9s   |
-|SetKeydDb            |6.58s   |
-|SetAndGetKeyDb       |16.4s   |
-|SetDragonfly         |6.34s   |
-|SetAndGetDragonfly   |17.7s   |
+|SetRedis             |6.05s   |
+|GetRedis             |5.90s   |
+|SetKeydDb            |7.26s   |
+|GetKeyDb             |4.66s   |
+|SetDragonfly         |5.13s   |
+|GetDragonfly         |5.13s   |
 
 
 ### example2
@@ -32,9 +32,9 @@
 
 |name                   |time    |
 |---                    |---     |
-|SetRedis               |1.52s   |
-|SetAndGetRedis         |3.35s   |
-|SetKeydDb              |1.58s   |
-|SetAndGetKeyDb         |3.55s   |
-|SetDragonfly           |1.80s   |
-|SetAndGetDragonfly     |4.02s   |
+|SetRedis               |1.28s   |
+|GetRedis               |1.25s   |
+|SetKeydDb              |1.36s   |
+|GetKeyDb               |1.31s   |
+|SetDragonfly           |1.47s   |
+|GetDragonfly           |1.49s   |

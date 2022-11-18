@@ -2,11 +2,11 @@ goos: linux
 goarch: amd64
 pkg: github.com/arita37/myutil/utilmy/db/kvs/kvdb
 cpu: 11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
-BenchmarkSetRedis-8          	       1	6962870819 ns/op
-BenchmarkSetGetRedis-8       	       1	15888771410 ns/op
-BenchmarkSetKeydDb-8         	       1	6582744471 ns/op
-BenchmarkSetGetKeyDb-8       	       1	16414140081 ns/op
-BenchmarkSetDragonfly-8      	       1	6341356311 ns/op
-BenchmarkSetGetDragonfly-8   	       1	17707056424 ns/op
+BenchmarkSetRedis-8       	       1	1279872604 ns/op
+BenchmarkGetRedis-8       	       1	1251679419 ns/op
+BenchmarkSetKeydDb-8      	       1	1362163824 ns/op
+BenchmarkGetKeyDb-8       	       1	1308849586 ns/op
+BenchmarkSetDragonfly-8   	       1	1474728096 ns/op
+BenchmarkGetDragonfly-8   	       1	1485367707 ns/op
 PASS
-ok  	github.com/arita37/myutil/utilmy/db/kvs/kvdb	69.910s
+ok  	github.com/arita37/myutil/utilmy/db/kvs/kvdb	8.169s

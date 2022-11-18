@@ -50,7 +50,7 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 	wg.Wait()
 }
 
-func RunSetGetXClientsYTimes(x int, y int, port string) {
+func RunGetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
 
 	for i := 0; i < x; i++ {
@@ -65,13 +65,14 @@ func RunSetGetXClientsYTimes(x int, y int, port string) {
 
 			ctx := context.Background()
 
+			key := GenerateRandomString(10)
+			value := GenerateRandomString(100)
+			err := client.Set(ctx, key, value, 0).Err()
+			if err != nil {
+				panic(err)
+			}
+
 			for j := 0; j < y; j++ {
-				key := GenerateRandomString(10)
-				value := GenerateRandomString(100)
-				err := client.Set(ctx, key, value, 0).Err()
-				if err != nil {
-					panic(err)
-				}
 				res := client.Get(ctx, key)
 				if res.Val() != value {
 					panic(res)
