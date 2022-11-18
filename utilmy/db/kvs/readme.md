@@ -13,6 +13,7 @@
 - 100 clients
 - 10.000 operations / client
 - 10 length of key and 500 length of value
+
 |name                 |time    |
 |---                  |---     |
 |SetRedis             |6.96s   |
@@ -28,6 +29,7 @@
 - 20 clients
 - 10.000 operations / client
 - 10 length of key and 500 length of value
+
 |name                   |time    |
 |---                    |---     |
 |SetRedis               |1.52s   |
