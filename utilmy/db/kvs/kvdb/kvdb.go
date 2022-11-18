@@ -13,6 +13,15 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
 
+var keyVal map[string]string
+
+func initKeyVal(n int) {
+	keyVal = make(map[string]string)
+	for i := 0; i < n; i++ {
+		keyVal[GenerateRandomString(10)] = GenerateRandomString(100)
+	}
+}
+
 func GenerateRandomString(n int) string {
 	sb := strings.Builder{}
 	sb.Grow(n)
@@ -24,6 +33,7 @@ func GenerateRandomString(n int) string {
 
 func RunSetXClientsYTimes(x int, y int, port string) {
 	var wg sync.WaitGroup
+	initKeyVal(y)
 
 	for i := 0; i < x; i++ {
 		wg.Add(1)
@@ -35,11 +45,8 @@ func RunSetXClientsYTimes(x int, y int, port string) {
 				DB:       0,  // use default DB
 			})
 
-			key := GenerateRandomString(10)
-			value := GenerateRandomString(100)
-
 			ctx := context.Background()
-			for j := 0; j < y; j++ {
+			for key, value := range keyVal {
 				err := client.Set(ctx, key, value, 0).Err()
 				if err != nil {
 					panic(err)
@@ -65,16 +72,9 @@ func RunGetXClientsYTimes(x int, y int, port string) {
 
 			ctx := context.Background()
 
-			key := GenerateRandomString(10)
-			value := GenerateRandomString(100)
-			err := client.Set(ctx, key, value, 0).Err()
-			if err != nil {
-				panic(err)
-			}
-
-			for j := 0; j < y; j++ {
+			for key, val := range keyVal {
 				res := client.Get(ctx, key)
-				if res.Val() != value {
+				if res.Val() != val {
 					panic(res)
 				}
 			}
