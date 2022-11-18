@@ -31,9 +31,10 @@
 
 |name                   |time    |
 |---                    |---     |
-|SetRedis               |2.94s   |
-|GetRedis               |1.32s   |
-|SetKeydDb              |2.97s   |
-|GetKeyDb               |1.37s   |
-|SetDragonfly           |3.05s   |
-|GetDragonfly           |1.49s   |
+|SetRedis               |88.7s   |
+|GetRedis               |6.67s   |
+|SetKeydDb              |88.6s   |
+|GetKeyDb               |5.41s   |
+|SetDragonfly           |88.3s   |
+|GetDragonfly           |5.63s   |
+
