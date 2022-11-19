@@ -78,8 +78,7 @@ def export(name="app1", dirout=""):
 ##########################################################################################
 ################################# Callbacks ##############################################
 ### Callback validation in Javascript (assets/scripts.js)  ##################
-"""
-    Validate target file or url, Construct path to target file
+""" Validate target file or url, Construct path to target file
     and Invoke page_render_html callback. 
 
 """
