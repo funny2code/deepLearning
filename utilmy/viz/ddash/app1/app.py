@@ -42,6 +42,7 @@ except Exception as e :
 
 
 
+
 ##########################################################################################
 def test_all():
     test1()
@@ -167,6 +168,7 @@ def page_render_main(content_layout:dict):
        homepage        = content_layout['sidebar_content']['data']['key']
     except Exception as e : 
         print(f'Content Layout issue. Details:\n {e}')
+        print(f'{content_layout} \n')        
         raise ValueError("version, sidebar_content or homepage is not found in layout") 
 
 
