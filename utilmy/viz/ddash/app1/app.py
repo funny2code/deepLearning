@@ -2,23 +2,28 @@
 Docs::
 
     pip install fire dash dash_bootstrap_components dash_treeview_antd jsoncomment pandas
-       
-    Data
-        copy .html    files to assets/html/
-        copy pages.py files to pages/ folder
-    
+           
     Command to run
          cd utilmy/viz/ddash/app1
 
         - Launch mixed viz      :   python app.py main --content_layout assets/mixed_layout.json   
     
+    File needed:
+         assets/mixed_layout.json
+         html    files to assets/html/
+         dash_pages.py files to pages/ folder
+    
+    Doc:
+    https://dash-bootstrap-components.opensource.faculty.ai/docs/components/form/
+
+
 """
 
 app = None
 try :
-    import dash_bootstrap_components as dbc
     import os, shutil, importlib
     from dash import Dash, html
+    import dash_bootstrap_components as dbc    
     from dash.dcc import Store
     from dash.dependencies import ClientsideFunction, Input, Output
     from dash_treeview_antd import TreeView
@@ -28,7 +33,7 @@ try :
                         external_stylesheets=[dbc.themes.BOOTSTRAP, 'assets/jsoneditor.min.css'],
                         suppress_callback_exceptions=True
                     )
-    app.title   = 'Simple render html'
+    app.title   = 'Template App html'
     pages       = {}
     json        = JsonComment()
 except Exception as e :
