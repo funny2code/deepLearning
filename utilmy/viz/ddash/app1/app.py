@@ -181,13 +181,13 @@ def page_render_main(content_layout:dict):
                             ])
 
 
-def main(content_layout="assets/html_layout.json", debug=True):
+def main(content_layout="assets/mixed_layout.json", debug=True):
     """ Run main Server Dash App
     Docs::
 
         python app.py main --content_layout assets/mixed_layout.json   
 
-        content_layout  : path to json layout file.  Content layout in JSON format. Default to 'assets/html_layout.json'.
+        content_layout  : path to json layout file.  Content layout in JSON format. Default to 'assets/mixed_layout.json'.
         debug           : True/False.  Set dash debug options.    
 
     """
