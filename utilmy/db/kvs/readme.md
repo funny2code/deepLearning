@@ -8,6 +8,15 @@ echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bash_profile
 
 ## Running the tests
 ```bash
+
+https://ragainis.lt/yet-another-comparison-redis-5-6-vs-keydb-6-for-small-instances-eed4f36bd2ba
+
+
+https://openbenchmarking.org/test/pts/rocksdb
+
+https://openbenchmarking.org/suite/pts/database
+
+
     docker compose up -d
     go mod download
     go install  golang.org/x/perf/cmd/benchstat

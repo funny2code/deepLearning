@@ -1,0 +1,5 @@
+k8s_frameworks:
+  url: http://zzzzzzzzz.local:10097/frameworks?d=
+  proxy:
+    http: http://stb-dev-proxy.db.yyyyy.co.jp:9502
+    https: https://stb-dev-proxy.db.yyyyy.co.jp:9502
