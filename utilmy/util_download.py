@@ -264,7 +264,7 @@ def download_custom_pageimage(query, fileout="query1", genre_en='', id0="", cat=
 
     query2     = urllib.parse.quote(query, encoding='utf-8')
     url_prefix = 'httpl/' + query2
-    ### https://search.rakuten.co.jp/search/mall/%E3%83%A1%E3%8384+blue+/?p=2
+    ### https://search.zzzzzzz.co.jp/search/mall/%E3%83%A1%E3%8384+blue+/?p=2
     print(url_prefix)
     print(path)
 

@@ -31,7 +31,7 @@ path = os.path.join(current_dir,'Product_Images_and_CSV')
 os.mkdir(path)
 os.chdir(path)
 
-csv_file = open('Rakuten.csv','w',encoding="utf-8")
+csv_file = open('zzzzzzz.csv','w',encoding="utf-8")
 csv_writer = csv.writer(csv_file, delimiter='\t')
 csv_writer.writerow(['Image Name','Product Title', 'Price','Shop Name','Review Count','product_url','scrape_page_url'])
 
@@ -39,8 +39,8 @@ page = 1
 count = 0
 while page!=151:
     try:
-        rakuten_url = 'https://search.rakuten.co.jp/search/mall/-/555087/?p='+str(page)
-        req = Request(url=rakuten_url)
+        zzzzzzz_url = 'https://search.zzzzzzz.co.jp/search/mall/-/555087/?p='+str(page)
+        req = Request(url=zzzzzzz_url)
         source = urlopen(req).read()
         soup = bs(source,'lxml')
 
@@ -79,12 +79,12 @@ while page!=151:
             for review in individual_item.find_all('a',class_='dui-rating-filter'):
                 count_review = review.text
             if save == 0:
-                csv_writer.writerow([str(count)+'.jpg',product_name,product_price,shopname,count_review,product_url,rakuten_url])
+                csv_writer.writerow([str(count)+'.jpg',product_name,product_price,shopname,count_review,product_url,zzzzzzz_url])
     except:
         time.sleep(5)
         continue
 
     page += 1
 
-# upload_to_drive("Rakuten.csv")
+# upload_to_drive("zzzzzzz.csv")
 print("Site Scraped Successfully")
