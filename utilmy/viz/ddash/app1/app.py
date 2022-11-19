@@ -127,7 +127,7 @@ def sidebar_v1(sidebar:dict):
 
     try:
         sidebar_content = html.Div([ 
-                            TreeView(  id          = 'input',
+                            TreeView(  id   = 'input',
                                 multiple    = False,
                                 checkable   = False,
                                 checked     = False,
@@ -189,10 +189,10 @@ def main(content_layout="assets/html_layout.json", debug=True):
     """ Run main Server Dash App
     Docs::
 
-        content_layout  : path to json file.  Content layout in JSON format. Default to 'assets/html_layout.json'.
-        debug           : True/False.  Set dash debug options. 
-    
-        Sample layout stored in         :  assets/html_layout.json
+        python app.py main --content_layout assets/mixed_layout.json   
+
+        content_layout  : path to json layout file.  Content layout in JSON format. Default to 'assets/html_layout.json'.
+        debug           : True/False.  Set dash debug options.    
 
     """
     global pages
