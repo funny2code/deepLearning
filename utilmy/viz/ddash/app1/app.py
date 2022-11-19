@@ -159,15 +159,12 @@ def sidebar_v1(sidebar:dict):
 def page_render_main(content_layout:dict):
     """  Will generate the Whole page of the App : Side Bar + main
     Docs::
-        Args:
-            _type_      : (dict) content layout
 
-        Raises: 
-            _ValueError_: Raised if version, sidebar_content or homepage is not found in layout dict.
+        content : (dict) content layout
+        Raises:   Raised if version, sidebar_content or homepage is not found in layout dict.
     
     """
-
-    #### Sidebar Generator
+    #### Sidebar Generator  #################
     SIDEBAR_VER        = { 1: sidebar_v1 } # Scalable sidebar
     try :    
        version         = content_layout['sidebar_content']['version'] 
@@ -178,15 +175,14 @@ def page_render_main(content_layout:dict):
         raise ValueError("version, sidebar_content or homepage is not found in layout") 
 
 
-    #### Main content
+    #### Main content  ####################
     main_content    = html.Div(id="output", style=content_layout['main_content'])
 
     #### All = Main + Sidebar
-    app.layout      = html.Div([ 
-                                sidebar_content, 
-                                main_content,
-                                Store(id='homepage', storage_type='session', data=homepage),
-                                Store(id='target-render')
+    app.layout      = html.Div([ sidebar_content, 
+                                 main_content,
+                                 Store(id='homepage', storage_type='session', data=homepage),
+                                 Store(id='target-render')
                             ])
 
 
@@ -194,9 +190,8 @@ def main(content_layout="assets/html_layout.json", debug=True):
     """ Run main Server Dash App
     Docs::
 
-        Args:
-            content_layout  (json)      :   Content layout in JSON format. Default to 'assets/html_layout.json'.
-            debug (boolean, optional)   :   Set dash debug options. 
+        content_layout  : path to json file.  Content layout in JSON format. Default to 'assets/html_layout.json'.
+        debug           : True/False.  Set dash debug options. 
     
         Sample layout stored in         :  assets/html_layout.json
 
