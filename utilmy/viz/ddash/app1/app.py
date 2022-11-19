@@ -134,14 +134,6 @@ def sidebar_v1(sidebar:dict):
                                 expanded    = [],
                                 data        = sidebar['data']
                             ), 
-                            # TreeView(
-                            #     id          = 'forms',
-                            #     multiple    = False,
-                            #     checkable   = False,
-                            #     checked     = False,
-                            #     selected    = [],
-                            #     expanded    = [],
-                            #     data        = { "title": "Upload JSON", "key":"forms.py" }
                             ],
                             style       = sidebar['style']
                         )
