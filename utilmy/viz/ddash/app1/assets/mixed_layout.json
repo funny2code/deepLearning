@@ -10,7 +10,8 @@
         // Type: Number. Only support for version 1
         "data": { 
 
-                "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer", 
+ //               "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer", 
+               "title": "Home", "key":"https://www.google.com", 
 
 
                 "children": [{

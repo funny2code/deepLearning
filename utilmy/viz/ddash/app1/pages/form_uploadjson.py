@@ -3,6 +3,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash import dcc, html, callback, clientside_callback, ClientsideFunction, callback_context
 
+##########################################################################################
+
 file_saved_location         = 'assets/'
 default_filename            = 'default_layout.json'
 
@@ -40,10 +42,8 @@ layout = html.Div([
 
 ##### Upload Json file to Live text Editor
 clientside_callback(
-    ClientsideFunction(
-        namespace       = 'clientside',
-        function_name   = 'liveEditor'
-    ), 
+    ClientsideFunction( namespace      = 'clientside',
+                       function_name   = 'liveEditor' ), 
         Output('temp-filename',    'data'),
         Input('upload-data',  'contents'),
         [State('upload-data',  'filename')]
@@ -52,10 +52,8 @@ clientside_callback(
 
 #### Fetch Json string formatted from live text editor
 clientside_callback(
-    ClientsideFunction(
-        namespace       = 'clientside',
-        function_name   = 'saveJSON'
-    ), 
+    ClientsideFunction(namespace       = 'clientside',
+                       function_name   = 'saveJSON'), 
         Output('temp-json',     'data'),
         Input('submit-button',  'n_clicks'),
         prevent_initial_callback= True
@@ -63,10 +61,8 @@ clientside_callback(
 
 
 #### Write Json to assets/ folder
-@callback(
-    Output('alert-toggle-auto',    'data'),
-    [Input('temp-json',             'data'),
-    Input('temp-filename',         'data')],
+@callback(Output('alert-toggle-auto',    'data'),
+          [Input('temp-json',            'data'), Input('temp-filename',         'data')],
     prevent_initial_callback        = True
 )
 def save_json(data, filename):
@@ -79,22 +75,18 @@ def save_json(data, filename):
 
 
 ####  Show alert info 
-@callback(
-    Output('alert-auto',        'children'),
-    [Input('alert-toggle-auto', 'data'),
-    Input('temp-filename',      'data')],
+@callback(Output('alert-auto',        'children'),
+          [Input('alert-toggle-auto', 'data'), Input('temp-filename',      'data')],
     prevent_initial_callback    = True
 )
 def toggle_alert(_, filename):
     if callback_context.triggered_id == 'alert-toggle-auto':
         filename = filename or default_filename
-        return  dbc.Alert(
-                    f'File Json saved to {file_saved_location}{filename}',
+        return  dbc.Alert( f'File Json saved to {file_saved_location}{filename}',
                     id      = 'alert-auto',
                     is_open = True,
                     duration= 3000,
-                    color   = 'primary',
-                )
+                    color   = 'primary',)
 
 
 
