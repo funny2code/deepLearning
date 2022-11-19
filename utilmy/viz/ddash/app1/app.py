@@ -77,42 +77,35 @@ def export(name="app1", dirout=""):
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-### Callback validation in Javascript (assets/scripts.js)
+### Callback validation in Javascript (assets/scripts.js)  ##################
 """
     Validate target file or url, Construct path to target file
     and Invoke page_render_html callback. 
 
 """
 app.clientside_callback(
-    ClientsideFunction(
-        namespace       = 'clientside',
-        function_name   = 'render'
-    ), 
+    ClientsideFunction(namespace       = 'clientside',
+                       function_name   = 'render'), 
         Output('target-render', 'data')
     ,
-    [
-        Input('input',    'selected'),
+    [   Input('input',    'selected'),
         Input('forms',    'selected'),
         Input('homepage', 'data')
     ]
 )
 
 
-### Callback Render
-@app.callback(
-                Output('output',       'children'), 
+
+### Callback Render   ######################################################
+@app.callback(   Output('output',       'children'), 
                 Input('target-render', 'data'), 
-                prevent_initial_call   = True
-            )
+                prevent_initial_call   = True )
 def page_render_html(data:str):
     """  Generate static HTML page via Iframe or Dash Layout
     Docs::
 
-        Args:
-            _type_: (str) path to target file
-
-        Returns:
-            _type_: (dash.html.Div) Iframe Layout or Dash Html Layout
+        data:    (str) path to target file
+        Returns: (dash.html.Div) Iframe Layout or Dash Html Layout
 
     """
     
@@ -127,14 +120,10 @@ def sidebar_v1(sidebar:dict):
     """ Compose Sidebar v1 layout component.
     Docs::
 
-        Args:
-            _type_      : (dict) Sidebar data and style
+        sidebar      : (dict) Sidebar data and style
 
-        Returns:
-            _type_      : (dash.html.Div) Sidebar v1 Div Component
-
-        Raises:
-            _ValueError_: Raised if data or style is not exist in sidebar_content dict.
+        Returns:  (dash.html.Div) Sidebar v1 Div Component
+        Raises:   Raised if data or style is not exist in sidebar_content dict.
     """
 
     try:
