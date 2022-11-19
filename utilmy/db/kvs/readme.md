@@ -1,3 +1,11 @@
+# Install Go
+```bash
+curl -OL https://go.dev/dl/go1.19.3.linux-amd64.tar.gz
+sha256sum go1.19.3.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && tar -C /usr/local -xzf go1.19.3.linux-amd64.tar.gz
+echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bash_profile
+```
+
 ## Running the tests
 ```bash
     docker compose up -d
