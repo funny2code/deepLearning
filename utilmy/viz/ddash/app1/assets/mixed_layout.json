@@ -25,7 +25,7 @@
                     "title": "Dash Pages",   "key": "02",
                     "children": [
                         {"title": "Upload JSON", "key": "form_uploadjson.py"},
-                        {"title": "Simple Calculator", "key": "form_calc.py"},
+                        {"title": "Calculator", "key": "form_calc.py"},
                         {"title": "dash-1", "key": "page1.py"},
                         {"title": "dash-2", "key": "page2.py"},
 
