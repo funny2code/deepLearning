@@ -9,6 +9,7 @@ file_saved_location         = 'assets/'
 default_filename            = 'default_layout.json'
 
 layout = html.Div([
+            html.H1("  JSON Config Check / uploader   "),
             html.Div(id='alert-auto'),
             html.Div(id='jsoneditor', style={'width':'75vw', 'height':'70vh'}),
             dcc.Upload(id  = 'upload-data',
@@ -34,7 +35,7 @@ layout = html.Div([
     ], style={ 'verticalAlign'      : 'middle', 
                 'margin'            : 'auto', 
                 'horizontalAlign'   : 'middle' 
-            })
+})
 
 
 ##########################################################################################
