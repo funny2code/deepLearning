@@ -20,15 +20,7 @@ function editorInstance(container) {
 
 window.dash_clientside  = Object.assign({}, window.dash_clientside, {
     clientside: {
-        render: function(targetRender, formRender, homePage) {
-
-            if (dash_clientside.callback_context.triggered.length > 0){
-                if (dash_clientside.callback_context.triggered[0]['prop_id'] == 'forms.selected') {
-                    targetRender = formRender
-
-                }
-
-            }
+        render: function(targetRender, homePage) {
 
             if (targetRender.length == 0){
                 // Handle Initial targetRender to homePage

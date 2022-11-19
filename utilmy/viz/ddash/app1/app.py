@@ -88,7 +88,6 @@ app.clientside_callback(
         Output('target-render', 'data')
     ,
     [   Input('input',    'selected'),
-        Input('forms',    'selected'),
         Input('homepage', 'data')
     ]
 )
