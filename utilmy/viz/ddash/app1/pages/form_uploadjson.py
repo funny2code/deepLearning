@@ -9,38 +9,22 @@ default_filename            = 'default_layout.json'
 layout = html.Div([
             html.Div(id='alert-auto'),
             html.Div(id='jsoneditor', style={'width':'75vw', 'height':'70vh'}),
-            dcc.Upload(
-                id          = 'upload-data',
+            dcc.Upload(id  = 'upload-data',
                 children    = html.Div(
-                            [
-                                'Drag and Drop or ',
-                                html.A('Select Files')
-                            ]),
-                style       = {
-                                'width'         : '100%',
-                                'height'        : '60px',
-                                'lineHeight'    : '60px',
-                                'borderWidth'   : '1px',
-                                'borderStyle'   : 'dashed',
-                                'borderRadius'  : '5px',
-                                'textAlign'     : 'center',
-                                'marginTop'     : '10px'
-                            },
+                            [ 'Drag and Drop or ',   html.A('Select Files') ]),
+                style       = { 'width'         : '100%', 'height'        : '60px', 'lineHeight'    : '60px', 'borderWidth'   : '1px', 'borderStyle'   : 'dashed', 'borderRadius'  : '5px', 'textAlign'     : 'center', 'marginTop'     : '10px' },
                 multiple    = False
             ),
+
             dbc.Button(
                 'Submit', 
                 id          = 'submit-button',
                 className   = 'me-1',
                 color       = 'primary',
-                style={
-                    'width'         : '100%',
-                    'height'        : '60px',
-                    'textAlign'     : 'center',
-                    'verticalAlign' : 'middle',
-                    'marginTop'     : '5px'
+                style={ 'width'         : '100%', 'height'        : '60px', 'textAlign'     : 'center', 'verticalAlign' : 'middle', 'marginTop'     : '5px'
                 }
             ),
+
             dcc.Store(id='uploaded'),
             dcc.Store(id='alert-toggle-auto'),
             dcc.Store(id='temp-filename', data="default_layout.json"),
@@ -53,25 +37,20 @@ layout = html.Div([
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-"""
-Upload Json file to Live text Editor
-"""
+
+##### Upload Json file to Live text Editor
 clientside_callback(
     ClientsideFunction(
         namespace       = 'clientside',
         function_name   = 'liveEditor'
     ), 
-        Output('temp-filename',    'data')
-    ,
+        Output('temp-filename',    'data'),
         Input('upload-data',  'contents'),
-    [
-        State('upload-data',  'filename')
-    ]
+        [State('upload-data',  'filename')]
 )
 
-"""
-Fetch Json string formatted from live text editor
-"""
+
+#### Fetch Json string formatted from live text editor
 clientside_callback(
     ClientsideFunction(
         namespace       = 'clientside',
@@ -82,9 +61,8 @@ clientside_callback(
         prevent_initial_callback= True
 )
 
-"""
-Write Json to assets/ folder
-"""
+
+#### Write Json to assets/ folder
 @callback(
     Output('alert-toggle-auto',    'data'),
     [Input('temp-json',             'data'),
@@ -99,8 +77,8 @@ def save_json(data, filename):
         with open(f'{file_saved_location}{filename}', 'w') as f:
             f.write(content)
 
-    
-""" Show alert info """
+
+####  Show alert info 
 @callback(
     Output('alert-auto',        'children'),
     [Input('alert-toggle-auto', 'data'),
@@ -117,3 +95,17 @@ def toggle_alert(_, filename):
                     duration= 3000,
                     color   = 'primary',
                 )
+
+
+
+
+
+
+
+
+
+
+
+
+
+

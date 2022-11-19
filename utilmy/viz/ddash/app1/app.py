@@ -1,19 +1,15 @@
 """  Launch app
 Docs::
 
-    Dependencies
-        pip install fire dash dash_bootstrap_components dash_treeview_antd jsoncomment
+    pip install fire dash dash_bootstrap_components dash_treeview_antd jsoncomment pandas
        
     Data
-        copy .html files to assets/html/
+        copy .html    files to assets/html/
         copy pages.py files to pages/ folder
     
     Command to run
-        cd utilmy/viz/ddash/app1
+         cd utilmy/viz/ddash/app1
 
-        - Launch links viz      :   python app.py main --content_layout assets/links_layout.json
-        - Launch html viz       :   python app.py main --content_layout assets/html_layout.json
-        - Launch dash pages viz :   python app.py main --content_layout assets/dash_layout.json
         - Launch mixed viz      :   python app.py main --content_layout assets/mixed_layout.json   
     
 """
@@ -35,51 +31,17 @@ try :
     app.title   = 'Simple render html'
     pages       = {}
     json        = JsonComment()
-except : ...
+except Exception as e :
+    print(e)
 
 
 
 
 ##########################################################################################
+def test_all():
+    test1()
+
 def test1():
-    """  Test Dash Render. command: python app.py test1
-    Docs::    
-    
-        python app.py main --content_layout assets/dash_layout.json
-    """
-    import utilmy as uu 
-    dir_repo, _ = uu.dir_testinfo()
-    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/dash_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
-    os.system(cmd)
-
-
-def test2():
-    """  Test Html Render. command: python app.py test2
-    Docs::    
-    
-        python app.py main --content_layout assets/html_layout.json
-        
-    """
-    import utilmy as uu 
-    dir_repo, _ = uu.dir_testinfo()
-    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/html_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py'  "
-    os.system(cmd)
-    
-
-def test3():
-    """  Test Links Render. command: python app.py test3
-    Docs::    
-
-        python app.py main --content_layout assets/links_layout.json 
-
-    """
-    import utilmy as uu 
-    dir_repo, _ = uu.dir_testinfo()
-    cmd         = f"cd {dir_repo}/viz/ddash/app1/  && python app.py main --content_layout assets/links_layout.json & sleep 10 && curl -Is 127.0.0.1:8050 | head -n 1 && pkill -f 'python app.py' "
-    os.system(cmd)
-
-
-def test4():
     """  Test Mixed Render. command: python app.py test4
     Docs::    
     
@@ -96,9 +58,9 @@ def test4():
 def export(name="app1", dirout=""):
     """  Export script dir to target dir. command: python app.py export
     Docs::    
-        Args:
-            name (str, optional): _description_. Defaults to "app1".
-            dirout (str, optional): _description_. Defaults to Current Working Directory.
+
+        name (str, optional): _description_. Defaults to "app1".
+        dirout (str, optional): _description_. Defaults to Current Working Directory.
     """
     import utilmy
     
@@ -177,8 +139,7 @@ def sidebar_v1(sidebar:dict):
 
     try:
         sidebar_content = html.Div([ 
-                            TreeView(
-                                id          = 'input',
+                            TreeView(  id          = 'input',
                                 multiple    = False,
                                 checkable   = False,
                                 checked     = False,
@@ -186,16 +147,16 @@ def sidebar_v1(sidebar:dict):
                                 expanded    = [],
                                 data        = sidebar['data']
                             ), 
-                            TreeView(
-                                id          = 'forms',
-                                multiple    = False,
-                                checkable   = False,
-                                checked     = False,
-                                selected    = [],
-                                expanded    = [],
-                                data        = { "title": "Upload JSON", "key":"forms.py" }
-                            )],
-                                style       = sidebar['style']
+                            # TreeView(
+                            #     id          = 'forms',
+                            #     multiple    = False,
+                            #     checkable   = False,
+                            #     checked     = False,
+                            #     selected    = [],
+                            #     expanded    = [],
+                            #     data        = { "title": "Upload JSON", "key":"forms.py" }
+                            ],
+                            style       = sidebar['style']
                         )
     except Exception as e:
         print(f'Sidebar issue. Details:\n {e}')

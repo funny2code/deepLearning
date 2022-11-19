@@ -1,9 +1,3 @@
-/*******************************************************************************
-***                                                                          ***
-***                    JSON Content_Layout Example                           ***
-***                                                                          ***
-*******************************************************************************/
-
 {
     "main_content" : { 
         // CSS Style in JSON Format, Applied to main content
@@ -15,27 +9,27 @@
         "version": 1, 
         // Type: Number. Only support for version 1
         "data": { 
-                /*
-                    title   :   menu's display text
-                    children:   add child menu
-                    key     :   target file or url to render. Fill Number to flag as non render target.
-                */
+
                 "title": "Home", "key":"https://gallery.plotly.host/bball-shot-explorer", 
-                // First key value assigned as Homepage
+
+
                 "children": [{
-                    "title": "Child",   "key": "01",
+                    "title": "Links",   "key": "01",
                     "children": [
                         {"title": "link1", "key": "https://dash.gallery/self-driving/"}
                         ]   
                     },
+
                     { 
-                    "title": "Child2",   "key": "02",
+                    "title": "Dash Pages",   "key": "02",
                     "children": [
+                        {"title": "Upload JSON", "key": "form_uploadjson.py"},
+                        {"title": "dash-1", "key": "page1.py"},
+                        {"title": "dash-2", "key": "page2.py"},
+
                         {"title": "html-1", "key": "page1.html"},
                         {"title": "html-2", "key": "page2.html"},
                         {"title": "html-3", "key": "page2_1.html"},
-                        {"title": "dash-1", "key": "page1.py"},
-                        {"title": "dash-2", "key": "page2.py"}
                     ]  
                 }]
             },
