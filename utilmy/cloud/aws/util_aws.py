@@ -65,7 +65,7 @@ def s3_get_jsonfile(dir_s3="s3://", n_thread=5):
     
     
 
-def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error=None, start_delay=0.1, verbose=True,   **kw):
+def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
 
@@ -87,9 +87,9 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error
     # Helper functions
     # *********************************
 
-    def load_json(json_file):
-        with open(json_file) as f:
-            data = json.load(f)
+    def load_json(raw_json_data):
+        with open(raw_json_data) as f:
+            data = json.loads(f)
         return data
 
     def get_s3_json_files(BUCKET):
@@ -106,18 +106,20 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error
                 s3_objects.append(file.key)
         return s3_objects
 
-    def download_one_file(bucket: str, output: str, client: boto3.client, s3_file: str):
+    def download_one_file(res_data: dict, bucket: str, client: boto3.client, s3_file: str):
         """
         Download a single file from S3
         Args:
+            res_data (dict): Store result of our json s3 reading
             bucket (str): S3 bucket where images are hosted
             output (str): Dir to store the images
             client (boto3.client): S3 client
             s3_file (str): S3 object name
         """
-        client.download_file(
-            Bucket=bucket, Key=s3_file, Filename=os.path.join(output, s3_file)
-        )
+        bytes_buffer = io.BytesIO()
+        client.download_fileobj(Bucket=bucket, Key=s3_file, Fileobj=bytes_buffer)
+        byte_value = bytes_buffer.getvalue()
+        res_data[s3_file] = byte_value.decode()
     # *********************************
     # End of Helper functions
     # *********************************
@@ -126,12 +128,15 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error
     # Creating only one session and one client
     session = boto3.Session()
     client = session.client("s3")
+    
+    # Store result data
+    res_data = {}
     # The client is shared between threads
-    func = partial(download_one_file, path_s3, OUTPUT_DIR, client)
+    func = partial(download_one_file, res_data, path_s3, client)
+
 
     # List for storing possible failed downloads to retry later
     failed_downloads = []
-    successful_downloads = []
 
     with ThreadPoolExecutor(max_workers=n_pool) as executor:
         # Using a dict for preserving the downloaded file for each future, to store it as a failure if we need that
@@ -141,8 +146,6 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error
         for future in as_completed(futures):
             if future.exception():
                 failed_downloads.append(futures[future])
-            else:
-                successful_downloads.append(futures[future])
 
     if len(failed_downloads) > 0  and dir_error is not None :
         print("Some downloads have failed. Saving ids to csv")
@@ -150,12 +153,7 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error
             wr = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
             wr.writerow(failed_downloads)
 
-    # Store json data as return value of function
-    res = {}
-    for s3_key in successful_downloads:
-        downloaded_file = os.path.join(dirout, s3_key)
-        res[s3_key] = load_json(downloaded_file)
-    return res
+    return res_data
     
     
 
