@@ -42,8 +42,7 @@ layout = html.Div([
 ################################# Callbacks ##############################################
 ##### Upload Json file to Live text Editor
 clientside_callback(
-    ClientsideFunction(namespace      = 'clientside',
-                       function_name   = 'liveEditor' ), 
+    ClientsideFunction(namespace      = 'clientside',   function_name   = 'liveEditor' ), 
         Output('temp-filename',    'data'),
         Input('upload-data',  'contents'),
         [State('upload-data',  'filename')]
@@ -52,19 +51,15 @@ clientside_callback(
 
 #### Fetch Json string formatted from live text editor
 clientside_callback(
-    ClientsideFunction(namespace       = 'clientside',
-                       function_name   = 'saveJSON'), 
+    ClientsideFunction(namespace       = 'clientside',  function_name   = 'saveJSON'), 
         Output('temp-json',     'data'),
-        Input('submit-button',  'n_clicks'),
-        prevent_initial_callback= True
+        Input('submit-button',  'n_clicks'),  prevent_initial_callback= True
 )
 
 
 #### Write Json to assets/ folder
 @callback(Output('alert-toggle-auto',    'data'),
-          [Input('temp-json',            'data'), Input('temp-filename',         'data')],
-    prevent_initial_callback        = True
-)
+          [Input('temp-json',            'data'), Input('temp-filename',  'data')],  prevent_initial_callback        = True )
 def save_json(data, filename):
     if callback_context.triggered_id == 'temp-json':
         content     = json.dumps(data, indent=4)
@@ -76,9 +71,7 @@ def save_json(data, filename):
 
 ####  Show alert info 
 @callback(Output('alert-auto',        'children'),
-          [Input('alert-toggle-auto', 'data'), Input('temp-filename',      'data')],
-    prevent_initial_callback    = True
-)
+          [Input('alert-toggle-auto', 'data'), Input('temp-filename',  'data')], prevent_initial_callback    = True )
 def toggle_alert(_, filename):
     if callback_context.triggered_id == 'alert-toggle-auto':
         filename = filename or default_filename
