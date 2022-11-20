@@ -64,7 +64,50 @@ def s3_get_jsonfile(dir_s3="s3://", n_thread=5):
     
     
     
+
+def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, input_fixed:dict=None, npool=5, **kw):
+    """  Run Multi-thread fun_async on input_list.
+    Doc::
+
+
+    """
+    import time, functools
+
+    #### Input xi #######################################    
+    #input_list = [  list of S3 files ]
+    # fun_async = single thread S3 reader
     
+    
+    #### Input xi #######################################
+    xi_list = [[] for t in range(n_pool)]
+    for i, xi in enumerate(input_list):
+        jj = i % n_pool
+        xi_list[jj].append( xi )  ### xi is already a tuple
+
+    if verbose:
+        for j in range(len(xi_list)):
+            log('thread ', j, len(xi_list[j]))
+        # time.sleep(6)
+
+    #### Pool execute ###################################
+    import multiprocessing as mp
+    # pool     = multiprocessing.Pool(processes=3)
+    pool = mp.pool.ThreadPool(processes=n_pool)
+    job_list = []
+    for i in range(n_pool):
+        time.sleep(start_delay)
+        log('starts', i)
+        job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
+        if verbose: log(i, xi_list[i])
+
+    res_list = []
+    for i in range(len(job_list)):
+        res_list.append(job_list[i].get())
+        log(i, 'job finished')
+
+    pool.close(); pool.join(); pool = None
+    log('n_processed', len(res_list))
+    return res_list
     
     
     
