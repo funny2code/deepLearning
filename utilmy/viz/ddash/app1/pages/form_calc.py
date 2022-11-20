@@ -1,10 +1,11 @@
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from dash import html, callback, ctx
-import dash_bootstrap_components as dbc    
 
-from dbc import Row as RR
-from dbc import Col as CC
+
+#from dash_bootstrap_components.dbc import Row as RR
+#from dbc import Row as RR
+#from dbc import Col as CC
 from dash import Dash, html
 
 
@@ -19,52 +20,63 @@ mde     = dbc.Row([ dbc.Label("Minimal Detection Effect :",    html_for = "min_e
                     width       = 4)],      className   = "mb-3")
 traffic = dbc.Row([ dbc.Label("Daily Traffic :",               html_for = "daily_traffic",  width = 3),    dbc.Col( dbc.Input(id= "daily_traffic", type = "number", placeholder = " 15000"), 
                     width       = 4)],      className   = "mb-3")
+nvariant= dbc.Row([ dbc.Label("N Variants :",           html_for = "n_variant",  width = 3),    dbc.Col( dbc.Input(id= "n_variant", type = "number", placeholder = "2"), 
+                    width       = 4)],      className   = "mb-3")
+
+
 calc    = dbc.Row([ dbc.Label("",                              html_for = "calc",           width = 3),    dbc.Col(dbc.Button(id = "calc",         color = "primary", children  = "Calc" ), 
                     width = 4)],            className   = "mb-3")
-result  = dbc.Row([ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   html.H5("Ndays required:", ),   html.P(id = "result2")])
+
+result  = dbc.Row([ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   
+                    html.H5("Ndays required:", ),   html.P(id = "result2")])
 
 
 ### Constructing Layout
-layout = dbc.Form([title, ctr, mde, traffic, calc, result], style={'padding'  : '20px'})
+layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'padding'  : '20px'})
 
 
 ##########################################################################################
 ################################# Callbacks ##############################################
 #### Sample BMI (Body Mass Index) calculation
 @callback( Output("result",           "children"),
-[Input("ctr",   "value"),       Input("min_effect",  "value"),   Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
-def calculate(ctr, min_effect, _):    
+[Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
+def calculate(ctr, min_effect, n_variant, _):    
     if ctx.triggered_id == 'calc':
-        # Parsing from string input to float
-        if (ctr is None or min_effect is None):  return '' 
+        if (ctr is None or min_effect is None or n_variant is None):  return '' 
 
-        ctr        = float(ctr)
-        min_effect = float(min_effect)    ###  relative minimum effect.
+        ctr        = 0.01*float(ctr)
+        min_effect = 0.01*float(min_effect)    ###  relative minimum effect.
+        n_variant  = float(n_variant) 
 
-        variance   = ctr*(1-ctr)  ### Binonmal
 
         ### Per variant, need to doule for mutiple Variants
-        BMI  = 16 * variance / ( min_effect **2 )
-        BMI  = str(BMI)
-        return BMI
+        variance   = ctr*(1-ctr)  ### Binonmal
+        nsample  = int( 16 * variance / ( min_effect **2 )   * n_variant )
+        res  = str(nsample)
+        return res
 
 
 
 @callback( Output("result2", "children"),
-[Input("ctr", "value"), Input("min_effect", "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
-def calc_ndays(ctr, min_effect, traffic,  _):    
+[Input("ctr", "value"), Input("min_effect", "value"),  Input("n_variant",   "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
+def calc_ndays(ctr, min_effect, n_variant, traffic,  _):    
     if ctx.triggered_id == 'calc':
-        # Parsing from string input to float
-        if (ctr is None or min_effect is None or traffic is None):  return '' 
+        if (ctr is None or min_effect is None or traffic is None or n_variant is None):  return '' 
 
-        ctr        = float(ctr)
-        min_effect = float(min_effect)
-        traffic    = max(1.0, float(traffic) )
+        ctr        = 0.01*float(ctr)
+        min_effect = 0.01*float(min_effect)  ###  relative minimum effect.
+        n_variant  = float(n_variant) 
+        traffic    = float(traffic)
 
-        BMI   = ctr**2 / ( min_effect) **2
-        ndays = max(1, int(BMI / traffic) )
- 
-        res  = str(ndays)
+        variance   = ctr*(1-ctr)             ### Binonmal
+
+        ### Per variant, need to doule for mutiple Variants
+        nsample = int( 16 * variance / ( min_effect **2 )   * n_variant )
+
+        ndays =  max(1, int(nsample / traffic) )
+        res   = str(ndays)
         return res
+
+
 
 

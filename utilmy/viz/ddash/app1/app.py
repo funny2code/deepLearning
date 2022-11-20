@@ -6,7 +6,7 @@ Docs::
     Command to run
          cd utilmy/viz/ddash/app1
 
-        - Launch mixed viz      :   python app.py main --content_layout assets/mixed_layout.json   
+        python app.py main --content_layout assets/mixed_layout.json   
     
     File needed:
          assets/mixed_layout.json
@@ -38,7 +38,11 @@ try :
     json        = JsonComment()
 except Exception as e :
     print(e)
+    1/0
 
+
+##########################################################################################
+from utilmy import log,log2
 
 
 
@@ -161,6 +165,7 @@ def page_render_main(content_layout:dict):
     
     """
     #### Sidebar Generator  #################
+    # print(content_layout)
     SIDEBAR_VER        = { 1: sidebar_v1 } # Scalable sidebar
     try :    
        version         = content_layout['sidebar_content']['version'] 
