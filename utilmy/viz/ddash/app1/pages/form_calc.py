@@ -13,6 +13,8 @@ layout = dbc.Row([
                 dbc.Input(id= "Daily traffic", type = "number", placeholder = " 15000") 
 
 
+
+
                 html.H5("Nsample required :", ),  html.P(id = "result")
                 html.H5("Ndays :", ),             html.P(id = "result2")
 
