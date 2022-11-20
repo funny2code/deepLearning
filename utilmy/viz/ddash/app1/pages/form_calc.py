@@ -4,7 +4,22 @@ from dash import html, callback, ctx
 
 
 #from dash_bootstrap_components.dbc import Row as RR
+def test(classname="mb-3", width=4):
+    #### Generate the code automatically
+    grid = [
+        ["Baseline  CTR level :",       dbc.Input(id= "ctr",          type = "number", placeholder = "CTR in %"),  ],
+        ["Minimal Detection Effect :",  dbc.Input(id= "min_effect",   type = "number", placeholder = "CTR in %"),  ],
+        ["Daily Traffic :",             dbc.Input(id= "daily_effect", type = "number", placeholder = "CTR in %"),  ],
+        ["N Variants :",                dbc.Input(id= "n_variant",    type = "number", placeholder = "CTR in %"),  ],   
 
+
+        ["",                            dbc.Button(id = "calc",         color = "primary", children  = "Calc" ), ],   
+
+        [ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   ]
+
+
+
+    ]
 
 
 ##########################################################################################
