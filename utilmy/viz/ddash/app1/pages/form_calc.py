@@ -1,6 +1,11 @@
 import dash_bootstrap_components as dbcmin_effetctmin_effect
 from dash.dependencies import Input, Output
 from dash import html, callback, ctx
+import dash_bootstrap_components as dbc    
+
+from dbc import Row as RR
+from dbc import Col as CC
+from dash import Dash, html
 
 
 ##########################################################################################
@@ -50,9 +55,12 @@ def calculate(ctr, min_effect, _):
         if (ctr is None or min_effect is None):  return '' 
 
         ctr        = float(ctr)
-        min_effect = float(min_effect)
+        min_effect = float(min_effect)    ###  relative minimum effect.
 
-        BMI  = ctr**2 / ( min_effect) **2
+        variance   = ctr*(1-ctr)  ### Binonmal
+
+        ### Per variant, need to doule for mutiple Variants
+        BMI  = 16 * variance / ( min_effect **2 )
         BMI  = str(BMI)
         return BMI
 
