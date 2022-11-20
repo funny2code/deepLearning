@@ -1,10 +1,16 @@
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from dash import html, callback, ctx
+#from dash_bootstrap_components.dbc import Row as RR
+
+
 
 
 ############################################################################################
-#from dash_bootstrap_components.dbc import Row as RR
+def test_all():
+  test1()
+
+  
 def test1(classname="mb-3", width=4):
     #### Generate the code automatically
     grid = [
