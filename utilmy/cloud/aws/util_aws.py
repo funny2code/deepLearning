@@ -45,6 +45,31 @@ def test1():
 
 
 
+def s3_get_jsonfile(dir_s3="s3://", n_thread=5):  
+    """ Return a dict with    
+       key: s3path_filename,   value = Dict containing the JSON.
+    
+    
+    """
+    dict_jsons = {}
+    
+    import json
+    
+    
+    
+               
+    dict_jsons[key] = json.loads(sstr)            
+    
+    return dict_jsons
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 
 ####################################################################################
