@@ -6444,10 +6444,57 @@ utilmy/viz/ddash/app1/__init__.py
 
 utilmy/viz/ddash/app1/app.py
 -------------------------functions----------------------
-iframe_render(selected)
-main(dir_html0 = "", dir_log = "")
-main_page()
-sidebar_add_v1()
+export(name = "app1", dirout = "")
+html_components(data)
+main(content_layout = "assets/html_layout.json", homepage = "", debug = True, dir_log = "")
+render_page(content_layout, homepage)
+sidebar_v1(sidebar)
+test1(homepage = "main_page.py")
+test2(homepage = "main.html")
+test3(homepage="about = "about:blank")
+test4(homepage = "main_page.py")
+
+
+
+utilmy/viz/ddash/app1/pages/main_page.py
+-------------------------functions----------------------
+update_output_div(input_value)
+
+
+
+utilmy/viz/ddash/app1/pages/page1.py
+-------------------------functions----------------------
+update_graph(xaxis_column_name, yaxis_column_name, xaxis_type, yaxis_type, year_value)
+
+
+
+utilmy/viz/ddash/app1/pages/page2.py
+-------------------------functions----------------------
+update_graph(xaxis_column_name, yaxis_column_name, xaxis_type, yaxis_type, year_value)
+
+
+
+utilmy/viz/ddash/app2_example/main.py
+-------------------------functions----------------------
+hill(x, alpha, beta)
+log1p(x, alpha)
+
+
+
+utilmy/viz/ddash/app2_example/mmm/contribution.py
+-------------------------methods----------------------
+MarketingMixModeling.__init__(self, app_df, imp_df, prior_params)
+MarketingMixModeling.dump_posterior_params(self, json_name)params_dict = {}for p in self.fit.model_pars[ =  {}for p in self.fit.model_pars[:-2]:)
+MarketingMixModeling.fit_posterior(self, stan_code)
+MarketingMixModeling.monthly_mmm()
+
+
+utilmy/viz/ddash/app2_example/multi-page.py
+
+
+utilmy/viz/ddash/app2_example/pages/group-level-mmm.py
+-------------------------functions----------------------
+hill(x, vmax, K, n)
 
 
 
