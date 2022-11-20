@@ -83,10 +83,7 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_del
     import boto3
 
 
-    # *********************************
     # Helper functions
-    # *********************************
-
     def load_json(raw_json_data):
         with open(raw_json_data) as f:
             data = json.loads(f)
@@ -120,9 +117,7 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_del
         client.download_fileobj(Bucket=bucket, Key=s3_file, Fileobj=bytes_buffer)
         byte_value = bytes_buffer.getvalue()
         res_data[s3_file] = byte_value.decode()
-    # *********************************
-    # End of Helper functions
-    # *********************************
+    # End of Helper functions  ###################################################
 
     files_to_download = get_s3_json_files(path_s3)
     # Creating only one session and one client
