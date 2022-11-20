@@ -65,9 +65,13 @@ def s3_get_jsonfile(dir_s3="s3://", n_thread=5):
     
     
 
-def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, input_fixed:dict=None, n_thread_workers=5, **kw):
+def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
+
+        # Define where to store artifacts:
+        # - temporarily downloaded file and
+        # - list of failed to download file in csv file
 
 
     """
@@ -78,10 +82,7 @@ def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, in
     import os, json, csv
     import boto3
 
-    # Define where to store artifacts:
-    # - temporarily downloaded file and
-    # - list of failed to download file in csv file
-    OUTPUT_DIR = "/tmp"
+
     # *********************************
     # Helper functions
     # *********************************
@@ -132,7 +133,7 @@ def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, in
     failed_downloads = []
     successful_downloads = []
 
-    with ThreadPoolExecutor(max_workers=n_thread_workers) as executor:
+    with ThreadPoolExecutor(max_workers=n_pool) as executor:
         # Using a dict for preserving the downloaded file for each future, to store it as a failure if we need that
         futures = {
             executor.submit(func, file_to_download): file_to_download for file_to_download in files_to_download
@@ -143,11 +144,9 @@ def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, in
             else:
                 successful_downloads.append(futures[future])
 
-    if len(failed_downloads) > 0:
+    if len(failed_downloads) > 0  and dir_error is not None :
         print("Some downloads have failed. Saving ids to csv")
-        with open(
-            os.path.join(OUTPUT_DIR, "failed_downloads.csv"), "w", newline=""
-        ) as csvfile:
+        with open( os.path.join(dir_error, "failed_downloads.csv"), "w", newline="" ) as csvfile:
             wr = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
             wr.writerow(failed_downloads)
 
