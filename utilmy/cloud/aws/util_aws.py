@@ -65,52 +65,98 @@ def s3_get_jsonfile(dir_s3="s3://", n_thread=5):
     
     
 
-def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, input_fixed:dict=None, npool=5, **kw):
+def s3_read_json_multithread_run(path_s3="",   start_delay=0.1, verbose=True, input_fixed:dict=None, n_thread_workers=5, **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
 
 
     """
-    import time, functools
 
-    #### Input xi #######################################    
-    #input_list = [  list of S3 files ]
-    # fun_async = single thread S3 reader
-    
-    
-    #### Input xi #######################################
-    xi_list = [[] for t in range(n_pool)]
-    for i, xi in enumerate(input_list):
-        jj = i % n_pool
-        xi_list[jj].append( xi )  ### xi is already a tuple
+    # Required library
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from functools import partial
+    import os, json, csv
+    import boto3
 
-    if verbose:
-        for j in range(len(xi_list)):
-            log('thread ', j, len(xi_list[j]))
-        # time.sleep(6)
+    # Define where to store artifacts:
+    # - temporarily downloaded file and
+    # - list of failed to download file in csv file
+    OUTPUT_DIR = "/tmp"
+    # *********************************
+    # Helper functions
+    # *********************************
 
-    #### Pool execute ###################################
-    import multiprocessing as mp
-    # pool     = multiprocessing.Pool(processes=3)
-    pool = mp.pool.ThreadPool(processes=n_pool)
-    job_list = []
-    for i in range(n_pool):
-        time.sleep(start_delay)
-        log('starts', i)
-        job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
-        if verbose: log(i, xi_list[i])
+    def load_json(json_file):
+        with open(json_file) as f:
+            data = json.load(f)
+        return data
 
-    res_list = []
-    for i in range(len(job_list)):
-        res_list.append(job_list[i].get())
-        log(i, 'job finished')
+    def get_s3_json_files(BUCKET):
+        """
+            Get all json files in a S3 bucket
+        """
+        s3 = boto3.resource('s3')
 
-    pool.close(); pool.join(); pool = None
-    log('n_processed', len(res_list))
-    return res_list
-    
-    
-    
+        my_bucket = s3.Bucket(BUCKET)
+        s3_objects = []
+        for file in my_bucket.objects.all():
+            # filter only json files
+            if file.key.lower().find(".json") != -1:
+                s3_objects.append(file.key)
+        return s3_objects
+
+    def download_one_file(bucket: str, output: str, client: boto3.client, s3_file: str):
+        """
+        Download a single file from S3
+        Args:
+            bucket (str): S3 bucket where images are hosted
+            output (str): Dir to store the images
+            client (boto3.client): S3 client
+            s3_file (str): S3 object name
+        """
+        client.download_file(
+            Bucket=bucket, Key=s3_file, Filename=os.path.join(output, s3_file)
+        )
+    # *********************************
+    # End of Helper functions
+    # *********************************
+
+    files_to_download = get_s3_json_files(path_s3)
+    # Creating only one session and one client
+    session = boto3.Session()
+    client = session.client("s3")
+    # The client is shared between threads
+    func = partial(download_one_file, path_s3, OUTPUT_DIR, client)
+
+    # List for storing possible failed downloads to retry later
+    failed_downloads = []
+    successful_downloads = []
+
+    with ThreadPoolExecutor(max_workers=n_thread_workers) as executor:
+        # Using a dict for preserving the downloaded file for each future, to store it as a failure if we need that
+        futures = {
+            executor.submit(func, file_to_download): file_to_download for file_to_download in files_to_download
+        }
+        for future in as_completed(futures):
+            if future.exception():
+                failed_downloads.append(futures[future])
+            else:
+                successful_downloads.append(futures[future])
+
+    if len(failed_downloads) > 0:
+        print("Some downloads have failed. Saving ids to csv")
+        with open(
+            os.path.join(OUTPUT_DIR, "failed_downloads.csv"), "w", newline=""
+        ) as csvfile:
+            wr = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+            wr.writerow(failed_downloads)
+
+    # Store json data as return value of function
+    res = {}
+    for s3_key in successful_downloads:
+        downloaded_file = os.path.join(OUTPUT_DIR, s3_key)
+        res[s3_key] = load_json(downloaded_file)
+    return res
     
     
 
