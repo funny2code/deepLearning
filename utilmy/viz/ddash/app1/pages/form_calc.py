@@ -4,22 +4,33 @@ from dash import html, callback, ctx
 
 
 ##########################################################################################
-layout = dbc.Row([
+### https://stackoverflow.com/questions/60299299/grid-dashboard-with-plotly-dash
+
+layout = html.Div([
+       
         html.H1("   AB Test Sample     "),
-        dbc.Col([
-                dbc.Input(id= "ctr",           type = "number", placeholder = "Baseline  CTR level n %",),
-                dbc.Input(id= "min_effect",    type = "number", placeholder = "Minimal Detection Effect in %") 
-                html.H5("   ")
-                dbc.Input(id= "Daily traffic", type = "number", placeholder = " 15000") 
+ 
+        dbc.Row([   html.label("   "), dbc.Input(id= "ctr",           type = "number", placeholder = "Baseline  CTR level n %",] )
+
+        dbc.Row([   html.label("   "), dbc.Input(id= "min_effect",    type = "number", placeholder = "Minimal Detection Effect in %")  ])
+
+        dbc.Row([   html.label("   "), dbc.Input(id= "Daily traffic", type = "number", placeholder = " 15000")   ])
 
 
-                html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result")
-                html.H5("Ndays required:", ),             html.P(id = "result2")
+        
+        html.H5("   ")
+        dbc.Col([ dbc.Button(id = "calc", color = "primary", children = "Calc" )], width = 4)       
+        html.H5("   ")
+
+
+        html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result")
+        html.H5("Ndays required:", ),             html.P(id = "result2")
 
             ],  width           = 4,
         ),
-        dbc.Col([ html.h5("") ], width = 4),  
-        dbc.Col([ dbc.Button(id = "calc", color = "primary", children = "Calc" )], width = 4)       
+
+            
+        , width = 4),  
 
 
     ],    
