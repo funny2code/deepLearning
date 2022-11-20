@@ -113,12 +113,12 @@ spark.hadoop.yarn.timeline-service.enabled false
 
 # To access Hive
 spark.hadoop.hive.llap.daemon.service.hosts @llap0
-spark.sql.hive.hiveserver2.jdbc.url jdbc:hive2://hdp-jz6001.haas.jpw1a.dcnw.rakuten:2181,hdp-jz6002.haas.jpw1a.dcnw.rakuten:2181,hdp-jz6003.haas.jpw1a.dcnw.rakuten:2181/hive_testdb;serviceDiscoveryMode=zooKeeperHA;zooKeeperNamespace=hs2ActivePassiveHA
+spark.sql.hive.hiveserver2.jdbc.url jdbc:hive2://hdp-jz6001.haas.jpw1a.dcnw.zzzzzzz:2181,hdp-jz6002.haas.jpw1a.dcnw.zzzzzzz:2181,hdp-jz6003.haas.jpw1a.dcnw.zzzzzzz:2181/hive_testdb;serviceDiscoveryMode=zooKeeperHA;zooKeeperNamespace=hs2ActivePassiveHA
 spark.datasource.hive.warehouse.load.staging.dir /tmp
-spark.datasource.hive.warehouse.metastoreUri thrift://hdp-hive6001.haas.jpw1a.dcnw.rakuten:9083,thrift://hdp-hive6002.haas.jpw1a.dcnw.rakuten:9083
+spark.datasource.hive.warehouse.metastoreUri thrift://hdp-hive6001.haas.jpw1a.dcnw.zzzzzzz:9083,thrift://hdp-hive6002.haas.jpw1a.dcnw.zzzzzzz:9083
 spark.security.credentials.hiveserver2.enabled false
-spark.sql.hive.hiveserver2.jdbc.url.principal hive/_HOST@JP.HADOOP.RAKUTEN.COM
-spark.hadoop.hive.zookeeper.quorum hdp-jz6001.haas.jpw1a.dcnw.rakuten:2181,hdp-jz6002.haas.jpw1a.dcnw.rakuten:2181,hdp-jz6003.haas.jpw1a.dcnw.rakuten:2181
+spark.sql.hive.hiveserver2.jdbc.url.principal hive/_HOST@JP.HADOOP.zzzzzzz.COM
+spark.hadoop.hive.zookeeper.quorum hdp-jz6001.haas.jpw1a.dcnw.zzzzzzz:2181,hdp-jz6002.haas.jpw1a.dcnw.zzzzzzz:2181,hdp-jz6003.haas.jpw1a.dcnw.zzzzzzz:2181
 
 ### Hive setup
 spark.sql.catalogImplementation            hive
