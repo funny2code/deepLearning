@@ -8,11 +8,10 @@ from dash import html, callback, ctx
 def test1(classname="mb-3", width=4):
     #### Generate the code automatically
     grid = [
-        ["Baseline  CTR level :",       dbc.Input(id= "ctr",          type = "number", placeholder = "CTR in %"),  ],
-        ["Minimal Detection Effect :",  dbc.Input(id= "min_effect",   type = "number", placeholder = "CTR in %"),  ],
-        ["Daily Traffic :",             dbc.Input(id= "daily_effect", type = "number", placeholder = "CTR in %"),  ],
-        ["N Variants :",                dbc.Input(id= "n_variant",    type = "number", placeholder = "CTR in %"),  ],   
-
+        ["Baseline  CTR level :",       dbc.Input(id= "ctr",          type= "number", placeholder= "CTR in %"),  ],
+        ["Minimal Detection Effect :",  dbc.Input(id= "min_effect",   type= "number", placeholder= "CTR in %"),  ],
+        ["Daily Traffic :",             dbc.Input(id= "daily_effect", type= "number", placeholder= "CTR in %"),  ],
+        ["N Variants :",                dbc.Input(id= "n_variant",    type= "number", placeholder= "CTR in %"),  ],   
 
         ["",                            dbc.Button(id = "calc",         color = "primary", children  = "Calc" ), ],   
 
@@ -43,14 +42,25 @@ def generate_grid(grid, classname='mb-3'):
 
 
 ################################# Callbacks ##############################################
-def input_get(*s):
-    ilist = []
-    for si in s :
-        if isinstance(si, str): 
-            ilist.append(Input(si, "value"))
-        elif isinstance(si, tuple):
-            ilist.append(Input(si[0], si[1]))
-    return ilist
+def input_get(*s, **kw):
+  """  Replace input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
+
+
+  Docs::
+
+     [Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
+     input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
+
+  """
+  ilist = []
+  for si in s :
+      if isinstance(si, str): 
+          ilist.append(Input(si, "value"))
+      elif isinstance(si, tuple):
+          ilist.append(Input(si[0], si[1],  )   )
+  return ilist
+
+
 
 
 ##########################################################################################

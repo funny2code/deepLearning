@@ -4,22 +4,9 @@ from dash import html, callback, ctx
 
 
 #from dash_bootstrap_components.dbc import Row as RR
-def test(classname="mb-3", width=4):
-    #### Generate the code automatically
-    grid = [
-        ["Baseline  CTR level :",       dbc.Input(id= "ctr",          type = "number", placeholder = "CTR in %"),  ],
-        ["Minimal Detection Effect :",  dbc.Input(id= "min_effect",   type = "number", placeholder = "CTR in %"),  ],
-        ["Daily Traffic :",             dbc.Input(id= "daily_effect", type = "number", placeholder = "CTR in %"),  ],
-        ["N Variants :",                dbc.Input(id= "n_variant",    type = "number", placeholder = "CTR in %"),  ],   
 
-
-        ["",                            dbc.Button(id = "calc",         color = "primary", children  = "Calc" ), ],   
-
-        [ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   ]
-
-
-
-    ]
+#### Utils for faster dash setup
+from .util_dash import input_get
 
 
 ##########################################################################################
@@ -33,7 +20,7 @@ mde     = dbc.Row([ dbc.Label("Minimal Detection Effect :", width = 3),
                     dbc.Col( dbc.Input(id= "min_effect",    type = "number", placeholder = "MDE in %"),  width= 4)],      className   = "mb-3")
 
 traffic = dbc.Row([ dbc.Label("Daily Traffic :",  width = 3),    
-                    dbc.Col( dbc.Input(id= "daily_traffic", type = "number", placeholder = "15000"),     width= 4)],      className   = "mb-3")
+                    dbc.Col( dbc.Input(id= "traffic", type = "number", placeholder = "15000"),     width= 4)],      className   = "mb-3")
 
 nvariant= dbc.Row([ dbc.Label("N Variants :", width = 3),    
                     dbc.Col( dbc.Input(id= "n_variant", type = "number", placeholder = "2"),             width= 4)],      className   = "mb-3")
@@ -52,14 +39,14 @@ layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'pa
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-def input_get(*s):
-    ilist = []
-    for si in s :
-        if isinstance(si, str): 
-            ilist.append(Input(si, "value"))
-        elif isinstance(si, tuple):
-            ilist.append(Input(si[0], si[1]))
-    return ilist
+# def input_get(*s):
+#     ilist = []
+#     for si in s :
+#         if isinstance(si, str): 
+#             ilist.append(Input(si, "value"))
+#         elif isinstance(si, tuple):
+#             ilist.append(Input(si[0], si[1]))
+#     return ilist
 
 
 @callback( Output("result",           "children"),
@@ -82,7 +69,7 @@ def calc_nsample(ctr, min_effect, n_variant, _):
 
 @callback( Output("result2", "children"),
 #[Input("ctr", "value"), Input("min_effect", "value"),  Input("n_variant",   "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
-input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
+input_get("ctr",  "min_effect", "n_variant", 'traffic',  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
 def calc_ndays(ctr, min_effect, n_variant, traffic,  _):    
     if ctx.triggered_id == 'calc':
         if (ctr is None or min_effect is None or traffic is None or n_variant is None):  return '' 
