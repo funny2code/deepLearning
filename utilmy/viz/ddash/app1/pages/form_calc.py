@@ -6,6 +6,7 @@ from dash import html, callback, ctx
 #from dash_bootstrap_components.dbc import Row as RR
 
 
+
 ##########################################################################################
 ### Modular Dash Html Part
 title   = html.H1("AB Test:  N-Sample calculator     ")
@@ -36,9 +37,19 @@ layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'pa
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-#### Sample BMI (Body Mass Index) calculation
+def input_get(*s):
+    ilist = []
+    for si in s :
+        if isinstance(si, str): 
+            ilist.append(Input(si, "value"))
+        elif isinstance(si, tuple):
+            ilist.append(Input(si[0], si[1]))
+    return ilist
+
+
 @callback( Output("result",           "children"),
-[Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
+#[Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
+input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
 def calc_nsample(ctr, min_effect, n_variant, _):    
     if ctx.triggered_id == 'calc':
         if (ctr is None or min_effect is None or n_variant is None):  return '' 
@@ -55,7 +66,8 @@ def calc_nsample(ctr, min_effect, n_variant, _):
 
 
 @callback( Output("result2", "children"),
-[Input("ctr", "value"), Input("min_effect", "value"),  Input("n_variant",   "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
+#[Input("ctr", "value"), Input("min_effect", "value"),  Input("n_variant",   "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
+input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
 def calc_ndays(ctr, min_effect, n_variant, traffic,  _):    
     if ctx.triggered_id == 'calc':
         if (ctr is None or min_effect is None or traffic is None or n_variant is None):  return '' 
