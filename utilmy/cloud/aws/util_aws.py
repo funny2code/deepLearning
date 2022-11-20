@@ -65,7 +65,7 @@ def s3_get_jsonfile(dir_s3="s3://", n_thread=5):
     
     
 
-def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
+def s3_read_json_multithread_run(path_s3="", n_pool=5, dirout="/tmp/", dir_error=None, start_delay=0.1, verbose=True,   **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
 
@@ -153,7 +153,7 @@ def s3_read_json_multithread_run(path_s3="", n_pool=5, dir_error=None, start_del
     # Store json data as return value of function
     res = {}
     for s3_key in successful_downloads:
-        downloaded_file = os.path.join(OUTPUT_DIR, s3_key)
+        downloaded_file = os.path.join(dirout, s3_key)
         res[s3_key] = load_json(downloaded_file)
     return res
     
