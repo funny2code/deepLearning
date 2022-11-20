@@ -40,10 +40,9 @@ layout = html.Div([
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-
 ##### Upload Json file to Live text Editor
 clientside_callback(
-    ClientsideFunction( namespace      = 'clientside',
+    ClientsideFunction(namespace      = 'clientside',
                        function_name   = 'liveEditor' ), 
         Output('temp-filename',    'data'),
         Input('upload-data',  'contents'),

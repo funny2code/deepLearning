@@ -26,17 +26,18 @@ def test1(classname="mb-3", width=4):
 
 ##########################################################################################
 def generate_grid(grid, classname='mb-3'):
-  lall = []
-  for ri in grid : 
-    lli = []
-    for cj in ri :
-       if isinstance(cj, str):  
-          lli.append( dbc.Label( cj ) )
-       else :
-          lli.append(cj  )
+    lall = []
+    for ri in grid : 
+      lli = []
+      for cj in ri :
+          if isinstance(cj, str):  
+            lli.append( dbc.Label( cj ) )
+          else :
+            lli.append(cj  )
 
-    lall.append( dbc.Row(lli, classname = classname) )
-
+      lall.append( dbc.Row(lli, className = classname) )
+      
+    return lall
 
 
 
@@ -84,7 +85,7 @@ def input_get(*s, **kw):
 #                     dbc.Col(dbc.Button(id = "calc",         color = "primary", children  = "Calc" ),     width = 4)],     className   = "mb-3")
 
 # result  = dbc.Row([ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   
-#                     html.H5("Ndays required:", ),   html.P(id = "result2")])
+#                     html.H5("Ndays required:", ),   html.P(id = "result2")])                html.H5("Ndays required:", ),   html.P(id = "result2")])
 
 
 # ### Constructing Layout

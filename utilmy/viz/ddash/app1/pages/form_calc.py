@@ -6,7 +6,7 @@ from dash import html, callback, ctx
 #from dash_bootstrap_components.dbc import Row as RR
 
 #### Utils for faster dash setup
-from .util_dash import input_get
+from .util_dash import input_get, generate_grid
 
 
 ##########################################################################################
@@ -32,6 +32,21 @@ calc    = dbc.Row([ dbc.Label("",width = 3),
 result  = dbc.Row([ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   
                     html.H5("Ndays required:", ),   html.P(id = "result2")])
 
+##### Standard Grid Format
+# grid = [
+#         ["Baseline  CTR level :",       dbc.Input(id= "ctr",          type= "number", placeholder= "CTR in %"),  ],
+#         ["Minimal Detection Effect :",  dbc.Input(id= "min_effect",   type= "number", placeholder= "CTR in %"),  ],
+#         ["Daily Traffic :",             dbc.Input(id= "daily_effect", type= "number", placeholder= "CTR in %"),  ],
+#         ["N Variants :",                dbc.Input(id= "n_variant",    type= "number", placeholder= "CTR in %"),  ],   
+
+#         ["",                            dbc.Button(id = "calc",         color = "primary", children  = "Calc" ), ],   
+
+#         [ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   ],
+
+#         [ html.H5("Ndays required:", ),                                  html.P(id = "result2")  ]        
+#     ]
+#grid =  generate_grid(grid, classname='mb-3')
+
 
 ### Constructing Layout
 layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'padding'  : '20px'})
@@ -39,16 +54,6 @@ layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'pa
 
 ##########################################################################################
 ################################# Callbacks ##############################################
-# def input_get(*s):
-#     ilist = []
-#     for si in s :
-#         if isinstance(si, str): 
-#             ilist.append(Input(si, "value"))
-#         elif isinstance(si, tuple):
-#             ilist.append(Input(si[0], si[1]))
-#     return ilist
-
-
 @callback( Output("result",           "children"),
 #[Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
 input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
@@ -89,10 +94,12 @@ def calc_ndays(ctr, min_effect, n_variant, traffic,  _):
 
 
 def ab_get_sample(ctr, min_effect, n_variant):
+    """  AB Test calculator
+    ### Per variant, need to doule for mutiple Variants
 
-        ### Per variant, need to doule for mutiple Variants
-        variance = ctr*(1-ctr)  ### Binonmal
-        nsample  = int( 16 * variance / ( min_effect **2 )   * n_variant )
-        return nsample
+    """ 
+    variance = ctr*(1-ctr)  ### Binonmal
+    nsample  = int( 16 * variance / ( min_effect **2 )   * n_variant )
+    return nsample
 
 
