@@ -1,7 +1,7 @@
-
-
 ########################################
+```bash
 git clone
+
 git checkout devtorch
 
 
@@ -12,5 +12,5 @@ cd  utilmy/viz/ddash/app1/
 python app.py main --content_layout assets/mixed_layout.json   
 
 
-
+```
 
