@@ -4,9 +4,6 @@ from dash import html, callback, ctx
 
 
 #from dash_bootstrap_components.dbc import Row as RR
-#from dbc import Row as RR
-#from dbc import Col as CC
-from dash import Dash, html
 
 
 ##########################################################################################
@@ -27,7 +24,7 @@ nvariant= dbc.Row([ dbc.Label("N Variants :", width = 3),
 
 
 calc    = dbc.Row([ dbc.Label("",width = 3),    
-                    dbc.Col(dbc.Button(id = "calc",         color = "primary", children  = "Calc" ),  width = 4)],        className   = "mb-3")
+                    dbc.Col(dbc.Button(id = "calc",         color = "primary", children  = "Calc" ),     width = 4)],     className   = "mb-3")
 
 result  = dbc.Row([ html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result"),   
                     html.H5("Ndays required:", ),   html.P(id = "result2")])
@@ -83,3 +80,5 @@ def ab_get_sample(ctr, min_effect, n_variant):
         variance = ctr*(1-ctr)  ### Binonmal
         nsample  = int( 16 * variance / ( min_effect **2 )   * n_variant )
         return nsample
+
+
