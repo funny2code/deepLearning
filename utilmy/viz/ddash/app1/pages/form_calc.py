@@ -15,7 +15,7 @@ layout = dbc.Row([
 
 
 
-                html.H5("Nsample required :", ),  html.P(id = "result")
+                html.H5("Nsample required ( 95% Confidence, 80% Power) :", ),  html.P(id = "result")
                 html.H5("Ndays :", ),             html.P(id = "result2")
 
             ],  width           = 4,
