@@ -3,8 +3,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash import dcc, html, callback, clientside_callback, ClientsideFunction, callback_context
 
-##########################################################################################
 
+##########################################################################################
 file_saved_location         = 'assets/'
 default_filename            = 'default_layout.json'
 
