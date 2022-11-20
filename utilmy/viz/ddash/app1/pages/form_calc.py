@@ -11,7 +11,7 @@ from .util_dash import input_get, generate_grid
 
 ##########################################################################################
 ### Modular Dash Html Part
-title   = html.H1("AB Test:  N-Sample calculator     ")
+title   = html.H1("AB Test:  N-Sample calculator  ( no variance reduction method)    ")
 
 ctr     = dbc.Row([ dbc.Label("Baseline  CTR level :",     width = 3),    
                     dbc.Col( dbc.Input(id= "ctr", type = "number", placeholder = "CTR in %"),            width= 4)],      className   = "mb-3")
@@ -55,7 +55,6 @@ layout = dbc.Form([title, ctr, mde, traffic, nvariant, calc, result], style={'pa
 ##########################################################################################
 ################################# Callbacks ##############################################
 @callback( Output("result",           "children"),
-#[Input("ctr",   "value"),       Input("min_effect",  "value"),  Input("n_variant",   "value"),    Input("calc",   "n_clicks")],  prevent_initial_callback=  True)
 input_get("ctr",  "min_effect", "n_variant",  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
 def calc_nsample(ctr, min_effect, n_variant, _):    
     if ctx.triggered_id == 'calc':
@@ -72,8 +71,7 @@ def calc_nsample(ctr, min_effect, n_variant, _):
 
 
 
-@callback( Output("result2", "children"),
-#[Input("ctr", "value"), Input("min_effect", "value"),  Input("n_variant",   "value"),   Input("daily_traffic", "value"),  Input("calc",  "n_clicks")], prevent_initial_callback=     True)
+@callback( Output("result2",    "children"),
 input_get("ctr",  "min_effect", "n_variant", 'traffic',  ("calc",   "n_clicks") ),  prevent_initial_callback=  True)
 def calc_ndays(ctr, min_effect, n_variant, traffic,  _):    
     if ctx.triggered_id == 'calc':
@@ -93,6 +91,8 @@ def calc_ndays(ctr, min_effect, n_variant, traffic,  _):
 
 
 
+##########################################################################################
+################ Function ################################################################
 def ab_get_sample(ctr, min_effect, n_variant):
     """  AB Test calculator
     ### Per variant, need to doule for mutiple Variants
