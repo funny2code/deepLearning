@@ -15,7 +15,7 @@ def redisGetXTimes(client , keys):
     client.execute_pipeline(*commands)
 
 def redisMGetXTimes(client , keys):
-    keys_str = ''.join(keys)
+    keys_str = ' '.join(keys)
     client.execute_pipeline('mget', keys_str)
 
 def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
