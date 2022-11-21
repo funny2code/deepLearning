@@ -1,3 +1,16 @@
+## Reference
+
+
+https://aws.amazon.com/blogs/database/optimize-redis-client-performance-for-amazon-elasticache/
+
+https://doordash.engineering/2020/11/19/building-a-gigascale-ml-feature-store-with-redis/
+
+https://doordash.engineering/2019/01/02/speeding-up-redis-with-compression/
+
+
+
+
+
 # Install Go
 ```bash
 curl -OL https://go.dev/dl/go1.19.3.linux-amd64.tar.gz
