@@ -17,6 +17,10 @@ def test_all():
 def test1():
     """function test1.
     """
+    import io, sys
+    # These libraries are for testing output.
+    # https://stackoverflow.com/questions/33767627/python-write-unittest-for-console-print
+
     os.environ['log_verbosity']='10'
     os.environ['log_type']='base'
 
@@ -29,6 +33,62 @@ def test1():
     log("info")
     logw("warning")
     logc("critical")
+
+    log("####### log() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log("testing log")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log2() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log2("testing log2")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log2\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log3() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log3("testing log3")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log3\n", "FAILED -> config_load(); The return value isn't expected"
+    
+    log("####### logw() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logw("testing logw")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logw\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### logc() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logc("testing logc")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logc\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### loge() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    loge("testing loge")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing loge\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### logr() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logr("testing logr")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logr\n", "FAILED -> config_load(); The return value isn't expected"
 
     try:
         a = 1 / 0
@@ -144,6 +204,38 @@ def test_logging():
     logger=logger_setup(log_file='test.log')
     log2(s)
   
+def test4():
+    """ function test4.
+    
+    Testing the functions log2 and log3 with verbosity equals to 1.
+    
+    """
+    import io, sys
+
+    os.environ['log_verbosity']='1'
+    os.environ['log_type']='base'
+
+    with open("config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 1, 'log_type': 'base'}, indent=4))
+
+    from util_log import log3, log2, log
+
+    log("####### log2() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log2("testing log2")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log3() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log3("testing log3")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
+    
 
 
 ############################################################################
