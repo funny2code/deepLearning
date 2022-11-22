@@ -17,8 +17,10 @@ class redisClient:
 
       PORT = self.cfg['port']
       HOST = self.cfg['host']
+      transaction  = cfg['transaction']
 
       self.client = redis.Redis(host='localhost', port=6379, db=0)
+      self.pipe =   self.client.pipeline(transaction=transaction)
 
 
  	def connect(self, table):
@@ -29,22 +31,34 @@ class redisClient:
       return val
 
    def put(key, val):     
-       return val
+       return True
 
-   def put_multi(self, key_values, batch_size=500, transaction=False):
-      pipe = self.client.pipeline(transaction=transaction)
+   def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
 
-      n       = len(keys)
-      n_batch = n // batch_size
+      n       = len(key_values)
+      n_batch = n // batch_size + 1
 
       for k in range(n_batch):
-         for i in range(batch_size):
-               pipe.hset(i, key_values[k*batch_size+ i][0], key_values[k*batch_size + i][1] )
-         pipe.execute()
-         
+         i = 0
+         while i < batch_size and k*batch_size+i < n :   
+               self.pipe.hset(i, key_values[k*batch_size+ i][0], key_values[k*batch_size + i][1] )
+               i += 1
 
-   def get_multi(self, keys, batch_size=500):
-      pipe = self.client.pipeline(transaction=False)
+         flag = 0 
+         ii   = 0
+         while flag and ii < nretry:0
+            ii =  ii + 1 
+            try :      
+               self.pipe.execute()
+               flag = False
+               ntotal = batch_size
+            except Exception as e: 
+
+
+      return ntotal             
+
+   def get_multi(self, keys, batch_size=500, transaction=False):
+      # pipe = self.client.pipeline(transaction= transaction)
 
       n_batch = len(keys) // batch_size
       res = []
@@ -52,8 +66,9 @@ class redisClient:
          for i in range(batch_size):
                pipe.hget(i, keys[k*batch_size + i])
 
-         res = res + pipe.execute()
+         res = res + self.pipe.execute()
 
+      return res
 
 
 class RedisQueries(object):
