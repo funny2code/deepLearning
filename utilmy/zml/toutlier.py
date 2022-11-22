@@ -190,7 +190,7 @@ def  train_test(nsample=100) :
     data_name = "titanic"
 
 
-    dir_data3     = "C:/D/gitdev/fraud/mldev/ztmp/rpp_fraud/"
+    dir_data3     = "C:/D/gitdev/fraud/mldev/ztmp/zzz_fraud/"
     dir_data3     = root_repo  + "/ztmp/"
     dir_input3_tr = dir_data3 + f"/input/features/202011/{feat_name}/"
     dir_input3_te = dir_data3 + f"/input/features/202011/{feat_name}/"
