@@ -56,7 +56,7 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
 
          pip install "smart_open[s3]==6.2.0"
          https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-         
+
          If run on Windows operating system, please move freeze_support to the main function
          As suggested here https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     """
@@ -166,6 +166,60 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
     pool.close(); pool.join(); pool = None
     log('n_processed', len(res_list))
     return res_list
+
+
+
+def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
+    """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
+    Doc::
+
+         Return list of tuple  : (S3_path, ddict )
+
+        https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
+
+        https://github.com/RaRe-Technologies/smart_open
+        
+        ### stream content *into* S3 (write mode) using a custom session
+        import os, boto3
+        session = boto3.Session(
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+        )
+        url = 's3://smart-open-py37-benchmark-results/test.txt'
+        with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
+            bytes_written = fout.write(b'hello world!')
+            print(bytes_written)
+
+        ### Buffer writing
+        tp = {'min_part_size': 5 * 1024**2}
+        with open('s3://bucket/key', 'w', transport_params=tp) as fout:
+            fout.write(lots_of_data)            
+
+    """
+    import json
+    from smart_open import open
+
+    ### Global Session, Shared across Threads
+    session = boto3.Session()   
+    client  = session.client('s3')
+
+    def json_load(s3_path, verbose=True):
+        ### Thread Safe function to parallelize
+        with open(s3_path, mode='r', transport_params={'client': client} ) as f:
+            ddict = json.loads(f)
+        return (s3_path, ddict)
+  
+
+    input_list  = s3_get_filelist(path_s3, suffix= suffix)
+
+    input_fixed = {'verbose': True}  ### Fixed params
+
+
+    #### Run Multihreading
+    from utilmy import multithread_run
+    list_tuple = multithread_run(fun_async= json_load, input_list= input_list,
+                                 n_pool= npool, input_fixed= input_fixed)
+    return list_tuple
 
 
 
