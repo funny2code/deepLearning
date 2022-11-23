@@ -18,6 +18,8 @@ Docs::
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
 from typing import Union, IO
+import boto3
+
 
 ######################################################################################
 from utilmy.utilmy_base import log, log2
@@ -71,15 +73,30 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     return res_data
 
 
+def s3_get_filelist(BUCKET, suffix=".json"):
+    # Get all json files in a S3 bucket
+    s3         = boto3.resource('s3')
+    my_bucket  = s3.Bucket(BUCKET)
+    s3_objects = []
+    for file in my_bucket.objects.all():
+        # filter only json files
+        if file.key.lower().find(suffix) != -1:
+            s3_objects.append(file.key)
+    return s3_objects
+
+
 def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
     """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
     Doc::
 
          Return list of tuple  : (S3_path, ddict )
 
+        https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
+
         https://github.com/RaRe-Technologies/smart_open
+        
+        ### stream content *into* S3 (write mode) using a custom session
         import os, boto3
-        # stream content *into* S3 (write mode) using a custom session
         session = boto3.Session(
             aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
             aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
@@ -89,37 +106,34 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
             bytes_written = fout.write(b'hello world!')
             print(bytes_written)
 
+        ### Buffer writing
+        tp = {'min_part_size': 5 * 1024**2}
+        with open('s3://bucket/key', 'w', transport_params=tp) as fout:
+            fout.write(lots_of_data)            
+
 
     """
-    import time, functools, json, boto3
+    import time, functools, json
     from smart_open import open
 
-    ### Global Session
+    ### Global Session, Shared across Threads
     session = boto3.Session()   
+    client  = session.client('s3')
 
     def json_load(s3_path, verbose=True):
-        with open(s3_path, mode='r', transport_params={'client': session.client('s3')} ) as f:
+        ### Thread Safe function to parallelize
+        with open(s3_path, mode='r', transport_params={'client': client} ) as f:
             ddict = json.loads(f)
         return (s3_path, ddict)
 
 
     if input_fixed is not None:
         fun_async = functools.partial(json_load, **input_fixed)
+    else :
+        fun_async= json_load    
 
 
-    def get_s3_json_files(BUCKET):
-        # Get all json files in a S3 bucket
-        s3         = boto3.resource('s3')
-        my_bucket  = s3.Bucket(BUCKET)
-        s3_objects = []
-        for file in my_bucket.objects.all():
-            # filter only json files
-            if file.key.lower().find(suffix) != -1:
-                s3_objects.append(file.key)
-        return s3_objects
-
-    input_list = get_s3_json_files(path_s3)
-
+    input_list = s3_get_filelist(path_s3, suffix= suffix)
 
 
     #### Input xi #######################################
@@ -181,7 +195,7 @@ def s3_donwload(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=T
             data = json.loads(f)
         return data
 
-    def get_s3_json_files(BUCKET):
+    def s3_get_filelist(BUCKET):
         """
             Get all json files in a S3 bucket
         """
@@ -210,7 +224,7 @@ def s3_donwload(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=T
         res_data[s3_file] = byte_value.decode()
 
 
-    files_to_download = get_s3_json_files(path_s3)
+    files_to_download = s3_get_filelist(path_s3)
     # Creating only one session and one client
     session = boto3.Session()
     client = session.client("s3")
