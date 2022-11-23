@@ -55,6 +55,8 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     Docs::
 
          pip install "smart_open[s3]==6.2.0"
+         https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
+         
          If run on Windows operating system, please move freeze_support to the main function
          As suggested here https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     """
