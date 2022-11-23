@@ -73,10 +73,10 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     return res_data
 
 
-def s3_get_filelist(BUCKET, suffix=".json"):
+def s3_get_filelist(path_s3_bucket="/mybucket1/mybucket2/", suffix=".json"):
     # Get all json files in a S3 bucket
     s3         = boto3.resource('s3')
-    my_bucket  = s3.Bucket(BUCKET)
+    my_bucket  = s3.Bucket(path_s3_bucket)
     s3_objects = []
     for file in my_bucket.objects.all():
         # filter only json files
@@ -111,7 +111,6 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         with open('s3://bucket/key', 'w', transport_params=tp) as fout:
             fout.write(lots_of_data)            
 
-
     """
     import time, functools, json
     from smart_open import open
@@ -131,7 +130,6 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         fun_async = functools.partial(json_load, **input_fixed)
     else :
         fun_async= json_load    
-
 
     input_list = s3_get_filelist(path_s3, suffix= suffix)
 
@@ -166,10 +164,6 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
     pool.close(); pool.join(); pool = None
     log('n_processed', len(res_list))
     return res_list
-
-
-
-
 
 
 
