@@ -35,6 +35,7 @@ def test_all():
     """
     test1()
 
+
 def test1():
     """function test1
 
@@ -45,55 +46,126 @@ def test1():
 
 
 
-def s3_get_jsonfile(dir_s3="s3://", n_thread=5):  
-    """ Return a dict with    
-       key: s3path_filename,   value = Dict containing the JSON.
     
-    
-    """
-    dict_jsons = {}
-    
-    import json
-    
-    
-    
-               
-    dict_jsons[key] = json.loads(sstr)            
-    
-    return dict_jsons
-    
-    
-    
+####################################################################################
+def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
+    """  Run Multi-processors load using smart_open
+    Docs::
 
-def s3_read_json_multithread_run(path_s3="", n_workers=16, verbose=True,   **kw):
-    """  Run Multi-thread fun_async on give s3 bucket path_s3.
+         pip install "smart_open[s3]==6.2.0"
+         If run on Windows operating system, please move freeze_support to the main function
+         As suggested here https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     """
-
-    # Required library
     from multiprocessing import freeze_support
-    # pip install "smart_open[s3]==6.2.0"
     from smart_open import s3
 
-    res_data = {}
-    
-    # If run on Windows operating system, please move freeze_support to the main function
-    # As suggested here https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
-    freeze_support()
+    try :    
+       freeze_support()
+    except Exception as e : 
+       log(e)   
 
-    for key, content in s3.iter_bucket(path_s3, workers=n_workers, accept_key=lambda key: key.endswith('.json')):
+    res_data = {}
+    for key, content in s3.iter_bucket(path_s3, workers=n_workers, accept_key=lambda key: key.endswith(suffix)):
         res_data[key] =  json.loads(content)
 
     return res_data
-    
-def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
+
+
+def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
+    """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
+    Doc::
+
+         Return list of tuple  : (S3_path, ddict )
+
+        https://github.com/RaRe-Technologies/smart_open
+        import os, boto3
+        # stream content *into* S3 (write mode) using a custom session
+        session = boto3.Session(
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+        )
+        url = 's3://smart-open-py37-benchmark-results/test.txt'
+        with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
+            bytes_written = fout.write(b'hello world!')
+            print(bytes_written)
+
+
+    """
+    import time, functools, json, boto3
+    from smart_open import open
+
+    ### Global Session
+    session = boto3.Session()   
+
+    def json_load(s3_path, verbose=True):
+        with open(s3_path, mode='r', transport_params={'client': session.client('s3')} ) as f:
+            ddict = json.loads(f)
+        return (s3_path, ddict)
+
+
+    if input_fixed is not None:
+        fun_async = functools.partial(json_load, **input_fixed)
+
+
+    def get_s3_json_files(BUCKET):
+        # Get all json files in a S3 bucket
+        s3         = boto3.resource('s3')
+        my_bucket  = s3.Bucket(BUCKET)
+        s3_objects = []
+        for file in my_bucket.objects.all():
+            # filter only json files
+            if file.key.lower().find(suffix) != -1:
+                s3_objects.append(file.key)
+        return s3_objects
+
+    input_list = get_s3_json_files(path_s3)
+
+
+
+    #### Input xi #######################################
+    xi_list = [[] for t in range(npool)]
+    for i, xi in enumerate(input_list):
+        jj = i % npool
+        xi_list[jj].append( xi )  ### xi is already a tuple
+
+    if verbose:
+        for j in range(len(xi_list)):
+            log('thread ', j, len(xi_list[j]))
+        # time.sleep(6)
+
+    #### Pool execute ###################################
+    import multiprocessing as mp
+    # pool     = multiprocessing.Pool(processes=3)
+    pool = mp.pool.ThreadPool(processes=npool)
+    job_list = []
+    for i in range(npool):
+        time.sleep(start_delay)
+        log('starts', i)
+        job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
+        if verbose: log(i, xi_list[i])
+
+    res_list = []
+    for i in range(len(job_list)):
+        res_list.append(job_list[i].get())
+        log(i, 'job finished')
+
+    pool.close(); pool.join(); pool = None
+    log('n_processed', len(res_list))
+    return res_list
+
+
+
+
+
+
+
+def s3_donwload(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
 
         # Define where to store artifacts:
         # - temporarily downloaded file and
         # - list of failed to download file in csv file
-
-
     """
 
     # Required library
@@ -101,14 +173,11 @@ def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_d
     from functools import partial
     import os, json, csv
     import boto3
+    from smart_open import open
 
-
-    # *********************************
-    # Helper functions
-    # *********************************
 
     def load_json(raw_json_data):
-        with open(raw_json_data) as f:
+        with open(raw_json_data, mode='r') as f:
             data = json.loads(f)
         return data
 
@@ -127,8 +196,7 @@ def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_d
         return s3_objects
 
     def download_one_file(res_data: dict, bucket: str, client: boto3.client, s3_file: str):
-        """
-        Download a single file from S3
+        """ Download a single file from S3
         Args:
             res_data (dict): Store result of our json s3 reading
             bucket (str): S3 bucket where images are hosted
@@ -140,22 +208,20 @@ def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_d
         client.download_fileobj(Bucket=bucket, Key=s3_file, Fileobj=bytes_buffer)
         byte_value = bytes_buffer.getvalue()
         res_data[s3_file] = byte_value.decode()
-    # *********************************
-    # End of Helper functions
-    # *********************************
+
 
     files_to_download = get_s3_json_files(path_s3)
     # Creating only one session and one client
     session = boto3.Session()
     client = session.client("s3")
     
-    # Store result data
     res_data = {}
-    # The client is shared between threads
+
+    ## The client is shared between threads
     func = partial(download_one_file, res_data, path_s3, client)
 
 
-    # List for storing possible failed downloads to retry later
+    ## List for storing possible failed downloads to retry later
     failed_downloads = []
 
     with ThreadPoolExecutor(max_workers=n_pool) as executor:
@@ -168,10 +234,7 @@ def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_d
                 failed_downloads.append(futures[future])
 
     if len(failed_downloads) > 0  and dir_error is not None :
-        print("Some downloads have failed. Saving ids to csv")
-        with open( os.path.join(dir_error, "failed_downloads.csv"), "w", newline="" ) as csvfile:
-            wr = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-            wr.writerow(failed_downloads)
+       log(failed_downloads)
 
     return res_data
  
