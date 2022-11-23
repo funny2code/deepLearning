@@ -85,7 +85,96 @@ def s3_read_json_multithread_run(path_s3="", n_workers=16, verbose=True,   **kw)
 
     return res_data
     
+def s3_read_json_multithread_run_2(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
+    """  Run Multi-thread fun_async on input_list.
+    Doc::
+
+        # Define where to store artifacts:
+        # - temporarily downloaded file and
+        # - list of failed to download file in csv file
+
+
+    """
+
+    # Required library
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from functools import partial
+    import os, json, csv
+    import boto3
+
+
+    # *********************************
+    # Helper functions
+    # *********************************
+
+    def load_json(raw_json_data):
+        with open(raw_json_data) as f:
+            data = json.loads(f)
+        return data
+
+    def get_s3_json_files(BUCKET):
+        """
+            Get all json files in a S3 bucket
+        """
+        s3 = boto3.resource('s3')
+
+        my_bucket = s3.Bucket(BUCKET)
+        s3_objects = []
+        for file in my_bucket.objects.all():
+            # filter only json files
+            if file.key.lower().find(".json") != -1:
+                s3_objects.append(file.key)
+        return s3_objects
+
+    def download_one_file(res_data: dict, bucket: str, client: boto3.client, s3_file: str):
+        """
+        Download a single file from S3
+        Args:
+            res_data (dict): Store result of our json s3 reading
+            bucket (str): S3 bucket where images are hosted
+            output (str): Dir to store the images
+            client (boto3.client): S3 client
+            s3_file (str): S3 object name
+        """
+        bytes_buffer = io.BytesIO()
+        client.download_fileobj(Bucket=bucket, Key=s3_file, Fileobj=bytes_buffer)
+        byte_value = bytes_buffer.getvalue()
+        res_data[s3_file] = byte_value.decode()
+    # *********************************
+    # End of Helper functions
+    # *********************************
+
+    files_to_download = get_s3_json_files(path_s3)
+    # Creating only one session and one client
+    session = boto3.Session()
+    client = session.client("s3")
     
+    # Store result data
+    res_data = {}
+    # The client is shared between threads
+    func = partial(download_one_file, res_data, path_s3, client)
+
+
+    # List for storing possible failed downloads to retry later
+    failed_downloads = []
+
+    with ThreadPoolExecutor(max_workers=n_pool) as executor:
+        # Using a dict for preserving the downloaded file for each future, to store it as a failure if we need that
+        futures = {
+            executor.submit(func, file_to_download): file_to_download for file_to_download in files_to_download
+        }
+        for future in as_completed(futures):
+            if future.exception():
+                failed_downloads.append(futures[future])
+
+    if len(failed_downloads) > 0  and dir_error is not None :
+        print("Some downloads have failed. Saving ids to csv")
+        with open( os.path.join(dir_error, "failed_downloads.csv"), "w", newline="" ) as csvfile:
+            wr = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+            wr.writerow(failed_downloads)
+
+    return res_data
+ 
 
 
 ####################################################################################
