@@ -1,4 +1,4 @@
-from util_redis import redisClient, ConnectionFailed, AuthenticationFailed
+from utilmy.db.kvs.util_redis import redisClient, ConnectionFailed, AuthenticationFailed
 import random, string
 
 def test_connection():
