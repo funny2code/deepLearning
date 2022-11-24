@@ -173,7 +173,8 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
     res_list = []
     for i in range(len(job_list)):
-        res_list.append(job_list[i].get())
+        if job_result is not None:
+            res_list.append(job_list[i].get())
         log(i, 'job finished')
 
     pool.close(); pool.join(); pool = None
