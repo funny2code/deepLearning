@@ -158,7 +158,8 @@ class redisClient:
                   pipe.hget(i, keys[ix])
 
 
-            res = res  + self.pipe.execute()
+            resk =  self.pipe.execute()
+            res  = res + resk
 
         return res
 
