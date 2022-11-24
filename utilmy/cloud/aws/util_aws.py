@@ -62,6 +62,7 @@ def test_s3json():
     
     print()
     
+    # URL: "https://buckets.grayhatwarfare.com/files?bucket=113"
     test_bucket = "coretics"
     print(f"Testing on Bucket {test_bucket}")
     res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
