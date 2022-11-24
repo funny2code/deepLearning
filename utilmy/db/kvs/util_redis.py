@@ -1,15 +1,83 @@
 """ Fast redis client
-  
+Docs::
+
+    pip install hiredis
+
 
 
 """
-
 import redis, time
 from utilmy import log
+import random, string
 
 
+#################################################################################
+#################################################################################
+def test_all():
+   test_connection()
+   test_getput()
+   test_getputmulti()
+
+
+
+def test_connection():
+    # test connection failed
+    try:
+        client = redisClient(host='localsss', port=1123)
+        assert False
+    except ConnectionFailed:
+        assert True
+
+    # test connection success
+    try:
+        client = redisClient(host='localhost', port=6379, db=0)
+        assert True
+    except ConnectionFailed:
+        assert False
+
+
+def test_getput():
+    client = redisClient(host='localhost', port=6379, db=0)
+    client.put('foo', 'bar')
+    res    = client.get('foo').decode('utf8')
+    assert res == 'bar'
+
+
+def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def test_getputmulti():
+    client = redisClient(host='localhost', port=6379, db=0)
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3']]
+    keys = ['a', 'b', 'c']
+
+    client.put_multi(keyvalues, 3)
+    res = client.get_multi(keys, 3)
+    print()
+    for i in range(len(keys)):
+        print(f'index {i}: key {keys[i]}; value {res[i]}')
+        
+
+
+
+#################################################################################
+#################################################################################
 class redisClient:
     def __init__(self, host: str = 'localhost', port: int = 6333, config_file: str=None, db=0, config_keyname= 'redis', config_dict=None):
+        """  hiredis client       
+        Docs::
+
+            host (str, ):        'localhost'.
+            port (int, ):         6333.
+            config_file (str, ):  None.
+            db (int, ):  0.
+            config_keyname (str, ):  'redis'.
+            config_dict (_type_, ):   None.
+
+         Raises:
+            ConnectionFailed: _description_
+         """
         if isinstance(config_dict, dict) :
             self.cfg = config_dict
 
@@ -27,7 +95,7 @@ class redisClient:
 
         self.host = self.cfg['host']
         self.port = self.cfg['port']
-        self.db = self.cfg['db']
+        self.db   = self.cfg['db']
 
         self.client = redis.Redis(host=self.host, port=self.port, db=self.db)
         try:
@@ -121,3 +189,15 @@ class RedisQueries(object):
 
 class ConnectionFailed(Exception):
     pass
+
+
+
+############################################################################################################
+if __name__ == '__main__':
+    import fire
+    fire.Fire()
+
+
+
+
+
