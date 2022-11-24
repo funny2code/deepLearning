@@ -236,7 +236,47 @@ def test4():
     result_value = captured_output.getvalue()
     assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
     
+def test5():
 
+    import importlib
+    import utilmy as uu
+    import util_log
+    drepo, dirtmp = uu.dir_testinfo()
+
+    util_log.log("Testing default env values")
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 10, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "base", "FAILED; LOG_TYPE wasn't expected"
+    
+    util_log.log("Testing log_verbosity and log_type")
+    os.environ['log_verbosity'] = '1'
+    os.environ['log_type'] = 'logging'
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 1, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.environ.pop('log_verbosity', None)
+    os.environ.pop('log_type', None)
+
+    util_log.log("Testing log_config_path")
+    os.environ['log_config_path'] = dirtmp+"config.json"
+    with open(dirtmp+"config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 2, 'log_type': 'logging',}, indent=4))
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 2, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.remove(dirtmp+"config.json")
+
+    util_log.log("Testing order priority")
+    os.environ['log_config_path'] = dirtmp+"config.json"
+    os.environ['log_verbosity'] = '3'
+    with open(dirtmp+"config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 2, 'log_type': 'logging',}, indent=4))
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 3, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.remove(dirtmp+"config.json")
+    os.environ.pop('log_verbosity', None)
+    os.environ.pop('log_type', None)
 
 ############################################################################
 if __name__ == "__main__":
