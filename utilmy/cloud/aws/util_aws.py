@@ -52,9 +52,20 @@ def test1():
     data = glob_s3(bucket_name="", path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
     print(json.dumps(data, indent=2))
 
-
-
-
+def test_s3json():
+    # URL: "https://buckets.grayhatwarfare.com/files?bucket=134"
+    test_bucket= "followtheleader"
+    print(f"Testing on Bucket {test_bucket}")
+    res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
+    print("Result:")
+    print(res)
+    
+    print()
+    
+    test_bucket = "coretics"
+    print(f"Testing on Bucket {test_bucket}")
+    res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
+    print(res)
     
 ####################################################################################
 def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
@@ -121,7 +132,7 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
             fout.write(lots_of_data)            
 
     """
-    import time, functools, json
+    import time, functools, json, pyjson5
     from smart_open import open
 
     ### Global Session, Shared across Threads
@@ -136,7 +147,13 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         
         ### Thread Safe function to parallelize
         with open(s3_path, mode='r', transport_params={'client': client} ) as f:
-            ddict = json.loads(f)
+            file_content = f.read()
+        try:
+            ddict = json.loads(file_content)
+        except:
+            # Use another json parser which supports JSON5 5 standard
+            ddict = pyjson5.loads(file_content)
+            
         return (s3_path, ddict)
 
 
@@ -173,8 +190,9 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
     res_list = []
     for i in range(len(job_list)):
+        job_result = job_list[i].get()
         if job_result is not None:
-            res_list.append(job_list[i].get())
+            res_list.append(job_result)
         log(i, 'job finished')
 
     pool.close(); pool.join(); pool = None
