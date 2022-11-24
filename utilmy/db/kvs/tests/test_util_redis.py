@@ -1,4 +1,4 @@
-from util_redis import redisClient, ConnectionFailed
+from util_redis import redisClient, ConnectionFailed, AuthenticationFailed
 import random, string
 
 def test_connection():
@@ -14,6 +14,20 @@ def test_connection():
         client = redisClient(host='localhost', port=6379, db=0)
         assert True
     except ConnectionFailed:
+        assert False
+
+    # test connection invalid password
+    try:
+        client = redisClient(host='localhost', port=6379, db=0, password='secret')
+        assert False
+    except AuthenticationFailed:
+        assert True
+
+    # test connection valid password
+    try:
+        client = redisClient(host='localhost', port=6379, db=0, password='')
+        assert True
+    except AuthenticationFailed:
         assert False
 
 def test_getput():

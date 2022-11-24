@@ -8,7 +8,14 @@ import redis
 
 
 class redisClient:
-    def __init__(self, host: str = 'localhost', port: int = 6333, config_file: str=None, db=0, config_keyname= 'redis', config_dict=None):
+    """
+    Fast Redis Client
+    Example:
+        from util_redis import redisClient\n
+        client = redisClient(host='localhost', port=6379, db=0)
+    """
+    def __init__(self, host: str = 'localhost',port: int = 6333, config_file: str=None,
+    password: str =None, db=0, config_keyname= 'redis', config_dict: dict=None):
         if isinstance(config_dict, dict) :
             self.cfg = config_dict
 
@@ -21,27 +28,45 @@ class redisClient:
             self.cfg = {
                 'host': host,
                 'port': port,
-                'db': db
+                'db': db,
+                'password': password
             }
 
         self.host = self.cfg['host']
         self.port = self.cfg['port']
         self.db = self.cfg['db']
+        self.password = self.cfg['password']
 
-        self.client = redis.Redis(host=self.host, port=self.port, db=self.db)
+        self.client = redis.Redis(host=self.host, port=self.port, db=self.db, password=self.password)
         try:
             self.client.ping()
         except redis.exceptions.ConnectionError: 
             raise ConnectionFailed("Failed to connect to redis")
+        except redis.exceptions.ResponseError:
+            raise AuthenticationFailed("Invalid password")
 
     def get(self, key):
+        """
+            get value from redis using key
+        """
         return self.client.get(key)
 
     def put(self, key, val):
+        """
+            set value to key
+        """
         self.client.set(key, val)
         return True
 
     def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
+        """
+        set multiple keys and values to redis
+        Parameters:
+        - key_values ([[key, value], ]): key and value as 2D list
+        - batch_size (int): number of batch.
+        - transaction (bool): enable MULTI and EXEC statements.
+        - nretry (int): number of retry
+        """
         n       = len(key_values)
         n_batch = n // batch_size + 1
         self.pipe =   self.client.pipeline(transaction=transaction)
@@ -64,6 +89,13 @@ class redisClient:
                     return ntotal             
 
     def get_multi(self, keys, batch_size=500, transaction=False):
+        """
+            get multiple value using list of keys
+            Parameters:
+                - keys (list(string)): list of keys
+                - batch_size (int): number of batch.
+                - transaction (bool): enable MULTI and EXEC statements.
+        """
         pipe = self.client.pipeline(transaction=transaction)
 
         n_batch = len(keys) // batch_size
@@ -102,4 +134,7 @@ class RedisQueries(object):
         return siid_to_title
 
 class ConnectionFailed(Exception):
+    pass
+
+class AuthenticationFailed(Exception):
     pass
