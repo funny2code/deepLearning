@@ -104,11 +104,11 @@ def test1():
 def test2():
     """function test2.
     """
-    os.environ['log_verbosity']='10'
+    os.environ['log_verbosity']='20'
     os.environ['log_type']='loguru'
 
     with open("config.json", mode='w') as f:
-        f.write(json.dumps({'log_verbosity': 10, 'log_type': 'loguru'}, indent=4))
+        f.write(json.dumps({'log_verbosity': 5, 'log_type': 'base'}, indent=4))
 
     import util_log
 
