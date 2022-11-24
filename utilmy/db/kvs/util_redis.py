@@ -64,16 +64,17 @@ def test_getputmulti():
 #################################################################################
 #################################################################################
 class redisClient:
-    def __init__(self, host: str = 'localhost', port: int = 6333, config_file: str=None, db=0, config_keyname= 'redis', config_dict=None):
+    def __init__(self, host:  str = 'localhost', port: int = 6333, user='', password='',
+                 config_file: str=None, db=0, config_keyname= 'redis', config_dict=None):
         """  hiredis client       
         Docs::
 
-            host (str, ):        'localhost'.
-            port (int, ):         6333.
-            config_file (str, ):  None.
-            db (int, ):  0.
-            config_keyname (str, ):  'redis'.
-            config_dict (_type_, ):   None.
+            host (str, ):             'localhost'
+            port (int, ):              6333
+            config_file (str, ):       None
+            db (int, ):                   0
+            config_keyname (str, ):  'redis'
+            config_dict (_type_, ):   None
 
          Raises:
             ConnectionFailed: _description_
@@ -87,10 +88,9 @@ class redisClient:
             self.cfg = self.cfg[config_keyname]
 
         else:
-            self.cfg = {
-                'host': host,
-                'port': port,
-                'db': db
+            self.cfg = { 'host': host, 'port': port, 'db': db,
+                'user' : user,
+                'password': password
             }
 
         self.host = self.cfg['host']
