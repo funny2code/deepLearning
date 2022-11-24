@@ -16,9 +16,16 @@ Docs::
 
 
 """
-import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
+import os, sys, time, datetime,inspect,  yaml, gc, pandas as pd, numpy as np, glob
 from typing import Union, IO
 import boto3
+
+try :
+    ## https://anaconda.org/conda-forge/orjson
+    ## conda install -c conda-forge orjson     #### pip install orjson
+    import orjson as  json  
+except :   
+    import json
 
 
 ######################################################################################

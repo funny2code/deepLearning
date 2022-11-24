@@ -4,7 +4,8 @@
 
 """
 
-import redis
+import redis, time
+from utilmy import log
 
 
 class redisClient:
@@ -34,45 +35,62 @@ class redisClient:
         except redis.exceptions.ConnectionError: 
             raise ConnectionFailed("Failed to connect to redis")
 
+
     def get(self, key):
         return self.client.get(key)
+
 
     def put(self, key, val):
         self.client.set(key, val)
         return True
 
-    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
-        n       = len(key_values)
-        n_batch = n // batch_size + 1
-        self.pipe =   self.client.pipeline(transaction=transaction)
 
+    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
+        n         =  len(key_values)
+        n_batch   =  n // batch_size + 1
+        self.pipe =  self.client.pipeline(transaction=transaction)
+
+        ntotal = 0  
         for k in range(n_batch):
             i = 0
             while i < batch_size and k*batch_size+i < n:   
                 self.pipe.hset(i, key_values[k*batch_size+ i][0], key_values[k*batch_size + i][1] )
                 i += 1
 
-            flag = 0 
+            flag = True 
             ii   = 0
             while flag and ii < nretry:
                 ii =  ii + 1 
                 try :      
                     self.pipe.execute()
                     flag = False
-                    ntotal = batch_size
+                    ntotal += batch_size
                 except Exception as e: 
-                    return ntotal             
+                    log(e)
+                    time.sleep(2)
+                  
+        return ntotal 
+
 
     def get_multi(self, keys, batch_size=500, transaction=False):
         pipe = self.client.pipeline(transaction=transaction)
 
-        n_batch = len(keys) // batch_size
+        n       = len(keys)
+        n_batch = n // batch_size  + 1
         res = []
         for k in range(n_batch):
             for i in range(batch_size):
-                pipe.hget(i, keys[k*batch_size + i])
+                ix  = k*batch_size + i
+                if ix > n : break
+                try :
+                   pipe.hget(i, keys[ix])
+                except Exception as e :
+                  log(e)   
+                  time.sleep(5)
+                  pipe.hget(i, keys[ix])
 
-            res = res + self.pipe.execute()
+
+            res = res  + self.pipe.execute()
 
         return res
 
