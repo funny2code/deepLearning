@@ -5,6 +5,9 @@ Docs::
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
 
 
+   pip install ijson streAMING JSON
+   https://pythonspeed.com/articles/json-memory-streaming/
+
    ### Read from S3
    https://stackoverflow.com/questions/45082832/how-to-read-partitioned-parquet-files-from-s3-using-pyarrow-in-python
    
@@ -204,6 +207,205 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
     pool.close(); pool.join(); pool = None
     log('n_processed', len(res_list))
     return res_list
+
+
+
+def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
+                 drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
+    """  Read file in parallel from disk, Support high number of files.
+    Doc::
+
+        path_glob: list of pattern, or sep by ";"
+        return: pd.DataFrame
+    """
+    import glob, gc,  pandas as pd, os
+    import time, functools, json, pyjson5
+    from smart_open import open
+    def log(*s, **kw):
+        print(*s, flush=True, **kw)
+
+
+    n_pool = npool if isinstance(npool, int)  else n_pool ## alias
+
+    ### Global Session, Shared across Threads
+    session = boto3.Session()   
+    client  = session.client('s3')
+
+    file_list = s3_get_filelist(path_glob, suffix= suffix)
+    n_file = len(file_list)
+
+    readers = {
+            ".pkl"     : pd.read_pickle, ".parquet" : pd.read_parquet,
+            ".tsv"     : pd.read_csv, ".csv"     : pd.read_csv, ".txt"     : pd.read_csv, ".zip"     : pd.read_csv,
+            ".gzip"    : pd.read_csv, ".gz"      : pd.read_csv,
+     }
+
+
+    #### Pool count  ###############################################
+    if n_pool < 1 :  n_pool = 1
+    if n_file <= 0:  m_job  = 0
+    elif n_file <= 2:
+      m_job  = n_file
+      n_pool = 1
+    else  :
+      m_job  = 1 + n_file // n_pool  if n_file >= 3 else 1
+    if verbose : log(n_file,  n_file // n_pool )
+
+    ### TODO : use with kewyword arguments
+    pd_reader_obj2 = None
+
+    #### Async Function ############################################
+    def fun_async(filei):
+        ext  = os.path.splitext(filei)[1]
+        if ext is None or ext == '': ext ='.parquet'
+
+        pd_reader_obj = readers.get(ext, None)
+        try :
+            with open(s3_path, mode='r', transport_params={'client': client} ) as f:
+                #file_content = f.read()
+                dfi = pd.read_json(f, lines=True) 
+
+        except Exception as e :
+          log(e)
+
+        # if dtype_reduce is not None:    dfi = pd_dtype_reduce(dfi, int0 ='int32', float0 = 'float32')
+        if col_filter is not None :       dfi = dfi[ dfi[col_filter].isin(col_filter_vals) ]
+        if cols is not None :             dfi = dfi[cols]
+        if nrows > 0        :             dfi = dfi.iloc[:nrows,:]
+        if drop_duplicates is not None  : dfi = dfi.drop_duplicates(drop_duplicates)
+        if fun_apply is not None  :       dfi = dfi.apply(lambda  x : fun_apply(x), axis=1)
+        return dfi
+
+
+    from multiprocessing.pool import ThreadPool
+    pool   = ThreadPool(processes=n_pool)
+    dfall  = pd.DataFrame(columns=cols) if cols is not None else pd.DataFrame()
+    for j in range(0, m_job ) :
+        if verbose : log("Pool", j, end=",")
+        job_list = []
+        for i in range(n_pool):
+           if n_pool*j + i >= n_file  : break
+
+           filei         = file_list[n_pool*j + i]
+           job_list.append( pool.apply_async(fun_async, (filei, )))
+           if verbose : log(j, filei)
+
+        for i in range(n_pool):
+            try :
+                  if i >= len(job_list): break
+                  dfi   = job_list[ i].get()
+                  dfall = pd.concat( (dfall, dfi), ignore_index=ignore_index, sort= concat_sort)
+                  #log("Len", n_pool*j + i, len(dfall))
+                  del dfi; gc.collect()
+            except Exception as e:
+                log('error', filei, e)
+
+
+    pool.close() ; pool.join() ;  pool = None
+    if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
+    return dfall
+
+
+
+def s3_json_topandas(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
+    """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
+    Doc::
+
+         Return pandas dataframe
+
+        https://stackoverflow.com/questions/55731954/read-json-file-with-python-from-s3-into-sagemaker-notebook
+        s3 = boto3.resource('s3')
+        my_bucket_source = s3.Bucket('bucket_source')
+
+        for obj in my_bucket_source.objects.filter(Prefix=prefix_source):
+                data_location = 's3://{}/{}'.format(obj.bucket_name, obj.key)
+                data = pd.read_json(data_location, lines = True )
+                display(data.head())
+                
+        https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
+        https://github.com/RaRe-Technologies/smart_open
+        
+        ### stream content *into* S3 (write mode) using a custom session
+        import os, boto3
+        session = boto3.Session(
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+        )
+        url = 's3://smart-open-py37-benchmark-results/test.txt'
+        with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
+            bytes_written = fout.write(b'hello world!')
+            log(bytes_written)
+
+        ### Buffer writing
+        tp = {'min_part_size': 5 * 1024**2}
+        with open('s3://bucket/key', 'w', transport_params=tp) as fout:
+            fout.write(lots_of_data)            
+
+    """
+    import time, functools, json, pyjson5
+    from smart_open import open
+
+    ### Global Session, Shared across Threads
+    session = boto3.Session()   
+    client  = session.client('s3')
+
+    def json_load(s3_path, verbose=True):
+        if len(s3_path) == 0: 
+            return None
+        else:
+            s3_path = s3_path.pop()
+        
+        ### Thread Safe function to parallelize
+        with open(s3_path, mode='r', transport_params={'client': client} ) as f:
+            #file_content = f.read()
+            df = pd.read_json(f, lines=True) 
+            
+        return df
+
+
+    if input_fixed is not None:
+        fun_async = functools.partial(json_load, **input_fixed)
+    else :
+        fun_async= json_load    
+
+    input_list = s3_get_filelist(path_s3, suffix= suffix)
+
+
+    #### Input xi #######################################
+    xi_list = [[] for t in range(npool)]
+    for i, xi in enumerate(input_list):
+        jj = i % npool
+        path_to_s3_object = f"s3://{path_s3}/{xi}"
+        xi_list[jj].append( path_to_s3_object )
+
+    if verbose:
+        for j in range(len(xi_list)):
+            log('thread ', j, len(xi_list[j]))
+        # time.sleep(6)
+
+    #### Pool execute ###################################
+    import multiprocessing as mp
+    # pool     = multiprocessing.Pool(processes=3)
+    pool = mp.pool.ThreadPool(processes=npool)
+    job_list = []
+    for i in range(npool):
+        time.sleep(start_delay)
+        log('starts', i)
+        job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
+        if verbose: log(i, xi_list[i])
+
+    res_list = []
+    for i in range(len(job_list)):
+        job_result = job_list[i].get()
+        if job_result is not None:
+            res_list.append(job_result)
+        log(i, 'job finished')
+
+    pool.close(); pool.join(); pool = None
+    log('n_processed', len(res_list))
+    return res_list
+
+
 
 
 
