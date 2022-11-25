@@ -219,7 +219,7 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
         return: pd.DataFrame
     """
     import glob, gc,  pandas as pd, os
-    import time, functools, json, pyjson5
+    import time, functools, json
     from smart_open import open
     def log(*s, **kw):
         print(*s, flush=True, **kw)
@@ -232,14 +232,13 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
     client  = session.client('s3')
 
     file_list = s3_get_filelist(path_glob, suffix= suffix)
-    n_file = len(file_list)
+    n_file    = len(file_list)
 
     readers = {
             ".pkl"     : pd.read_pickle, ".parquet" : pd.read_parquet,
             ".tsv"     : pd.read_csv, ".csv"     : pd.read_csv, ".txt"     : pd.read_csv, ".zip"     : pd.read_csv,
             ".gzip"    : pd.read_csv, ".gz"      : pd.read_csv,
      }
-
 
     #### Pool count  ###############################################
     if n_pool < 1 :  n_pool = 1
