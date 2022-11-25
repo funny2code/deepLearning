@@ -34,7 +34,7 @@ except :
 
 
 ######################################################################################
-from utilmy.utilmy_base import log, log2
+from utilmy.utilmy_base import log, log2, log3
 
 def help():
     """function help"""
@@ -219,6 +219,76 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
 
 
+def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json", timeout=60,  **kw):
+    """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
+    Doc::
+
+        Return list of tuple  : (S3_path, ddict )
+
+        https://github.com/RaRe-Technoprinties/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
+
+        https://github.com/RaRe-Technoprinties/smart_open
+        
+        ### stream content *into* S3 (write mode) using a custom session
+        import os, boto3
+        session = boto3.Session(
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],)
+
+        url = 's3://smart-open-py37-benchmark-results/test.txt'
+        with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
+            bytes_written = fout.write(b'hello world!')
+            print(bytes_written)
+
+        ### Buffer writing
+        tp = {'min_part_size': 5 * 1024**2}
+        with open('s3://bucket/key', 'w', transport_params=tp) as fout:
+            fout.write(lots_of_data)            
+
+    """
+    import concurrent.futures
+    import time, functools, json, pyjson5
+    from smart_open import open
+
+    ### Global Session, Shared across Threads
+    session = boto3.Session(aws_access_key_id='', aws_secret_access_key='',)   
+    client  = session.client('s3')
+
+    def json_load(s3_path, bucket_name=path_s3):
+        s3_path = f"s3://{bucket_name}/{s3_path}"
+        ### Thread Safe function to parallelize
+        with open(s3_path, mode='r', transport_params={'client': client} ) as f:
+            file_content = f.read()
+        try:
+            ddict = json.loads(file_content)
+        except:
+            # Use another json parser which supports JSON5 5 standard
+            ddict = pyjson5.loads(file_content)
+            
+        return (s3_path, ddict)  
+
+    # get all json files from s3 bucket
+    input_list = s3_get_filelist(path_s3, suffix= suffix)
+
+    # list to collect all file contents
+    res_list = []
+
+    # use concurrent futures and thread pool exector with 5 cores and map the json_load function
+    with concurrent.futures.ThreadPoolExecutor(npool) as executor:
+        future = executor.map(json_load, input_list, timeout=timeout)
+
+    try:
+        # iterate the results from map performed in separate threads, wait a limited time
+        for result in future:
+            res_list.append(result)
+
+    except TimeoutError:
+        log('file taking too long to download. please change the current exectution timeout')
+
+    return res_list
+
+
+
 def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
                  drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
     """  Read file in parallel from disk, Support high number of files.
@@ -312,105 +382,6 @@ def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,
     if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
     return dfall
 
-
-
-def s3_json_topandas(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
-    """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
-    Doc::
-
-         Return pandas dataframe
-
-        https://stackoverflow.com/questions/55731954/read-json-file-with-python-from-s3-into-sagemaker-notebook
-        s3 = boto3.resource('s3')
-        my_bucket_source = s3.Bucket('bucket_source')
-
-        for obj in my_bucket_source.objects.filter(Prefix=prefix_source):
-                data_location = 's3://{}/{}'.format(obj.bucket_name, obj.key)
-                data = pd.read_json(data_location, lines = True )
-                display(data.head())
-                
-        https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-        https://github.com/RaRe-Technologies/smart_open
-        
-        ### stream content *into* S3 (write mode) using a custom session
-        import os, boto3
-        session = boto3.Session(
-            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-        )
-        url = 's3://smart-open-py37-benchmark-results/test.txt'
-        with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
-            bytes_written = fout.write(b'hello world!')
-            log(bytes_written)
-
-        ### Buffer writing
-        tp = {'min_part_size': 5 * 1024**2}
-        with open('s3://bucket/key', 'w', transport_params=tp) as fout:
-            fout.write(lots_of_data)            
-
-    """
-    import time, functools, json, pyjson5
-    from smart_open import open
-
-    ### Global Session, Shared across Threads
-    session = boto3.Session()   
-    client  = session.client('s3')
-
-    def json_load(s3_path, verbose=True):
-        if len(s3_path) == 0: 
-            return None
-        else:
-            s3_path = s3_path.pop()
-        
-        ### Thread Safe function to parallelize
-        with open(s3_path, mode='r', transport_params={'client': client} ) as f:
-            #file_content = f.read()
-            df = pd.read_json(f, lines=True) 
-            
-        return df
-
-
-    if input_fixed is not None:
-        fun_async = functools.partial(json_load, **input_fixed)
-    else :
-        fun_async= json_load    
-
-    input_list = s3_get_filelist(path_s3, suffix= suffix)
-
-
-    #### Input xi #######################################
-    xi_list = [[] for t in range(npool)]
-    for i, xi in enumerate(input_list):
-        jj = i % npool
-        path_to_s3_object = f"s3://{path_s3}/{xi}"
-        xi_list[jj].append( path_to_s3_object )
-
-    if verbose:
-        for j in range(len(xi_list)):
-            log('thread ', j, len(xi_list[j]))
-        # time.sleep(6)
-
-    #### Pool execute ###################################
-    import multiprocessing as mp
-    # pool     = multiprocessing.Pool(processes=3)
-    pool = mp.pool.ThreadPool(processes=npool)
-    job_list = []
-    for i in range(npool):
-        time.sleep(start_delay)
-        log('starts', i)
-        job_list.append(pool.apply_async(fun_async, (xi_list[i],) ))
-        if verbose: log(i, xi_list[i])
-
-    res_list = []
-    for i in range(len(job_list)):
-        job_result = job_list[i].get()
-        if job_result is not None:
-            res_list.append(job_result)
-        log(i, 'job finished')
-
-    pool.close(); pool.join(); pool = None
-    log('n_processed', len(res_list))
-    return res_list
 
 
 
