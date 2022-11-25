@@ -74,7 +74,17 @@ def test_s3json():
     test_bucket = "coretics"
     log(f"Testing on Bucket {test_bucket}")
     res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
+    assert len(res)>0, "empty"
     log(res)
+
+
+
+def test3(self):
+    bucket_name = "coretics"
+    log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers '{n_workers}' ...\n\n")
+    res_data = s3_read_json(path_s3 = bucket_name, n_workers = 3)
+    assert len(res_data)>0, "empty"
+
 
 
 
