@@ -43,14 +43,17 @@ def test_all():
     """
     """
     test1()
+    test_s3json()
 
 
 def test1():
     """function test1
 
-    """    
-    data = glob_s3(bucket_name="", path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
+    """
+    bucket= "followtheleader"    
+    data = glob_s3(bucket_name=bucket, path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
     log(json.dumps(data, indent=2))
+
 
 def test_s3json():
     # URL: "https://buckets.grayhatwarfare.com/files?bucket=134"
