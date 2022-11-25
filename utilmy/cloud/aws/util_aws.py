@@ -35,7 +35,7 @@ def help():
     """function help"""
     from utilmy import help_create
     ss = help_create(__file__)
-    print(ss)
+    log(ss)
 
 
 ####################################################################################
@@ -50,24 +50,26 @@ def test1():
 
     """    
     data = glob_s3(bucket_name="", path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
-    print(json.dumps(data, indent=2))
+    log(json.dumps(data, indent=2))
 
 def test_s3json():
     # URL: "https://buckets.grayhatwarfare.com/files?bucket=134"
     test_bucket= "followtheleader"
-    print(f"Testing on Bucket {test_bucket}")
+    log(f"Testing on Bucket {test_bucket}")
     res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
-    print("Result:")
-    print(res)
+    log("Result:")
+    log(res)
     
-    print()
+    log()
     
     # URL: "https://buckets.grayhatwarfare.com/files?bucket=113"
     test_bucket = "coretics"
-    print(f"Testing on Bucket {test_bucket}")
+    log(f"Testing on Bucket {test_bucket}")
     res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
-    print(res)
-    
+    log(res)
+
+
+
 ####################################################################################
 def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     """  Run Multi-processors load using smart_open
@@ -125,7 +127,7 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         url = 's3://smart-open-py37-benchmark-results/test.txt'
         with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
             bytes_written = fout.write(b'hello world!')
-            print(bytes_written)
+            log(bytes_written)
 
         ### Buffer writing
         tp = {'min_part_size': 5 * 1024**2}
@@ -221,7 +223,7 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         url = 's3://smart-open-py37-benchmark-results/test.txt'
         with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
             bytes_written = fout.write(b'hello world!')
-            print(bytes_written)
+            log(bytes_written)
 
         ### Buffer writing
         tp = {'min_part_size': 5 * 1024**2}
@@ -375,7 +377,7 @@ def s3_get_filelist_cmd(parent_cmd: list) -> list:
             # Run the cmd and add the result to files list
             files_list.extend(s3_get_filelist_cmd(recursive_cmd))
     else:
-        print("Oh No. An Error Occurred!")
+        log("Oh No. An Error Occurred!")
         raise Exception(err.decode("utf8"))
 
     # Return files_list which contains all data for this
@@ -452,7 +454,7 @@ def glob_s3(path: str, recursive: bool = True,
         if xi.get("LastModified", None):  xlist += (xi['LastModified'],)
         if xi.get("Output", None):        xlist += (xi['Output'],)
         flist.append(xlist)
-      print(flist)
+      log(flist)
     else :  
       return files_data
 
@@ -513,12 +515,12 @@ def s3_load_file(s3_path: str,
             if this_line_decoded:
                 # In case you want to have stdout as well
                 # If removed there will be no indication that we are still receiving the data
-                print(this_line_decoded)
+                log(this_line_decoded)
                 file_data = file_data + "\n" + this_line_decoded
     else:
         for this_bit in iter(proc.stdout.read, b''):
             file_data = bytes()
-            print(this_bit, sep="", end="")
+            log(this_bit, sep="", end="")
             file_data = file_data + this_bit
 
     # If the process returncode is None and we reach here, start polling for returncode until it exists
