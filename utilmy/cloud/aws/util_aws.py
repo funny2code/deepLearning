@@ -59,6 +59,48 @@ def test1():
     data = glob_s3(bucket_name=bucket, path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
     log(json.dumps(data, indent=2))
 
+def test2():
+    def print_df_json(s3_url, df):
+        print(f"S3 object with url {s3_url}")
+        print("Dataframe:")
+        print(df)
+        print()
+    
+    def s3_get_filelist(BUCKET):
+        """
+            Get all json files in a S3 bucket
+        """
+        s3 = boto3.resource('s3')
+
+        my_bucket = s3.Bucket(BUCKET)
+        s3_objects = []
+        for file in my_bucket.objects.all():
+            # filter only json files
+            if file.key.lower().find(".json") != -1:
+                s3_objects.append(file.key)
+        return s3_objects    
+    """
+    # Test on single json file that is normal
+    s3_object_normal = "s3://followtheleader/bower_components/jquery/bower.json"
+    res = load_json_data_frame(s3_object_normal)
+    print_df_json(s3_object_normal, res)
+    # Test with single json file containing conments
+    s3_object_with_comments = "s3://followtheleader/bower_components/jquery/src/.eslintrc.json"
+    res = load_json_data_frame(s3_object_with_comments)
+    print_df_json(s3_object_with_comments, res)
+    """
+    
+    # Get all json file in a s3 bucket and test against them
+    bucket= "followtheleader"
+    s3_file_names = s3_get_filelist(bucket)
+    print(s3_file_names)
+    
+    for file_name in s3_file_names:
+        s3_obj_url = f"s3://{bucket}/{file_name}"
+        res = load_json_data_frame(s3_obj_url)
+        print_df_json(s3_obj_url, res)
+        print()
+
 
 def test_s3json():
     # URL: "https://buckets.grayhatwarfare.com/files?bucket=134"
@@ -746,8 +788,38 @@ def s3_load_file(s3_path: str,
     elif proc.returncode == 0:
         return file_data
 
+def load_json_data_frame(s3_path, verbose=True):
+    from smart_open import open
+    import pandas as pd
+    import boto3
+    
+    def parse_json(j, verbose=True):
+        # Parse json string
+        import json, pyjson5
+        
+        if verbose: print("Loading JSON file ..")
 
+        try:
+            d = json.loads(j)
+            if verbose: print("json format: standard")
+            return d
+        except:
+            d = pyjson5.loads(j)
+            if verbose: print("json format: JSON5")
+            return d
 
+    session = boto3.Session()
+    client = session.client("s3")
+
+    with open(s3_path, "r") as f:
+        file_content = f.read()
+        json_data = parse_json(file_content)
+        # https://stackoverflow.com/questions/40442014/python-pandas-valueerror-arrays-must-be-all-same-length
+        # To avoid error when arrays not with same length
+        df = pd.DataFrame.from_dict(json_data, orient="index")
+        df = df.transpose()
+    
+    return df
 
 
 
