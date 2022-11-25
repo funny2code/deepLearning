@@ -263,7 +263,7 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
         try :
             with open(s3_path, mode='r', transport_params={'client': client} ) as f:
                 #file_content = f.read()
-                dfi = pd.read_json(f, lines=True) 
+                dfi = pd_reader_obj(f, lines=True) 
 
         except Exception as e :
           log(e)
