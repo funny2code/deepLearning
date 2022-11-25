@@ -2,6 +2,8 @@
 """ Utils for AWS
 Docs::
 
+    https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
+
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
 
 
@@ -233,12 +235,11 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
     file_list = s3_get_filelist(path_glob, suffix= suffix)
     n_file    = len(file_list)
 
-    readers = {
-            ".pkl"     : pd.read_pickle, ".parquet" : pd.read_parquet,
-            ".tsv"     : pd.read_csv, ".csv"     : pd.read_csv, ".txt"     : pd.read_csv, ".zip"     : pd.read_csv,
-            ".gzip"    : pd.read_csv, ".gz"      : pd.read_csv,
+    readers = { ".pkl"     : pd.read_pickle, ".parquet" : pd.read_parquet,
+                ".tsv"     : pd.read_csv, ".csv"     : pd.read_csv, ".txt"     : pd.read_csv, ".zip"     : pd.read_csv,
+                ".gzip"    : pd.read_csv, ".gz"      : pd.read_csv,
      }
-
+     
     #### Pool count  ###############################################
     if n_pool < 1 :  n_pool = 1
     if n_file <= 0:  m_job  = 0
@@ -260,8 +261,9 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
         pd_reader_obj = readers.get(ext, None)
         try :
             with open(s3_path, mode='r', transport_params={'client': client} ) as f:
-                #file_content = f.read()
-                dfi = pd_reader_obj(f, lines=True) 
+                # file_content = f.read()
+                # dfi = pd_reader_obj(f)
+                dfi = pd.read_json(f, lines=True) 
 
         except Exception as e :
           log(e)
