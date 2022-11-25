@@ -224,7 +224,6 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
     def log(*s, **kw):
         print(*s, flush=True, **kw)
 
-
     n_pool = npool if isinstance(npool, int)  else n_pool ## alias
 
     ### Global Session, Shared across Threads

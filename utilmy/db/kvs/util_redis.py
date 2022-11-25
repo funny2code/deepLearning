@@ -134,9 +134,11 @@ class redisClient:
 
         ntotal = 0  
         for k in range(n_batch):
-            i = 0
-            while i < batch_size and k*batch_size+i < n:   
-                self.pipe.hset(i, key_values[k*batch_size+ i][0], key_values[k*batch_size + i][1] )
+            for i in range(batch_size):
+                ix  = k*batch_size + i 
+                if ix >= n: break 
+                key,val = key_values[ix]   
+                self.pipe.hset(i, key, val )
                 i += 1
 
             flag = True 
@@ -170,7 +172,7 @@ class redisClient:
         for k in range(n_batch):
             for i in range(batch_size):
                 ix  = k*batch_size + i
-                if ix > n : break
+                if ix >= n : break
                 try :
                    pipe.hget(i, keys[ix])
                 except Exception as e :
