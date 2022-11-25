@@ -212,12 +212,12 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
 
 
-def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
+def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
                  drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
     """  Read file in parallel from disk, Support high number of files.
     Doc::
 
-        path_glob: list of pattern, or sep by ";"
+        path_s3: 
         return: pd.DataFrame
     """
     import glob, gc,  pandas as pd, os
@@ -232,7 +232,7 @@ def s3_pd_read_file2(path_glob="*.pkl", suffix=".json", ignore_index=True,  cols
     session = boto3.Session()   
     client  = session.client('s3')
 
-    file_list = s3_get_filelist(path_glob, suffix= suffix)
+    file_list = s3_get_filelist(path_s3, suffix= suffix)
     n_file    = len(file_list)
 
     readers = { ".pkl"     : pd.read_pickle, ".parquet" : pd.read_parquet,
