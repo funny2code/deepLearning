@@ -66,9 +66,7 @@ def test_s3json():
     log(f"Testing on Bucket {test_bucket}")
     res = s3_json_read2(path_s3=test_bucket, npool=5, start_delay=0.1, verbose=True, input_fixed=None, suffix=".json", )
     log("Result:")
-    log(res)
-    
-    log()
+    log(res, "\n")    
     
     # URL: "https://buckets.grayhatwarfare.com/files?bucket=113"
     test_bucket = "coretics"
@@ -78,8 +76,7 @@ def test_s3json():
     log(res)
 
 
-
-def test3(self):
+def test3():
     bucket_name = "coretics"
     log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers '{n_workers}' ...\n\n")
     res_data = s3_read_json(path_s3 = bucket_name, n_workers = 3)
