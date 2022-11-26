@@ -8,6 +8,7 @@ Docs::
 """
 import time, random, string
 from dataclasses import dataclass
+from box import Box
 import redis
 from redis.cluster import RedisCluster, ClusterNode
 
@@ -19,7 +20,7 @@ from utilmy import log
 def test_all():
    test_connection()
    test_getput()
-   test_getputmulti()
+   test_getput2()
 
 
 def test_connection():
@@ -45,11 +46,7 @@ def test_getput():
     assert res == 'bar'
 
 
-def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-
-
-def test_getputmulti():
+def test_getput2():
     client = redisClient(host='localhost', port=6379, db=0)
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3']]
     keys = ['a', 'b', 'c']
@@ -66,16 +63,17 @@ def test_getputmulti():
 def test_cluster1():
     # test connection failed
     try:
-        config = RedisClusterConfig('localssss', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+        config = {'host': 'localhost', 'port': 6379, 'node_ports': [6379, 6380, 6381, 6382, 6383, 6384], 'password': 'bitnami'}
         client = RedisClusterClient(config)
         assert False
     except redis.exceptions.RedisClusterException:
         assert True
 
+
 def test_cluster2():
     # test connection success
     try:
-        config = RedisClusterConfig('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+        config = {'host': 'localhost', 'port': 6379, 'node_ports': [6379, 6380, 6381, 6382, 6383, 6384], 'password': 'bitnami'}
         client = RedisClusterClient(config)
         assert True
     except redis.exceptions.RedisClusterException:
@@ -83,7 +81,8 @@ def test_cluster2():
 
 
 def test_cluster3():
-    config = RedisClusterConfig('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    config = {'host': 'localhost', 'port': 6379, 'node_ports': [6379, 6380, 6381, 6382, 6383, 6384], 'password': 'bitnami'}
+
     client = RedisClusterClient(config)
     client.put('foo', 'bar')
     res = client.get('foo').decode('utf8')
@@ -105,16 +104,10 @@ def test_cluster3():
 
 #################################################################################
 #################################################################################
-@dataclass
-class RedisClusterConfig:
-    host: str
-    port: str | int
-    node_ports: list()
-    password: str
-
-
 class RedisClusterClient:
-    def __init__(self, clusterConfig : RedisClusterConfig, read_from_replicas=True, encoding='utf-8', decode_response=True):
+    def __init__(self, clusterConfig : dict, read_from_replicas=True, encoding='utf-8', decode_response=True):
+
+        clusterConfig = Box(clusterConfig)
         nodes = list()
         for port in clusterConfig.node_ports:
             nodes.append(ClusterNode(host=clusterConfig.host, port=port))
@@ -357,6 +350,14 @@ class RedisQueries(object):
             if len(vals) > 1:
                 siid_to_title[siid] = vals[-1]
         return siid_to_title
+
+
+
+
+#################################################################################
+def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
 
 class ConnectionFailed(Exception):
 
