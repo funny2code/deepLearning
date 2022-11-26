@@ -144,7 +144,6 @@ def test_logging():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'logging'}, indent=4))
 
-    # import util_log
     from utilmy.configs.logs import util_log
 
     import importlib
@@ -242,7 +241,6 @@ def test5():
 
     import importlib
     import utilmy as uu
-    # import util_log
     from utilmy.configs.logs import util_log
     drepo, dirtmp = uu.dir_testinfo()
 
