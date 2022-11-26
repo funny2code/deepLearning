@@ -11,11 +11,16 @@ def test_all():
     test1()
     test2()
     test_logging()
+    test4()
+    test5()
 
 
 
 def test1():
     """function test1.
+
+    Testing the functions log3, log2, log, logw, loge, logc, logr
+
     """
     import io, sys
     # These libraries are for testing output.
@@ -103,6 +108,9 @@ def test1():
 
 def test2():
     """function test2.
+
+    Testing the functions logger_setup, logr, loge
+
     """
     os.environ['log_verbosity']='20'
     os.environ['log_type']='loguru'
@@ -138,6 +146,11 @@ def test2():
 
 
 def test_logging():
+    """function test_logging.
+
+    Testing the functions in util_log.py
+
+    """
     os.environ['log_verbosity']='10'
     os.environ['log_type']='logging'
 
@@ -238,6 +251,11 @@ def test4():
     assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
     
 def test5():
+    """ function test5.
+    
+    Testing the functions in util_log.py.
+    
+    """
 
     import importlib
     import utilmy as uu
