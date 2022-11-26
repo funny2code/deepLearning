@@ -2,6 +2,8 @@
 """ Utils for AWS
 Docs::
 
+    pip install awswrangler
+
     https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
 
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
@@ -17,7 +19,7 @@ Docs::
    https://pypi.org/project/smart-open/6.2.0/
    
    
-   
+   https://github.com/aws/aws-sdk-pandas/search?q=read_json
 
 
 """
@@ -58,6 +60,7 @@ def test1():
     bucket= "followtheleader"    
     data = glob_s3(bucket_name=bucket, path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
     log(json.dumps(data, indent=2))
+
 
 def test2():
     def print_df_json(s3_url, df):
@@ -124,8 +127,7 @@ def test3():
     res_data = s3_read_json(path_s3 = bucket_name, n_workers = 3)
     assert len(res_data)>0, "empty"
 
-
-def performance_test():
+def test_bench():
     """
         Performance/Speed test among 
         s3_read_json, s3_json_read2, s3_json_read3 
@@ -189,8 +191,74 @@ def performance_test():
     print("Duration wise best preference: ", min(duration_wise, key=duration_wise.get))    
 
 
+def test_topandas():
+    """
+        https://gist.github.com/uhho/a1490ae2abd112b556dcd539750aa151
 
-####################################################################################
+
+    """
+    def s3_to_pandas(client, bucket, key, header=None):
+        # get key using boto3 client
+        obj = client.get_object(Bucket=bucket, Key=key)
+        gz = gzip.GzipFile(fileobj=obj['Body'])
+        
+        # load stream directly to DF
+        return pd.read_csv(gz, header=header, dtype=str)
+
+
+    def s3_to_pandas_with_processing(client, bucket, key, header=None):
+        
+        # get key using boto3 client
+        obj = client.get_object(Bucket=bucket, Key=key)
+        gz = gzip.GzipFile(fileobj=obj['Body'])
+
+        # replace some characters in incomming stream and load it to DF
+        lines = "\n".join([line.replace('?', ' ') for line in gz.read().decode('utf-8').split('\n')])
+        return pd.read_csv(io.StringIO(lines), header=None, dtype=str)
+
+    def pandas_to_s3(df, client, bucket, key):
+
+        # write DF to string stream
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False)
+
+        # reset stream position
+        csv_buffer.seek(0)
+        # create binary stream
+        gz_buffer = io.BytesIO()
+
+        # compress string stream using gzip
+        with gzip.GzipFile(mode='w', fileobj=gz_buffer) as gz_file:
+            gz_file.write(bytes(csv_buffer.getvalue(), 'utf-8'))
+            
+        # write stream to S3
+        obj = client.put_object(Bucket=bucket, Key=key, Body=gz_buffer.getvalue())
+        
+
+
+##### List of JSON ######################################################################################
+def s3_get_filelist(path_s3="/mybucket1/mybucket2/", suffix=".json"):
+    """     # Get all json files in a S3 bucket
+    Docs::
+    
+        path_s3_bucket (str, optional): _description_. Defaults to "/mybucket1/mybucket2/".
+        suffix (str, optional): _description_. Defaults to ".json".
+
+    Returns:  List of S3 filename
+
+    """
+    s3         = boto3.resource('s3')
+    my_bucket  = s3.Bucket(path_s3)
+    s3_objects = []
+    for file in my_bucket.objects.all():
+        # filter only json files
+        if file.key.lower().find(suffix) != -1:
+            fi =  f"s3://{path_s3}/{file.key}"
+            s3_objects.append(fi)
+    return s3_objects
+
+
+##### s3 to JSON ######################################################################################
 def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     """  Run Multi-processors load using smart_open
     Docs::
@@ -211,21 +279,11 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
 
     res_data = {}
     for key, content in s3.iter_bucket(path_s3, workers=n_workers, accept_key=lambda key: key.endswith(suffix)):
-        res_data[key] =  json.loads(content)
+        res_data[path_s3 + "/" + key] =  json.loads(content)
 
     return res_data
 
 
-def s3_get_filelist(path_s3_bucket="/mybucket1/mybucket2/", suffix=".json"):
-    # Get all json files in a S3 bucket
-    s3         = boto3.resource('s3')
-    my_bucket  = s3.Bucket(path_s3_bucket)
-    s3_objects = []
-    for file in my_bucket.objects.all():
-        # filter only json files
-        if file.key.lower().find(suffix) != -1:
-            s3_objects.append(file.key)
-    return s3_objects
 
 
 def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
@@ -292,7 +350,8 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
     xi_list = [[] for t in range(npool)]
     for i, xi in enumerate(input_list):
         jj = i % npool
-        path_to_s3_object = f"s3://{path_s3}/{xi}"
+        path_to_s3_object = xi
+        #path_to_s3_object = f"s3://{path_s3}/{xi}"
         xi_list[jj].append( path_to_s3_object )
 
     if verbose:
@@ -394,7 +453,46 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
 
 
-def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
+
+
+
+
+####  S3 --> Pandas ################################################################################
+def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=True,  **kw)->pd.DataFrame:
+    """  Read file in parallel from S3, Support high number of files.
+    Doc::
+
+            path (Union[str, List[str]]) – S3 prefix (accepts Unix shell-style wildcards) (e.g. s3://bucket/prefix) or list of S3 objects paths (e.g. [s3://bucket/key0, s3://bucket/key1]).
+            path_suffix (Union[str, List[str], None]) – Suffix or List of suffixes to be read (e.g. [“.json”]). If None, will try to read all files. (default)
+            path_ignore_suffix (Union[str, List[str], None]) – Suffix or List of suffixes for S3 keys to be ignored.(e.g. [“_SUCCESS”]). If None, will try to read all files. (default)
+            version_id (Optional[Union[str, Dict[str, str]]]) – Version id of the object or mapping of object path to version id. (e.g. {‘s3://bucket/key0’: ‘121212’, ‘s3://bucket/key1’: ‘343434’})
+            ignore_empty (bool) – Ignore files with 0 bytes.
+            orient (str) – Same as Pandas: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_json.html
+            use_threads (Union[bool, int]) – True to enable concurrent requests, False to disable multiple threads. If enabled os.cpu_count() will be used as the max number of threads. If integer is provided, specified number is used.
+            last_modified_begin – Filter the s3 files by the Last modified date of the object. The filter is applied only after list all s3 files.
+            last_modified_end (datetime, optional) – Filter the s3 files by the Last modified date of the object. The filter is applied only after list all s3 files.
+            boto3_session (boto3.Session(), optional) – Boto3 Session. The default boto3 session will be used if boto3_session receive None.
+            s3_additional_kwargs (Optional[Dict[str, Any]]) – Forward to botocore requests, only “SSECustomerAlgorithm” and “SSECustomerKey” arguments will be considered.
+            chunksize (int, optional) – If specified, return an generator where chunksize is the number of rows to include in each chunk.
+            dataset (bool) – If True read a JSON dataset instead of simple file(s) loading all the related partitions as columns. If True, the lines=True will be assumed by default.
+            partition_filter (Optional[Callable[[Dict[str, str]], bool]]) – Callback Function filters to apply on PARTITION columns (PUSH-DOWN filter). This function MUST receive a single argument (Dict[str, str]) where keys are partitions names and values are partitions values. Partitions values will be always strings extracted from S3. This function MUST return a bool, True to read the partition or False to ignore it. Ignored if dataset=False. E.g lambda x: True if x["year"] == "2020" and x["month"] == "1" else False https://aws-sdk-pandas.readthedocs.io/en/2.17.0/tutorials/023%20-%20Flexible%20Partitions%20Filter.html
+            pandas_kwargs – KEYWORD arguments forwarded to pandas.read_json(). You can NOT pass pandas_kwargs explicit, just add valid Pandas arguments in the function call and awswrangler will accept it. e.g. wr.s3.read_json(‘s3://bucket/prefix/’, lines=True, keep_default_dates=True) https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_json.html
+
+            Returns
+            Pandas DataFrame or a Generator in case of chunksize != None.
+
+            Return type
+            Union[pandas.DataFrame, Generator[pandas.DataFrame, None, None]]
+
+    """
+    import gc,  pandas as pd
+    import awswrangler as wr
+    dfall         = wr.s3.read_json(path=path_s3, path_suffix=suffix, use_thread=npool, dataset=dataset, **kw)
+    return dfall
+
+
+
+def s3_pd_read_json2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
                  drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
     """  Read file in parallel from disk, Support high number of files.
     Doc::
@@ -491,8 +589,41 @@ def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,
 
 
 
+def load_json_data_frame(s3_path, verbose=True):
+    from smart_open import open
+    
+    def parse_json(j, verbose=True):
+        # Parse json string
+        import json, pyjson5
+        
+        if verbose: print("Loading JSON file ..")
 
-def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
+        try:
+            d = json.loads(j)
+            if verbose: print("json format: standard")
+            return d
+        except:
+            d = pyjson5.loads(j)
+            if verbose: print("json format: JSON5")
+            return d
+
+    session = boto3.Session()
+    client = session.client("s3")
+
+    with open(s3_path, "r") as f:
+        file_content = f.read()
+        json_data = parse_json(file_content)
+        # https://stackoverflow.com/questions/40442014/python-pandas-valueerror-arrays-must-be-all-same-length
+        # To avoid error when arrays not with same length
+        df = pd.DataFrame.from_dict(json_data, orient="index")
+        df = df.transpose()
+    
+    return df
+
+
+
+#####################################################################################################
+def s3_json_read2bis(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
     """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
     Doc::
 
@@ -747,7 +878,6 @@ def glob_s3(path: str, recursive: bool = True,
       return files_data
 
 
-
 def s3_load_file(s3_path: str, 
                  extra_params: list = None, 
                  return_stream: bool = False, 
@@ -821,39 +951,6 @@ def s3_load_file(s3_path: str,
         raise Exception(f"Error occurred with exit code {proc.returncode}\n{str(err.decode('utf8'))}")
     elif proc.returncode == 0:
         return file_data
-
-def load_json_data_frame(s3_path, verbose=True):
-    from smart_open import open
-    import pandas as pd
-    import boto3
-    
-    def parse_json(j, verbose=True):
-        # Parse json string
-        import json, pyjson5
-        
-        if verbose: print("Loading JSON file ..")
-
-        try:
-            d = json.loads(j)
-            if verbose: print("json format: standard")
-            return d
-        except:
-            d = pyjson5.loads(j)
-            if verbose: print("json format: JSON5")
-            return d
-
-    session = boto3.Session()
-    client = session.client("s3")
-
-    with open(s3_path, "r") as f:
-        file_content = f.read()
-        json_data = parse_json(file_content)
-        # https://stackoverflow.com/questions/40442014/python-pandas-valueerror-arrays-must-be-all-same-length
-        # To avoid error when arrays not with same length
-        df = pd.DataFrame.from_dict(json_data, orient="index")
-        df = df.transpose()
-    
-    return df
 
 
 
