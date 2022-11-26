@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
 """ Utils for AWS
 Docs::
-
     pip install awswrangler
-
     https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
-
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
-
-
    pip install ijson streAMING JSON
    https://pythonspeed.com/articles/json-memory-streaming/
-
    ### Read from S3
    https://stackoverflow.com/questions/45082832/how-to-read-partitioned-parquet-files-from-s3-using-pyarrow-in-python
    
@@ -20,8 +14,6 @@ Docs::
    
    
    https://github.com/aws/aws-sdk-pandas/search?q=read_json
-
-
 """
 import os, sys, time, datetime,inspect,  yaml, gc, pandas as pd, numpy as np, glob
 from typing import Union, IO
@@ -55,7 +47,6 @@ def test_all():
 
 def test1():
     """function test1
-
     """
     bucket= "followtheleader"    
     data = glob_s3(bucket_name=bucket, path="", recursive=True, max_items_per_api_call="1000", extra_params=[])
@@ -123,79 +114,14 @@ def test_s3json():
 
 def test3():
     bucket_name = "coretics"
-    log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers 3 ...\n\n")
+    log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers '{n_workers}' ...\n\n")
     res_data = s3_read_json(path_s3 = bucket_name, n_workers = 3)
     assert len(res_data)>0, "empty"
-
-def test_bench():
-    """
-        Performance/Speed test among 
-        s3_read_json, s3_json_read2, s3_json_read3 
-        functions
-    """
-    from pyinstrument import Profiler
-    import re 
-
-    bucket_name = "coretics"
-    
-    print(f"Bucket Name: {bucket_name}")
-
-    def extract_performance_profile(func):
-        with Profiler() as p:
-            func()
-        output = p.output_text()
-        samples = float(re.findall(r"Samples:  (\d*[.]?\d*)", output)[0])
-        duration = float(re.findall(r"Duration: (\d*[.]?\d*)", output)[0])
-        cpu_time = float(re.findall(r"CPU time: (\d*[.]?\d*)", output)[0])
-        return {
-            "samples" : samples,
-            "duration" : duration,
-            "cpu_time" : cpu_time
-        }
-    
-    profile1 = profile2 = profile3 = {
-            "samples"  : None,
-            "duration" : 999999,
-            "cpu_time" : 999999
-        }
-
-    try:
-        profile1 = extract_performance_profile(lambda: s3_read_json(path_s3 = bucket_name, n_workers = 3))
-    except Exception as e:
-        print(f"Error in performance test for 's3_read_json': {e}")    
-    try:
-        profile2 = extract_performance_profile(lambda: s3_json_read2(path_s3 = bucket_name))
-    except Exception as e:
-        print(f"Error in performance test for 's3_json_read2': {e}")
-    try:
-        profile3 = extract_performance_profile(lambda: s3_json_read3(path_s3 = bucket_name))
-    except Exception as e:
-        print(f"Error in performance test for 's3_json_read3': {e}")
-
-    print(f"\n\nPerformance of s3_read_json : \n{profile1}")
-    print(f"Performance of s3_json_read2 : \n{profile2}")
-    print(f"Performance of s3_json_read3 : \n{profile3}")
-
-    cpu_wise = {
-        "s3_read_json" : profile1.get("cpu_time"),
-        "s3_json_read2" : profile2.get("cpu_time"),
-        "s3_json_read3" : profile3.get("cpu_time")
-    }
-    print("CPU usage wise best preference: ", min(cpu_wise, key=cpu_wise.get))
-
-    duration_wise = {
-        "s3_read_json" : profile1.get("duration"),
-        "s3_json_read2" : profile2.get("duration"),
-        "s3_json_read3" : profile3.get("duration")
-    }
-    print("Duration wise best preference: ", min(duration_wise, key=duration_wise.get))    
 
 
 def test_topandas():
     """
         https://gist.github.com/uhho/a1490ae2abd112b556dcd539750aa151
-
-
     """
     def s3_to_pandas(client, bucket, key, header=None):
         # get key using boto3 client
@@ -243,9 +169,7 @@ def s3_get_filelist(path_s3="/mybucket1/mybucket2/", suffix=".json"):
     
         path_s3_bucket (str, optional): _description_. Defaults to "/mybucket1/mybucket2/".
         suffix (str, optional): _description_. Defaults to ".json".
-
     Returns:  List of S3 filename
-
     """
     s3         = boto3.resource('s3')
     my_bucket  = s3.Bucket(path_s3)
@@ -262,10 +186,8 @@ def s3_get_filelist(path_s3="/mybucket1/mybucket2/", suffix=".json"):
 def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
     """  Run Multi-processors load using smart_open
     Docs::
-
          pip install "smart_open[s3]==6.2.0"
          https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-
          If run on Windows operating system, please move freeze_support to the main function
          As suggested here https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     """
@@ -289,11 +211,8 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
 def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
     """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
     Doc::
-
          Return list of tuple  : (S3_path, ddict )
-
         https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-
         https://github.com/RaRe-Technologies/smart_open
         
         ### stream content *into* S3 (write mode) using a custom session
@@ -306,12 +225,10 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
             bytes_written = fout.write(b'hello world!')
             log(bytes_written)
-
         ### Buffer writing
         tp = {'min_part_size': 5 * 1024**2}
         with open('s3://bucket/key', 'w', transport_params=tp) as fout:
             fout.write(lots_of_data)            
-
     """
     import time, functools, json, pyjson5
     from smart_open import open
@@ -386,11 +303,8 @@ def s3_json_read2(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json", timeout=60,  **kw):
     """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
     Doc::
-
         Return list of tuple  : (S3_path, ddict )
-
         https://github.com/RaRe-Technoprinties/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-
         https://github.com/RaRe-Technoprinties/smart_open
         
         ### stream content *into* S3 (write mode) using a custom session
@@ -398,17 +312,14 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
         session = boto3.Session(
             aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
             aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],)
-
         url = 's3://smart-open-py37-benchmark-results/test.txt'
         with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
             bytes_written = fout.write(b'hello world!')
             print(bytes_written)
-
         ### Buffer writing
         tp = {'min_part_size': 5 * 1024**2}
         with open('s3://bucket/key', 'w', transport_params=tp) as fout:
             fout.write(lots_of_data)            
-
     """
     import concurrent.futures
     import time, functools, json, pyjson5
@@ -461,7 +372,6 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=True,  **kw)->pd.DataFrame:
     """  Read file in parallel from S3, Support high number of files.
     Doc::
-
             path (Union[str, List[str]]) – S3 prefix (accepts Unix shell-style wildcards) (e.g. s3://bucket/prefix) or list of S3 objects paths (e.g. [s3://bucket/key0, s3://bucket/key1]).
             path_suffix (Union[str, List[str], None]) – Suffix or List of suffixes to be read (e.g. [“.json”]). If None, will try to read all files. (default)
             path_ignore_suffix (Union[str, List[str], None]) – Suffix or List of suffixes for S3 keys to be ignored.(e.g. [“_SUCCESS”]). If None, will try to read all files. (default)
@@ -477,14 +387,12 @@ def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=Tru
             dataset (bool) – If True read a JSON dataset instead of simple file(s) loading all the related partitions as columns. If True, the lines=True will be assumed by default.
             partition_filter (Optional[Callable[[Dict[str, str]], bool]]) – Callback Function filters to apply on PARTITION columns (PUSH-DOWN filter). This function MUST receive a single argument (Dict[str, str]) where keys are partitions names and values are partitions values. Partitions values will be always strings extracted from S3. This function MUST return a bool, True to read the partition or False to ignore it. Ignored if dataset=False. E.g lambda x: True if x["year"] == "2020" and x["month"] == "1" else False https://aws-sdk-pandas.readthedocs.io/en/2.17.0/tutorials/023%20-%20Flexible%20Partitions%20Filter.html
             pandas_kwargs – KEYWORD arguments forwarded to pandas.read_json(). You can NOT pass pandas_kwargs explicit, just add valid Pandas arguments in the function call and awswrangler will accept it. e.g. wr.s3.read_json(‘s3://bucket/prefix/’, lines=True, keep_default_dates=True) https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_json.html
-
             Returns
             Pandas DataFrame or a Generator in case of chunksize != None.
-
             Return type
             Union[pandas.DataFrame, Generator[pandas.DataFrame, None, None]]
-
     """
+    import gc,  pandas as pd
     import awswrangler as wr
     dfall         = wr.s3.read_json(path=path_s3, path_suffix=suffix, use_thread=npool, dataset=dataset, **kw)
     return dfall
@@ -495,7 +403,6 @@ def s3_pd_read_json2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,
                  drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
     """  Read file in parallel from disk, Support high number of files.
     Doc::
-
         path_s3: 
         return: pd.DataFrame
     """
@@ -625,11 +532,8 @@ def load_json_data_frame(s3_path, verbose=True):
 def s3_json_read2bis(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:dict=None, suffix=".json",  **kw):
     """  Run Multi-thread json reader for S3 json files, using smart_open in Mutlti Thread
     Doc::
-
          Return list of tuple  : (S3_path, ddict )
-
         https://github.com/RaRe-Technologies/smart_open/blob/develop/howto.md#how-to-read-from-s3-efficiently 
-
         https://github.com/RaRe-Technologies/smart_open
         
         ### stream content *into* S3 (write mode) using a custom session
@@ -642,13 +546,12 @@ def s3_json_read2bis(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixe
         with open(url, 'wb', transport_params={'client': session.client('s3')}) as fout:
             bytes_written = fout.write(b'hello world!')
             log(bytes_written)
-
         ### Buffer writing
         tp = {'min_part_size': 5 * 1024**2}
         with open('s3://bucket/key', 'w', transport_params=tp) as fout:
             fout.write(lots_of_data)            
-
     """
+    import json
     from smart_open import open
 
     ### Global Session, Shared across Threads
@@ -678,7 +581,6 @@ def s3_json_read2bis(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixe
 def s3_donwload(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=True,   **kw):
     """  Run Multi-thread fun_async on input_list.
     Doc::
-
         # Define where to store artifacts:
         # - temporarily downloaded file and
         # - list of failed to download file in csv file
@@ -760,7 +662,6 @@ def s3_donwload(path_s3="", n_pool=5, dir_error=None, start_delay=0.1, verbose=T
 def s3_get_filelist_cmd(parent_cmd: list) -> list:
     """ AWS CLI S3 Call by subprocess and get list of  results:
         list of (name, date, size)
-
     """
     import json
     from subprocess import PIPE, Popen
@@ -818,19 +719,13 @@ def glob_s3(path: str, recursive: bool = True,
             return_format='tuple',
             extra_params: list = None) -> list:
     """  Glob files on S3 using AWS CLI
-
     Docs::
-
         path: str, recursive: bool = True,
         max_items_per_api_call: str = 1000,
         fields = "name,date,size"
         return_format='tuple'
         extra_params: list = None
-
         https://bobbyhadz.com/blog/aws-cli-list-all-files-in-bucket
-
-
-
     """        
     bucket_name, path = s3_split_path(path)
 
@@ -882,24 +777,16 @@ def s3_load_file(s3_path: str,
                  is_binary: bool = False) -> Union[str, IO, bytes]:
     """ Load file in memory using AWS CLI  --> subprocess --> stdout --> python
     Docs::
-
           file_data = get_data(s3_path="", extra_params=[])
           
           extra params:
           return_stream:  return as stream data
           is_binary :     return as binary string
-
-
           Infos:
              cmd = ["aws", "s3", "cp", s3_path, "-"]
-
              https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
-
              https://aws.amazon.com/blogs/media/processing-user-generated-content-using-aws-lambda-and-ffmpeg/
-
              https://stackoverflow.com/questions/48725405/how-to-read-binary-data-over-a-pipe-from-another-process-in-python
-
-
     """             
     from subprocess import PIPE, Popen
 
@@ -958,7 +845,3 @@ def s3_load_file(s3_path: str,
 if __name__ == '__main__':
     import fire
     fire.Fire()
-
-
-
-
