@@ -2,6 +2,8 @@
 """ Utils for AWS
 Docs::
 
+    pip install awswrangler
+
     https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
 
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
@@ -393,7 +395,41 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
 
 ####  S3 --> Pandas ################################################################################
-def s3_pd_read_file2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
+def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=True,  **kw)->pd.DataFrame:
+    """  Read file in parallel from S3, Support high number of files.
+    Doc::
+
+            path (Union[str, List[str]]) – S3 prefix (accepts Unix shell-style wildcards) (e.g. s3://bucket/prefix) or list of S3 objects paths (e.g. [s3://bucket/key0, s3://bucket/key1]).
+            path_suffix (Union[str, List[str], None]) – Suffix or List of suffixes to be read (e.g. [“.json”]). If None, will try to read all files. (default)
+            path_ignore_suffix (Union[str, List[str], None]) – Suffix or List of suffixes for S3 keys to be ignored.(e.g. [“_SUCCESS”]). If None, will try to read all files. (default)
+            version_id (Optional[Union[str, Dict[str, str]]]) – Version id of the object or mapping of object path to version id. (e.g. {‘s3://bucket/key0’: ‘121212’, ‘s3://bucket/key1’: ‘343434’})
+            ignore_empty (bool) – Ignore files with 0 bytes.
+            orient (str) – Same as Pandas: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_json.html
+            use_threads (Union[bool, int]) – True to enable concurrent requests, False to disable multiple threads. If enabled os.cpu_count() will be used as the max number of threads. If integer is provided, specified number is used.
+            last_modified_begin – Filter the s3 files by the Last modified date of the object. The filter is applied only after list all s3 files.
+            last_modified_end (datetime, optional) – Filter the s3 files by the Last modified date of the object. The filter is applied only after list all s3 files.
+            boto3_session (boto3.Session(), optional) – Boto3 Session. The default boto3 session will be used if boto3_session receive None.
+            s3_additional_kwargs (Optional[Dict[str, Any]]) – Forward to botocore requests, only “SSECustomerAlgorithm” and “SSECustomerKey” arguments will be considered.
+            chunksize (int, optional) – If specified, return an generator where chunksize is the number of rows to include in each chunk.
+            dataset (bool) – If True read a JSON dataset instead of simple file(s) loading all the related partitions as columns. If True, the lines=True will be assumed by default.
+            partition_filter (Optional[Callable[[Dict[str, str]], bool]]) – Callback Function filters to apply on PARTITION columns (PUSH-DOWN filter). This function MUST receive a single argument (Dict[str, str]) where keys are partitions names and values are partitions values. Partitions values will be always strings extracted from S3. This function MUST return a bool, True to read the partition or False to ignore it. Ignored if dataset=False. E.g lambda x: True if x["year"] == "2020" and x["month"] == "1" else False https://aws-sdk-pandas.readthedocs.io/en/2.17.0/tutorials/023%20-%20Flexible%20Partitions%20Filter.html
+            pandas_kwargs – KEYWORD arguments forwarded to pandas.read_json(). You can NOT pass pandas_kwargs explicit, just add valid Pandas arguments in the function call and awswrangler will accept it. e.g. wr.s3.read_json(‘s3://bucket/prefix/’, lines=True, keep_default_dates=True) https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_json.html
+
+            Returns
+            Pandas DataFrame or a Generator in case of chunksize != None.
+
+            Return type
+            Union[pandas.DataFrame, Generator[pandas.DataFrame, None, None]]
+
+    """
+    import gc,  pandas as pd
+    import awswrangler as wr
+    dfall         = wr.s3.read_json(path=path_s3, path_suffix=suffix, use_thread=npool, dataset=dataset, **kw)
+    return dfall
+
+
+
+def s3_pd_read_json2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,  cols=None, verbose=False, nrows=-1, nfile=1000000, concat_sort=True, n_pool=1, npool=None,
                  drop_duplicates=None, col_filter:str=None,  col_filter_vals:list=None, dtype_reduce=None, fun_apply=None, use_ext=None,  **kw)->pd.DataFrame:
     """  Read file in parallel from disk, Support high number of files.
     Doc::
