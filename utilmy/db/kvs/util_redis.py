@@ -17,10 +17,10 @@ from utilmy import log
 
 #################################################################################
 #################################################################################
-def test_all():
-   test_connection()
-   test_getput()
-   test_getput2()
+# def test_all():
+#    test_connection()
+#    test_getput()
+#    test_getput2()
 
 
 def test_connection():
@@ -33,14 +33,14 @@ def test_connection():
 
     # test connection success
     try:
-        client = redisClient(host='localhost', port=6379, db=0)
+        client = redisClient(host='localhost', port=6378, db=0)
         assert True
     except ConnectionFailed:
         assert False
 
 
 def test_getput():
-    client = redisClient(host='localhost', port=6379, db=0)
+    client = redisClient(host='localhost', port=6378, db=0)
     client.put('foo', 'bar')
     res    = client.get('foo').decode('utf8')
     assert res == 'bar'
@@ -53,11 +53,15 @@ def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
 def test_getputmulti():
     client = redisClient(host='localhost', port=6378, db=0)
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
-    keys = ['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
 
     client.put_multi(keyvalues, 3)
     res = client.get_multi(keys, 3)
-    assert 11 == len(res)
+    assert 12 == len(res)
+    for i in range(len(keys)):
+        # assert value
+        assert keyvalues[i][1] == res[i].decode('utf-8')
+
         
 
 
@@ -89,26 +93,14 @@ def test_cluster3():
 def test_cluster_getputmulti():
     client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
-    keys = ['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
 
     client.put_multi(keyvalues, 3)
     res = client.get_multi(keys, 3)
-    print()
+    assert 12 == 12
     for i in range(len(keys)):
-        print(f'index {i}: key {keys[i]}; value {res[i]}')
-
-
-# def test_getputmulti():
-#     config = RedisClusterConfig('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
-#     client = RedisClusterClient(config)
-#     keyvalues = [['a', '1'], ['b', '2'], ['c', '3']]
-#     keys = ['a', 'b', 'c']
-
-#     client.put_multi(keyvalues, 1)
-#     res = client.get_multi(keys, 1)
-#     print()
-#     for i in range(len(keys)):
-#         print(f'index {i}: key {keys[i]}; value {res[i]}')
+        # assert value
+        assert keyvalues[i][1] == res[i].decode('utf-8')
 
 
 #################################################################################
@@ -153,17 +145,18 @@ class RedisClusterClient:
             transaction (bool): enable MULTI and EXEC statements.
             nretry (int): number of retry
         """
-        n         =  len(key_values)
-        n_batch   =  n // batch_size + 1
-        self.pipe =  self.client.pipeline(transaction=transaction)
+        self.pipe = self.client.pipeline(transaction=False)
+        n = len(key_values)
+        n_batch = len(key_values) // batch_size
 
         ntotal = 0  
         for k in range(n_batch):
             for i in range(batch_size):
                 ix  = k*batch_size + i 
                 if ix >= n: break 
-                key,val = key_values[ix]   
-                self.pipe.hset(i, key, val )
+                key = key_values[ix][0]
+                val = key_values[ix][1]
+                self.pipe.hset(ix, key, val)
                 i += 1
 
             flag = True 
@@ -188,7 +181,7 @@ class RedisClusterClient:
             batch_size (int): number of batch.
             transaction (bool): enable MULTI and EXEC statements.
         """
-        pipe = self.client.pipeline(transaction=transaction)
+        self.pipe = self.client.pipeline(transaction=transaction)
 
         n       = len(keys)
         n_batch = n // batch_size  + 1
@@ -198,17 +191,17 @@ class RedisClusterClient:
                 ix  = k*batch_size + i
                 if ix >= n : break
                 try :
-                   pipe.hget(i, keys[ix])
+                    self.pipe.hget(ix, keys[ix])
                 except Exception as e :
-                  log(e)   
-                  time.sleep(5)
-                  pipe.hget(i, keys[ix])
+                    log(e)   
+                    time.sleep(5)
+                    self.pipe.hget(i, keys[ix])
 
 
             resk =  self.pipe.execute()
             res  = res + resk
 
-        return 
+        return res
 
 
 
@@ -277,17 +270,18 @@ class redisClient:
             transaction (bool): enable MULTI and EXEC statements.
             nretry (int): number of retry
         """
-        n         =  len(key_values)
-        n_batch   =  n // batch_size + 1
-        self.pipe =  self.client.pipeline(transaction=transaction)
+        self.pipe = self.client.pipeline(transaction=False)
+        n = len(key_values)
+        n_batch = len(key_values) // batch_size
 
         ntotal = 0  
         for k in range(n_batch):
             for i in range(batch_size):
                 ix  = k*batch_size + i 
                 if ix >= n: break 
-                key,val = key_values[ix]   
-                self.pipe.hset(i, key, val )
+                key = key_values[ix][0]
+                val = key_values[ix][1]
+                self.pipe.hset(ix, key, val)
                 i += 1
 
             flag = True 
@@ -307,13 +301,12 @@ class redisClient:
 
     def get_multi(self, keys, batch_size=500, transaction=False):
         """get multiple value using list of keys
-
         Parameters:
             keys (list(string)): list of keys
             batch_size (int): number of batch.
             transaction (bool): enable MULTI and EXEC statements.
         """
-        pipe = self.client.pipeline(transaction=transaction)
+        self.pipe = self.client.pipeline(transaction=transaction)
 
         n       = len(keys)
         n_batch = n // batch_size  + 1
@@ -323,11 +316,11 @@ class redisClient:
                 ix  = k*batch_size + i
                 if ix >= n : break
                 try :
-                   pipe.hget(i, keys[ix])
+                   self.pipe.hget(ix, keys[ix])
                 except Exception as e :
                   log(e)   
                   time.sleep(5)
-                  pipe.hget(i, keys[ix])
+                  self.pipe.hget(i, keys[ix])
 
 
             resk =  self.pipe.execute()
