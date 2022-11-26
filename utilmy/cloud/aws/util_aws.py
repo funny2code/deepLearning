@@ -123,9 +123,72 @@ def test_s3json():
 
 def test3():
     bucket_name = "coretics"
-    log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers '{n_workers}' ...\n\n")
+    log(f"\nTesting 's3_read_json' function with Bucket '{bucket_name}' and no of workers 3 ...\n\n")
     res_data = s3_read_json(path_s3 = bucket_name, n_workers = 3)
     assert len(res_data)>0, "empty"
+
+def test_bench():
+    """
+        Performance/Speed test among 
+        s3_read_json, s3_json_read2, s3_json_read3 
+        functions
+    """
+    from pyinstrument import Profiler
+    import re 
+
+    bucket_name = "coretics"
+    
+    print(f"Bucket Name: {bucket_name}")
+
+    def extract_performance_profile(func):
+        with Profiler() as p:
+            func()
+        output = p.output_text()
+        samples = float(re.findall(r"Samples:  (\d*[.]?\d*)", output)[0])
+        duration = float(re.findall(r"Duration: (\d*[.]?\d*)", output)[0])
+        cpu_time = float(re.findall(r"CPU time: (\d*[.]?\d*)", output)[0])
+        return {
+            "samples" : samples,
+            "duration" : duration,
+            "cpu_time" : cpu_time
+        }
+    
+    profile1 = profile2 = profile3 = {
+            "samples"  : None,
+            "duration" : 999999,
+            "cpu_time" : 999999
+        }
+
+    try:
+        profile1 = extract_performance_profile(lambda: s3_read_json(path_s3 = bucket_name, n_workers = 3))
+    except Exception as e:
+        print(f"Error in performance test for 's3_read_json': {e}")    
+    try:
+        profile2 = extract_performance_profile(lambda: s3_json_read2(path_s3 = bucket_name))
+    except Exception as e:
+        print(f"Error in performance test for 's3_json_read2': {e}")
+    try:
+        profile3 = extract_performance_profile(lambda: s3_json_read3(path_s3 = bucket_name))
+    except Exception as e:
+        print(f"Error in performance test for 's3_json_read3': {e}")
+
+    print(f"\n\nPerformance of s3_read_json : \n{profile1}")
+    print(f"Performance of s3_json_read2 : \n{profile2}")
+    print(f"Performance of s3_json_read3 : \n{profile3}")
+
+    cpu_wise = {
+        "s3_read_json" : profile1.get("cpu_time"),
+        "s3_json_read2" : profile2.get("cpu_time"),
+        "s3_json_read3" : profile3.get("cpu_time")
+    }
+    print("CPU usage wise best preference: ", min(cpu_wise, key=cpu_wise.get))
+
+    duration_wise = {
+        "s3_read_json" : profile1.get("duration"),
+        "s3_json_read2" : profile2.get("duration"),
+        "s3_json_read3" : profile3.get("duration")
+    }
+    print("Duration wise best preference: ", min(duration_wise, key=duration_wise.get))    
 
 
 def test_topandas():

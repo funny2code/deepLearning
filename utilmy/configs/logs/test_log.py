@@ -11,11 +11,16 @@ def test_all():
     test1()
     test2()
     test_logging()
+    test4()
+    test5()
 
 
 
 def test1():
     """function test1.
+
+    Testing the functions log3, log2, log, logw, loge, logc, logr
+
     """
     import io, sys
     # These libraries are for testing output.
@@ -27,7 +32,7 @@ def test1():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'base'}, indent=4))
 
-    from util_log import log3, log2, log, logw, loge, logc, logr
+    from utilmy.configs.logs.util_log import log3, log2, log, logw, loge, logc, logr
     log3("debug2")
     log2("debug")
     log("info")
@@ -103,6 +108,9 @@ def test1():
 
 def test2():
     """function test2.
+
+    Testing the functions logger_setup, logr, loge
+
     """
     os.environ['log_verbosity']='20'
     os.environ['log_type']='loguru'
@@ -110,12 +118,13 @@ def test2():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 5, 'log_type': 'base'}, indent=4))
 
-    import util_log
+    # import util_log
+    from utilmy.configs.logs import util_log
 
     import importlib
     importlib.reload(util_log)
 
-    from util_log import log3, log2, log, logw, loge, logc, logr
+    from utilmy.configs.logs.util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
     util_log.logger_setup('config_loguru.yaml', 'default')
@@ -137,19 +146,24 @@ def test2():
 
 
 def test_logging():
+    """function test_logging.
+
+    Testing the functions in util_log.py
+
+    """
     os.environ['log_verbosity']='10'
     os.environ['log_type']='logging'
 
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'logging'}, indent=4))
 
-    import util_log
+    from utilmy.configs.logs import util_log
 
     import importlib
     importlib.reload(util_log)
 
-    from util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
-    from util_log import FORMATTER_1, FORMATTER_2, FORMATTER_3, FORMATTER_4, FORMATTER_5
+    from utilmy.configs.logs.util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
+    from utilmy.configs.logs.util_log import FORMATTER_1, FORMATTER_2, FORMATTER_3, FORMATTER_4, FORMATTER_5
 
     s='test logger_name'
     print('\ntest logger_name')
@@ -218,7 +232,7 @@ def test4():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 1, 'log_type': 'base'}, indent=4))
 
-    from util_log import log3, log2, log
+    from utilmy.configs.logs.util_log import log3, log2, log
 
     log("####### log2() ..")
     captured_output = io.StringIO()
@@ -237,10 +251,15 @@ def test4():
     assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
     
 def test5():
+    """ function test5.
+    
+    Testing the functions in util_log.py.
+    
+    """
 
     import importlib
     import utilmy as uu
-    import util_log
+    from utilmy.configs.logs import util_log
     drepo, dirtmp = uu.dir_testinfo()
 
     util_log.log("Testing default env values")
