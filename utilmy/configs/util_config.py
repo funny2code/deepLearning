@@ -105,17 +105,17 @@ nest:
 
    #######  config_val file ########################################
    ss ="""
-string: str()
-regex: regex('abcde')
-number: num(min=1, max=13.12)
-integer: int()
-boolean: bool()
-list: list()
-enum: enum('one', True, 1)
-map: map()
-empty: null()
-date: day()
-nest:
+    string: str()
+    regex: regex('abcde')
+    number: num(min=1, max=13.12)
+    integer: int()
+    boolean: bool()
+    list: list()
+    enum: enum('one', True, 1)
+    map: map()
+    empty: null()
+    date: day()
+    nest:
     integer: int()
     nest:
         string: str()   
