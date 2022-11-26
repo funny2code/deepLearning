@@ -82,19 +82,19 @@ def test2():
 
    #######  yaml file ###############################################
    ss ="""
-string: "hello"
-regex: 'abcde'
-number: 13.12
-integer: 2
-boolean: True
-list: ['hi']
-enum: 1
-map:
-    hello: 1
-    another: "hi"
-empty: null
-date: 2015-01-01
-nest:
+    string: "hello"
+    regex: 'abcde'
+    number: 13.12
+    integer: 2
+    boolean: True
+    list: ['hi']
+    enum: 1
+    map:
+        hello: 1
+        another: "hi"
+    empty: null
+    date: 2015-01-01
+    nest:
     integer: 1
     nest:
         string: "nested"   
