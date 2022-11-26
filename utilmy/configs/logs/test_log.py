@@ -27,7 +27,7 @@ def test1():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'base'}, indent=4))
 
-    from util_log import log3, log2, log, logw, loge, logc, logr
+    from  utilmy.configs.logs.util_log import log3, log2, log, logw, loge, logc, logr
     log3("debug2")
     log2("debug")
     log("info")
