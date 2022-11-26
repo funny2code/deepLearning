@@ -50,15 +50,13 @@ def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
 
 
 def test_getputmulti():
-    client = redisClient(host='localhost', port=6379, db=0)
-    keyvalues = [['a', '1'], ['b', '2'], ['c', '3']]
-    keys = ['a', 'b', 'c']
+    client = redisClient(host='localhost', port=6378, db=0)
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
+    keys = ['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
 
     client.put_multi(keyvalues, 3)
     res = client.get_multi(keys, 3)
-    print()
-    for i in range(len(keys)):
-        print(f'index {i}: key {keys[i]}; value {res[i]}')
+    assert 11 == len(res)
         
 
 
@@ -66,8 +64,7 @@ def test_getputmulti():
 def test_cluster1():
     # test connection failed
     try:
-        config = RedisClusterConfig('localssss', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
-        client = RedisClusterClient(config)
+        client = RedisClusterClient('localssss', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
         assert False
     except redis.exceptions.RedisClusterException:
         assert True
@@ -75,19 +72,28 @@ def test_cluster1():
 def test_cluster2():
     # test connection success
     try:
-        config = RedisClusterConfig('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
-        client = RedisClusterClient(config)
+        client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
         assert True
     except redis.exceptions.RedisClusterException:
         assert False
 
 
 def test_cluster3():
-    config = RedisClusterConfig('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
-    client = RedisClusterClient(config)
+    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
     client.put('foo', 'bar')
     res = client.get('foo').decode('utf8')
     assert res == 'bar'
+
+def test_cluster_getputmulti():
+    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
+    keys = ['a', 'b', 'c', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+
+    client.put_multi(keyvalues, 3)
+    res = client.get_multi(keys, 3)
+    print()
+    for i in range(len(keys)):
+        print(f'index {i}: key {keys[i]}; value {res[i]}')
 
 
 # def test_getputmulti():
@@ -105,26 +111,20 @@ def test_cluster3():
 
 #################################################################################
 #################################################################################
-@dataclass
-class RedisClusterConfig:
-    host: str
-    port: str | int
-    node_ports: list()
-    password: str
-
-
 class RedisClusterClient:
-    def __init__(self, clusterConfig : RedisClusterConfig, read_from_replicas=True, encoding='utf-8', decode_response=True):
+    def __init__(self, host: str, port:str|int, ports: list(), password: str, read_from_replicas=True, encoding='utf-8', decode_response=True):
         nodes = list()
-        for port in clusterConfig.node_ports:
-            nodes.append(ClusterNode(host=clusterConfig.host, port=port))
+        for node_port in ports:
+            nodes.append(ClusterNode(host=host, port=node_port))
 
         self.client = RedisCluster(
             startup_nodes=nodes,
             read_from_replicas=read_from_replicas,
-            host=clusterConfig.host,
-            password=clusterConfig.password,
-            port=clusterConfig.port)
+            host=host,
+            password=password,
+            port=port,
+            encoding=encoding,
+            decode_response=decode_response)
 
         
         self.client.ping()
