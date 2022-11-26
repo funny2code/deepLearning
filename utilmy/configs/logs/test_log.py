@@ -17,18 +17,78 @@ def test_all():
 def test1():
     """function test1.
     """
+    import io, sys
+    # These libraries are for testing output.
+    # https://stackoverflow.com/questions/33767627/python-write-unittest-for-console-print
+
     os.environ['log_verbosity']='10'
     os.environ['log_type']='base'
 
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'base'}, indent=4))
 
-    from util_log import log3, log2, log, logw, loge, logc, logr
+    from utilmy.configs.logs.util_log import log3, log2, log, logw, loge, logc, logr
     log3("debug2")
     log2("debug")
     log("info")
     logw("warning")
     logc("critical")
+
+    log("####### log() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log("testing log")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log2() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log2("testing log2")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log2\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log3() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log3("testing log3")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing log3\n", "FAILED -> config_load(); The return value isn't expected"
+    
+    log("####### logw() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logw("testing logw")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logw\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### logc() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logc("testing logc")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logc\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### loge() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    loge("testing loge")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing loge\n", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### logr() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    logr("testing logr")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "testing logr\n", "FAILED -> config_load(); The return value isn't expected"
 
     try:
         a = 1 / 0
@@ -44,18 +104,19 @@ def test1():
 def test2():
     """function test2.
     """
-    os.environ['log_verbosity']='10'
+    os.environ['log_verbosity']='20'
     os.environ['log_type']='loguru'
 
     with open("config.json", mode='w') as f:
-        f.write(json.dumps({'log_verbosity': 10, 'log_type': 'loguru'}, indent=4))
+        f.write(json.dumps({'log_verbosity': 5, 'log_type': 'base'}, indent=4))
 
-    import util_log
+    # import util_log
+    from utilmy.configs.logs import util_log
 
     import importlib
     importlib.reload(util_log)
 
-    from util_log import log3, log2, log, logw, loge, logc, logr
+    from utilmy.configs.logs.util_log import log3, log2, log, logw, loge, logc, logr
 
     ### Redefine new template
     util_log.logger_setup('config_loguru.yaml', 'default')
@@ -83,13 +144,14 @@ def test_logging():
     with open("config.json", mode='w') as f:
         f.write(json.dumps({'log_verbosity': 10, 'log_type': 'logging'}, indent=4))
 
-    import util_log
+    # import util_log
+    from utilmy.configs.logs import util_log
 
     import importlib
     importlib.reload(util_log)
 
-    from util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
-    from util_log import FORMATTER_1, FORMATTER_2, FORMATTER_3, FORMATTER_4, FORMATTER_5
+    from utilmy.configs.logs.util_log import logger, log3, log2, log, logw, loge, logc, logr, logger_setup
+    from utilmy.configs.logs.util_log import FORMATTER_1, FORMATTER_2, FORMATTER_3, FORMATTER_4, FORMATTER_5
 
     s='test logger_name'
     print('\ntest logger_name')
@@ -144,7 +206,80 @@ def test_logging():
     logger=logger_setup(log_file='test.log')
     log2(s)
   
+def test4():
+    """ function test4.
+    
+    Testing the functions log2 and log3 with verbosity equals to 1.
+    
+    """
+    import io, sys
 
+    os.environ['log_verbosity']='1'
+    os.environ['log_type']='base'
+
+    with open("config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 1, 'log_type': 'base'}, indent=4))
+
+    from utilmy.configs.logs.util_log import log3, log2, log
+
+    log("####### log2() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log2("testing log2")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
+
+    log("####### log3() ..")
+    captured_output = io.StringIO()
+    sys.stdout = captured_output
+    log3("testing log3")
+    sys.stdout = sys.__stdout__
+    result_value = captured_output.getvalue()
+    assert result_value == "", "FAILED -> config_load(); The return value isn't expected"
+    
+def test5():
+
+    import importlib
+    import utilmy as uu
+    # import util_log
+    from utilmy.configs.logs import util_log
+    drepo, dirtmp = uu.dir_testinfo()
+
+    util_log.log("Testing default env values")
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 10, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "base", "FAILED; LOG_TYPE wasn't expected"
+    
+    util_log.log("Testing log_verbosity and log_type")
+    os.environ['log_verbosity'] = '1'
+    os.environ['log_type'] = 'logging'
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 1, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.environ.pop('log_verbosity', None)
+    os.environ.pop('log_type', None)
+
+    util_log.log("Testing log_config_path")
+    os.environ['log_config_path'] = dirtmp+"config.json"
+    with open(dirtmp+"config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 2, 'log_type': 'logging',}, indent=4))
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 2, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.remove(dirtmp+"config.json")
+
+    util_log.log("Testing order priority")
+    os.environ['log_config_path'] = dirtmp+"config.json"
+    os.environ['log_verbosity'] = '3'
+    with open(dirtmp+"config.json", mode='w') as f:
+        f.write(json.dumps({'log_verbosity': 2, 'log_type': 'logging',}, indent=4))
+    importlib.reload(util_log)
+    assert util_log.VERBOSITY == 3, "FAILED; VERBOSITY wasn't expected"
+    assert util_log.LOG_TYPE == "logging", "FAILED; LOG_TYPE wasn't expected"
+    os.remove(dirtmp+"config.json")
+    os.environ.pop('log_verbosity', None)
+    os.environ.pop('log_type', None)
 
 ############################################################################
 if __name__ == "__main__":

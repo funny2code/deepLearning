@@ -7,9 +7,12 @@ Doc::
         export log_verbosity=10
         export log_type='logging'   / 'base' / 'loguru'
 
-
-        export log_config_path="~/myconfig.json"
-
+        ### Custom Config file
+        export log_config_path = "~/myconfig.json"
+        LOG_CONFIG = {
+           'log_verbosity':  10     ,
+            'log_type'     :  'base' ,
+        }        
 
     Usage :
     from util_log import log
@@ -32,19 +35,26 @@ from pathlib import Path
 
 ######################################################################################
 ##### Global settting  ###############################################################
+
 LOG_CONFIG = {}
+
 try:
-    with open("config.json", mode='r') as f:
+    LOG_CONFIG_FILE = os.environ.get('log_config_path',  os.getcwd() + "/config.json" )
+    with open(LOG_CONFIG_FILE, mode='r') as f:
         LOG_CONFIG = json.load(f)
-        print(LOG_CONFIG)
 except Exception as e:
-    print('Cannot open config file, using default config', e)
+    pass
 
-
-VERBOSITY   = os.environ.get('log_verbosity', 10)  if 'log_verbosity' not in LOG_CONFIG else LOG_CONFIG['log_verbosity']
-LOG_TYPE    = os.environ.get('log_type',  'base')  if 'log_type'      not in LOG_CONFIG else LOG_CONFIG['log_type']
+LOG_CONFIG = {
+    'log_verbosity':  os.environ.get('log_verbosity', LOG_CONFIG.get('log_verbosity',10)),
+    'log_type'     :  os.environ.get('log_type',  LOG_CONFIG.get('log_type',"base")),
+}
+VERBOSITY   = int(LOG_CONFIG["log_verbosity"])
+LOG_TYPE    = LOG_CONFIG["log_type"]
 
 THISFILE_PATH = Path(__file__).resolve().parent
+
+
 
 
 
