@@ -8,6 +8,7 @@ Docs::
 """
 import time, random, string
 from dataclasses import dataclass
+from box import Box
 import redis
 from redis.cluster import RedisCluster, ClusterNode
 
@@ -19,7 +20,7 @@ from utilmy import log
 def test_all():
    test_connection()
    test_getput()
-   test_getputmulti()
+   test_getput2()
 
 
 def test_connection():
@@ -68,6 +69,7 @@ def test_cluster1():
         assert False
     except redis.exceptions.RedisClusterException:
         assert True
+
 
 def test_cluster2():
     # test connection success
@@ -357,6 +359,14 @@ class RedisQueries(object):
             if len(vals) > 1:
                 siid_to_title[siid] = vals[-1]
         return siid_to_title
+
+
+
+
+#################################################################################
+def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
 
 class ConnectionFailed(Exception):
 

@@ -485,7 +485,6 @@ def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=Tru
             Union[pandas.DataFrame, Generator[pandas.DataFrame, None, None]]
 
     """
-    import gc,  pandas as pd
     import awswrangler as wr
     dfall         = wr.s3.read_json(path=path_s3, path_suffix=suffix, use_thread=npool, dataset=dataset, **kw)
     return dfall
@@ -650,7 +649,6 @@ def s3_json_read2bis(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixe
             fout.write(lots_of_data)            
 
     """
-    import json
     from smart_open import open
 
     ### Global Session, Shared across Threads
