@@ -20,8 +20,7 @@ from utilmy import date_now, log
 ########################################################################################################
 ########################################################################################################
 def s3_files_move(dirin, dirout, use_threads=False, max_try=3):
-    """
-        Uploads all the logfiles listed within dirin directory into S3 bucket/timestamp
+    """ Uploads all the logfiles listed within dirin directory into S3 bucket/timestamp
     """
     dirin = Path(dirin)
     tmp_extn = ".dtmpXXX"
@@ -35,7 +34,7 @@ def s3_files_move(dirin, dirout, use_threads=False, max_try=3):
             path       = f'{dirout}/{dnew.name}'
             obj_list   = wr.s3.list_objects(path=path)
             if path in obj_list:
-                path = f"{d.stem}.{''.join(random.choices(string.ascii_lowercase, k=len(tmp_extn)))}"  # To Avoid Overwrite : original filename + . + random alphabet
+                path = f"{d.stem}.{int(time.time())}"  # To Avoid Overwrite : original filename + . + random alphabet
             wr.s3.upload(local_file=local_file, path=path, use_threads=use_threads)
             os.remove(local_file)
         except Exception as e:   #### It will pick on the next cycle
