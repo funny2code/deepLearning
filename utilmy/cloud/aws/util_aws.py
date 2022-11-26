@@ -19,7 +19,7 @@ Docs::
    https://pypi.org/project/smart-open/6.2.0/
    
    
-   
+   https://github.com/aws/aws-sdk-pandas/search?q=read_json
 
 
 """
