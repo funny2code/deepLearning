@@ -97,7 +97,7 @@ def test_cluster_getputmulti():
     keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', ]
 
     client.put_multi(keyvalues, 3)
-    res = client.get_multi(keys, 4)
+    res = client.get_multi(keys, 5)
     assert len(res) == len(keys)   ###  11
     for i in range(len(keys)):
         # assert value
