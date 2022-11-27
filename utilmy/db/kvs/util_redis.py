@@ -17,10 +17,10 @@ from utilmy import log
 
 #################################################################################
 #################################################################################
-# def test_all():
-#    test_connection()
-#    test_getput()
-#    test_getput2()
+def test_all():
+    test_connection()
+    test_getput()
+    test_getputmulti()
 
 
 def test_connection():
@@ -52,12 +52,12 @@ def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
 
 def test_getputmulti():
     client = redisClient(host='localhost', port=6378, db=0)
-    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
-    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'],  ]
+    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',  ]
 
-    client.put_multi(keyvalues, 3)
-    res = client.get_multi(keys, 3)
-    assert 12 == len(res)
+    client.put_multi(keyvalues,3 )
+    res = client.get_multi(keys, 5)
+    assert len(res)  == len(keys)
     for i in range(len(keys)):
         # assert value
         assert keyvalues[i][1] == res[i].decode('utf-8')
