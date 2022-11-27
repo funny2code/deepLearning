@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from box import Box
 import redis
 from redis.cluster import RedisCluster, ClusterNode
+import datetime
 
 from utilmy import log
 
@@ -90,6 +91,12 @@ def test_cluster3():
     res = client.get('foo').decode('utf8')
     assert res == 'bar'
 
+def test_cluster_set_with_ttl():
+    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    client.put('foo', 'bar', 1)
+    time.sleep(1)
+    res = client.get('foo')
+    assert res == None
 
 def test_cluster_getputmulti():
     client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
@@ -146,13 +153,13 @@ class RedisClusterClient:
         return self.client.get(key)
 
 
-    def put(self, key, val):
+    def put(self, key, val, ttl: float=None):
         """set value to key
         """
-        self.client.set(key, val)
+        self.client.set(key, val, ex=ttl)
         return True
 
-    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
+    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3, ttl=None):
         """set multiple keys and values to redis
         Docs::
 
@@ -175,7 +182,7 @@ class RedisClusterClient:
                 # replace hset with set 
                 # `batch get` will not found the key if order of element on the list is not the same
                 # as order of list when setting value. because index of the key representing hash.
-                self.pipe.set(key, val)
+                self.pipe.set(key, val, ex=ttl)
                 i += 1
 
             flag = True 
@@ -277,13 +284,13 @@ class redisClient:
         return self.client.get(key)
 
 
-    def put(self, key, val):
+    def put(self, key, val, ttl=None):
         """set value to key
         """
-        self.client.set(key, val)
+        self.client.set(key, val, ex=ttl)
         return True
 
-    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
+    def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3, ttl=None):
         """set multiple keys and values to redis
         
         Parameters:
@@ -307,7 +314,7 @@ class redisClient:
                 # replace hset with set 
                 # `batch get` will not found the key if order of element on the list is not the same
                 # as order of list when setting value. because index of the key representing hash.
-                self.pipe.set(key, val)
+                self.pipe.set(key, val, ex=ttl)
                 i += 1
 
             flag = True 
