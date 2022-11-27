@@ -172,7 +172,8 @@ class RedisClusterClient:
                 if ix >= n: break 
                 key = key_values[ix][0]
                 val = key_values[ix][1]
-                # replace hsget with set 
+                # --> Important to document the issues in the code
+                # replace hset with set 
                 # `batch get` will not found the key if order of element on the list is not the same
                 # as order of list when setting value. because index of the key representing hash.
                 self.pipe.set(key, val)
@@ -209,6 +210,7 @@ class RedisClusterClient:
             for i in range(batch_size):
                 ix  = k*batch_size + i
                 if ix >= n : break
+                # --> Important to document the issues in the code
                 # replace hget with get 
                 # `batch get` will not found the key if order of element on the list is not the same
                 # as order of list when setting value. because index of the key representing hash.
@@ -303,6 +305,7 @@ class redisClient:
                 if ix >= n: break 
                 key = key_values[ix][0]
                 val = key_values[ix][1]
+                # --> Important to document the issues in the code
                 # replace hset with set 
                 # `batch get` will not found the key if order of element on the list is not the same
                 # as order of list when setting value. because index of the key representing hash.
@@ -341,6 +344,7 @@ class redisClient:
                 ix  = k*batch_size + i
                 if ix >= n : break
                 try :
+                    # --> Important to document the issues in the code
                     # replace hget with get 
                     # `batch get` will not found the key if order of element on the list is not the same
                     # as order of list when setting value. because index of the key representing hash.
