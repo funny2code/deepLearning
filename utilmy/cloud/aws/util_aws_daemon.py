@@ -1,12 +1,14 @@
-"""Daemon process to flush log files from Local to S3
+"""Daemon processes
 Docs::
 
+   Flush log on disk
+   cd $utilmy/cloud/aws/
+   python  util_aws_daemon.py   run_move_toS3 --freq 120  --format "%Y%M%D"   --dirin = loca/mylog/   --dirout  s3://bucket
 
-   python  util_aws_daemon.py   run_move_log_toS3 --freq 120  --format "%Y%M%D"   --dirin = loca/mylog/   --dirout  s3://bucket
 
 
 """
-import time, random, string, os
+import time,  os
 import boto3
 import awswrangler as wr
 from pathlib import Path
@@ -19,7 +21,7 @@ from utilmy import date_now, log
 
 ########################################################################################################
 ########################################################################################################
-def s3_files_move(dirin, dirout, use_threads=False, max_try=3):
+def s3_files_move(dirin:str, dirout:str, use_threads=False, max_try=3):
     """ Uploads all the logfiles listed within dirin directory into S3 bucket/timestamp
     """
     dirin = Path(dirin)
@@ -28,6 +30,7 @@ def s3_files_move(dirin, dirout, use_threads=False, max_try=3):
         if not d.is_file(): continue
         try :
 
+            log(d) 
             dnew = d.rename(f"{d}{tmp_extn}")  if tmp_extn not in d.name: else d
 
             local_file = dnew.absolute()
@@ -43,7 +46,7 @@ def s3_files_move(dirin, dirout, use_threads=False, max_try=3):
 
                        
 
-def run_move_log_toS3(dirin, dirout, freq=600, add_datebucket=True, fmt="%Y%m%d", timezone="Asia/Japan"):
+def run_move_toS3(dirin, dirout, freq=600, add_datebucket=True, fmt="%Y%m%d", timezone="Asia/Japan"):
     """  Daemon moving logs to S3 in background
     Docs::
     

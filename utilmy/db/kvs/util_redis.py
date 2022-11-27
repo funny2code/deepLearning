@@ -148,7 +148,7 @@ class RedisClusterClient:
         """
         self.pipe = self.client.pipeline(transaction=False)
         n = len(key_values)
-        n_batch = len(key_values) // batch_size
+        n_batch = 1 +  int(len(key_values) // batch_size)
 
         ntotal = 0  
         for k in range(n_batch):
@@ -185,22 +185,22 @@ class RedisClusterClient:
         self.pipe = self.client.pipeline(transaction=transaction)
 
         n       = len(keys)
-        n_batch = n // batch_size  + 1
-        res = []
+        n_batch = int(n // batch_size)  + 1
+        res     = []
         for k in range(n_batch):
             for i in range(batch_size):
                 ix  = k*batch_size + i
                 if ix >= n : break
-                try :
-                    self.pipe.hget(ix, keys[ix])
-                except Exception as e :
-                    log(e)   
-                    time.sleep(5)
-                    self.pipe.hget(i, keys[ix])
+                self.pipe.hget(ix, keys[ix])
 
-
-            resk =  self.pipe.execute()
-            res  = res + resk
+            try :
+                resk = self.pipe.execute()
+                res  = res + resk
+            except Exception as e : 
+                log(e)   
+                time.sleep(5)
+                resk = self.pipe.execute()
+                res  = res + resk
 
         return res
 
