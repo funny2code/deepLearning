@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """ Utils for AWS
 Docs::
+
     pip install awswrangler
     https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
-   pip install ijson streAMING JSON
+
+   pip install ijson   #streAMING JSON
    https://pythonspeed.com/articles/json-memory-streaming/
+
+
    ### Read from S3
    https://stackoverflow.com/questions/45082832/how-to-read-partitioned-parquet-files-from-s3-using-pyarrow-in-python
-   
-   
+      
    https://pypi.org/project/smart-open/6.2.0/
-   
-   
+
    https://github.com/aws/aws-sdk-pandas/search?q=read_json
 """
 import os, sys, time, datetime,inspect,  yaml, gc, pandas as pd, numpy as np, glob
