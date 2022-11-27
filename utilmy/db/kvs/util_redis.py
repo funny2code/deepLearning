@@ -52,8 +52,8 @@ def randomStringGenerator(size, chars=string.ascii_lowercase + string.digits):
 
 def test_getputmulti():
     client = redisClient(host='localhost', port=6378, db=0)
-    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'],  ]
-    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',  ]
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11']]
+    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
 
     client.put_multi(keyvalues,3 )
     res = client.get_multi(keys, 5)
@@ -62,7 +62,7 @@ def test_getputmulti():
         # assert value
         assert keyvalues[i][1] == res[i].decode('utf-8')
 
-        
+
 
 
 ########## Cluster ##################################################################
@@ -102,6 +102,21 @@ def test_cluster_getputmulti():
     for i in range(len(keys)):
         # assert value
         assert keyvalues[i][1] == res[i].decode('utf-8')
+
+
+def test_cluster_getmulti_5lastkey():
+    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
+    keys = ['g', 'h', 'i', 'j', 'k']
+
+    client.put_multi(keyvalues, 3)
+    res = client.get_multi(keys, 3)
+
+    leftoffset = 6
+    assert len(res) == len(keys)   ###  5
+    for i in range(len(keys) - 1):
+        # assert value
+        assert keyvalues[i+leftoffset][1] == res[i].decode('utf-8')
 
 
 #################################################################################
@@ -157,7 +172,10 @@ class RedisClusterClient:
                 if ix >= n: break 
                 key = key_values[ix][0]
                 val = key_values[ix][1]
-                self.pipe.hset(ix, key, val)
+                # replace hsget with set 
+                # `batch get` will not found the key if order of element on the list is not the same
+                # as order of list when setting value. because index of the key representing hash.
+                self.pipe.set(key, val)
                 i += 1
 
             flag = True 
@@ -191,7 +209,10 @@ class RedisClusterClient:
             for i in range(batch_size):
                 ix  = k*batch_size + i
                 if ix >= n : break
-                self.pipe.hget(ix, keys[ix])
+                # replace hget with get 
+                # `batch get` will not found the key if order of element on the list is not the same
+                # as order of list when setting value. because index of the key representing hash.
+                self.pipe.get(keys[ix])
 
             try :
                 resk = self.pipe.execute()
@@ -282,7 +303,10 @@ class redisClient:
                 if ix >= n: break 
                 key = key_values[ix][0]
                 val = key_values[ix][1]
-                self.pipe.hset(ix, key, val)
+                # replace hset with set 
+                # `batch get` will not found the key if order of element on the list is not the same
+                # as order of list when setting value. because index of the key representing hash.
+                self.pipe.set(key, val)
                 i += 1
 
             flag = True 
@@ -317,11 +341,14 @@ class redisClient:
                 ix  = k*batch_size + i
                 if ix >= n : break
                 try :
-                   self.pipe.hget(ix, keys[ix])
+                    # replace hget with get 
+                    # `batch get` will not found the key if order of element on the list is not the same
+                    # as order of list when setting value. because index of the key representing hash.
+                   self.pipe.get(keys[ix])
                 except Exception as e :
                   log(e)   
                   time.sleep(5)
-                  self.pipe.hget(i, keys[ix])
+                  self.pipe.get(keys[ix])
 
 
             resk =  self.pipe.execute()
