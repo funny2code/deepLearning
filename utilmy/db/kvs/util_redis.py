@@ -90,14 +90,15 @@ def test_cluster3():
     res = client.get('foo').decode('utf8')
     assert res == 'bar'
 
+
 def test_cluster_getputmulti():
     client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
-    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l']
+    keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', ]
 
     client.put_multi(keyvalues, 3)
-    res = client.get_multi(keys, 3)
-    assert 12 == 12
+    res = client.get_multi(keys, 4)
+    assert len(res) == len(keys)   ###  11
     for i in range(len(keys)):
         # assert value
         assert keyvalues[i][1] == res[i].decode('utf-8')
@@ -138,8 +139,8 @@ class RedisClusterClient:
 
     def put_multi(self, key_values, batch_size=500, transaction=False, nretry=3):
         """set multiple keys and values to redis
-        
-        Parameters:
+        Docs::
+
             key_values ([[key, value], ]): key and value as 2D list
             batch_size (int): number of batch.
             transaction (bool): enable MULTI and EXEC statements.
