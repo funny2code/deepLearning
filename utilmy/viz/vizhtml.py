@@ -49,6 +49,8 @@ from datetime import datetime
 from typing import List
 from tqdm import tqdm
 from box import Box
+
+from utilmy import log
 from utilmy.viz.css import getcss
 from utilmy.viz.test_vizhtml import (test1, test2, test3, test4, test_scatter_and_histogram_matplot, test_pd_plot_network, 
   test_page, test_cssname, test_external_css, test_table, test_getdata, test_colimage_table, test_tseries_dateformat 
@@ -60,17 +62,14 @@ try :
    from highcharts import Highchart
    from pyvis import network as net
 except :
-   from utilmy.utilmy_base import sys_install
-   sys_install(cmd= "pip install python-box python-highcharts matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed")      
+   #from utilmy.utilmy_base import sys_install
+   cmd= "pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed"
+   #sys_install(cmd= cmd)      
+   log(cmd)
    1/0  ### exit Gracefully !
 
    
    
-############################################################################################
-def log(*s):
-    """  Log text to console
-    """
-    print(*s, flush=True)
 
 
 ############################################################################################
