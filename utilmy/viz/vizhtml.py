@@ -7,8 +7,8 @@ Docs::
     https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
 
 
-    !pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
-    !pip install utilmy
+    pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
+    pip install utilmy
     !
 
     https://try2explore.com/questions/10109123
@@ -63,9 +63,8 @@ try :
    from pyvis import network as net
 except :
    #from utilmy.utilmy_base import sys_install
-   cmd= "pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed"
    #sys_install(cmd= cmd)      
-   log(cmd)
+   log("pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed")
    1/0  ### exit Gracefully !
 
    
