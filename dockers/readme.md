@@ -4,7 +4,7 @@ Build And publish from Github Actions
 
 0) Go on online editor  (  zdocker2 branch)
 
-    https://github.dev/arita37/myutil/tree/zdocker2/dockers
+    https://github.dev/arita37/myutil/blob/zdocker2/dockers/readme.md
 
 
 1) Create folder in dockers/mydockerXXXX  and all the docker files
