@@ -1,0 +1,15 @@
+python-box
+fire
+pyarrow
+loguru
+pyyaml
+pandas
+numpy
+boto3
+awswrangler
+utilmy
+polars
+awscli
+ipython
+pip3 install torch  --extra-index-url https://download.pytorch.org/whl/cpu
+
