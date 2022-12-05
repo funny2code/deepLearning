@@ -1383,6 +1383,7 @@ def pd_plot_tseries_highcharts(df0,
     
             df0         :        Panda dataframe on which you want to apply time_series.
             coldate     :        Column name for date.
+            figsize     :        (10,7)
             date_format :        %m for moth , %d for day and %Y for Year.
             coly1=[]    :        Column name for y-axis one.
             coly2=[]    :        Column name for y-axis second.
