@@ -7,8 +7,8 @@ Docs::
     https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
 
 
-    !pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
-    !pip install utilmy
+    pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
+    pip install utilmy
     !
 
     https://try2explore.com/questions/10109123
@@ -63,9 +63,8 @@ try :
    from pyvis import network as net
 except :
    #from utilmy.utilmy_base import sys_install
-   cmd= "pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed"
    #sys_install(cmd= cmd)      
-   log(cmd)
+   log("pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed")
    1/0  ### exit Gracefully !
 
    
@@ -1384,6 +1383,7 @@ def pd_plot_tseries_highcharts(df0,
     
             df0         :        Panda dataframe on which you want to apply time_series.
             coldate     :        Column name for date.
+            figsize     :        (10,7)
             date_format :        %m for moth , %d for day and %Y for Year.
             coly1=[]    :        Column name for y-axis one.
             coly2=[]    :        Column name for y-axis second.
