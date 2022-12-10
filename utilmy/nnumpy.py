@@ -110,12 +110,11 @@ def test1_convert():
 
 
 ##############################################################################################################
-####### Numpy, Dict, List compute related  ###################################################################
+####### Dict, Cache  #########################################################################################
 class LRUCache(object):
     def __init__(self, max_size=4):
         """ LRUCache:__init__.
         Doc::
-                
                     Args:
                         max_size:     
                     Returns:
@@ -129,12 +128,7 @@ class LRUCache(object):
 
     def _move_latest(self, key):
         """ LRUCache:_move_latest.
-        Doc::
-                
-                    Args:
-                        key:     
-                    Returns:
-                       
+        Doc::          
         """
         # Order is in descending priority, i.e. first element
         # is latest.
@@ -142,13 +136,7 @@ class LRUCache(object):
 
     def __getitem__(self, key, default=None):
         """ LRUCache:__getitem__.
-        Doc::
-                
-                    Args:
-                        key:     
-                        default:     
-                    Returns:
-                       
+        Doc::         
         """
         if key not in self._items:
             return default
@@ -160,12 +148,7 @@ class LRUCache(object):
     def __setitem__(self, key, value):
         """ LRUCache:__setitem__.
         Doc::
-                
-                    Args:
-                        key:     
-                        value:     
-                    Returns:
-                       
+                             
         """
         if len(self._items) >= self.max_size:
             keys = list(self._items.keys())
@@ -185,12 +168,6 @@ class fixedDict(OrderedDict):
     def __init__(self, *args, **kwds):
         """ fixedDict:__init__.
         Doc::
-                
-                    Args:
-                        *args:     
-                        **kwds:     
-                    Returns:
-                       
         """
         self.size_limit = kwds.pop("limit", None)
         OrderedDict.__init__(self, *args, **kwds)
@@ -198,24 +175,14 @@ class fixedDict(OrderedDict):
 
     def __setitem__(self, key, value):
         """ fixedDict:__setitem__.
-        Doc::
-                
-                    Args:
-                        key:     
-                        value:     
-                    Returns:
-                       
+        Doc::                       
         """
         OrderedDict.__setitem__(self, key, value)
         self._check_size_limit()
 
     def _check_size_limit(self):
         """ fixedDict:_check_size_limit.
-        Doc::
-                
-                    Args:
-                    Returns:
-                       
+        Doc::         
         """
         if self.size_limit is not None:
             while len(self) > self.size_limit:
@@ -226,67 +193,55 @@ class dict_to_namespace(object):
     #### Dict to namespace
     def __init__(self, d):
         """ dict_to_namespace:__init__.
-        Doc::
-                
-                    Args:
-                        d:     
-                    Returns:
-                       
+        Doc::                       
         """
         self.__dict__ = d
 
 
-def to_dict(**kw):
-  """function to_dict.
-  Doc::
-          
-        Args:
-            **kw:   
-        Returns:
-            
-  """
-  ## return dict version of the params
-  return kw
+from typing import Any, Callable, Sequence, Dict
+def dict_flatten(d, *,recursive: bool = True, join_fn= ".".join,) -> Dict[str, Any]:
+    r"""Flatten dictionaries recursively.
+    
+    
+    """
+    result: Dict[str, Any] = {}
+    for key, item in d.items():
+        if isinstance(item, dict) and recursive:
+            subdict = dict_flatten(item, recursive=True, join_fn=join_fn)
+            for subkey, subitem in subdict.items():
+                result[join_fn((key, subkey))] = subitem
+        else:
+            result[key] = item
+    return result
 
 
-def to_timeunix(datex="2018-01-16"):
-  """function to_timeunix.
-  Doc::
-          
-        Args:
-            datex:   
-        Returns:
-            
-  """
-  if isinstance(datex, str)  :
-     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
-
-  if isinstance(datex, datetime.date)  :
-     return int(time.mktime( datex.timetuple()) * 1000)
-
-
-def to_datetime(x) :
-  """function to_datetime.
-  Doc::
-          
-        Args:
-            x:   
-        Returns:
-            
-  """
-  import pandas as pd
-  return pd.to_datetime( str(x) )
+def dict_unflatten(d, *, recursive= True, split_fn= lambda s: s.split(".", maxsplit=1),) -> Dict[str, Any]:
+    r"""Unflatten dictionaries recursively.
+    
+    """
+    result = {}
+    for key, item in d.items():
+        split = split_fn(key)
+        result.setdefault(split[0], {})
+        if len(split) > 1 and recursive:
+            assert len(split) == 2
+            subdict = dict_unflatten(
+                {split[1]: item}, recursive=recursive, split_fn=split_fn
+            )
+            result[split[0]] |= subdict
+        else:
+            result[split[0]] = item
+    return result
 
 
+
+
+
+######################################################################################################
 def np_list_intersection(l1, l2) :
   """function np_list_intersection.
   Doc::
-          
-        Args:
-            l1:   
-            l2:   
-        Returns:
-            
+
   """
   return [x for x in l1 if x in l2]
 
@@ -310,22 +265,53 @@ def np_add_remove(set_, to_remove, to_add):
     return result_temp
 
 
+
+######################################################################################################
+def to_dict(**kw):
+  """function to_dict.
+  Doc::
+            
+  """
+  ## return dict version of the params
+  return kw
+
+
+def to_timeunix(datex="2018-01-16"):
+  """function to_timeunix.
+  Doc::
+
+
+  """
+  if isinstance(datex, str)  :
+     return int(time.mktime(datetime.datetime.strptime(datex, "%Y-%m-%d").timetuple()) * 1000)
+
+  if isinstance(datex, datetime.date)  :
+     return int(time.mktime( datex.timetuple()) * 1000)
+
+
+
+def to_datetime(x) :
+  """function to_datetime.
+  Doc::
+          
+            
+  """
+  import pandas as pd
+  return pd.to_datetime( str(x) )
+
+
 def to_float(x, valdef=-1):
     """function to_float.
-    Doc::
-
-                
+    Doc::     
     """
     try :
         return float(x)
     except :
         return valdef
 
-def to_int(x, valdef=-1):
-    """function to_int.
-    Doc::
 
-                
+def to_int(x, valdef=-1):
+    """function to_int.                
     """
     try :
         return int(x)
@@ -335,8 +321,6 @@ def to_int(x, valdef=-1):
 
 def is_int(x):
     """function is_int.
-    Doc::
-
     """
     try :
         int(x)
@@ -346,9 +330,7 @@ def is_int(x):
 
 
 def is_float(x):
-    """function is_float.
-    Doc::
-                
+    """function is_float. 
     """
     try :
         float(x)
