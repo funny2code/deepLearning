@@ -163,8 +163,9 @@ onnxruntime
 
 
 ##### Cloud
-boto
-
+boto3
+awswrangler
+smart_open
 
 
 
