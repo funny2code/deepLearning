@@ -51,6 +51,9 @@ Doc pushed here:
 
 
 
+### Good pacakge
+
+https://github.com/shankarpandala/lazypredict
 
 
 
