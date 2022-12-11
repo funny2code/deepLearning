@@ -9,7 +9,6 @@ Docs::
 
     pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
     pip install utilmy
-    !
 
     https://try2explore.com/questions/10109123
     https://mpld3.github.io/examples/index.html

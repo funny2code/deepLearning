@@ -1,10 +1,13 @@
-""" Usage template
+""" Usage template to copy paste
 Docs::
 
    pip install python-box python-highcharts mpld3 pandas-highcharts fire --quiet
    pip install pretty_html_table pyvis  utilmy
 
    https://arita37.github.io/myutil/en/zdocs_y23487teg65f6/utilmy.viz.html#module-utilmy.viz.vizhtml
+
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=Rrho08zYe6Gj
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
 
 
 """
