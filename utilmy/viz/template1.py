@@ -1,8 +1,13 @@
-# pip install python-box python-highcharts mpld3 pandas-highcharts fire --quiet
+""" Usage template
+Docs::
 
-# pip install pretty_html_table pyvis
+   pip install python-box python-highcharts mpld3 pandas-highcharts fire --quiet
+   pip install pretty_html_table pyvis  utilmy
 
-# pip install utilmy
+   https://arita37.github.io/myutil/en/zdocs_y23487teg65f6/utilmy.viz.html#module-utilmy.viz.vizhtml
+
+
+"""
 
 from utilmy.viz import vizhtml as vi
 import pandas as pd
