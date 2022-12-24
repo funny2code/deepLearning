@@ -368,13 +368,51 @@ def test5():
     import utilmy
     drepo, dtmp = utilmy.dir_testinfo()
     data = test_getdata(verbose=False)
-    doc = vi.htmlDoc(title='Stock report', dir_out="", cfg={}, css_name= "a4")
-    doc.h2('Plot of weather data') 
-    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate=  'Date',date_format =  None,
-                      coly1   =  ['Temperature'],coly2   =  ["Rainfall"],
+    doc = vi.htmlDoc(title='Weather report', dir_out="", cfg={}, css_name= "a4")
+    doc.h2('Testing to figsize') 
+    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate = 'Date',date_format = None,
+                      coly1 = ['Temperature'],coly2 = ["Rainfall"],
                      title = "Weather",cfg={},figsize=(500,300), mode='highcharts')
     vi.html_show(doc.get_html())
     doc.save(dtmp + '/test_tseries_figsize.html')
+
+    doc = vi.htmlDoc(title='Weather report', dir_out="", cfg={}, css_name= "a4")
+    doc.h2('Testing to xlabel') 
+    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate = 'Date',date_format = None,
+                      coly1 = ['Temperature'],coly2 = ["Rainfall"],
+                     title = "Weather",cfg={}, xlabel="testing xlabel", figsize=None, mode='highcharts')
+    vi.html_show(doc.get_html())
+    doc.save(dtmp + '/test_tseries_xlabel.html')
+
+    doc = vi.htmlDoc(title='Weather report', dir_out="", cfg={}, css_name= "a4")
+    doc.h2('Testing to y1label') 
+    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate = 'Date',date_format = None,
+                      coly1  = ['Temperature'],coly2 = ["Rainfall"],
+                     title = "Weather",cfg={}, y1label="testing y1label", figsize=None, mode='highcharts')
+    vi.html_show(doc.get_html())
+    doc.save(dtmp + '/test_tseries_y1label.html')
+
+    doc = vi.htmlDoc(title='Weather report', dir_out="", cfg={}, css_name= "a4")
+    doc.h2('Test to y2label') 
+    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate = 'Date',date_format = None,
+                      coly1 = ['Temperature'],coly2 = ["Rainfall"],
+                     title = "Weather",cfg={}, y2label="testing y2label", figsize=None, mode='highcharts')
+    vi.html_show(doc.get_html())
+    doc.save(dtmp + '/test_tseries_y2label.html')
+
+    doc = vi.htmlDoc(title='Weather report', dir_out="", cfg={}, css_name= "a4")
+    doc.h2('Testing to cfg') 
+    cfg = {
+        "title": "Testing title",
+        "figsize":(500,300),
+        "subtitle": "Testing subtitle"
+    }
+    doc.plot_tseries(data['weatherdata.csv'].iloc[:1000, :],coldate = 'Date',date_format = None,
+                      coly1 = ['Temperature'],coly2=  ["Rainfall"],
+                     title = None,cfg=cfg, figsize=None, mode='highcharts')
+    vi.html_show(doc.get_html())
+    doc.save(dtmp + '/test_tseries_cfg.html')
+
 
 ###################################################################################################
 if __name__ == "__main__":
