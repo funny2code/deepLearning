@@ -1419,7 +1419,9 @@ def pd_plot_tseries_highcharts(df0,
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     H = Highchart(renderTo=container_id)
     options = {
-      'chart':   { 'zoomType': 'xy'},
+      'chart':   {  "width": cc.figsize[0],
+                    "height": cc.figsize[1], 
+                    'zoomType': 'xy'},
         'title': { 'text': cc.title},
         'subtitle': {  'text': cc.subtitle },
         'xAxis': [{'type': 'datetime', 'title': { 'text': cc.xlabel } }],
