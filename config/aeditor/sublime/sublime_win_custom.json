@@ -1,0 +1,125 @@
+{
+  "keys": [
+    "ctrl+w"
+  ],
+  "command": "test"
+},
+{
+  "keys": [
+    "ctrl+n"
+  ],
+  "command": "exec",
+  "args": {
+    "shell_cmd": "cd /_devs/Python01/gitdev/dsa2 && python zgitutil.py",
+  },
+},
+{
+  "keys": [
+    "ctrl+g"
+  ],
+  "command": "google_search_input"
+},
+{
+  "keys": [
+    "ctrl+q"
+  ],
+  "command": "howdoi_direct"
+},
+{
+  "keys": [
+    "ctrl+p"
+  ],
+  "command": "fold_by_level",
+  "args": {
+    "level": 2
+  }
+},
+//{ "keys": ["ctrl+b"], "command": "goto_symbol_in_project" },
+{
+  "keys": [
+    "end"
+  ],
+  "command": "next_view"
+},
+{
+  "keys": [
+    "home"
+  ],
+  "command": "prev_view"
+},
+//{ "keys": ["ctrl+q"], "command": "howdoi" },
+{
+  "keys": [
+    "ctrl+space"
+  ],
+  "command": "goto_symbol_in_project"
+},
+{
+  "keys": [
+    "end"
+  ],
+  "command": "next_view"
+},
+{
+  "keys": [
+    "home"
+  ],
+  "command": "prev_view"
+},
+{
+  "keys": [
+    "ctrl+v"
+  ],
+  "command": "paste"
+},
+{
+  "keys": [
+    "ctrl+f1"
+  ],
+  "command": "tgit_commit",
+  "args": {
+    "dirs": []
+  }
+},
+{
+  "keys": [
+    "ctrl+f2"
+  ],
+  "command": "tgit_sync"
+},
+{
+  "keys": [
+    "ctrl+t"
+  ],
+  "command": "terminus_open",
+  "args": {
+    "cwd": "${file_path:${folder}}"
+  }
+},
+{
+  "keys": [
+    "ctrl+tab"
+  ],
+  "command": "send_code",
+  "context": [
+    {
+      "key": "selector",
+      "operator": "equal",
+      "operand": "source"
+    }
+  ]
+},
+{
+  "keys": [
+    "ctrl+tab"
+  ],
+  "command": "send_code",
+  "context": [
+    {
+      "key": "selector",
+      "operator": "equal",
+      "operand": "markup.raw.code-fence.markdown, markup.raw.block.fenced.markdown"
+    }
+  ]
+},
+]
