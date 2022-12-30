@@ -51,6 +51,7 @@ opencv-python-headless
 
 ########################################################
 #### utilmy.nlp
+scikit-learn
 datasketch  ### lSH
 rapidfuzz
 editdistance
