@@ -461,7 +461,7 @@ class htmlDoc(object):
 
     def plot_tseries(self, df:pd.DataFrame, coldate, coly1: list, coly2=[],
                      title: str="", xlabel=None, y1label=None,  y2label=None,                      
-                     figsize: tuple=(14,7),  plot_type="", spacing=0.1,
+                     figsize: tuple=(800,400),  plot_type="", spacing=0.1,
 
                      date_format=None, nsample: int= 10000,
                      
@@ -1401,7 +1401,7 @@ def pd_plot_tseries_highcharts(df0,
     cc.y1label   = "_".join(coly1)      if y1label is None else y1label
     cc.y2label   = "_".join(coly2)      if y2label is None else y2label
     cc.title        = cc.get('title',    str(y1label) + " vs " + str(coldate) ) if title is None else title
-    cc.figsize      = cc.get('figsize', (25, 15) )    if figsize is None else figsize
+    cc.figsize      = cc.get('figsize', (800, 400) )    if figsize is None else figsize
     cc.subtitle     = cc.get('subtitle', '')
     cc.coly1    = coly1
     cc.coly2    = coly2
@@ -1419,7 +1419,9 @@ def pd_plot_tseries_highcharts(df0,
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     H = Highchart(renderTo=container_id)
     options = {
-      'chart':   { 'zoomType': 'xy'},
+      'chart':   {  "width": cc.figsize[0],
+                    "height": cc.figsize[1],
+                    'zoomType': 'xy'},
         'title': { 'text': cc.title},
         'subtitle': {  'text': cc.subtitle },
         'xAxis': [{'type': 'datetime', 'title': { 'text': cc.xlabel } }],
