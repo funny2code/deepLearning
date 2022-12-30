@@ -79,8 +79,6 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
       - 'REDIS_CLUSTER_CREATOR=yes'
       - 'REDIS_CLUSTER_ANNOUNCE_IP=localhost'
-      - 'REDIS_CLUSTER_ANNOUNCE_PORT=6384'
-      - 'REDIS_CLUSTER_DYNAMIC_IPS=no'
 
 volumes:
   redis-cluster_data-0:
