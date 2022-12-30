@@ -19,9 +19,16 @@ from utilmy import log
 #################################################################################
 #################################################################################
 def test_all():
-    test_connection()
-    test_getput()
+    #test_connection()
+    #test_getput()
     test_getputmulti()
+
+
+def test_all_cluster(config=None):
+    test_cluster1()
+    test_getputmulti()
+
+
 
 
 def test_connection():
@@ -70,7 +77,7 @@ def test_getputmulti():
 def test_cluster1():
     # test connection failed
     try:
-        client = RedisClusterClient('localssss', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+        client = RedisClusterClient('localssss', 6379, [6379, ], 'bitnami')
         assert False
     except redis.exceptions.RedisClusterException:
         assert True
@@ -79,27 +86,27 @@ def test_cluster1():
 def test_cluster2():
     # test connection success
     try:
-        client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+        client = RedisClusterClient('localhost', 6379, [6379, ], 'bitnami')
         assert True
     except redis.exceptions.RedisClusterException:
         assert False
 
 
 def test_cluster3():
-    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    client = RedisClusterClient('localhost', 6379, [6379, ], 'bitnami')
     client.put('foo', 'bar')
     res = client.get('foo').decode('utf8')
     assert res == 'bar'
 
 def test_cluster_set_with_ttl():
-    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    client = RedisClusterClient('localhost', 6379, [6379, ], 'bitnami')
     client.put('foo', 'bar', 1)
     time.sleep(1)
     res = client.get('foo')
     assert res == None
 
 def test_cluster_getputmulti():
-    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    client = RedisClusterClient('localhost', 6379, [6379, ], 'bitnami')
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
     keys = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', ]
 
@@ -112,7 +119,7 @@ def test_cluster_getputmulti():
 
 
 def test_cluster_getmulti_5lastkey():
-    client = RedisClusterClient('localhost', 6379, [6379, 6380, 6381, 6382, 6383, 6384], 'bitnami')
+    client = RedisClusterClient('localhost', 6379, [6379, ], 'bitnami')
     keyvalues = [['a', '1'], ['b', '2'], ['c', '3'], ['d', '4'], ['e', '5'], ['f', '6'], ['g', '7'], ['h', '8'], ['i', '9'], ['j', '10'], ['k', '11'], ['l', '12']]
     keys = ['g', 'h', 'i', 'j', 'k']
 
