@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Start containers
-        run: docker-compose up -d --build -f utilmy/db/kvs/redis_cluster_docker.yuml
+        run: docker-compose up -d --build -f utilmy/db/kvs/redis_cluster_docker.yml
 
 
       - name: Full Run
