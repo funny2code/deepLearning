@@ -1,3 +1,4 @@
+##### macoS needs a bridge
 version: '2'
 services:
   redis-node-0:
@@ -13,7 +14,7 @@ services:
       - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-5'
       - REDIS_CLUSTER_ANNOUNCE_PORT=6379
-      - 'REDIS_CLUSTER_ANNOUNCE_IP=192.168.50.4'
+      - 'REDIS_CLUSTER_ANNOUNCE_IP=$(HOST_IP)'
       - REDIS_CLUSTER_BUS_ANNOUNCE_PORT=16369
       - REDIS_CLUSTER_DYNAMIC_IPS=no
     networks:
@@ -44,7 +45,7 @@ services:
     command:
       - /bin/bash
       - -c
-      - redis-cli -a bitnami --cluster create 192.168.50.4:6379  --cluster-replicas 1 --cluster-yes
+      - redis-cli -a bitnami --cluster create $HOST_IP:6379  --cluster-replicas 1 --cluster-yes
 
     networks:
       cluster-redis:

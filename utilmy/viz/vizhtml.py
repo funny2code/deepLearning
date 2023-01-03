@@ -9,7 +9,6 @@ Docs::
 
     pip install python-box python-highcharts  mpld3 pandas-highcharts fire  pretty-html-table matplotlib ipython
     pip install utilmy
-    !
 
     https://try2explore.com/questions/10109123
     https://mpld3.github.io/examples/index.html
@@ -57,14 +56,16 @@ from utilmy.viz.test_vizhtml import (test1, test2, test3, test4, test_scatter_an
 )
 
 try :
-   import matplotlib.pyplot as plt
-   import mpld3
-   from highcharts import Highchart
-   from pyvis import network as net
+   pass
+   # import matplotlib.pyplot as plt
+   # import mpld3
+   # from highcharts import Highchart
+   # from pyvis import network as net
 except :
    #from utilmy.utilmy_base import sys_install
-   #sys_install(cmd= cmd)      
-   log("pip install python-box python-highcharts dateparser matplotlib==3.2.1 ipython  mpld3==0.5.7 pandas-highcharts  pretty-html-table  pyvis  --upgrade-strategy only-if-needed")
+   #sys_install(cmd= cmd)
+   log("pip install python-box python-highcharts dateparser matplotlib==3.2.1  pandas-highcharts  pretty-html-table   --upgrade-strategy only-if-needed")
+   log("pip install mpld3==0.5.7 pandas-highcharts pyvis  --upgrade-strategy only-if-needed")
    1/0  ### exit Gracefully !
 
    
@@ -134,8 +135,8 @@ def show(file_csv_parquet:str="myfile.parquet", title='table',format: str='blue_
     from utilmy import pd_read_file
     df = pd_read_file(file_csv_parquet)
     log(df)
-    title = title + "<br>" + file
-    doc = vi.htmlDoc(dir_out="", title=title, format=format, cfg={})
+    title = title + "<br>" + file_csv_parquet
+    doc = htmlDoc(dir_out="", title=title, format=format, cfg={})
     doc.h1(title) 
     doc.table(df, use_datatable=use_datatable, table_id=table_id, custom_css_class=css_class)
     doc.save(dir_out)
@@ -462,7 +463,7 @@ class htmlDoc(object):
 
     def plot_tseries(self, df:pd.DataFrame, coldate, coly1: list, coly2=[],
                      title: str="", xlabel=None, y1label=None,  y2label=None,                      
-                     figsize: tuple=(14,7),  plot_type="", spacing=0.1,
+                     figsize: tuple=(800,400),  plot_type="", spacing=0.1,
 
                      date_format=None, nsample: int= 10000,
                      
@@ -489,6 +490,7 @@ class htmlDoc(object):
         """
         html_code = ''
         if mode == 'matplot':
+            import mpld3
             fig       = pd_plot_tseries_matplot(df, coldate, coly1=coly1, coly2=coly2,
                                                    date_format=date_format,
 
@@ -692,32 +694,35 @@ mpld3_CSS = """
     display: none; }
 """
 
+try:
+    import mpld3
+    class mpld3_TopToolbar(mpld3.plugins.PluginBase):
+        """Plugin for moving toolbar to top of figure"""
 
-class mpld3_TopToolbar(mpld3.plugins.PluginBase):
-    """Plugin for moving toolbar to top of figure"""
+        JAVASCRIPT = """
+        mpld3.register_plugin("toptoolbar", TopToolbar);
+        TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
+        TopToolbar.prototype.constructor = TopToolbar;
+        function TopToolbar(fig, props){
+            mpld3.Plugin.call(this, fig, props);
+        };
+        TopToolbar.prototype.draw = function(){
+          // the toolbar svg doesn't exist
+          // yet, so first draw it
+          this.fig.toolbar.draw();
+          // then change the y position to be
+          // at the top of the figure
+          this.fig.toolbar.toolbar.attr("x", 150);
+          this.fig.toolbar.toolbar.attr("y", 400);
+          // then remove the draw function,
+          // so that it is not called again
+          this.fig.toolbar.draw = function() {}
+        }
+        """
+        def __init__(self):
+            self.dict_ = {"type": "toptoolbar"}
+except : pass
 
-    JAVASCRIPT = """
-    mpld3.register_plugin("toptoolbar", TopToolbar);
-    TopToolbar.prototype = Object.create(mpld3.Plugin.prototype);
-    TopToolbar.prototype.constructor = TopToolbar;
-    function TopToolbar(fig, props){
-        mpld3.Plugin.call(this, fig, props);
-    };
-    TopToolbar.prototype.draw = function(){
-      // the toolbar svg doesn't exist
-      // yet, so first draw it
-      this.fig.toolbar.draw();
-      // then change the y position to be
-      // at the top of the figure
-      this.fig.toolbar.toolbar.attr("x", 150);
-      this.fig.toolbar.toolbar.attr("y", 400);
-      // then remove the draw function,
-      // so that it is not called again
-      this.fig.toolbar.draw = function() {}
-    }
-    """
-    def __init__(self):
-        self.dict_ = {"type": "toptoolbar"}
 
 
 def mlpd3_add_tooltip(fig, points, labels):
@@ -809,7 +814,7 @@ def pd_plot_scatter_matplot(df:pd.DataFrame, colx: str=None, coly: str=None, col
             save_path=''  :        Path to save plot.
             verbose=True  :        Verbose.
     """
-    
+    import matplotlib.pyplot as plt
     cc           = Box(cfg)
     cc.figsize   = cc.get('figsize', (25, 15))  # Dict type default values
     cc.title     = cc.get('title', 'scatter title' )
@@ -1153,6 +1158,7 @@ def pd_plot_histogram_matplot(df:pd.DataFrame, col: str='' ,colormap:str='RdYlBu
         ylabel=None       :        Label for y axis.
         verbose=True      :        Verbose mode.
     """
+    import matplotlib.pyplot as plt
     cm = plt.cm.get_cmap(colormap)
     df.loc[:,col] = df[col].fillna(0)
     df.loc[:,col] = [ to_float(t) for t in df[col].values  ]
@@ -1299,6 +1305,7 @@ def pd_plot_scatter_highcharts(df0:pd.DataFrame, colx:str=None, coly:str=None, c
                                cfg:dict={}, mode='d3', save_img=False,  verbose=True )
     """
     import matplotlib
+    import matplotlib.pyplot as plt
     from box import Box
     from highcharts import Highchart
 
@@ -1330,6 +1337,7 @@ def pd_plot_scatter_highcharts(df0:pd.DataFrame, colx:str=None, coly:str=None, c
 
     ### Using Class 1 ---> Color
     color_list    = [ hash(str(x)) for x in df[colclass1].values     ]
+
     # Normalize the classes value over [0.0, 1.0]
     norm          = matplotlib.colors.Normalize(vmin=min(color_list), vmax=max(color_list))
     c_map         = plt.cm.get_cmap(cc.colormap)
@@ -1402,7 +1410,7 @@ def pd_plot_tseries_highcharts(df0,
     cc.y1label   = "_".join(coly1)      if y1label is None else y1label
     cc.y2label   = "_".join(coly2)      if y2label is None else y2label
     cc.title        = cc.get('title',    str(y1label) + " vs " + str(coldate) ) if title is None else title
-    cc.figsize      = cc.get('figsize', (25, 15) )    if figsize is None else figsize
+    cc.figsize      = cc.get('figsize', (800, 400) )    if figsize is None else figsize
     cc.subtitle     = cc.get('subtitle', '')
     cc.coly1    = coly1
     cc.coly2    = coly2
@@ -1420,7 +1428,9 @@ def pd_plot_tseries_highcharts(df0,
     container_id = 'cid_' + str(np.random.randint(9999, 99999999))
     H = Highchart(renderTo=container_id)
     options = {
-      'chart':   { 'zoomType': 'xy'},
+      'chart':   {  "width": cc.figsize[0],
+                    "height": cc.figsize[1],
+                    'zoomType': 'xy'},
         'title': { 'text': cc.title},
         'subtitle': {  'text': cc.subtitle },
         'xAxis': [{'type': 'datetime', 'title': { 'text': cc.xlabel } }],
@@ -1623,6 +1633,7 @@ def colormap_get_names():
 
 
   """
+  import matplotlib.pyplot as plt
   cmaps = {}
   cmaps['uniform_sequential'] = [
             'viridis', 'plasma', 'inferno', 'magma', 'cividis']
@@ -1882,8 +1893,7 @@ x.onclick = function() {
 ###################################################################################################
 ###################################################################################################
 def help_get_codesource(func):
-    """ 
-    Extract code source from func name
+    """ Extract code source from func name
     Docs::
 
             func:        function to extract code source from
@@ -1898,8 +1908,7 @@ def help_get_codesource(func):
 
 
 def to_float(x):
-    """
-    Convert x to float if possible
+    """Convert x to float if possible
     Docs::
 
             x:        object to convert to float

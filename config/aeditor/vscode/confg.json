@@ -1,0 +1,133 @@
+{
+  "editor.formatOnPaste": true,
+  "editor.multiCursorModifier": "ctrlCmd",
+  "editor.snippetSuggestions": "top",
+  "files.autoSave": "afterDelay",
+  "editor.wordWrapColumn": 120,
+  "vs-kubernetes": {
+    "vs-kubernetes.helm-path.windows": "C:\\Users\\kevin.noel\\.vs-kubernetes\\tools\\helm\\windows-amd64\\helm.exe",
+    "vs-kubernetes.minikube-path.windows": "C:\\Users\\kevin.noel\\.vs-kubernetes\\tools\\minikube\\windows-amd64\\minikube.exe",
+    "vs-kubernetes.draft-path.windows": "C:\\Users\\kevin.noel\\.vs-kubernetes\\tools\\draft\\windows-amd64\\draft.exe"
+  },
+  "editor.minimap.enabled": false,
+  "workbench.iconTheme": "Monokai Pro Icons",
+  "editor.fontWeight": "100",
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "yaml.schemas": {
+    "file:///c%3A/Users/noelk/.vscode/extensions/atlassian.atlascode-2.10.12/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+  },
+  "atlascode.bitbucket.enabled": false,
+  "atlascode.jira.enabled": false,
+  "python.jediEnabled": false,
+  "python.analysis.cacheFolderPath": "C:\\ztmp\\vscode_cache",
+  "python.analysis.cachingLevel": "Library",
+  "remote.SSH.remotePlatform": {
+    "linux": ""
+  },
+  "python.languageServer": "Jedi",
+  "python.linting.enabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.extraPaths": [
+    "D:/_devs/Python01/ana3b/envs/py37/Lib/site-packages"
+  ],
+  "python.pythonPath": "D:/_devs/Python01/ana3b/envs/py37/python.exe",
+  "workbench.colorTheme": "Monokai One Dark Vivid",
+  "breadcrumbs.enabled": false,
+  "editor.renderWhitespace": "none",
+  "remoteHub.commitDirectlyWarning": "off",
+  "workbench.sideBar.location": "right",
+  "editor.foldingImportsByDefault": true,
+  "editor.showFoldingControls": "always",
+  "anycode.language.features": {
+    "folding": true
+  },
+  "anycode.symbolIndexSize": 9000,
+  "explorer.confirmDragAndDrop": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "editor.fontFamily": "Consolas,GenericMonospace,ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,‘Fira Code’, Consolas, 'Courier New', monospace",
+  "editor.tabSize": 2,
+  "editor.fontSize": 13.5,
+  // Is git enabled
+  "git.enabled": true,
+  "git.decorations.enabled": false,
+  "git.ignoreMissingGitWarning": true,
+  "editor.glyphMargin": false,
+  "editor.inlineSuggest.enabled": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+  "terminal.integrated.tabs.location": "left",
+  "git.autofetch": true,
+  "terminal.integrated.tabs.enabled": false,
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "sendtoterminalplus.languages": [
+    {
+      "langId": "default",
+      "delayMode": "default",
+      "payloadFormat": "default",
+      "linePattern": "{line}",
+      "noSelectionPayload": [
+        "{currentline}"
+      ],
+      "oneLineSelectionPayload": [
+        "{selection}"
+      ],
+      "multiLineSelectionPayload": [
+        "{selection}"
+      ]
+    },
+    {
+      "langId": "scala",
+      "delayMode": "default",
+      "payloadFormat": "chunk",
+      "linePattern": "{line}",
+      "noSelectionPayload": [
+        "{currentline}"
+      ],
+      "oneLineSelectionPayload": [
+        "{selection}"
+      ],
+      "multiLineSelectionPayload": [
+        ":paste",
+        "{selection}",
+        "\u0004"
+      ]
+    },
+    {
+      "langId": "python",
+      "delayMode": "default",
+      "payloadFormat": "chunk",
+      "linePattern": "{line}",
+      "noSelectionPayload": [
+        "{currentline}",
+        "",
+        "\u0004"
+      ],
+      "oneLineSelectionPayload": [
+        "{selection}",
+        "",
+        "\u0004"
+      ],
+      "multiLineSelectionPayload": [
+        "{selection}",
+        "",
+        "\u0004"
+      ]
+    }
+  ],
+  "explorer.confirmDelete": false,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "extensions.autoUpdate": false,
+  "redhat.telemetry.enabled": true,
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": false,
+    "plaintext": false,
+    "markdown": true,
+    "python": true
+  },
+  "diffEditor.ignoreTrimWhitespace": false,
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "editor.foldingMaximumRegions": 10000
+}

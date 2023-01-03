@@ -51,6 +51,7 @@ opencv-python-headless
 
 ########################################################
 #### utilmy.nlp
+scikit-learn==1.1.3
 datasketch  ### lSH
 rapidfuzz
 editdistance
@@ -163,8 +164,9 @@ onnxruntime
 
 
 ##### Cloud
-boto
-
+boto3
+awswrangler
+smart_open
 
 
 

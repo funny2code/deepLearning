@@ -1,11 +1,22 @@
-# pip install python-box python-highcharts mpld3 pandas-highcharts fire --quiet
+""" Usage template to copy paste
+Docs::
 
-# pip install pretty_html_table pyvis
+   pip install python-box python-highcharts mpld3 pandas-highcharts fire --quiet
+   pip install pretty_html_table pyvis  utilmy
 
-# pip install utilmy
+   https://arita37.github.io/myutil/en/zdocs_y23487teg65f6/utilmy.viz.html#module-utilmy.viz.vizhtml
 
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=Rrho08zYe6Gj
+    https://colab.research.google.com/drive/1NYQZrfAPqbuLCt9yhVROLMRJM-RrFYWr#scrollTo=2zMKv6MXOJJu
+
+
+"""
+
+#################################################################################################################
+#############  Template 1 #######################################################################################
 from utilmy.viz import vizhtml as vi
 import pandas as pd
+
 
 url = 'https://raw.githubusercontent.com/AlexAdvent/high_charts/main/data/stock_data.csv'
 df = pd.read_csv(url)
@@ -38,3 +49,31 @@ doc.pd_plot_network(df, cola='from', colb='to',
     coledge='col_edge',colweight="weight")
 
 doc.save('graphplot.html')
+
+
+
+#################################################################################################################
+#############  Template 2 #######################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
