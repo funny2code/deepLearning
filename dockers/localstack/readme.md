@@ -21,6 +21,9 @@ TODO
 
 
 
+Infos
+
+https://stackoverflow.com/questions/45551496/redirect-aws-sdks-default-endpoint-to-mocked-localstack-endpoints
 
 
 ```
