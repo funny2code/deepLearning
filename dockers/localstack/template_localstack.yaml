@@ -1,0 +1,66 @@
+version: '3.8'
+
+volumes:
+    mysql_data:
+        driver: local
+    s3_data:
+        driver: local
+
+services:
+    app:
+        build:
+            context: .
+            target: development
+        depends_on:
+            - db
+            - cache
+            - s3
+
+        ports:
+            - 8888:80
+            - 9229:9229
+        volumes:
+            - ./src:/app/src
+            - ./bin:/app/bin
+        env_file:
+            - ./.env
+        environment:
+            - NODE_ENV=debug
+            - DB_NAME=mydbsql
+
+        profiles:
+            - dev
+  
+    db:
+        image: mysql:5.7
+        platform: linux/x86_64
+        ports:
+            - 3306:3306
+        environment:
+            - MYSQL_ROOT_PASSWORD=test
+        volumes:
+            - mysql_data:/var/lib/mysql
+
+    ###### Issue on MacOS ---> need to use th docker_rediscluster.yml
+    cache:
+        image: docker.io/bitnami/redis-cluster:7.0
+        ports:
+           - 6379:6379
+    # cache:
+    #     image: redis:5.0.4
+    #     ports:
+    #         - 6379:6379
+
+    s3:
+        image: minio/minio:RELEASE.2022-08-02T23-59-16Z
+        ports:
+            - 9000:9000
+            - 9001:9001
+        command: server --console-address :9001 /data
+        volumes:
+            - s3_data:/data
+
+networks:
+    default:
+        name: localnet
+        driver: bridge
