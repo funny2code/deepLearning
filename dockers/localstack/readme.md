@@ -5,15 +5,8 @@
 ```
 TODO
 
-   1) Create and test
-         template_localstack.yaml
+   Fix  v2/docker_aws/yaml  to create a mock of AWS
 
-
-   2) and Re-direct all AWS acccess to this docker
-       AWS IAM
-       AWS Redis
-       AWS RDS Mysql
-       AWS S3
 
     
     So, when we start this docker + Shell Script ===> All AWS Code works with this docker !!!!
