@@ -3,7 +3,7 @@
 
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, random
-from tkinter import E
+# from tkinter import E
 from box import Box
 
 
