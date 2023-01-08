@@ -27,6 +27,8 @@
 
 
 #### Mock Permanent Endpoint
+      https://stackoverflow.com/questions/52494196/is-there-any-way-to-specify-endpoint-url-in-aws-cli-config-file
+      
       https://hackernoon.com/run-your-own-aws-apis-on-openshift-d0acb876d5b6
 
 
