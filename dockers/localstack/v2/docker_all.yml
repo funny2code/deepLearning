@@ -1,0 +1,111 @@
+version: '3.7'
+
+services:
+  localstack:
+    image: localstack/localstack:0.14.4
+    ports:
+      - 4566:4566 # すべてのサービスポート
+      - 8000:8080 # dashboard
+    volumes:
+      # 初回起動スクリプト
+      - ./docker/localstack:/docker-entrypoint-initaws.d
+      # おまじない
+      - /var/run/docker.sock:/var/run/docker.sock
+      # データのマウント
+      - 'localstack-data:/tmp/localstack'
+    environment:
+      # 有効にするサービス
+      - SERVICES=s3,iam
+      # s3のpresignedUrl
+      # https://docs.localstack.cloud/integrations/aws-cli/#setting-up-local-region-and-credentials-to-run-localstack
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - DISABLE_CORS_CHECKS=1
+
+volumes:
+  localstack-data:
+    driver: 'local'
+
+
+####### MySQL
+  rds_mysql:
+      image: mysql:5.7
+      platform: linux/x86_64
+      ports:
+          - 3306:3306
+      environment:
+          - MYSQL_ROOT_PASSWORD=test
+      volumes:
+          - mysql_data:/var/lib/mysql
+
+
+
+######## Redis cluster
+  redis-node-0:
+    image: docker.io/bitnami/redis-cluster:7.0
+    volumes:
+      - redis-cluster_data-0:/bitnami/redis/data
+    #network_mode: "host"
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    environment:
+      #- 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-5'
+      - REDIS_CLUSTER_ANNOUNCE_PORT=6379
+      - 'REDIS_CLUSTER_ANNOUNCE_IP=192.168.50.4'
+      - REDIS_CLUSTER_BUS_ANNOUNCE_PORT=16369
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    networks:
+      cluster-redis:
+        ipv4_address: 172.27.0.105
+
+  redis-node-5:
+    image: docker.io/bitnami/redis-cluster:7.0
+    volumes:
+      - redis-cluster_data-5:/bitnami/redis/data
+    # network_mode: "host"
+    ports:
+      - "6380:6379"
+    depends_on:
+      - redis-node-0
+      # - redis-node-1
+
+    environment:
+      #- 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDISCLI_AUTH=bitnami'
+      - 'REDIS_CLUSTER_REPLICAS=1'
+      #- 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+      - 'REDIS_NODES=redis-node-0  redis-node-5'
+      - 'REDIS_CLUSTER_CREATOR=yes'
+      - REDIS_CLUSTER_DYNAMIC_IPS=no
+    entrypoint: []
+    command:
+      - /bin/bash
+      - -c
+      - redis-cli -a bitnami --cluster create 192.168.50.4:6379  --cluster-replicas 1 --cluster-yes
+
+    networks:
+      cluster-redis:
+        ipv4_address: 172.27.0.106
+
+volumes:
+  redis-cluster_data-0:
+    driver: local
+  redis-cluster_data-5:
+    driver: local
+
+###### Issue in MacOS ---> need to create Bridge with local IP adress !!!!
+networks:
+  cluster-redis:
+    driver: bridge
+    ipam:
+        driver: default
+        config:
+            - subnet: 172.27.0.0/16
+
+
