@@ -570,6 +570,7 @@ utilmy/db/kvs/util_redis.py
 randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
 randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
 test_all()
+test_all_cluster(config = None)
 test_cluster1()
 test_cluster2()
 test_cluster3()
@@ -6718,6 +6719,7 @@ test1(verbose = False)
 test2(verbose = False)
 test3(verbose = False)
 test4(verbose = False)
+test5()
 test_colimage_table()
 test_cssname(verbose = False, css_name = "a4")
 test_external_css()
@@ -6790,7 +6792,6 @@ htmlDoc.sep(self, css: str = '')
 htmlDoc.serve_file(self)
 htmlDoc.table(self, df:pd.DataFrame, format: str = 'blue_light', custom_css_class = None, colimage  =  None, use_datatable = False, table_id = None, **kw)
 htmlDoc.tag(self, x)
-mpld3_TopToolbar.__init__(self)
 
 
 utilmy/viz/zarchive/__init__.py
