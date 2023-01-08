@@ -25,13 +25,17 @@
 
 
 
-#### Mock Endpoint
-https://hackernoon.com/run-your-own-aws-apis-on-openshift-d0acb876d5b6
+#### Mock Permanent Endpoint
+      https://hackernoon.com/run-your-own-aws-apis-on-openshift-d0acb876d5b6
 
 
-aws configure set cli_pager "" --profile integ
+      aws configure set cli_pager "" --profile integ
 
-https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+      https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html
+
+
+      https://github.com/ikigeg/localstack-demonstrations
+
 
 
 ```
