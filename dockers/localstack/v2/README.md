@@ -9,9 +9,12 @@
 
 
 #### Start the AWS mock rediscluster
-   docker compose -f cluster/docker-compose.yml up
+   docker compose -f  noredis/docker-compose.yml up
 
-   redis_cluster_create.py  --node-count 5
+
+   export HOSTIP=$( ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'  ) 
+
+   docker compose -f  rredis/docker-rediscluster.yml up
 
 
 
