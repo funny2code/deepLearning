@@ -6,8 +6,8 @@
    
    ###### Need to send the Host IP to RedisCluster
    export HOSTIP=(ipconfig)
-
-   docker compose  -e $HOSTIP:HOSTIP          -f    rredis/docker_rediscluster.yml       up
+   ### HOSTIp avaialble in the docker NOW
+   docker compose            -f    rredis/docker_rediscluster.yml       up
 
 
    #### Set permanent endpoints
@@ -19,7 +19,7 @@
    # This command must be written in ~/.bash_aliases or ~/.bashrc – 
 
    ### function aws() { /usr/local/bin/aws --endpoint foo "${@}" } 
-    
+
 
    ./check_localstack.sh
 
