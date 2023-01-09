@@ -1,9 +1,28 @@
 ```
 
+Structure learning
+
+https://github.com/ignavierng/golem
+
+https://github.com/ignavierng/golem/blob/main/src/golem.py#L50
+
+
+https://github.com/huawei-noah/trustworthyAI/tree/master/gcastle
+
+
+
+
+
+https://benchpressdocs.readthedocs.io/en/latest/available_structure_learning_algorithms.html
+
 
 https://causalpy.readthedocs.io/en/latest/
 
 
+
+https://medium.com/@felixleopoldorios/structure-learning-using-benchpress-826847db0aa8
+
+https://github.com/felixleopoldo/benchpress
 
 
 Python causal ecosystem grows rapidly. While writing my book (https://causalpython.io) I analyzed it thoroughly, looking for packages that have stable support, enthusiastic contributors and simply do their job. Here are my four recommendations:
