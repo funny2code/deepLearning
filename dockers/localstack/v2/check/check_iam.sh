@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
+##### Check IAM
 
-: '
-    Simple unit test to ensure localstack IAM is up and running
-'
-
-USER_NAME="Brian Kernighan"
 AWS_TOOL="awslocal"
 
 awsInvoke() {

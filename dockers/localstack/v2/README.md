@@ -1,25 +1,25 @@
 # Readme
 ```
-### Install :   (awslocal & redis)  for Mac
-    ./install.sh
+### Install :  
+    ### AWS Mock
+    pip3 install awscli-local 
+
+    ### redis client
+    brew install redis
 
 
-#### Start the AWS mock Redis
-   docker compose -f nocluster/docker-compose.yml up
+
+#### Start the AWS mock Redis normal
+   start_all.sh  redis
 
 
 #### Start the AWS mock rediscluster
-   docker compose -f  noredis/docker-compose.yml up
-
-
-   export HOSTIP=$( ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'  ) 
-
-   docker compose -f  rredis/docker-rediscluster.yml up
+   start_all.sh  rediscluster
 
 
 
 #### Tests
-   s3-test.sh    : S3 testing
+   check/check_s3.sh    : S3 testing
 
 
    mysql -h 127.0.0.1 -P 3306 -u root -p test
@@ -29,7 +29,30 @@
 
 
 
+### Docs
+
+https://github.com/ikigeg/localstack-demonstrations
+
+
+aws s3api create-bucket \
+  --bucket my-bucket-name \
+  --region ap-northeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1 \
+  --endpoint-url http://localhost:4566
+
+  --region ap-northeast-1 \
+  --create-bucket-configuration LocationConstraint=ap-northeast-1 \
+
+
+
+
+
 #### Mock Permanent Endpoint
+alias aws='aws --endpoint-url http://localhost:4566'
+And put that in your ~/.bash_profile or ~/.zshrc
+
+
+
       https://stackoverflow.com/questions/52494196/is-there-any-way-to-specify-endpoint-url-in-aws-cli-config-file
       
       https://hackernoon.com/run-your-own-aws-apis-on-openshift-d0acb876d5b6
@@ -51,18 +74,14 @@
 ```
 Docker compose with a redis cluster does not work on a mac as the redis cluster
 cannot forward ip address on a mac due to how networking works. Run:
-`docker compose -f ./docker-compose.yml up` and you will see all of the nodes
-are running fine in Docker. It will then connect fine by running `redis-cli`.
-However it will hang when redis puts the `key -> value` pair in another node.
-It will look like this:
+`docker compose -f ./docker-compose.yml up`
+
+
 127.0.0.1:6370> SET hello world
 -> Redirected to slot [3028] located at 172.18.0.6:6379
 Putting the nodes in a specific subnet 
 
 
-To get around this problem I have supplied a script for creating a cluster
-locally and compose file for just creating a redis server. There is no way
-around this.
 
 
 ```

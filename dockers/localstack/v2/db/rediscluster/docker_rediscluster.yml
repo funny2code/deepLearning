@@ -43,9 +43,9 @@ services:
     entrypoint: []
     command:
       - /bin/bash
-      - -c
-      - redis-cli -a bitnami --cluster create 192.168.50.4:6379  --cluster-replicas 1 --cluster-yes
-      ### 192.168  IS your local Laptop host IP  ---> Make accessible through localhost
+      - redis-cli -a bitnami --cluster create  ${HOST_IP}:6379  --cluster-replicas 1 --cluster-yes
+      ## - redis-cli -a bitnami --cluster create 192.168.50.4:6379  --cluster-replicas 1 --cluster-yes
+      ## 192.168  IS your local Laptop host IP  ---> Make accessible through localhost
 
     networks:
       cluster-redis:
