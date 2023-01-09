@@ -1,0 +1,52 @@
+version: '3.7'
+
+services:
+  ####### localstack #########################################
+  localstack:
+    image: localstack/localstack:0.14.4
+    ports:
+      - "4566:4566" #
+      - "8000:8080" # dashboard
+    volumes:
+      - ./docker/localstack:/docker-entrypoint-initaws.d
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # 有効にするサービス
+      - SERVICES=s3,iam,redshift
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - DISABLE_CORS_CHECKS=1
+    networks:
+      app_subnet:
+        ipv4_address: 172.18.0.10
+
+  ####### MySQL  #############################################
+  rds_mysql:
+    image: mysql:5.7
+    platform: linux/x86_64
+    ports:
+      - "3306:3306"
+    # Connect via commandline: mysql -h 127.0.0.1 -P 3306 -u root -p
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+    networks:
+      app_subnet:
+        ipv4_address: 172.18.0.20
+
+  ###### Redis ###############################################
+  redis:
+    image: redis:7
+    ports:
+      - "6370:6379"
+    networks:
+      app_subnet:
+        ipv4_address: 172.18.0.32
+
+networks:
+  app_subnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
