@@ -72,6 +72,11 @@ And put that in your ~/.bash_profile or ~/.zshrc
 
 #### Issues
 ```
+Redis Cluster fixes
+
+https://github.com/bitnami/bitnami-docker-redis-cluster/issues/3
+
+
 Docker compose with a redis cluster does not work on a mac as the redis cluster
 cannot forward ip address on a mac due to how networking works. Run:
 `docker compose -f ./docker-compose.yml up`
