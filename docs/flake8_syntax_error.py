@@ -5828,3 +5828,21 @@ Traceback (most recent call last):
   File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/options/config.py", line 131, in parse_config
     raise ValueError(
 ValueError: Error code 'E/W' supplied to 'ignore' option does not match '^[A-Z]{1,3}[0-9]{0,3}$'
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/bin/flake8", line 8, in <module>
+    sys.exit(main())
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/main/cli.py", line 23, in main
+    app.run(argv)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/main/application.py", line 198, in run
+    self._run(argv)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/main/application.py", line 186, in _run
+    self.initialize(argv)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/main/application.py", line 165, in initialize
+    self.plugins, self.options = parse_args(argv)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/options/parse_args.py", line 53, in parse_args
+    opts = aggregator.aggregate_options(option_manager, cfg, cfg_dir, rest)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/options/aggregator.py", line 30, in aggregate_options
+    parsed_config = config.parse_config(manager, cfg, cfg_dir)
+  File "/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/flake8/options/config.py", line 131, in parse_config
+    raise ValueError(
+ValueError: Error code 'E/W' supplied to 'ignore' option does not match '^[A-Z]{1,3}[0-9]{0,3}$'
