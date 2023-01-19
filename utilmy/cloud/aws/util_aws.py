@@ -263,13 +263,15 @@ def aws_get_session(profile_name:str="", session=None):
             session.get_component('credential_provider').get_provider('assume-role').cache = credentials.JSONFileCache(cli_cache)
 
             # Create boto3 client from session
-            client = boto3.Session(botocore_session=session)
+            try:
+                client = boto3.Session(botocore_session=session)
+            except botocore.exceptions.ClientError as e:
+                client = BotoSession().refreshable_session()
             log2("Using ", fi, client)
             return client
  
 
-    client = boto3.Session( aws_access_key_id    = os.environ['AWS_ACCESS_KEY_ID'],
-                            aws_secret_access_key= os.environ['AWS_SECRET'],)
+    client = BotoSession().refreshable_session()
     log2("using ENV Variables ", client)
     return client
 
@@ -327,7 +329,10 @@ class BotoSession:
         Get session credentials
         """
         credentials = {}
-        session = Session(region_name=self.region_name, profile_name=self.profile_name)
+        session = Session(
+                aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key=os.environ['AWS_SECRET'],
+            )
 
         # if sts_arn is given, get credential by assuming given role
         if self.sts_arn:
