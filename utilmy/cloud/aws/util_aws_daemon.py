@@ -9,14 +9,10 @@ Docs::
 
 """
 import time,  os
-import boto3
-import awswrangler as wr
+import boto3, awswrangler as wr
 from pathlib import Path
 
 from utilmy import date_now, log
-
-
-
 
 
 ########################################################################################################

@@ -2,6 +2,13 @@
 """ Utils for AWS
 Docs::
 
+    S3 as File System:
+      https://s3fs.readthedocs.io/en/latest/
+
+      https://pypi.org/project/smart-open/
+
+
+
     pip install awswrangler
     https://aws-sdk-pandas.readthedocs.io/en/stable/stubs/awswrangler.s3.wait_objects_exist.html
     https://loige.co/aws-command-line-s3-content-from-stdin-or-to-stdout/
@@ -164,54 +171,37 @@ def test_topandas():
         
 
 
+######################################################################################
+def aws_load_pickle(dir_s3:str=""):
+   """
+       s3.put_object(Bucket='mytestbucket',Key='myDictionary', Body=serializedMyData
 
+   """
+   import pickle, boto3
 
-######## Refrestable session
-def aws_get_session(profile_name:str="", session=None):
-    """ Get session
-    Docs::
-     
-        1) From local cache  .aws/cli/cache .aws/cli/boto
-        2) From ENV Variable: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-
-        Returns: Boto3 session
-    """
-    from botocore import credentials
-    import botocore.session
-    import glob
-
-    if session is not None :
-        return session
-
-    for fi in [ '.aws/cli/cache', '.aws/boto/cache' ]:
-        # By default the cache path is ~/.aws/boto/cache
-        cli_cache = os.path.join(os.path.expanduser('~'), fi)
-        if len(glob.glob(cli_cache + "/*" ) ) > 0 :
-            # Construct botocore session with cache
-            session = botocore.session.get_session()
-            session.get_component('credential_provider').get_provider('assume-role').cache = credentials.JSONFileCache(cli_cache)
-
-            # Create boto3 client from session
-            client = boto3.Session(botocore_session=session)
-            log2("Using ", fi, client)
-            return client
  
+   try :
+      s3 = boto3.resource('s3')
+      obj = pickle.loads(s3.Bucket(path).Object(fname).get()['Body'].read())
+      return obj
+   except Exception as e :
+      loge(e)
 
-    client = boto3.Session( aws_access_key_id    = os.environ['AWS_ACCESS_KEY_ID'],
-                            aws_secret_access_key= os.environ['AWS_SECRET'],)
-    log2("using ENV Variables ", client)
-    return client
+
+def torch_save_s3(model, dir_s3:str):
+    import torch
+    path, fname = s3_split_dir(dir_s3)
+    s3 = boto3.resource('s3')
+    buffer = io.BytesIO()
+    torch.save(model, buffer)
+    s3.put_object(Bucket="power-plant-embeddings", Key=, Body=buffer.getvalue())
 
 
-
-from uuid import uuid4
-from datetime import datetime
-from time import time
-
-import boto3
-from boto3 import Session
-from botocore.credentials import RefreshableCredentials
-from botocore.session import get_session
+def s3_split_dir(dir_s3:str):
+   dir_s3 = dir_s3.replace("//", "/")
+   path  = dir_s3.split("/")[:-1]
+   fname = dir_s3.split("/")[-1]
+   return path, fname 
 
 
 
@@ -219,6 +209,7 @@ from botocore.session import get_session
 
 
 ######################################################################################
+#######  Session #####################################################################
 def aws_check_session(session,)->bool:
     """ Check if an aws session works """
     try:
@@ -247,7 +238,6 @@ def s3_check_bucket(session, bucket_name=''):
         return False
 
 
-##### List of JSON ######################################################################################
 def aws_get_session(profile_name:str="", session=None):
     """ Get session
     Docs::
@@ -285,27 +275,29 @@ def aws_get_session(profile_name:str="", session=None):
 
 
 
+########################################################################################
+####### Refreshable session ############################################################
+from uuid import uuid4
+from datetime import datetime
+from time import time
 
-
-
-
+import boto3
+from boto3 import Session
+from botocore.credentials import RefreshableCredentials
+from botocore.session import get_session
 
 
 class BotoSession:
-    """
-    Boto Helper class which lets us create refreshable session, so that we can cache the client or resource.
+    """Boto Helper class which lets us create refreshable session, so that we can cache the client or resource.
     Usage
     -----
     session = BotoSession().refreshable_session()
     client = session.client("s3") # we now can cache this client object without worrying about expiring credentials
-
     # check for max session duration
     # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html#id_roles_use_view-role-max-session
     """
-    def __init__(
-        self,
-        region_name: str = None,
-        profile_name: str = None,
+    def __init__(self,
+        region_name: str = None, profile_name: str = None,
         sts_arn: str = None,
         session_name: str = None,
     ):
@@ -387,7 +379,7 @@ class BotoSession:
             return boto3.Session()
 
 
-##### List of JSON ######################################################################################
+##### List of JSON ####################################################################################
 def s3_get_filelist(path_s3="/mybucket1/mybucket2/", suffix=".json"):
     """     # Get all json files in a S3 bucket
     Docs::
@@ -429,7 +421,6 @@ def s3_read_json(path_s3="", n_workers=1, verbose=True, suffix=".json",   **kw):
         res_data[path_s3 + "/" + key] =  json.loads(content)
 
     return res_data
-
 
 
 
@@ -591,8 +582,6 @@ def s3_json_read3(path_s3, npool=5, start_delay=0.1, verbose=True, input_fixed:d
 
 
 
-
-
 ####  S3 --> Pandas ################################################################################
 def s3_pd_read_json(path_s3="s3://mybucket", suffix=".json",npool=2, dataset=True,  **kw)->pd.DataFrame:
     """  Read file in parallel from S3, Support high number of files.
@@ -715,8 +704,6 @@ def s3_pd_read_json2(path_s3="s3://mybucket", suffix=".json", ignore_index=True,
     pool.close() ; pool.join() ;  pool = None
     if m_job>0 and verbose : log(n_file, j * n_file//n_pool )
     return dfall
-
-
 
 
 
