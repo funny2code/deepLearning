@@ -215,6 +215,82 @@ from botocore.session import get_session
 
 
 
+
+
+
+######################################################################################
+def aws_check_session(session,)->bool:
+    """ Check if an aws session works """
+    try:
+        session.client('sts').get_caller_identity()
+        return True
+    except:
+        return False
+
+
+def aws_check_session2(session,)->bool:
+    """ Check if an aws session works """
+    try:
+        session.client('s3').list_buckets()
+        return True
+    except:
+        return False
+
+
+def s3_check_bucket(session, bucket_name=''):
+    """ Check if an aws s3 bucket exist """
+    s3 = session.resource('s3')
+    try:
+        s3.meta.client.head_bucket(Bucket=bucket_name)
+        return True
+    except:
+        return False
+
+
+##### List of JSON ######################################################################################
+def aws_get_session(profile_name:str="", session=None):
+    """ Get session
+    Docs::
+     
+        1) From local cache  .aws/cli/cache .aws/cli/boto
+        2) From ENV Variable: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+
+        Returns: Boto3 session
+    """
+    from botocore import credentials
+    import botocore.session
+    import glob
+
+    if session is not None :
+        return session
+
+    for fi in [ '.aws/cli/cache', '.aws/boto/cache' ]:
+        # By default the cache path is ~/.aws/boto/cache
+        cli_cache = os.path.join(os.path.expanduser('~'), fi)
+        if len(glob.glob(cli_cache + "/*" ) ) > 0 :
+            # Construct botocore session with cache
+            session = botocore.session.get_session()
+            session.get_component('credential_provider').get_provider('assume-role').cache = credentials.JSONFileCache(cli_cache)
+
+            # Create boto3 client from session
+            client = boto3.Session(botocore_session=session)
+            log2("Using ", fi, client)
+            return client
+ 
+
+    client = boto3.Session( aws_access_key_id    = os.environ['AWS_ACCESS_KEY_ID'],
+                            aws_secret_access_key= os.environ['AWS_SECRET'],)
+    log2("using ENV Variables ", client)
+    return client
+
+
+
+
+
+
+
+
+
 class BotoSession:
     """
     Boto Helper class which lets us create refreshable session, so that we can cache the client or resource.
