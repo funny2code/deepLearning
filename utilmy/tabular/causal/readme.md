@@ -2,6 +2,17 @@
 
 Structure learning
 
+
+causica methods.
+
+https://github.com/microsoft/showwhy
+
+
+
+https://causal-learn.readthedocs.io/en/latest/search_methods_index/index.html
+
+
+
 https://github.com/ignavierng/golem
 
 https://github.com/ignavierng/golem/blob/main/src/golem.py#L50
