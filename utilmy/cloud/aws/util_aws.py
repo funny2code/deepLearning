@@ -266,7 +266,7 @@ def aws_get_session(profile_name:str="", session=None):
             try:
                 client = boto3.Session(botocore_session=session)
             except botocore.exceptions.ClientError as e:
-                client = BotoSession().refreshable_session()
+                client = BotoSession(profile_name=profile_name).refreshable_session()
             log2("Using ", fi, client)
             return client
  
