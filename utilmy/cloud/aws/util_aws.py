@@ -298,6 +298,9 @@ class BotoSession:
     # check for max session duration
     # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html#id_roles_use_view-role-max-session
     """
+    # check for max session duration
+    # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use.html#id_roles_use_view-role-max-session
+    TTL = 900  # default
     def __init__(self,
         region_name: str = None, profile_name: str = None,
         sts_arn: str = None,
@@ -355,7 +358,7 @@ class BotoSession:
                 "access_key": session_credentials.get("access_key"),
                 "secret_key": session_credentials.get("secret_key"),
                 "token": session_credentials.get("token"),
-                "expiry_time": datetime.fromtimestamp(time() + TTL).isoformat(),
+                "expiry_time": datetime.fromtimestamp(time() + BotoSession.TTL).isoformat(),
             }
 
         return credentials
