@@ -1,0 +1,179 @@
+#######################################################################################################
+# https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
+#ARG TARGETPLATFORM
+
+
+##### Install Debian APT-GET  ###################################################3#####
+FROM debian:buster-slim as BASE
+
+
+##### Config debian
+ARG VCS_REF=unspecified
+LABEL org.label-schema.vcs-ref "$VCS_REF"
+
+
+##### APT Get     #####################################################################
+RUN apt-get update   && apt-get upgrade -y \
+  && apt-get install -y libsqlite3-dev \
+    default-libmysqlclient-dev \
+    software-properties-common \
+    apt-transport-https  ca-certificates \
+    wget git  nano  vim  curl  openssl  unzip \
+    gcc   g++   gfortran libc6-dev \
+    libatlas3-base \
+    libopenblas-base \
+    libatlas-base-dev \
+    build-essential 
+
+
+######## Workdir  #####################################################################
+RUN  mkdir -p /opt/work/  
+WORKDIR /opt/work/ 
+
+
+
+##### RUST  Install ##################################################################
+# RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Add .cargo/bin to PATH
+RUN . "$HOME/.cargo/env"
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Check cargo is visible
+# RUN cargo --help &&  rustc --version
+
+#FROM rust:slim-buster as builder
+#SHELL ["bash", "-c"]
+#WORKDIR /build
+#COPY . .
+#ENV CARGO_HOME=/opt/cargo
+
+
+
+#### Install kubctl.  ##############################################################
+## https://hub.docker.com/r/bitnami/kubectl
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl
+RUN chmod u+x kubectl && mv kubectl /bin/kubectl
+
+
+
+
+#### Clean-up. ####################################################################
+RUN apt-get autoremove -y \
+    && apt-get clean -y
+
+
+
+
+
+##### Protocol Buffer  #############################################################
+# RUN wget "https://github.com/protocolbuffers/protobuf/releases/download/v3.20.3/protoc-3.20.3-linux-$(scripts/docker-get-protoc-arch.sh).zip" && \
+#     unzip -d /build "protoc-3.20.3-linux-$(scripts/docker-get-protoc-arch.sh).zip" && \
+#     wget https://github.com/googleapis/googleapis/archive/77bdd3dd26ea10c1b4f1c190e776a2d3fe4b3e8d.zip && \
+#     unzip -d /build 77bdd3dd26ea10c1b4f1c190e776a2d3fe4b3e8d.zip
+
+# RUN PROTOC_ZIP=protoc-3.14.0-linux-x86_64.zip 
+# RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/$PROTOC_ZIP 
+# RUN sudo unzip -o $PROTOC_ZIP -d /usr/local bin/protoc 
+# RUN sudo unzip -o $PROTOC_ZIP -d /usr/local 'include/*' 
+# RUN rm -f $PROTOC_ZIP
+
+# ENV PROTOC="/build/bin/protoc"
+# ENV GOOGLEAPIS_DIR="/build/googleapis-77bdd3dd26ea10c1b4f1c190e776a2d3fe4b3e8d"
+# ENV PROTOC = "bin/protoc"
+
+ENV PROTOC_ZIP=protoc-3.14.0-linux-x86_64.zip
+RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/${PROTOC_ZIP}
+RUN unzip -o ${PROTOC_ZIP} -d ./proto 
+RUN chmod 755 -R ./proto/bin
+ENV BASE=/usr
+# Copy into path
+RUN cp ./proto/bin/protoc ${BASE}/bin/
+RUN cp -R ./proto/include/* ${BASE}/include/
+
+# Download protoc-gen-grpc-web
+ENV GRPC_WEB=protoc-gen-grpc-web-1.2.1-linux-x86_64
+ENV GRPC_WEB_PATH=/usr/bin/protoc-gen-grpc-web
+RUN curl -OL https://github.com/grpc/grpc-web/releases/download/1.2.1/${GRPC_WEB}
+# Copy into path
+RUN mv ${GRPC_WEB} ${GRPC_WEB_PATH}
+RUN chmod +x ${GRPC_WEB_PATH}
+
+
+
+
+
+
+
+#####################################################################################################
+# Miniconda
+ENV CONDA_DIR=/opt/miniconda
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+ENV PYTHONDONTWRITEBYTECODE=true
+
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    chmod a+x miniconda.sh && \
+    ./miniconda.sh -b -p $CONDA_DIR && \
+    rm ./miniconda.sh && \
+    conda install python=3.8.13 
+
+
+
+###### work folder  #################################################
+# RUN pip install --upgrade pip \
+# RUN conda  install -c conda-forge -y 
+
+COPY ./py38.txt   /opt/work/
+RUN cat /opt/work/py38.txt
+RUN pip  install -r /opt/work/py38.txt  --no-cache-dir  
+RUN pip install torch==1.12.1+cpu  --extra-index-url https://download.pytorch.org/whl/cpu  --no-cache-dir  
+    
+
+
+
+
+
+#### Setting up LibTorch environment variables:  #####################
+##    - For CPU: 
+RUN  wget -O libtorch.zip https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.13.0%2Bcpu.zip  \
+     && unzip libtorch.zip \   
+     && export LIBTORCH=/opt/work/libtorch/   \    
+     && export LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH \
+     && rm -rf liborch.zip 
+
+
+
+
+##### Clean up. #####################################################
+RUN  rm -rf /var/lib/apt/lists/*  \
+    && conda clean -tpy \
+    && rm -rf /root/.cache/pip/
+    #&& find $CONDA_DIR -follow -type f -name '*.a' -delete \
+    #&& find $CONDA_DIR -follow -type f -name '*.pyc' -delete \
+    #&& find $CONDA_DIR -follow -type f -name '*.js.map' -delete \
+    #&& find "$CONDA_DIR/lib/python*/site-packages/bokeh/server/static" -follow -type f -
+
+
+#### Custom dirs ####################################################
+RUN mkdir -p /app.
+# WORKDIR /app
+
+
+
+#####  Entry Point.  ##############################################
+# COPY bin/entrypoint.sh /usr/local/bin/
+# COPY bin/vscode.sh /usr/local/bin/
+
+##### Jupyter entrypoint
+#EXPOSE 8888
+#VOLUME /notebooks
+#WORKDIR /notebooks
+
+
+ENTRYPOINT ["/bin/bash"]
+
+
+
+

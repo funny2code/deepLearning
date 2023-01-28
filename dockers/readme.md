@@ -1,4 +1,25 @@
 
+
+
+
+```
+
+
+https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host
+
+
+ docker run -itd --rm  --add-host=host.docker.internal:host-gateway  -v ~/.aws:/root/.aws   -v ~/D/gitdev:/opt/gitdev --network host --name ml2 --platform linux/amd64  $DNAME
+
+Replace 127.0.0.1 by host.docker.internal, inside docker to communicate to the HOST in Macos
+https://qiita.com/kai_kou/items/5182965ea75c85cf1e3f
+
+
+```
+
+
+
+
+
 Build And publish from Github Actions
 ```
 
