@@ -24,15 +24,7 @@ elif [[ "$1" = topfile ]]; then
       head -n 20  
       
    exit 0
-elif [[ "$1" = rename ]] &&\
-   [[ -e "$2" ]] &&\
-   [[ ! -e "$3" ]]; then
-   # If the first argument is 'rename',
-   # the second argument is a file or directory
-   # and the third argument does not exist as a file or directory:
-   # Copy and delete old folder.
-   echo "Rename ${2} to ${3}"
-   /bin/mv "$2" "$3"
+
    
    exit 0
 else
