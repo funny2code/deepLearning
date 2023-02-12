@@ -14,38 +14,67 @@ set -e  # Exit on error.
 
 #### Global vars ###################################
 FUNAME=`basename "$0"`
-NOW=$(date '+%Y%m%d')
+YMD=$(date '+%Y%m%d')
 #echo "######### ${me} #############################"
 #echo "$NOW"
 
 
 ### Input Params. ##################################
 [ $# -eq 0 ] &&    echo $DDOC && exit    #### No input print doc
-ddo="size"  &&  [ -z $1 ] && export ddo=$1
-ppath="~/"  &&  [ -z $2 ] && export ppath=$2
-ssize=20    &&  [ -z $3 ] && export ssize=$3
+ddo="size"  &&  [ -z $1 ] &&     ddo=$1
+ppath="~/"  &&  [ -z $2 ] &&     ppath=$2
 
 
 ### Core ###########################################
 if [[ "$ddo" = size ]]; then
-   df -h $ppath
-   echo  # Newline
-   du -h --max-depth=5. $ppath / |\
-      /bin/grep '[0-9]G\>' |\
-      /usr/bin/sort -hr 
-      
-   exit 0
+      df -h $ppath
+      echo  # Newline
+      du -h --max-depth=5. $ppath / |\
+         /bin/grep '[0-9]G\>' |\
+         /usr/bin/sort -hr 
 
+
+
+exit 0
 elif [[ "$ddo" = topfile ]]; then
-   df -H $ppath
-   echo  # Newline
-   du -a . --exclude='${HOME}/zdropbox' |\
-      sort -n -r |\
-      head -n $ssize  
-      
-   exit 0
+      ssize=20    &&  [ -z $3 ] &&     ssize=$3
 
-   
+      df -H $ppath
+      echo  # Newline
+      du -a . --exclude='${HOME}/zdropbox' |\
+         sort -n -r |\
+         head -n $ssize  
+
+
+
+exit 0
+elif [[ "$ddo" = recentfile ]]; then
+      ### recent file modified files + created
+
+
+
+
+
+
+
+elif [[ "$ddo" =  backup ]]; then
+      ### backup quickly currently folder, skip big files.
+      pathbase = "suffix of path_$YMD"
+      dir_to="~/zbackup/$pathbase"    &&  [ -z $3 ] &&     dir_to=$3
+
+      rsync -ar $ppath  dir_to
+
+
+
+
+
+exit 0
+elif [[ "$ddo" = recentfile ]]; then
+
+
+
+
+
 else
    echo $DDOC
 fi
