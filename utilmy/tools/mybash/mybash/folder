@@ -2,10 +2,10 @@
 USAGE=$(cat <<-END
      Perform various useful operations on the folders/directories
 
-
-     folder size        ~/mypathXYZ             #### Print folder size in Gb
-     folder topfile     mypathXYZ/    20        #### Print 20 biggest size files
-     folder recentifle  ~/mypathXYZ   10        #### Print recently modified files   
+     folder
+     folder size        ./            #### Print folder size in Gb
+     folder topfile     ./    20        #### Print 20 biggest size files
+     folder recentifle  ./   10        #### Print recently modified files   
 
                                 
      folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
@@ -27,24 +27,28 @@ YMD=$(date '+%Y%m%d')
 
 
 ### Input Params and Defaults ##################################
-[ $# -eq 0 ] &&    echo $UUSAGE && exit         ### No input print doc
-task="size"   &&  [ -z $1 ] &&     task=$1         ### print folder size
-ppath="$PWD"  &&  [ -z $2 ] &&     ppath=$2     ### current path as default
+[ $# -eq 0 ] &&    echo -e "$USAGE" && exit         ### No input print doc
+task=$1    &&  [ -z $1 ] && task="size"              ### print folder size
+ppath=$2   &&  [ -z $2 ] && ppath="$PWD"          ### current path as default
 
 
 ### Core ###########################################
 if [[ "$task" = size ]]; then
+       ssize=$3   &&  [ -z $3 ] &&  ssize=20 
+
       df -h $ppath
       echo  # Newline
-      du -h -d 5 $ppath / |\
-         grep '[0-9]G\>' |\
-         sort -hr 
+      du -h -d 5 $ppath        |\
+         #| grep '[0-9]G\>'       |
+         #| grep -v 'denied'      | 
+         sort -hr             |\
+         head -n $ssize 
 
 
 
 exit 0
 elif [[ "$task" = topfile ]]; then
-      ssize=20    &&  [ -z $3 ] &&     ssize=$3
+      ssize=$3   &&  [ -z $3 ] &&  ssize=20 
 
       df -H $ppath
       echo  # Newline
@@ -57,14 +61,14 @@ elif [[ "$task" = topfile ]]; then
 exit 0
 elif [[ "$task" = recentfile ]]; then
       ### recent file modified files + created
-      nfile=20    &&  [ -z $3 ] &&     nfile=$3
+      ssize=$3   &&  [ -z $3 ] &&  ssize=20 
 
       if [[ "$OSTYPE" == "darwin"* ]]; then
          ### MacoS
-         find $ppath -type f -exec stat -lt "%F %T" {} \+ | cut -d' ' -f6- | sort -n | tail -n $nfile
+         find $ppath -type f -exec stat -lt "%F %T" {} \+ | cut -d' ' -f6- | sort -n | tail -n $ssize
       else 
           ### Linux 
-          find $ppath -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n $nfile
+          find $ppath -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n $ssize
 
       fi
 
@@ -72,7 +76,7 @@ elif [[ "$task" = recentfile ]]; then
 exit 0
 elif [[ "$task" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
-      pathbase = "suffix of path_$YMD"
+      pathbase="suffix of path_$YMD"
       dir_to="~/zbackup/$pathbase"    &&  [ -z $3 ] &&     dir_to=$3
 
       rsync -ar $ppath  dir_to
