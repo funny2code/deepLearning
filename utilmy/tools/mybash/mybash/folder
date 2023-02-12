@@ -8,8 +8,11 @@ USAGE=$(cat <<-END
      folder recentifle  ./   10        #### Print recently modified files   
 
                                 
-     folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
+     folder backup   mypathXYZ/                               #### copied into default path ~/zarchive/mypath_suffix_20230202/
      folder backup   ~/mypathXYZ   ~/mypath_target/
+
+
+     folder copysmallfile  mypathFROm/    mypathTO/    100m   ### copy files recursively, filter big files
      
 
 END
