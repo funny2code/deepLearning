@@ -1,11 +1,12 @@
 #!/bin/bash
 DDOC=$(cat <<-END
-     folder size    ~/
-     folder topfile ~/ 20
-     folder recentifle ~/  10
 
-     folder backup ~/mypath         #### copied into ~/zarchive/mypath_suffix_20230202/
-     folder backup ~/mypath   ~/mypath_target/
+     folder size        ~/mypathXYZ             #### Print folder size in Gb
+     folder topfile     mypathXYZ/    20
+     folder recentifle  ~/mypathXYZ   10
+
+     folder backup   mypathXYZ/         #### copied into ~/zarchive/mypath_suffix_20230202/
+     folder backup   ~/mypathXYZ   ~/mypath_target/
      
 
 END
