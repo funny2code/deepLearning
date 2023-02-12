@@ -38,9 +38,9 @@ if [[ "$task" = size ]]; then
 
       df -h $ppath
       echo  # Newline
-      du -h -d 5 $ppath        |\
-         #| grep '[0-9]G\>'       |
-         #| grep -v 'denied'      | 
+      du -h -d 10 $ppath     2>&1   |\
+         # grep '[0-9]G\>'       |
+         grep -v 'denied'      | 
          sort -hr             |\
          head -n $ssize 
 
