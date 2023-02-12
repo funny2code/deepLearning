@@ -28,12 +28,12 @@ YMD=$(date '+%Y%m%d')
 
 ### Input Params and Defaults ##################################
 [ $# -eq 0 ] &&    echo $UUSAGE && exit         ### No input print doc
-ddo="size"  &&  [ -z $1 ] &&     ddo=$1         ### print folder size
+task="size"   &&  [ -z $1 ] &&     task=$1         ### print folder size
 ppath="$PWD"  &&  [ -z $2 ] &&     ppath=$2     ### current path as default
 
 
 ### Core ###########################################
-if [[ "$ddo" = size ]]; then
+if [[ "$task" = size ]]; then
       df -h $ppath
       echo  # Newline
       du -h --max-depth=5 $ppath / |\
@@ -43,7 +43,7 @@ if [[ "$ddo" = size ]]; then
 
 
 exit 0
-elif [[ "$ddo" = topfile ]]; then
+elif [[ "$task" = topfile ]]; then
       ssize=20    &&  [ -z $3 ] &&     ssize=$3
 
       df -H $ppath
@@ -55,7 +55,7 @@ elif [[ "$ddo" = topfile ]]; then
 
 
 exit 0
-elif [[ "$ddo" = recentfile ]]; then
+elif [[ "$task" = recentfile ]]; then
       ### recent file modified files + created
       nfile=20    &&  [ -z $3 ] &&     nfile=$3
 
@@ -70,7 +70,7 @@ elif [[ "$ddo" = recentfile ]]; then
 
 
 exit 0
-elif [[ "$ddo" =  backup ]]; then
+elif [[ "$task" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
       pathbase = "suffix of path_$YMD"
       dir_to="~/zbackup/$pathbase"    &&  [ -z $3 ] &&     dir_to=$3
@@ -82,7 +82,7 @@ elif [[ "$ddo" =  backup ]]; then
 
 
 exit 0
-elif [[ "$ddo" = recentfile ]]; then
+elif [[ "$task" = recentfile ]]; then
 
 
 
