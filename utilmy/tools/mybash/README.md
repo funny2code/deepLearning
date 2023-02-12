@@ -6,6 +6,8 @@
      gti clone https://github.com/arita37/myutil.git
      cd myutil
      git checkout devtorch
+     cd utilmy/tools/mybash/mybash/
+     echo $pwd  ### copy this below
 
 
 
