@@ -4,15 +4,15 @@ USAGE=$(cat <<-END
 
      folder
      folder size        ./            #### Print folder size in Gb
-     folder topfile     ./    20        #### Print 20 biggest size files
-     folder recentifle  ./   10        #### Print recently modified files   
+     folder topfile     ./   20       #### Print 20 biggest size files
+     folder recentifle  ./   10       #### Print recently modified files   
 
                                 
-     folder backup   mypathXYZ/                               #### copied into default path ~/zarchive/mypath_suffix_20230202/
-     folder backup   ~/mypathXYZ   ~/mypath_target/
+     folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
+     folder backup   ~/mypathXYZ   ~/mypath_target/       #### copied from mypathXYZ to mypath_target/
 
 
-     folder copysmallfile  mypathFROm/    mypathTO/    100m   ### copy files recursively, filter big files
+     folder copysmallfile   mypathFROm/   mypathTO/   100m       ### copy files recursively, filter big files
      
 
 END
@@ -102,15 +102,4 @@ exit 0
 else
    echo $USAGE
 fi
-
-
-
-
-
-
-
-
-
-
-
 
