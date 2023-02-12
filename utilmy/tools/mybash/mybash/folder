@@ -57,9 +57,15 @@ elif [[ "$ddo" = topfile ]]; then
 exit 0
 elif [[ "$ddo" = recentfile ]]; then
       ### recent file modified files + created
+      nfile=20    &&  [ -z $3 ] &&     nfile=$3
 
 
+      ### Linux 
+      find $ppath -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n $nfile
 
+
+      ### MacoS
+      find $ppath -type f -exec stat -lt "%F %T" {} \+ | cut -d' ' -f6- | sort -n | tail -n $nfile
 
 
 
