@@ -34,13 +34,13 @@ ppath=$2   &&  [ -z $2 ] && ppath="$PWD"          ### current path as default
 
 ### Core ###########################################
 if [[ "$task" = size ]]; then
-       ssize=$3   &&  [ -z $3 ] &&  ssize=20 
+      ssize=$3   &&  [ -z $3 ] &&  ssize=20 
 
       df -h $ppath
       echo  # Newline
       du -h -d 10 $ppath     2>&1   |\
-         # grep '[0-9]G\>'       |
-         grep -v 'denied'          |\ 
+         # grep '[0-9]G\>'         |\
+         grep -v 'denied'           |\ 
          sort -hr                   |\
          head -n $ssize 
 
@@ -52,7 +52,7 @@ elif [[ "$task" = topfile ]]; then
 
       df -H $ppath
       echo  # Newline
-      du -a . --exclude='${HOME}/zdropbox' |\
+      du -a $ppath  --exclude='${HOME}/zdropbox' |\
          sort -n -r |\
          head -n $ssize  
 

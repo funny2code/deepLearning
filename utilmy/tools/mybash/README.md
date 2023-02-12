@@ -105,6 +105,12 @@ fi
 #### Helpers
 ```bash
 
+
+https://github.com/maxwell-bland/copilot-in-the-terminal
+
+
+
+
 cconfig="$1"
 if [[ -z $1 ]]; then 
    cconfig="config/prd/config_prd_real.yaml"
