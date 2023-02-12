@@ -60,10 +60,11 @@ YMD=$(date '+%Y%m%d')
 
 
 
-### Input Params ##################################
-[ $# -eq 0 ] &&    echo $UUSAGE && exit    #### No input print doc
-task="size"  &&  [ -z $1 ] &&     task=$1
-ppath="~/"  &&  [ -z $2 ] &&     ppath=$2
+### Input Params and Defaults ##################################
+[ $# -eq 0 ] &&    echo -e "$USAGE" && exit       ###  No input print doc
+task=$1    &&  [ -z $1 ] && task="size"           ###  print folder size
+ppath=$2   &&  [ -z $2 ] && ppath="$PWD"          ###  current path as default
+
 
 
 ### Core ###########################################
