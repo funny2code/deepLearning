@@ -3,7 +3,7 @@
 
 ### Usage
  1) Copy the folder mybash/ where you want
-     gti clone https://github.com/arita37/myutil.git
+     git clone https://github.com/arita37/myutil.git
      cd myutil
      git checkout devtorch
      cd utilmy/tools/mybash/mybash/
@@ -87,7 +87,7 @@ elif [[ "$task" =  taskZZZZ ]]; then
 
        ### DO SOMETHING
 
-
+exit 0
 else
    echo $USAGE
 fi
@@ -139,11 +139,9 @@ grep -r "$1" .
 }
 
 
-
 countlines () {
 wc -l "$1"
 }
-
 
 
 countwords () {
@@ -151,15 +149,14 @@ wc -w "$1"
 }
 
 
-
 countcharacters () {
 wc -c "$1"
 }
 
+
 modified24hrs () {
 find . -mtime 0
 }
-
 
 
 replaceall () {
@@ -167,11 +164,9 @@ grep -rl "$1" . | xargs sed -i "s/$1/$2/g"
 }
 
 
-
 largerthan100mb () {
 find . -type f -size +100M
 }
-
 
 
 ```
