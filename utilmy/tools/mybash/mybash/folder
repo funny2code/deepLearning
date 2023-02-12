@@ -19,14 +19,14 @@ END
 # set -x  # Output commands being run.
 set -e  # Exit on error.
 
+
 #### Global vars ###################################
 FUNAME=`basename "$0"`
 YMD=$(date '+%Y%m%d')
-#echo "######### ${me} #############################"
-#echo "$NOW"
 
 
-### Input Params. ##################################
+
+### Input Params ##################################
 [ $# -eq 0 ] &&    echo $UUSAGE && exit    #### No input print doc
 ddo="size"  &&  [ -z $1 ] &&     ddo=$1
 ppath="~/"  &&  [ -z $2 ] &&     ppath=$2
