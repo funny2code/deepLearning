@@ -36,9 +36,9 @@ ppath="$PWD"  &&  [ -z $2 ] &&     ppath=$2     ### current path as default
 if [[ "$task" = size ]]; then
       df -h $ppath
       echo  # Newline
-      du -h --max-depth=5 $ppath / |\
-         /bin/grep '[0-9]G\>' |\
-         /usr/bin/sort -hr 
+      du -h -d 5 $ppath / |\
+         grep '[0-9]G\>' |\
+         sort -hr 
 
 
 
