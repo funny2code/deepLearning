@@ -93,11 +93,15 @@ fi
 
 
 
+```
 
 
 
+## TODO
+```bash 
 
 
+1) make mybash/folder script bug free and add new tasks
 
 
 
@@ -105,7 +109,6 @@ fi
 
 
 ```
-
 
 
 
