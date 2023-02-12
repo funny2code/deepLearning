@@ -2,6 +2,7 @@
 DDOC=$(cat <<-END
      folder size    ~/
      folder topfile ~/ 20
+     folder recentifle ~/  10
 
      
 
