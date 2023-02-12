@@ -1,34 +1,63 @@
 #!/bin/bash
+DDOC=$(cat <<-END
+     folder size    ~/
+     folder topfile ~/ 20
 
+     
+
+END
+)
+
+#### Global Config. #################################
 # set -x  # Output commands being run.
 set -e  # Exit on error.
 
-me=`basename "$0"`
-echo "######### ${me} #############################"
+#### Global vars ###################################
+FUNAME=`basename "$0"`
 NOW=$(date '+%Y%m%d')
-echo "$NOW"
+#echo "######### ${me} #############################"
+#echo "$NOW"
 
-if [[ "$1" = size ]]; then
-   sudo /bin/df -h
+
+### Input Params. ##################################
+[ $# -eq 0 ] &&    echo $DDOC && exit    #### No input print doc
+ddo="size"  &&  [ -z $1 ] && export ddo=$1
+ppath="~/"  &&  [ -z $2 ] && export ppath=$2
+ssize=20    &&  [ -z $3 ] && export ssize=$3
+
+
+### Core ###########################################
+if [[ "$ddo" = size ]]; then
+   df -h $ppath
    echo  # Newline
-   sudo /usr/bin/du -h --max-depth=5 / |\
+   du -h --max-depth=5. $ppath / |\
       /bin/grep '[0-9]G\>' |\
       /usr/bin/sort -hr 
       
    exit 0
-elif [[ "$1" = topfile ]]; then
-   /bin/df -H
+
+elif [[ "$ddo" = topfile ]]; then
+   df -H $ppath
    echo  # Newline
-   /usr/bin/du -a . --exclude='${HOME}/zdropbox' |\
+   du -a . --exclude='${HOME}/zdropbox' |\
       sort -n -r |\
-      head -n 20  
+      head -n $ssize  
       
    exit 0
 
    
-   exit 0
 else
-   1>&2 echo "Invalid arguments. Usage:
-
-./${me} size | topfile | rename from to"
+   echo $DDOC
 fi
+
+
+
+
+
+
+
+
+
+
+
+
