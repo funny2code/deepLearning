@@ -7,17 +7,20 @@
  2) in your bashrc or zshrc,  add
      export PATH="../mybash/:$PATH"
 
+
  3) Initlize all alias,vars,...
      source init/init_all.sh
 
 
-### Naming Convention:
-   folder  size      ~/
-   folder  topfile   ~/
+#### Example
+     folder size        ~/mypathXYZ             #### Print folder size in Gb
+     folder topfile     mypathXYZ/    20        #### Print 20 biggest size files
+     folder recentifle  ~/mypathXYZ   10        #### Print recently modified files   
 
-   ### Custom alias in init/alias_init.sh 
-   ddir size   ~/
-   ddir topfile. ~/ 20
+                               
+     folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
+     folder backup   ~/mypathXYZ   ~/mypath_target/
+     
 
 
 
