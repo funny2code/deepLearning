@@ -69,7 +69,7 @@ elif [[ "$ddo" = recentfile ]]; then
       fi
 
 
-
+exit 0
 elif [[ "$ddo" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
       pathbase = "suffix of path_$YMD"
