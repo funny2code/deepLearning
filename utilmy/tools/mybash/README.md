@@ -7,6 +7,7 @@
 
  2) in your bashrc or zshrc,  add
      export PATH="../mybash/:$PATH"
+     chmod -R 777 ../mybash     ### exec
 
 
  3) Initlize all alias,vars,...
