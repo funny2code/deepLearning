@@ -17,7 +17,7 @@
      folder topfile     mypathXYZ/    20        #### Print 20 biggest size files
      folder recentifle  ~/mypathXYZ   10        #### Print recently modified files   
 
-                               
+
      folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
      folder backup   ~/mypathXYZ   ~/mypath_target/
      
@@ -40,15 +40,7 @@ if [[ -z $1 ]]; then
 fi 
 
 
-navigatehome () {
-cd ~
-}
 
-
-
-tail10 () {
-tail -n 10 "$1"
-}
 
 
 
