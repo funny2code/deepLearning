@@ -1,11 +1,14 @@
 #!/bin/bash
-DDOC=$(cat <<-END
+USAGE=$(cat <<-END
+     Perform various useful operations on the folders/directories
+
 
      folder size        ~/mypathXYZ             #### Print folder size in Gb
-     folder topfile     mypathXYZ/    20
-     folder recentifle  ~/mypathXYZ   10
+     folder topfile     mypathXYZ/    20        #### Print 20 biggest size files
+     folder recentifle  ~/mypathXYZ   10        #### Print recently modified files   
 
-     folder backup   mypathXYZ/         #### copied into ~/zarchive/mypath_suffix_20230202/
+                                
+     folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
      folder backup   ~/mypathXYZ   ~/mypath_target/
      
 
@@ -24,7 +27,7 @@ YMD=$(date '+%Y%m%d')
 
 
 ### Input Params. ##################################
-[ $# -eq 0 ] &&    echo $DDOC && exit    #### No input print doc
+[ $# -eq 0 ] &&    echo $UUSAGE && exit    #### No input print doc
 ddo="size"  &&  [ -z $1 ] &&     ddo=$1
 ppath="~/"  &&  [ -z $2 ] &&     ppath=$2
 
@@ -80,7 +83,7 @@ elif [[ "$ddo" = recentfile ]]; then
 
 
 else
-   echo $DDOC
+   echo $USAGE
 fi
 
 
