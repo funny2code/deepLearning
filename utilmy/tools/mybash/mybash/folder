@@ -32,7 +32,7 @@ ppath="~/"  &&  [ -z $2 ] &&     ppath=$2
 if [[ "$ddo" = size ]]; then
       df -h $ppath
       echo  # Newline
-      du -h --max-depth=5. $ppath / |\
+      du -h --max-depth=5 $ppath / |\
          /bin/grep '[0-9]G\>' |\
          /usr/bin/sort -hr 
 
