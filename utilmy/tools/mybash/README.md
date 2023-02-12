@@ -11,7 +11,7 @@
 
 
  3) Initlize all alias,vars,...
-     source init/init_all.sh
+     source __init/init_all.sh
 
 
 #### Example
