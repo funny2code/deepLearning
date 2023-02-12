@@ -48,11 +48,12 @@ if [[ "$task" = size ]]; then
 
 exit 0
 elif [[ "$task" = topfile ]]; then
-      ssize=$3   &&  [ -z $3 ] &&  ssize=20 
+      ssize=$3          &&  [ -z $3 ] &&  ssize=20 
+      eexcludedirs=$4   &&  [ -z $4 ] &&  excludedirs="~/zzzzz" 
 
       df -H $ppath
       echo  # Newline
-      du -a $ppath  --exclude='${HOME}/zdropbox' |\
+      du -a $ppath  --exclude='${eexcludedirs}' |\
          sort -n -r |\
          head -n $ssize  
 
