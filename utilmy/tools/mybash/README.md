@@ -3,15 +3,22 @@
 
 ### Usage
  1) Copy the folder mybash/ where you want
+     gti clone https://github.com/arita37/myutil.git
+     cd myutil
+     git checkout devtorch
 
 
- 2) in your bashrc or zshrc,  add
-     export PATH="../mybash/:$PATH"
-     chmod -R 777 ../mybash     ### exec
+
+ 2) in your bashrc or zshrc,  add those lines
+
+     export mybash=YOURFOLDER/myutil/utilmy/tools/mybash/mybash/
+     export PATH="$mybash:$PATH"
+     chmod -R 777 $mybash                    ### exec
+     source $mybash/__init/init_all.sh       ##### Init all the alias
 
 
  3) Initlize all alias,vars,...
-     source __init/init_all.sh
+     source $mybash/__init/init_all.sh
 
 
 #### Example
