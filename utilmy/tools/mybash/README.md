@@ -27,7 +27,7 @@
 
 
 
-##### Template of all script
+## Template of all scripts
 ```bash
 #!/bin/bash
 USAGE=$(cat <<-END
