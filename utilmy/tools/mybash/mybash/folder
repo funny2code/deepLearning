@@ -81,20 +81,23 @@ exit 0
 elif [[ "$task" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
       pathbase="suffix of path_$YMD"
-      dir_to=  dir_to=$3     &&  [ -z $3 ] &&    "~/zbackup/$pathbase"
+      dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
 
-      rsync -ar $ppath  dir_to
+      rsync -ar $ppath  $dir_to
+
 
 
 
 exit 0
 elif [[ "$task" =  copysmallfile ]]; then
-      ### Copy only small files, exclude big one
-      dir_to=$3         &&  [ -z $3 ] &&    "~/zbackup/$pathbase"
-      max_file_size=$4  &&  [ -z $4 ] &&    "100"
+      ### Copy only small files, exclude big one cplwf
+      pathbase="suffix of path_$YMD"
+      dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
+      max_file_size="-$4c"  &&  [ -z $4 ] &&    max_file_size="-1000c"
 
       #### Add File filtering
-      rsync -ar $ppath  dir_to
+      #rsync -ar $ppath  dir_to
+      find $ppath -mindepth 1 -maxdepth 1 -type f -size $max_file_size -exec cp -t $dir_to
 
 
 
