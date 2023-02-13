@@ -1,0 +1,121 @@
+version: '3.7'
+
+services:
+  ####### localstack #########################################
+  localstack:
+    image: localstack/localstack:0.14.4
+    ports:
+      - 4566:4566 #
+      - 8000:8080 # dashboard
+    volumes:
+      - ./docker/localstack:/docker-entrypoint-initaws.d
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      # 有効にするサービス
+      - SERVICES=s3,iam,redshift
+      # s3のpresignedUrl
+      # https://docs.localstack.cloud/integrations/aws-cli/#setting-up-local-region-and-credentials-to-run-localstack
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - DISABLE_CORS_CHECKS=1
+
+  ####### MySQL  #############################################
+  rds_mysql:
+    image: mysql:5.7
+    platform: linux/x86_64
+    ports:
+      - 3306:3306
+    # Connect via commandline: mysql -h 127.0.0.1 -P 3306 -u root -p
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+
+  ###### Redis Cluster #######################################
+  redis-node-0:
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+      - "6375:6379"
+    volumes:
+      - redis-cluster_data-0:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-1:
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+      - "6371:6379"
+    volumes:
+      - redis-cluster_data-1:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-2:
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+      - "6372:6379"
+    volumes:
+      - redis-cluster_data-2:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-3:
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+      - "6373:6379"
+    volumes:
+      - redis-cluster_data-3:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-4:
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+      - "6374:6379"
+    volumes:
+      - redis-cluster_data-4:/bitnami/redis/data
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+
+  redis-node-5:
+    image: docker.io/bitnami/redis-cluster:7.0
+    volumes:
+      - redis-cluster_data-5:/bitnami/redis/data
+    ports:
+      - "6370:6379"
+    depends_on:
+      - redis-node-0
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+    environment:
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDISCLI_AUTH=bitnami'
+      - 'REDIS_CLUSTER_REPLICAS=1'
+      - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+      - 'REDIS_CLUSTER_CREATOR=yes'
+
+volumes:
+  redis-cluster_data-0:
+    driver: local
+  redis-cluster_data-1:
+    driver: local
+  redis-cluster_data-2:
+    driver: local
+  redis-cluster_data-3:
+    driver: local
+  redis-cluster_data-4:
+    driver: local
+  redis-cluster_data-5:
+    driver: local
+
+networks:
+  default:
+    name: cluster-subnet
+    driver: bridge

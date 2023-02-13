@@ -705,6 +705,50 @@ def os_system(cmd, doprint=False):
     print( f"Error {cmd}, {e}")
 
 
+def os_subprocess_decode(proc):
+    """
+
+    """
+    # If we need a stream
+    if return_stream: return proc.stdout
+
+
+    # If we need to return the data only
+    file_data = ""
+    if not is_binary:
+        for this_line in iter(proc.stdout.readline, b''):
+
+            # Poll for return code
+            proc.poll()
+            # If return code exists exit from loop
+            if proc.returncode is not None:
+                break
+
+            # Decode the binary stream
+            this_line_decoded = this_line.decode("utf8")
+            if this_line_decoded:
+                # In case you want to have stdout as well
+                # If removed there will be no indication that we are still receiving the data
+                log(this_line_decoded)
+                file_data = file_data + "\n" + this_line_decoded
+    else:
+        for this_bit in iter(proc.stdout.read, b''):
+            file_data = bytes()
+            log(this_bit, sep="", end="")
+            file_data = file_data + this_bit
+
+    # If the process returncode is None and we reach here, start polling for returncode until it exists
+    while proc.returncode is None:
+        proc.poll()
+
+    # raise exception if error occurred, else return file_data
+    if proc.returncode != 0 and proc.returncode is not None:
+        _, err = proc.communicate()
+        raise Exception(f"Error occurred with exit code {proc.returncode}\n{str(err.decode('utf8'))}")
+    elif proc.returncode == 0:
+        return file_data
+
+
 
 #####################################################################################################
 ##### File I-O ######################################################################################

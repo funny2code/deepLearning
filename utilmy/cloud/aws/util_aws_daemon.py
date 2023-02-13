@@ -9,14 +9,10 @@ Docs::
 
 """
 import time,  os
-import boto3
-import awswrangler as wr
+import boto3, awswrangler as wr
 from pathlib import Path
 
 from utilmy import date_now, log
-
-
-
 
 
 ########################################################################################################
@@ -31,7 +27,7 @@ def s3_files_move(dirin:str, dirout:str, use_threads=False, max_try=3):
         try :
 
             log(d) 
-            dnew = d.rename(f"{d}{tmp_extn}")  if tmp_extn not in d.name: else d
+            dnew = d.rename(f"{d}{tmp_extn}")  if tmp_extn not in d.name else d
 
             local_file = dnew.absolute()
             path       = f'{dirout}/{dnew.name}'

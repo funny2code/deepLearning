@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#
+""" Universal logger
 Doc::
 
    Global ENV Variables
