@@ -6,17 +6,16 @@
      git clone https://github.com/arita37/myutil.git
      cd myutil
      git checkout devtorch
-     cd utilmy/tools/mybash/mybash/
      echo $pwd  ### copy this below
 
 
 
  2) in your bashrc or zshrc,  add those lines
 
-     export mybash=YOURFOLDER/myutil/utilmy/tools/mybash/mybash/
-     export PATH="$mybash:$PATH"
-     chmod -R 777 $mybash                    ### exec
-     source $mybash/__init/init_all.sh       ##### Init all the alias
+     export mybashdir=YOURFOLDER/myutil/utilmy/tools/mybash/mybash/
+     export PATH="$mybashdir:$PATH"
+     chmod -R 777 $mybashdir                    ### exec
+     source $mybashdir/__init/init_all.sh       ##### Init all the alias
 
 
  3) Initlize all alias,vars,...
@@ -36,7 +35,7 @@
   4) you can debug bash script online here
      https://www.onlinegdb.com/online_bash_shell
 
-     
+
 
 ```
 
