@@ -555,6 +555,7 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
              force_hourofday=-1,
+             force_minofhour=-1,
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
@@ -582,11 +583,11 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
         now_utc = datenow
 
     elif (isinstance(datenow, float) or isinstance(datenow, int)   )  and  datenow > 1600100100  :  ### Unix time stamp
-        ## unix seconds in UTC 
+        ## unix seconds in UTC
         # fromtimestamp give you the date and time in local time
         # utcfromtimestamp gives you the date and time in UTC.
-        #  int(time.time()) - date_now( int(time.time()), returnval='unix', timezone='utc') == 0 
-        now_utc = datetime.datetime.fromtimestamp(datenow)   ## 
+        #  int(time.time()) - date_now( int(time.time()), returnval='unix', timezone='utc') == 0
+        now_utc = datetime.datetime.fromtimestamp(datenow)   ##
 
     elif  len(sdt) >7 :  ## date in string
         now_utc = datetime.datetime.strptime(sdt, fmt_input)
@@ -594,28 +595,32 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
     else:
         now_utc = datetime.datetime.now(tzone('UTC'))  # Current time in UTC
 
-    #### Force dates
-    if force_dayofmonth >0 :
-        now_utc = now_utc.replace(day=force_dayofmonth)
-
-    if force_dayofweek >0 :
-        actual_day = now_utc.weekday()
-        days_of_difference = force_dayofweek - actual_day
-        now_utc = now_utc + datetime.timedelta(days=days_of_difference)
-
-    if force_hourofday >0 :
-        now_utc = now_utc.replace(hour=force_hourofday)
-
-
     # now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_utc.astimezone(tzone('UTC'))  if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone)) 
+    #now_new = now_utc.astimezone(tzone('UTC'))  if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone))
+    now_new = now_utc  if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone))
 
+    ####  Add months
     now_new = now_new + datetime.timedelta(days=add_days + 7*add_weeks, hours=add_hours, minutes=add_mins,)
-
-
     if add_months!=0 :
         from dateutil.relativedelta import relativedelta
         now_new = now_new + relativedelta(months=add_months)
+
+
+    #### Force dates
+    if force_dayofmonth >0 :
+        now_new = now_new.replace(day=force_dayofmonth)
+
+    if force_dayofweek >0 :
+        actual_day = now_new.weekday()
+        days_of_difference = force_dayofweek - actual_day
+        now_new = now_new + datetime.timedelta(days=days_of_difference)
+
+    if force_hourofday >0 :
+        now_new = now_new.replace(hour=force_hourofday)
+
+    if force_minofhour >0 :
+        now_new = now_new.replace(minute=force_minofhour)
+
 
     if   returnval == 'datetime': return now_new ### datetime
     elif returnval == 'int':      return int(now_new.strftime(fmt))
