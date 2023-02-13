@@ -33,6 +33,11 @@
      folder backup   ~/mypathXYZ   ~/mypath_target/
 
 
+  4) you can debug bash script online here
+     https://www.onlinegdb.com/online_bash_shell
+
+     
+
 ```
 
 
