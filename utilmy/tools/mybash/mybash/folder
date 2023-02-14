@@ -12,7 +12,7 @@ USAGE=$(cat <<-END
      folder backup   ~/mypathXYZ   ~/mypath_target/       #### copied from mypathXYZ to mypath_target/
 
 
-     folder copysmallfile   mypathFROm/   mypathTO/   100m       ### copy files recursively, filter big files
+     folder copysmallfile   mypathFROm/   mypathTO/   100       ### copy files recursively, filter big files
      
 
 END
@@ -80,21 +80,28 @@ elif [[ "$task" = recentfile ]]; then
 exit 0
 elif [[ "$task" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
-      pathbase="suffix of path_$YMD"
-      dir_to=  dir_to=$3     &&  [ -z $3 ] &&    "~/zbackup/$pathbase"
+      pathbase="backup_$YMD"
+      dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
 
-      rsync -ar $ppath  dir_to
+      rsync -ar $ppath  $dir_to
+
 
 
 
 exit 0
 elif [[ "$task" =  copysmallfile ]]; then
-      ### Copy only small files, exclude big one
-      dir_to=$3         &&  [ -z $3 ] &&    "~/zbackup/$pathbase"
-      max_file_size=$4  &&  [ -z $4 ] &&    "100"
+      ### Copy only small files, exclude big one cplwf
+      pathbase="backup_$YMD"
+      dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
+      max_file_size="-$4c"  &&  [ -z $4 ] &&    max_file_size="-1000c"
 
       #### Add File filtering
-      rsync -ar $ppath  dir_to
+      # echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
+      cmd= (find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to )
+      
+      printf '%q ' "${cmd[@]}"
+      "${cmd[@]}"   ### Execute the command
+
 
 
 
@@ -103,3 +110,30 @@ else
    echo $USAGE
 fi
 
+
+
+function exists_in_list() {
+    # https://www.baeldung.com/linux/check-variable-exists-in-list
+    # list1="banana pear apple strawberry lime"
+    # if exists_in_list "pear"   "$list1" ","; then
+    #     echo "pear is in the list"
+    # else
+    #     echo "pear is not in the list"
+    # fi    
+
+    VALUE=$1
+    LIST=$2
+    DELIMITER=$3  &&  [ -z $3 ] &&    DELIMITER=","
+
+    echo $LIST | tr "$DELIMITER" '\n' | grep -F -q -x "$VALUE"
+}
+
+alias exists=exists_in_list
+
+
+
+### https://stackoverflow.com/questions/2005192/how-to-execute-a-bash-command-stored-as-a-string-with-quotes-and-asterisk
+# cmd=( mysql AMORE -u username -ppassword -h localhost -e "SELECT  host  FROM amoreconfig" )
+# printf 'Proposing to run: '
+# printf '%q ' "${cmd[@]}"
+# printf '\n'
