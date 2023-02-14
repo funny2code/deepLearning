@@ -96,7 +96,7 @@ elif [[ "$task" =  copysmallfile ]]; then
       max_file_size="-$4c"  &&  [ -z $4 ] &&    max_file_size="-1000c"
 
       #### Add File filtering
-      #rsync -ar $ppath  dir_to
+      echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
       find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to
 
 
