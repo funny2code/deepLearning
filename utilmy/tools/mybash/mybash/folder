@@ -96,8 +96,12 @@ elif [[ "$task" =  copysmallfile ]]; then
       max_file_size="-$4c"  &&  [ -z $4 ] &&    max_file_size="-1000c"
 
       #### Add File filtering
-      echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
-      find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to
+      # echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
+      cmd= (find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to )
+      
+      printf '%q ' "${cmd[@]}"
+      "${cmd[@]}"   ### Execute the command
+
 
 
 
@@ -106,3 +110,9 @@ else
    echo $USAGE
 fi
 
+
+### https://stackoverflow.com/questions/2005192/how-to-execute-a-bash-command-stored-as-a-string-with-quotes-and-asterisk
+# cmd=( mysql AMORE -u username -ppassword -h localhost -e "SELECT  host  FROM amoreconfig" )
+# printf 'Proposing to run: '
+# printf '%q ' "${cmd[@]}"
+# printf '\n'
