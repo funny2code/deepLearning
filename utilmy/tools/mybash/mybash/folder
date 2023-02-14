@@ -12,7 +12,7 @@ USAGE=$(cat <<-END
      folder backup   ~/mypathXYZ   ~/mypath_target/       #### copied from mypathXYZ to mypath_target/
 
 
-     folder copysmallfile   mypathFROm/   mypathTO/   100m       ### copy files recursively, filter big files
+     folder copysmallfile   mypathFROm/   mypathTO/   100       ### copy files recursively, filter big files
      
 
 END
@@ -80,7 +80,7 @@ elif [[ "$task" = recentfile ]]; then
 exit 0
 elif [[ "$task" =  backup ]]; then
       ### backup quickly currently folder, skip big files.
-      pathbase="suffix of path_$YMD"
+      pathbase="backup_$YMD"
       dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
 
       rsync -ar $ppath  $dir_to
@@ -91,13 +91,13 @@ elif [[ "$task" =  backup ]]; then
 exit 0
 elif [[ "$task" =  copysmallfile ]]; then
       ### Copy only small files, exclude big one cplwf
-      pathbase="suffix of path_$YMD"
+      pathbase="backup_$YMD"
       dir_to=$3  &&  [ -z $3 ]  &&  dir_to="~/zbackup/$pathbase"
       max_file_size="-$4c"  &&  [ -z $4 ] &&    max_file_size="-1000c"
 
       #### Add File filtering
       #rsync -ar $ppath  dir_to
-      find $ppath -mindepth 1 -maxdepth 1 -type f -size $max_file_size -exec cp -t $dir_to
+      find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to
 
 
 
