@@ -111,6 +111,27 @@ else
 fi
 
 
+
+function exists_in_list() {
+    # https://www.baeldung.com/linux/check-variable-exists-in-list
+    # list1="banana pear apple strawberry lime"
+    # if exists_in_list "pear"   "$list1" ","; then
+    #     echo "pear is in the list"
+    # else
+    #     echo "pear is not in the list"
+    # fi    
+
+    VALUE=$1
+    LIST=$2
+    DELIMITER=$3  &&  [ -z $3 ] &&    DELIMITER=","
+
+    echo $LIST | tr "$DELIMITER" '\n' | grep -F -q -x "$VALUE"
+}
+
+alias exists=exists_in_list
+
+
+
 ### https://stackoverflow.com/questions/2005192/how-to-execute-a-bash-command-stored-as-a-string-with-quotes-and-asterisk
 # cmd=( mysql AMORE -u username -ppassword -h localhost -e "SELECT  host  FROM amoreconfig" )
 # printf 'Proposing to run: '
