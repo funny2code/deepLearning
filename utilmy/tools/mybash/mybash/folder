@@ -112,10 +112,10 @@ fi
 
 
 
-function exists_in_list() {
+function exists() {
     # https://www.baeldung.com/linux/check-variable-exists-in-list
-    # list1="banana pear apple strawberry lime"
-    # if exists_in_list "pear"   "$list1" ","; then
+    # list1="banana,pear,apple,strawberry,lime"
+    # if exists "pear"   "$list1" ","; then
     #     echo "pear is in the list"
     # else
     #     echo "pear is not in the list"
