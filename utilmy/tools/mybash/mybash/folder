@@ -3,13 +3,13 @@ USAGE=$(cat <<-END
      Perform various useful operations on the folders/directories
 
      folder
-     folder size        ./            #### Print folder size in Gb
-     folder topfile     ./   20       #### Print 20 biggest size files
-     folder recentifle  ./   10       #### Print recently modified files   
+     folder size        ./            						#### Print folder size in Gb
+     folder topfile     ./   20   "dir1 dir2 dir3"    		#### Print 20 biggest size files
+     folder recentifle  ./   10       						#### Print recently modified files   
 
                                 
-     folder backup   mypathXYZ/                           #### copied into default path ~/zarchive/mypath_suffix_20230202/
-     folder backup   ~/mypathXYZ   ~/mypath_target/       #### copied from mypathXYZ to mypath_target/
+     folder backup   mypathXYZ/                           	#### copied into default path ~/zarchive/mypath_suffix_20230202/
+     folder backup   ~/mypathXYZ   ~/mypath_target/      	#### copied from mypathXYZ to mypath_target/
 
 
      folder copysmallfile   mypathFROm/   mypathTO/   100       ### copy files recursively, filter big files
@@ -46,23 +46,30 @@ if [[ "$task" = size ]]; then
       df -h $ppath
       echo  # Newline
       du -h -d 10 $ppath     2>&1   |\
-         # grep '[0-9]G\>'         |\
-         grep -v 'denied'           |\ 
-         sort -hr                   |\
-         head -n $ssize 
-
+        # grep '[0-9]G\>'			|\
+		grep -v 'denied'			|\
+        sort -hr                    |\
+        head -n $ssize 
 
 
 exit 0
 elif [[ "$task" = topfile ]]; then
       ssize=$3          &&  [ -z $3 ] &&  ssize=20 
-      eexcludedirs=$4   &&  [ -z $4 ] &&  excludedirs="~/zzzzz" 
+      for val in $4; do eexcludedirs+="--exclude=$val " ; done  &&  [ -z $4 ] &&  excludedirs="~/zzzzz" 
 
       df -H $ppath
       echo  # Newline
-      du -a $ppath  --exclude='${eexcludedirs}' |\
-         sort -n -r |\
-         head -n $ssize  
+
+
+	  while read -r str; do du -d 0 -h $str ; done < \
+			<( du -a $ppath $eexcludedirs |\
+					sort -n -r            |\
+					head -n $ssize        |\
+					awk '{print $2}' )
+	
+    #   du -a $ppath  $eexcludedirs     |\
+    #      sort -n -r					  |\
+    #      head -n $ssize  
 
 
 
@@ -73,10 +80,24 @@ elif [[ "$task" = recentfile ]]; then
 
       if [[ "$OSTYPE" == "darwin"* ]]; then
          ### MacoS
-         find $ppath -type f -exec stat -lt "%F %T" {} \+ | cut -d' ' -f6- | sort -n | tail -n $ssize
-      else 
+		 while read -r str; do echo -e "$( date -r "$str" +'%F %T') \t $str" ; done < \
+				<( find $ppath -type f -exec stat -lt "%F %T" {} \+ 	|\
+							cut -d' ' -f6-								|\
+				 			sort -n 									|\
+							tail -n $ssize 								|\
+							sort -r )
+
+        #  find $ppath -type f -exec stat -lt "%F %T" {} \+ | cut -d' ' -f6- | sort -n | tail -n $ssize
+    	else 
           ### Linux 
-          find $ppath -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f 2- | tail -n $ssize
+			while read -r str; do echo -e "$( date -r "$str" +'%F %T') \t $str" ; done < \
+				<( find $ppath -type f -printf "%T@ %p\n" 	|\
+				 			sort -n 						|\
+							tail -n $ssize 					|\
+							sort -r 						|\
+							cut -d' ' -f2-  )
+         
+		# find $ppath -type f -printf "%T@ %p\n" | sort -n | cut -d' ' -f2- | tail -n $ssize
 
       fi
 
@@ -101,10 +122,10 @@ elif [[ "$task" =  copysmallfile ]]; then
 
       #### Add File filtering
       # echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
-      cmd= (find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to )
+      cmd=$(find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp {} $dir_to \; )
       
       printf '%q ' "${cmd[@]}"
-      "${cmd[@]}"   ### Execute the command
+    #   "${cmd[@]}"   ### Execute the command
 
 
 
