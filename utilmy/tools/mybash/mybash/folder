@@ -20,7 +20,7 @@ END
 
 #### Global Config. #################################
 # set -x  # Output commands being run.
-set -e  # Exit on error.
+set -e  # Exit on error.å
 
 
 #### Global vars ###################################
