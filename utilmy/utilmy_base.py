@@ -578,7 +578,7 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
     from pytz import timezone as tzone
     import datetime, time
 
-    if timezone_input == None:
+    if timezone_input is None:
         timezone_input = timezone
 
     sdt = str(datenow)
