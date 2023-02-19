@@ -291,9 +291,14 @@ batch_lambda_run()
 
 utilmy/cloud/aws/util_aws.py
 -------------------------functions----------------------
+aws_check_session(session, )
+aws_check_session2(session, )
+aws_get_session(profile_name:str = "", session = None)
+aws_load_pickle(dir_s3:str = "")
 glob_s3(path: str, recursive: bool  =  True, max_items_per_api_call: str  =  1000, fields  =  "name,date,size", return_format = 'tuple', extra_params: list  =  None)
 help()
 load_json_data_frame(s3_path, verbose = True)
+s3_check_bucket(session, bucket_name = '')
 s3_donwload(path_s3 = "", n_pool = 5, dir_error = None, start_delay = 0.1, verbose = True, **kw)
 s3_get_filelist(path_s3 = "/mybucket1/mybucket2/", suffix = ".json")
 s3_get_filelist_cmd(parent_cmd: list)
@@ -304,6 +309,7 @@ s3_load_file(s3_path: str, extra_params: list  =  None, return_stream: bool  =  
 s3_pd_read_json(path_s3="s3 = "s3://mybucket", suffix = ".json", npool = 2, dataset = True, **kw)
 s3_pd_read_json2(path_s3="s3 = "s3://mybucket", suffix = ".json", ignore_index = True, cols = None, verbose = False, nrows = -1, nfile = 1000000, concat_sort = True, n_pool = 1, npool = None, drop_duplicates = None, col_filter:str = None, col_filter_vals:list = None, dtype_reduce = None, fun_apply = None, use_ext = None, **kw)
 s3_read_json(path_s3 = "", n_workers = 1, verbose = True, suffix = ".json", **kw)
+s3_split_dir(dir_s3:str)
 s3_split_path(s3_path)
 test1()
 test2()
@@ -311,7 +317,12 @@ test3()
 test_all()
 test_s3json()
 test_topandas()
+torch_save_s3(model, dir_s3:str)
 
+-------------------------methods----------------------
+BotoSession.__get_session_credentials(self, ttl = 900)
+BotoSession.__init__(self, region_name: str  =  None, profile_name: str  =  None, sts_arn: str  =  None, session_name: str  =  None, )
+BotoSession.refreshable_session(self)
 
 
 utilmy/cloud/aws/util_aws_daemon.py
@@ -3016,6 +3027,7 @@ os_ram_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
 os_remove(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", ndays_past = 1000, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
 os_removedirs(path, verbose = False)
 os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
+os_subprocess_decode(proc)
 os_system(cmd, doprint = False)
 os_system_list(ll, logfile = None, sleep_sec = 10)
 os_variable_check(ll, globs = None, do_terminate = True)
@@ -6127,7 +6139,7 @@ main()
 
 
 
-utilmy/tools/mybash/mybash/github_getallrepo.py
+utilmy/tools/mybash/mybash/ggithub/github_getallrepo.py
 -------------------------functions----------------------
 gather_clone_urls(account, no_forks = True)
 
@@ -6518,7 +6530,7 @@ zip2(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '
 
 utilmy/utilmy_base.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, force_minofhour = -1, returnval = 'str,int,datetime/unix')
 dir_testinfo(tag = "", verbose = 1, )
 direpo(show = 0)
 dirpackage(show = 0)
