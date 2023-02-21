@@ -586,7 +586,7 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
     if isinstance(datenow, datetime.datetime):
         now_utc = datenow
 
-    elif (isinstance(datenow, float) or isinstance(datenow, int)   )  and  datenow > 1600100100  :  ### Unix time stamp
+    elif (isinstance(datenow, float) or isinstance(datenow, int))  and  datenow > 1600100100 and str(datenow)[0] == "1"  :  ### Unix time stamp
         ## unix seconds in UTC
         # fromtimestamp give you the date and time in local time
         # utcfromtimestamp gives you the date and time in UTC.
@@ -1141,6 +1141,23 @@ def test_datenow():
     log("Testing the argument datenow with a timestamp value and with different timezone")
     random_timestamp = 1621583040
     assert abs(random_timestamp - date_now(random_timestamp, returnval='unix',timezone_input="UTC", timezone="Europe/Paris")) < 1e-2, ""
+
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_hours= 17,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_hours =17,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    log("Testing with double conversion")
+    #Testing first the return values unix and datetime, because, return value int needs another format
+    for first_rval in ["unix","datetime"]:
+        first_conv = date_now(datenow='2023-02-16 21:56:00',returnval=first_rval,timezone_input="Asia/Tokyo",timezone="America/Santiago",fmt="%Y-%m-%d %H:%M:%S",fmt_input="%Y-%m-%d %H:%M:%S")
+        for second_rval in ["unix","datetime","int"]:
+            assert date_now(first_conv, returnval=second_rval,timezone_input="America/Santiago",timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-16 21:56:00',returnval=second_rval,timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    # Testing the return value int with its correct format
+    first_conv = date_now(datenow='2023-02-16 21:56:00',returnval="int",timezone_input="Asia/Tokyo",timezone="America/Santiago",fmt_input="%Y-%m-%d %H:%M:%S", fmt ="%Y%m%d%H%M%S")
+    for rval in ["unix", "datetime", "int"]:
+        assert date_now(str(first_conv), returnval=rval,timezone_input="America/Santiago",timezone="Asia/Tokyo",fmt_input="%Y%m%d%H%M%S") == date_now(datenow='2023-02-16 21:56:00',returnval=rval,timezone_input="Asia/Tokyo",timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S")
+
 
 def test_loadfunctionuri():
     import utilmy as m
