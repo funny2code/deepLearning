@@ -232,7 +232,7 @@ class JarqueBera(object):
 
     Notes
     -----
-    The Jarque-Bera test is a goodness-of-fit test developed by Carlos Jarque and Anil Bera that tests whether
+    The Jarque-Bera test is a goodness-of-fit test developed by zzztt Jarque and Anil Bera that tests whether
     a sample of data is normally distributed using the sample's kurtosis and skewness. The Jarque-Bera test
     statistic is defined as:
 
