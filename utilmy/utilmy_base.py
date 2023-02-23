@@ -551,10 +551,12 @@ def load_function_uri(uri_name: str="MyFolder/myfile.py:my_function"):
 ### Generic Date function   #####################################################
 def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
              add_days=0,  add_mins=0, add_hours=0, add_months=0,add_weeks=0,
+             timezone_input=None,
              timezone='Asia/Tokyo', fmt_input="%Y-%m-%d",
              force_dayofmonth=-1,   ###  01 first of month
              force_dayofweek=-1,
              force_hourofday=-1,
+             force_minofhour=-1,
              returnval='str,int,datetime/unix'):
     """ One liner for date Formatter
     Doc::
@@ -576,46 +578,54 @@ def date_now(datenow:Union[str,int,float,datetime.datetime]="", fmt="%Y%m%d",
     from pytz import timezone as tzone
     import datetime, time
 
+    if timezone_input is None:
+        timezone_input = timezone
+
     sdt = str(datenow)
 
     if isinstance(datenow, datetime.datetime):
         now_utc = datenow
 
-    elif (isinstance(datenow, float) or isinstance(datenow, int)   )  and  datenow > 1600100100  :  ### Unix time stamp
-        ## unix seconds in UTC 
+    elif (isinstance(datenow, float) or isinstance(datenow, int))  and  datenow > 1600100100 and str(datenow)[0] == "1"  :  ### Unix time stamp
+        ## unix seconds in UTC
         # fromtimestamp give you the date and time in local time
         # utcfromtimestamp gives you the date and time in UTC.
-        #  int(time.time()) - date_now( int(time.time()), returnval='unix', timezone='utc') == 0 
-        now_utc = datetime.datetime.fromtimestamp(datenow)   ## 
-
+        #  int(time.time()) - date_now( int(time.time()), returnval='unix', timezone='utc') == 0
+        now_utc = datetime.datetime.fromtimestamp(datenow, tz=tzone("UTC") )   ##
     elif  len(sdt) >7 :  ## date in string
         now_utc = datetime.datetime.strptime(sdt, fmt_input)
 
     else:
         now_utc = datetime.datetime.now(tzone('UTC'))  # Current time in UTC
-
-    #### Force dates
-    if force_dayofmonth >0 :
-        now_utc = now_utc.replace(day=force_dayofmonth)
-
-    if force_dayofweek >0 :
-        actual_day = now_utc.weekday()
-        days_of_difference = force_dayofweek - actual_day
-        now_utc = now_utc + datetime.timedelta(days=days_of_difference)
-
-    if force_hourofday >0 :
-        now_utc = now_utc.replace(hour=force_hourofday)
-
-
     # now_new = now_utc.astimezone(tzone(timezone))  if timezone != 'utc' else  now_utc.astimezone(tzone('UTC'))
-    now_new = now_utc.astimezone(tzone('UTC'))  if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone)) 
+    #now_new = now_utc.astimezone(tzone('UTC'))  if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone))
+    if now_utc.tzinfo == None:
+        now_utc = tzone(timezone_input).localize(now_utc)
 
+    now_new = now_utc if timezone in {'utc', 'UTC'} else now_utc.astimezone(tzone(timezone))
+
+    ####  Add months
     now_new = now_new + datetime.timedelta(days=add_days + 7*add_weeks, hours=add_hours, minutes=add_mins,)
-
-
     if add_months!=0 :
         from dateutil.relativedelta import relativedelta
         now_new = now_new + relativedelta(months=add_months)
+
+
+    #### Force dates
+    if force_dayofmonth >0 :
+        now_new = now_new.replace(day=force_dayofmonth)
+
+    if force_dayofweek >0 :
+        actual_day = now_new.weekday()
+        days_of_difference = force_dayofweek - actual_day
+        now_new = now_new + datetime.timedelta(days=days_of_difference)
+
+    if force_hourofday >0 :
+        now_new = now_new.replace(hour=force_hourofday)
+
+    if force_minofhour >0 :
+        now_new = now_new.replace(minute=force_minofhour)
+
 
     if   returnval == 'datetime': return now_new ### datetime
     elif returnval == 'int':      return int(now_new.strftime(fmt))
@@ -1117,6 +1127,36 @@ def test_datenow():
     datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
     dtu = datetime.datetime.fromtimestamp(ts) #.strftime('%Y-%m-%d %H:%M:%S')
     datetime.datetime.timestamp(dtu )  
+
+    log("Testing the argument timezone_input")
+    # Testing adding minutes, hours, and months
+    assert date_now(datenow='2023-02-16 21:56:00',returnval="unix",timezone_input="America/Santiago",timezone="Europe/Paris",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 01:56:00',returnval="unix",timezone="Europe/Paris",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 21:56:00',returnval="unix",timezone_input="America/Santiago",timezone="Europe/Paris",add_hours = 2,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 01:56:00',returnval="unix",timezone="Europe/Paris",add_hours = 2,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 21:56:00',returnval="unix",timezone_input="America/Santiago",timezone="Europe/Paris",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 01:56:00',returnval="unix",timezone="Europe/Paris",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    log("Testing the argument datenow with a datetime object as value")
+    datetime_obj = datetime.datetime(2023,2,16,21,56,0,0)
+    assert date_now(datenow = datetime_obj,timezone="Europe/Paris", returnval = "datetime", fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-16 21:56:00',returnval="datetime",timezone="Europe/Paris",fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    log("Testing the argument datenow with a timestamp value and with different timezone")
+    random_timestamp = 1621583040
+    assert abs(random_timestamp - date_now(random_timestamp, returnval='unix',timezone_input="UTC", timezone="Europe/Paris")) < 1e-2, ""
+
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_mins = 52,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_hours= 17,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_hours =17,fmt_input="%Y-%m-%d %H:%M:%S")
+    assert date_now(datenow='2023-02-16 23:56:00',returnval="unix",timezone_input="Europe/Paris",timezone="Asia/Tokyo",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-17 07:56:00',returnval="unix",timezone="Asia/Tokyo",add_months=10,fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    log("Testing with double conversion")
+    #Testing first the return values unix and datetime, because, return value int needs another format
+    for first_rval in ["unix","datetime"]:
+        first_conv = date_now(datenow='2023-02-16 21:56:00',returnval=first_rval,timezone_input="Asia/Tokyo",timezone="America/Santiago",fmt="%Y-%m-%d %H:%M:%S",fmt_input="%Y-%m-%d %H:%M:%S")
+        for second_rval in ["unix","datetime","int"]:
+            assert date_now(first_conv, returnval=second_rval,timezone_input="America/Santiago",timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S") == date_now(datenow='2023-02-16 21:56:00',returnval=second_rval,timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S")
+    
+    # Testing the return value int with its correct format
+    first_conv = date_now(datenow='2023-02-16 21:56:00',returnval="int",timezone_input="Asia/Tokyo",timezone="America/Santiago",fmt_input="%Y-%m-%d %H:%M:%S", fmt ="%Y%m%d%H%M%S")
+    for rval in ["unix", "datetime", "int"]:
+        assert date_now(str(first_conv), returnval=rval,timezone_input="America/Santiago",timezone="Asia/Tokyo",fmt_input="%Y%m%d%H%M%S") == date_now(datenow='2023-02-16 21:56:00',returnval=rval,timezone_input="Asia/Tokyo",timezone="Asia/Tokyo",fmt_input="%Y-%m-%d %H:%M:%S")
 
 
 def test_loadfunctionuri():

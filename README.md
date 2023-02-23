@@ -6,6 +6,29 @@
 
 
 
+#### Install
+```bash
+# conda activate yourENV
+
+git clone https://github.com/arita37/myutil.git
+cd myutil
+git checkout devtorch
+
+### Install Package in Dev mode
+pip install -e .
+
+
+
+
+```
+
+
+
+
+
+
+
+
 
  # Code Foramtter Clang-format
 ```

@@ -1,7 +1,3 @@
-
 ### What you want as alias
-alias ddir="folder "
-
-
-
-
+alias cc_dir="folder "
+alias cc_files="files"

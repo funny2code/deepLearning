@@ -291,13 +291,44 @@ batch_lambda_run()
 
 utilmy/cloud/aws/util_aws.py
 -------------------------functions----------------------
+aws_check_session(session, )
+aws_check_session2(session, )
+aws_get_session(profile_name:str = "", session = None)
+aws_load_pickle(dir_s3:str = "")
 glob_s3(path: str, recursive: bool  =  True, max_items_per_api_call: str  =  1000, fields  =  "name,date,size", return_format = 'tuple', extra_params: list  =  None)
 help()
+load_json_data_frame(s3_path, verbose = True)
+s3_check_bucket(session, bucket_name = '')
+s3_donwload(path_s3 = "", n_pool = 5, dir_error = None, start_delay = 0.1, verbose = True, **kw)
+s3_get_filelist(path_s3 = "/mybucket1/mybucket2/", suffix = ".json")
 s3_get_filelist_cmd(parent_cmd: list)
+s3_json_read2(path_s3, npool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, suffix = ".json", **kw)
+s3_json_read2bis(path_s3, npool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, suffix = ".json", **kw)
+s3_json_read3(path_s3, npool = 5, start_delay = 0.1, verbose = True, input_fixed:dict = None, suffix = ".json", timeout = 60, **kw)
 s3_load_file(s3_path: str, extra_params: list  =  None, return_stream: bool  =  False, is_binary: bool  =  False)
+s3_pd_read_json(path_s3="s3 = "s3://mybucket", suffix = ".json", npool = 2, dataset = True, **kw)
+s3_pd_read_json2(path_s3="s3 = "s3://mybucket", suffix = ".json", ignore_index = True, cols = None, verbose = False, nrows = -1, nfile = 1000000, concat_sort = True, n_pool = 1, npool = None, drop_duplicates = None, col_filter:str = None, col_filter_vals:list = None, dtype_reduce = None, fun_apply = None, use_ext = None, **kw)
+s3_read_json(path_s3 = "", n_workers = 1, verbose = True, suffix = ".json", **kw)
+s3_split_dir(dir_s3:str)
 s3_split_path(s3_path)
 test1()
+test2()
+test3()
 test_all()
+test_s3json()
+test_topandas()
+torch_save_s3(model, dir_s3:str)
+
+-------------------------methods----------------------
+BotoSession.__get_session_credentials(self, ttl = 900)
+BotoSession.__init__(self, region_name: str  =  None, profile_name: str  =  None, sts_arn: str  =  None, session_name: str  =  None, )
+BotoSession.refreshable_session(self)
+
+
+utilmy/cloud/aws/util_aws_daemon.py
+-------------------------functions----------------------
+run_move_toS3(dirin, dirout, freq = 600, add_datebucket = True, fmt = "%Y%m%d", timezone = "Asia/Japan")
+s3_files_move(dirin:str, dirout:str, use_threads = False, max_try = 3)
 
 
 
@@ -311,6 +342,8 @@ utilmy/configs/logs/test_log.py
 -------------------------functions----------------------
 test1()
 test2()
+test4()
+test5()
 test_all()
 test_logging()
 
@@ -388,10 +421,6 @@ os_getenv_dict()
 
 
 utilmy/data.py
--------------------------functions----------------------
-help()
-log(*s)
-
 
 
 utilmy/dates.py
@@ -444,6 +473,139 @@ DBlist.info(self, )
 DBlist.list(self, show = True)
 DBlist.remove(self, db_path)
 DBlist.show(self, db_path = None, n = 4)
+
+
+utilmy/db/kvs/__init__.py
+
+
+utilmy/db/kvs/couch_conn.py
+-------------------------methods----------------------
+CouchConn.__init__(self, config_file_path = None)
+CouchConn.make_conn(self, name)
+CouchConn.sc_control_conn(self)
+CouchConn.sc_search_conn(self)
+CouchConn.sc_user_conn(self)
+CouchConn.top_conn(self)
+
+
+utilmy/db/kvs/couch_queries.py
+-------------------------methods----------------------
+CouchQueries.__init__(self, config_file_path = None)
+CouchQueries.get_h32vrans(self, h32s, ipl_version = None)
+CouchQueries.get_h64_to_h32s(self, h64s, ipl_version = None)
+CouchQueries.get_htkn_to_qh32s(self, htkns)
+CouchQueries.get_ipl_data(self, siids)
+CouchQueries.get_qh32_to_qhashes(self, qh32s)
+CouchQueries.get_qhash_to_genredist(self, qhashes)
+CouchQueries.get_qhash_to_queries(self, qhashes)
+CouchQueries.get_qhash_to_vrandist(self, qhashes)
+CouchQueries.get_siid_stats(self, siids)
+CouchQueries.get_siid_to_ad_data(self, siids, no_title = True)
+CouchQueries.get_siid_to_qhashes(self, siids)
+CouchQueries.get_siid_to_qhashes_new(self, siids)
+CouchQueries.get_siid_to_title(self, siids)
+CouchQueries.get_vran_to_querydist(self, vrans)
+CouchQueries.get_vrans_to_items(self, vrans, ipl_version = None)
+CouchQueries.set_h32vrans(self, h32_vran_map, ipl_version = None)
+CouchQueries.set_h64_to_h32s(self, h64_to_h32s_map, ipl_version = None)
+CouchQueries.set_htkn_to_qh32s(self, htoq32s)
+CouchQueries.set_ipl_data(self, siid_to_vsg_map, ipl_version = None)
+CouchQueries.set_qh32_to_qhashes(self, qh32toqhashes)
+CouchQueries.set_qhash_to_genredist(self, qhash_to_genrescore)
+CouchQueries.set_qhash_to_queries(self, qmap)
+CouchQueries.set_qhash_to_vrandist(self, qhash_to_vranscore)
+CouchQueries.set_siid_to_qhashes(self, siid_to_queries)
+CouchQueries.set_vran_to_querydist(self, vran_to_querydist)
+CouchQueries.set_vrans_to_items(self, vran_to_items_map, ipl_version = None)
+CouchQueries.zzz_version_id(self)
+
+
+utilmy/db/kvs/redis_bench_python/__init__.py
+
+
+utilmy/db/kvs/redis_bench_python/tests/test_credis.py
+-------------------------functions----------------------
+randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
+redisGetXTimes(client, keys)
+redisMGetXTimes(client, keys)
+redisSetXTimes(client, keys, values, batch_size = 500)
+test_credisGet()
+test_credisMGet()
+test_credisSet()
+
+
+
+utilmy/db/kvs/redis_bench_python/tests/test_hiredis.py
+-------------------------functions----------------------
+hiredisPipeleineGetXTimes(client, keys)
+hiredisPipeleineHGetXTimes(client: redis.Redis, keys, batch_size = 500)
+hiredisPipeleineHSetXTimes(client: redis.Redis, keys, values, batch_size = 500)
+hiredisPipeleineSetXTimes(client, keys, values)
+randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
+redis_get_batch(client: redis.Redis, keys, batch_size = 500)
+test_hiredisGet()
+test_hiredisHGet()
+test_hiredisHSet()
+test_hiredisSet()
+
+
+
+utilmy/db/kvs/redis_bench_python/tests/test_redis.py
+-------------------------functions----------------------
+randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
+redisGetXTimes(client : redis.Redis, keys)
+redisHGetXTimes(client : redis.Redis, keys)
+redisHSetXTimes(client: redis.Redis, keys, values)
+redisMGetXTimes(client, keys)
+redisSetXTimes(client, keys, values)
+test_redisGet()
+test_redisHGet()
+test_redisHSet()
+test_redisMGet()
+test_redisSet()
+
+
+
+utilmy/db/kvs/util_cassandra.py
+-------------------------methods----------------------
+CassConn.__init__(self, config_file_path = None)
+CassConn.insert_multi(session, query, data_map, sync = True, max_try = 2)
+CassConn.insert_multi_new(self, in_session, query, records, sync = True, max_try = 2, batch_size = 25)
+CassConn.make_connection(self, cluster_name, keyspace_name = None)
+CassConn.product_conn(self)
+CassConn.read_multi(session, query, key_list, batch_size = 25, m_concurrent = 1, max_try = 2)
+
+
+utilmy/db/kvs/util_redis.py
+-------------------------functions----------------------
+randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
+randomStringGenerator(size, chars = string.ascii_lowercase + string.digits)
+test_all()
+test_all_cluster(config = None)
+test_cluster1()
+test_cluster2()
+test_cluster3()
+test_cluster_getmulti_5lastkey()
+test_cluster_getputmulti()
+test_cluster_set_with_ttl()
+test_connection()
+test_getput()
+test_getputmulti()
+
+-------------------------methods----------------------
+RedisClusterClient.__init__(self, host: str, port:str|int, ports: list()
+RedisClusterClient.get(self, key)
+RedisClusterClient.get_multi(self, keys, batch_size = 500, transaction = False)
+RedisClusterClient.put(self, key, val, ttl: float = None)
+RedisClusterClient.put_multi(self, key_values, batch_size = 500, transaction = False, nretry = 3, ttl = None)
+RedisQueries.__init__(self, config_file = None)
+RedisQueries.get_siid_to_title(self, siids)
+RedisQueries.version_id(self)
+redisClient.__init__(self, host:  str  =  'localhost', port: int  =  6333, user = '', password = '', config_file: str = None, db = 0, config_keyname =  'redis', config_dict = None)
+redisClient.get(self, key)
+redisClient.get_multi(self, keys, batch_size = 500, transaction = False)
+redisClient.put(self, key, val, ttl = None)
+redisClient.put_multi(self, key_values, batch_size = 500, transaction = False, nretry = 3, ttl = None)
 
 
 utilmy/db/qdrant/dbvector.py
@@ -2428,6 +2590,11 @@ test_pd_create_dag(nrows = 1000, n_nodes = 100)
 
 
 utilmy/iio.py
+-------------------------functions----------------------
+screenshot(output = 'fullscreen.png')
+test_all()
+test_screenshot()
+
 
 
 utilmy/images/__init__.py
@@ -2807,6 +2974,7 @@ test_lsh()
 
 utilmy/nnumpy.py
 -------------------------functions----------------------
+dict_flatten(d, *, recursive: bool  =  True, join_fn =  ".".join, )
 is_float(x)
 is_int(x)
 np_add_remove(set_, to_remove, to_add)
@@ -2844,6 +3012,7 @@ os_file_replacestring(findstr, replacestr, some_dir, pattern = "*.*", dirlevel =
 os_get_function_name()
 os_get_ip(mode = 'internal')
 os_get_os()
+os_get_process_info(sep = "-")
 os_get_uniqueid(format = "int")
 os_getcwd()
 os_import(mod_name = "myfile.config.model", globs = None, verbose = True)
@@ -2858,6 +3027,7 @@ os_ram_sizeof(o, ids, hint = " deep_getsizeof(df_pd, set()
 os_remove(dirin = "folder/**/*.parquet", min_size_mb = 0, max_size_mb = 1, exclude = "", include_only = "", ndays_past = 1000, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, dry = 0)
 os_removedirs(path, verbose = False)
 os_search_content(srch_pattern = None, mode = "str", dir1 = "", file_pattern = "*.*", dirlevel = 1)
+os_subprocess_decode(proc)
 os_system(cmd, doprint = False)
 os_system_list(ll, logfile = None, sleep_sec = 10)
 os_variable_check(ll, globs = None, do_terminate = True)
@@ -2866,16 +3036,10 @@ os_variable_exist(x, globs, msg = "")
 os_variable_init(ll, globs)
 os_wait_processes(nhours = 7)
 os_walk(path, pattern = "*", dirlevel = 50)
-test1()
-test2()
-test4()
-test6_os()
-test7_os()
-test8()
-test8_os()
 test_all()
 test_filecache()
 test_globglob()
+test_os()
 test_os_module_uncache()
 z_os_search_fast(fname, texts = None, mode = "regex/str")
 
@@ -2911,6 +3075,31 @@ myProblem6.get_data_symbolic(self)
 myProblem7.__init__(self)
 myProblem7.get_cost_symbolic(self, dCGP)
 myProblem7.get_data_symbolic(self)
+
+
+utilmy/optim/gp_ranking.py
+-------------------------functions----------------------
+help()
+test5()
+test9()
+test_pars_values()
+
+-------------------------methods----------------------
+myProblem_ranking.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking.check(self)
+myProblem_ranking.get_correlm(self, formulae_str)
+myProblem_ranking.get_cost(self, expr:None, symbols)
+myProblem_ranking.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem_ranking.rank_merge_v5(self, ll1:list, ll2:list, formulae_str:str)
+myProblem_ranking.rank_score(self, fornulae_str:str, rank1:list, rank2:list)
+myProblem_ranking_v2.__init__(self, n_sample  =  100, kk  =  1.0, nsize  =  100, ncorrect1  =  50, ncorrect2  =  50, adjust = 1.0)
+myProblem_ranking_v2.check(self)
+myProblem_ranking_v2.get_correlm(self, formulae_str:str)
+myProblem_ranking_v2.get_cost(self, expr:None, symbols)
+myProblem_ranking_v2.get_rank_based_other(self, l1: list, l2: list)
+myProblem_ranking_v2.rank_generate_fake(self, dict_full, list_overlap, nsize = 100, ncorrect = 20)
+myProblem_ranking_v2.rank_merge_v5(self, ll1:list, ll2:list, formulae_str)
+myProblem_ranking_v2.rank_score(self, formulae_str:str, rank1:list, rank2:list)
 
 
 utilmy/optim/gp_searchformulae.py
@@ -3120,6 +3309,7 @@ pd_show(df, nrows = 100, reader = 'notepad.exe', **kw)
 pd_to_file(df, filei, check = 0, verbose = True, show = 'shape', **kw)
 pd_to_hiveparquet(dirin, dirout = "/ztmp_hive_parquet/df.parquet", verbose = False)
 pd_to_mapdict(df, colkey = 'ranid', colval = 'item_tag', naval = '0', colkey_type = 'str', colval_type = 'str', npool = 5, nrows = 900900900, verbose = True)
+test1()
 test2()
 test_all()
 test_pd_col_bins()
@@ -5949,7 +6139,7 @@ main()
 
 
 
-utilmy/tools/mybash/mybash/github_getallrepo.py
+utilmy/tools/mybash/mybash/ggithub/github_getallrepo.py
 -------------------------functions----------------------
 gather_clone_urls(account, no_forks = True)
 
@@ -6197,10 +6387,9 @@ bootstrap_sequential()
 utilmy/util_batch.py
 -------------------------functions----------------------
 batchLog(object)
-main()
-now_daymonth_isin(day_month, timezone = "jp")
-now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "jp")
-now_weekday_isin(day_week = None, timezone = 'jp')
+now_daymonth_isin(day_month, timezone = "Asia/Tokyo")
+now_hour_between(hour1="12 = "12:45", hour2="13 = "13:45", timezone = "Asia/Tokyo")
+now_weekday_isin(day_week = None, timezone = 'Asia/Tokyo')
 os_lock_acquireLock(plock:str = "tmp/plock.lock")
 os_lock_releaseLock(locked_file_descriptor)
 os_process_find_name(name = r"((.*/)
@@ -6208,16 +6397,17 @@ os_wait_cpu_ram_lower(cpu_min = 30, sleep = 10, interval = 5, msg =  "", name_pr
 os_wait_fileexist2(dirin, ntry_max = 100, sleep_time = 300)
 os_wait_filexist(flist, sleep = 300)
 os_wait_program_end(cpu_min = 30, sleep = 60, interval = 5, msg =  "", program_name = None, verbose = True)
-test_all()
+test1()
+test_functions()
 test_funtions_thread()
 test_index()
 test_os_process_find_name()
-time_sleep_random(nmax = 5)
+time_sleep(nmax = 5, israndom = True)
 to_file_safe(msg:str, fpath:str)
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt", ntry = 10)
-Index0.read(self, )
+Index0.read(self)
 Index0.save(self, flist:list)
 Index0.save_filter(self, val:list = None)
 IndexLock.__init__(self, findex, file_lock = None, min_size = 5, skip_comment = True, ntry = 20)
@@ -6326,16 +6516,21 @@ utilmy/util_zip.py
 dataset_donwload(url, path_target)
 dataset_get_path(cfg: dict)
 dir_size(dirin = "mypath", dirout = "./save.txt")
-gzip(dirin = '/mydir', dirout = "./")
+gzip(dirin = '/mydir', dirout = "./", root_dir:Optional[str] = '/')
+help()
 os_extract_archive(file_path, path = ".", archive_format = "auto")
-to_file(s, filep)
+test1()
+test2()
+test_all()
 unzip(dirin, dirout)
+zip(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '/', format = 'zip')
+zip2(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '/', exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, )
 
 
 
 utilmy/utilmy_base.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, force_minofhour = -1, returnval = 'str,int,datetime/unix')
 dir_testinfo(tag = "", verbose = 1, )
 direpo(show = 0)
 dirpackage(show = 0)
@@ -6369,16 +6564,10 @@ sys_exit(msg = "exited", err_int = 0)
 sys_install(cmd = "")
 sys_path_append(path = "__file__", level_above = 2)
 test1()
-test2()
-test3()
-test4()
-test5()
-test6_datenow()
-test7()
-test8_load_save()
-test9_find_fuzzy()
 test_all()
-to_file(txt, fpath, mode = 'a')
+test_datenow()
+test_loadfunctionuri()
+to_file(txt:str, fpath:str, mode = 'a')
 
 -------------------------methods----------------------
 Index0.__init__(self, findex:str = "ztmp_file.txt", min_chars = 5)
@@ -6398,22 +6587,11 @@ toFileSafe.write(self, *s)
 
 utilmy/utils.py
 -------------------------functions----------------------
-config_load(config_path: Optional[Union[str, pathlib.Path]]  =  None)
-dataset_donwload(url, path_target)
+help()
 load_callable_from_dict(function_dict, return_other_keys = False)
-load_callable_from_uri(uri)
-load_function(package = "mlmodels.util", name = "path_norm")
-load_function_uri(uri_name = "path_norm")
-log(*s)
-log2(*s)
-loge(*s)
-logger_setup()
-logw(*s)
-os_extract_archive(file_path, path = ".", archive_format = "auto")
-test0()
+load_callable_from_uri(uri="mypath/myfile.py = "mypath/myfile.py::myFunction")
 test1()
 test_all()
-to_file(s, filep)
 
 
 
@@ -6426,7 +6604,105 @@ fontsize_css(size)
 
 
 
-utilmy/viz/dash.py
+utilmy/viz/ddash/__init__.py
+
+
+utilmy/viz/ddash/app1/__init__.py
+
+
+utilmy/viz/ddash/app1/app.py
+-------------------------functions----------------------
+export(name = "app1", dirout = "")
+main(content_layout = "assets/mixed_layout.json", debug = True)
+page_render_html(data:str)
+page_render_main(content_layout:dict)
+sidebar_v1(sidebar:dict)
+test1()
+test_all()
+
+
+
+utilmy/viz/ddash/app1/pages/form_calc.py
+-------------------------functions----------------------
+ab_get_sample(ctr, min_effect, n_variant)
+calc_ndays(ctr, min_effect, n_variant, traffic, _)
+calc_nsample(ctr, min_effect, n_variant, _)
+
+
+
+utilmy/viz/ddash/app1/pages/form_uploadjson.py
+-------------------------functions----------------------
+save_json(data, filename)
+toggle_alert(_, filename)
+
+
+
+utilmy/viz/ddash/app1/pages/page1.py
+-------------------------functions----------------------
+update_graph(xaxis_column_name, yaxis_column_name, xaxis_type, yaxis_type, year_value)
+
+
+
+utilmy/viz/ddash/app1/pages/page2.py
+-------------------------functions----------------------
+update_graph(xaxis_column_name, yaxis_column_name, xaxis_type, yaxis_type, year_value)
+
+
+
+utilmy/viz/ddash/app1/pages/util_dash.py
+-------------------------functions----------------------
+generate_grid(grid, classname = 'mb-3')
+input_get(*s, **kw)
+test1(classname = "mb-3", width = 4)
+test_all()
+
+
+
+utilmy/viz/ddash/app1/pages/utils.py
+-------------------------functions----------------------
+generate_grid(grid, classname = 'mb-3')
+input_get(*s)
+test1(classname = "mb-3", width = 4)
+
+
+
+utilmy/viz/ddash/app2_example/main.py
+-------------------------functions----------------------
+hill(x, alpha, beta)
+log1p(x, alpha)
+
+
+
+utilmy/viz/ddash/app2_example/mmm/contribution.py
+-------------------------methods----------------------
+MarketingMixModeling.__init__(self, app_df, imp_df, prior_params)
+MarketingMixModeling.dump_posterior_params(self, json_name)params_dict = {}for p in self.fit.model_pars[ =  {}for p in self.fit.model_pars[:-2]:)
+MarketingMixModeling.fit_posterior(self, stan_code)
+MarketingMixModeling.monthly_mmm()
+
+
+utilmy/viz/ddash/app2_example/multi-page.py
+
+
+utilmy/viz/ddash/app2_example/pages/group-level-mmm.py
+-------------------------functions----------------------
+hill(x, vmax, K, n)
+
+
+
+utilmy/viz/ddash/dash_help.py
+
+
+utilmy/viz/ddash/ddash/simple-dash/app.py
+
+
+utilmy/viz/ddash/ddash/simple-dash/index.py
+
+
+utilmy/viz/ddash/ddash/simple-dash/routes.py
+-------------------------functions----------------------
+render_page_content(pathname)
+
 
 
 utilmy/viz/embedding.py
@@ -6455,6 +6731,7 @@ test1(verbose = False)
 test2(verbose = False)
 test3(verbose = False)
 test4(verbose = False)
+test5()
 test_colimage_table()
 test_cssname(verbose = False, css_name = "a4")
 test_external_css()
@@ -6487,7 +6764,6 @@ help_get_codesource(func)
 html_show(html_code, verbose = 1)
 html_show_chart_highchart(html_code, verbose = True)
 images_to_html(dir_input = "*.png", title = "", verbose = False)
-log(*s)
 mlpd3_add_tooltip(fig, points, labels)
 pd_plot_density_d3(df: pd.DataFrame, colx, coly, radius = 9, title: str  =  'Plot Density', 460, 460), xlabel: str  =  'x-axis', ylabel: str  =  'y-axis', color: str  =  '#69b3a2', cfg: dict  =  {})
 pd_plot_histogram_highcharts(df:pd.DataFrame, colname:str = None, binsNumber = None, binWidth = None, color:str = '#7CB5EC', title:str = "", xaxis_label:str =  "x-axis", yaxis_label:str = "y-axis", cfg:dict = {}, mode = 'd3', save_img = "", show = False, verbose = True, **kw)
@@ -6528,7 +6804,6 @@ htmlDoc.sep(self, css: str = '')
 htmlDoc.serve_file(self)
 htmlDoc.table(self, df:pd.DataFrame, format: str = 'blue_light', custom_css_class = None, colimage  =  None, use_datatable = False, table_id = None, **kw)
 htmlDoc.tag(self, x)
-mpld3_TopToolbar.__init__(self)
 
 
 utilmy/viz/zarchive/__init__.py
