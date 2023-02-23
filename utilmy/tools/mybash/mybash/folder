@@ -65,7 +65,8 @@ elif [[ "$task" = topfile ]]; then
       #      sort -n -r					  |\
       #      head -n $ssize
 
-      exit 0
+
+exit 0
 elif [[ "$task" = recentfile ]]; then
       ### recent file modified files + created
       ssize=$3 && [ -z $3 ] && ssize=20
@@ -93,7 +94,8 @@ elif [[ "$task" = recentfile ]]; then
 
       fi
 
-      exit 0
+
+exit 0
 elif [[ "$task" = backup ]]; then
       ### backup quickly currently folder, skip big files.
       pathbase="backup_$YMD"
@@ -101,7 +103,9 @@ elif [[ "$task" = backup ]]; then
 
       rsync -ar $ppath $dir_to
 
-      exit 0
+
+
+exit 0
 elif [[ "$task" = copysmallfile ]]; then
       ### Copy only small files, exclude big one cplwf
       pathbase="backup_$YMD"
@@ -115,7 +119,22 @@ elif [[ "$task" = copysmallfile ]]; then
       printf '%q ' "${cmd[@]}"
       #   "${cmd[@]}"   ### Execute the command
 
-      exit 0
+
+exit 0
+elif [[ "$task" = copyfolderonly ]]; then
+      ### Copy only folder
+      pathbase="backup_$YMD"
+      dir_to=$3 && [ -z $3 ] && dir_to="~/zbackup/$pathbase"
+      eexclude="-$4c" && [ -z $4 ] && eexclude="*"
+
+      #### Add File filtering
+      rsync -a --include '*/' --exclude  $eexclude  "$ppath" $dir_to
+
+
+
+
+
+exit 0
 else
       echo $USAGE
 fi
