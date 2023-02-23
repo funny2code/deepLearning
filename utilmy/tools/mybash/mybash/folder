@@ -14,7 +14,9 @@ USAGE=$(
 
 
      folder copysmallfile   mypathFROm/   mypathTO/   100       ### copy files recursively, filter big files
-     
+
+     folder copyfolderonly   mypathFROm/   mypathTO/       ### copy folder only
+
 
 END
 )
