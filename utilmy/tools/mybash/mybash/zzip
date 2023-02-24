@@ -22,21 +22,21 @@ task=$1
 
 ### Core ###########################################
 if [[ "$task" = uncmp ]]; then
-    zipfile=$2 && [ -z $2 ] && echo $USAGE && zipfile="invalid"
-    targetdir=$3 && [ -z $3 ] && targetdir=$(pwd)
+	zipfile=$2 && [ -z $2 ] && echo $USAGE && zipfile="invalid"
+	targetdir=$3 && [ -z $3 ] && targetdir=$(pwd)
 
-    case $zipfile in
-	*.zip)      unzip "$zipfile" -d $targetdir                           ;;
-	*.tar)      tar -xvf "$zipfile"  -C $targetdir                       ;;
-	*.tgz)      tar -zxvf "$zipfile" -C $targetdir                       ;;
-	*.tar.xz)   tar -xvf "$zipfile"  -C $targetdir                       ;;
-	*.tar.bz2)  tar -jxvf "$zipfile" -C $targetdir                       ;;
-	*.tar.gz)   tar -zxvf "$zipfile" -C $targetdir                       ;;
-	*.7z)       7z x "$zipfile" -o $targetdir                            ;;
-	*.rar)      7z x "$zipfile" -o $targetdir                            ;;
-	*)          echo "'$zipfile' Format not recognized"                  ;;
-    esac
-    exit 0
+	case $zipfile in
+		*.zip)      unzip "$zipfile" -d $targetdir                           ;;
+		*.tar)      tar -xvf "$zipfile"  -C $targetdir                       ;;
+		*.tgz)      tar -zxvf "$zipfile" -C $targetdir                       ;;
+		*.tar.xz)   tar -xvf "$zipfile"  -C $targetdir                       ;;
+		*.tar.bz2)  tar -jxvf "$zipfile" -C $targetdir                       ;;
+		*.tar.gz)   tar -zxvf "$zipfile" -C $targetdir                       ;;
+		*.7z)       7z x "$zipfile" -o $targetdir                            ;;
+		*.rar)      7z x "$zipfile" -o $targetdir                            ;;
+		*)          echo "'$zipfile' Format not recognized"                  ;;
+	esac
+	exit 0
 else
       echo $USAGE
 fi
