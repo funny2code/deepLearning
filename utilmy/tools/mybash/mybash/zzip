@@ -5,6 +5,7 @@ USAGE=$(
      Perform zip operations based on the compression mechanism
 
      zzip uncmp archive.tar target				#### Uncompress the file to target directory(default=PWD)  
+     zzip cmp archive.tar source1, [source2...]			#### Compress and/or archive the source files. 
 
 END
 )
@@ -37,8 +38,24 @@ if [[ "$task" = uncmp ]]; then
 		*)          echo "'$zipfile' Format not recognized"                  ;;
 	esac
 	exit 0
+elif [[ "$task" = cmp ]]; then
+	zipfile=$2 && [ -z $2 ] && echo $USAGE && exit 0
+	echo "${@:3}"
+	sourcefiles="${@:3}"
+	sourcefiles="${@:3}" && [ ${#sourcefiles[@]} -eq 0 ] && echo $USAGE && exit 0
+
+	case $zipfile in
+		*.zip)      zip "$zipfile" $sourcefiles                              ;;
+		*.tar)      tar -cvf "$zipfile" $sourcefiles		             ;;
+		*.tgz)      tar -zcvf "$zipfile" $sourcefiles                        ;;
+		*.tar.xz)   tar -Jcvf "$zipfile" $sourcefiles                        ;;
+		*.tar.bz2)  tar -jcvf "$zipfile" $sourcefiles                        ;;
+		*.tar.gz)   tar -zcvf "$zipfile" $sourcefiles                        ;;
+		*.7z)       7z a "$zipfile" $sourcefiles                             ;;
+		*.rar)      rar a "$zipfile" $sourcefiles                            ;;
+		*)          echo "'$zipfile' Format not recognized"                  ;;
+	esac
+	exit 0
 else
       echo $USAGE
 fi
-
-
