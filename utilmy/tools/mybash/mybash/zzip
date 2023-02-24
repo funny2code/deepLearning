@@ -1,0 +1,44 @@
+#!/bin/bash
+
+USAGE=$(
+      cat <<-END
+     Perform zip operations based on the compression mechanism
+
+     zzip uncmp archive.tar target				#### Uncompress the file to target directory(default=PWD)  
+
+END
+)
+
+#### Global Config. #################################
+# set -x  # Output commands being run.
+set -e # Exit on error.å
+
+FUNAME=$(basename "$0")
+YMD=$(date '+%Y%m%d')
+
+### Input Params and Defaults ##################################
+[ $# -eq 0 ] && echo -e "$USAGE" && exit ###  No input print doc
+task=$1
+
+### Core ###########################################
+if [[ "$task" = uncmp ]]; then
+    zipfile=$2 && [ -z $2 ] && echo $USAGE && zipfile="invalid"
+    targetdir=$3 && [ -z $3 ] && targetdir=$(pwd)
+
+    case $zipfile in
+	*.zip)      unzip "$zipfile" -d $targetdir                           ;;
+	*.tar)      tar -xvf "$zipfile"  -C $targetdir                       ;;
+	*.tgz)      tar -zxvf "$zipfile" -C $targetdir                       ;;
+	*.tar.xz)   tar -xvf "$zipfile"  -C $targetdir                       ;;
+	*.tar.bz2)  tar -jxvf "$zipfile" -C $targetdir                       ;;
+	*.tar.gz)   tar -zxvf "$zipfile" -C $targetdir                       ;;
+	*.7z)       7z x "$zipfile" -o $targetdir                            ;;
+	*.rar)      7z x "$zipfile" -o $targetdir                            ;;
+	*)          echo "'$zipfile' Format not recognized"                  ;;
+    esac
+    exit 0
+else
+      echo $USAGE
+fi
+
+
