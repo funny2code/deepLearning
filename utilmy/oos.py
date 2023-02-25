@@ -266,8 +266,30 @@ def test_os():
     assert  not log(res) and len(res) >0, res
 
     log("#######   os_search_content() ..")
-    dfres = os_search_content(srch_pattern='Dummy', dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
+    dfres = os_search_content(srch_pattern=['Dummy'], dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
     assert not log(dfres) and len(dfres) > 0, dfres
+    
+    #Testing with multiple lines
+    line = """
+    First dummy text
+    Second dummy text
+    Third dummy text
+    Fourth dummy text"""
+    uu.to_file(line, dirtmp + "/os_file_test_multiple_lines.txt")
+    dfres = os_search_content(srch_pattern=["Fourth dummy text"], dir1=dirtmp, file_pattern="*multiple_lines.txt", mode="str", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing with regex mode
+    log("Testing with regex")
+    line = """
+        message:
+        This is a dummy text with a dummy email
+
+        subject: dummy@mail.com
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_email_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\w+@mail\.\w{2,3}'], dir1=dirtmp, file_pattern="*email_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
 
     log("###### os_walk() ..")
     folders = os_walk(path=dirtmp, pattern="*.txt")
