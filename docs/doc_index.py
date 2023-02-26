@@ -6530,7 +6530,7 @@ zip2(dirin:str = "mypath", dirout:str = "myfile.zip", root_dir:Optional[str] = '
 
 utilmy/utilmy_base.py
 -------------------------functions----------------------
-date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, force_minofhour = -1, returnval = 'str,int,datetime/unix')
+date_now(datenow:Union[str, int, float, datetime.datetime] = "", fmt = "%Y%m%d", add_days = 0, add_mins = 0, add_hours = 0, add_months = 0, add_weeks = 0, timezone_input = None, timezone = 'Asia/Tokyo', fmt_input = "%Y-%m-%d", force_dayofmonth = -1, ###  01 first of monthforce_dayofweek = -1, force_hourofday = -1, force_minofhour = -1, returnval = 'str,int,datetime/unix')
 dir_testinfo(tag = "", verbose = 1, )
 direpo(show = 0)
 dirpackage(show = 0)
