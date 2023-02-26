@@ -280,7 +280,6 @@ def test_os():
     assert not log(dfres) and len(dfres) == 1, dfres
 
     #Testing with regex mode
-    log("Testing with regex")
     line = """
         message:
         This is a dummy text with a dummy email
@@ -289,6 +288,20 @@ def test_os():
     """
     uu.to_file(line, dirtmp + "/os_file_test_email_regex.txt")
     dfres = os_search_content(srch_pattern=[r'\w+@mail\.\w{2,3}'], dir1=dirtmp, file_pattern="*email_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing the argument dirlevel
+    uu.to_file("dummy text", dirtmp + "folder1/folder2/folder3/folder4/folder5/os_file_test_dirlevel.txt")
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp, file_pattern="*dirlevel.txt", mode="str", dirlevel=5)
+    assert not log(dfres) and len(dfres) == 1, dfres
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp, file_pattern="*dirlevel.txt", mode="str", dirlevel=4)
+    assert not log(dfres) and len(dfres) == 0, dfres
+
+    #Testing with json files
+    random_dict = {"test":54, "random":"test"}
+    jsonString = json.dumps(random_dict)
+    uu.to_file(jsonString,dirtmp + "os_file_test_json.json")
+    dfres = os_search_content(srch_pattern=[jsonString], dir1=dirtmp, file_pattern="*json.json", mode="str", dirlevel=1)
     assert not log(dfres) and len(dfres) == 1, dfres
 
     log("###### os_walk() ..")
