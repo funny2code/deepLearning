@@ -118,7 +118,7 @@ elif [[ "$task" = copysmallfile ]]; then
       # echo "find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp -t $dir_to"
       cmd=$(find $ppath -mindepth 1 -maxdepth 10 -type f -size $max_file_size -exec cp {} $dir_to \;)
 
-      printf '%q ' "${cmd[@]}"
+	  #   printf '%q ' "${cmd[@]}"
       #   "${cmd[@]}"   ### Execute the command
 
 
@@ -130,7 +130,8 @@ elif [[ "$task" = copyfolderonly ]]; then
       eexclude="-$4c" && [ -z $4 ] && eexclude="*"
 
       #### Add File filtering
-      rsync -a --include '*/' --exclude  $eexclude  "$ppath" $dir_to
+      #   rsync -a --include '*/' --exclude  $eexclude  $ppath $dir_to
+	  rsync -a -f"+ */" -f"- *" $ppath $dir_to
 
 
 
