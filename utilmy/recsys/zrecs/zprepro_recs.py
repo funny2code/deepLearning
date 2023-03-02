@@ -1736,9 +1736,9 @@ if 'utils daily' :
 
 
     def dict_load_genre(today, today1):
-        dgenre = dict_load(    dirin= dir_cpa3 + f'/ca_check/daily/item/ca_items2_{today}/raw3am/*.parquet',  colval='genre_id', colkey='siid', )
+        dgenre = dict_load(    dirin= dir_cpa3 + f'/ww_check/daily/item/ww_items2_{today}/raw3am/*.parquet',  colval='genre_id', colkey='siid', )
         if len(dgenre) < 1:
-            dgenre = dict_load(dirin= dir_cpa3 + f'/ca_check/daily/item/ca_items2_{today1}/raw3am/*.parquet', colval='genre_id', colkey='siid', )
+            dgenre = dict_load(dirin= dir_cpa3 + f'/ww_check/daily/item/ww_items2_{today1}/raw3am/*.parquet', colval='genre_id', colkey='siid', )
         log('Ngenres', len(dgenre) )
         return dgenre
 
@@ -2065,13 +2065,13 @@ if 'daily_check':
 
 
         ('', "\nCA"),
-        (f"/ca_check/daily/item/ca_items2_{today}/raw3am/",     "CA item   Data"),
-        (f"/ca_check/daily/item/ca_items2_{today}/clean03am/",   "CA item   Data"),
-        (f"/ca_check/daily/item/ca_items2_{today}/clean10am/",  "CA item   Data"),
+        (f"/ww_check/daily/item/ww_items2_{today}/raw3am/",     "CA item   Data"),
+        (f"/ww_check/daily/item/ww_items2_{today}/clean03am/",   "CA item   Data"),
+        (f"/ww_check/daily/item/ww_items2_{today}/clean10am/",  "CA item   Data"),
 
-        (f"/ca_check/daily/item/ca_items2_{today}/score/",    "item  scores"),
-        (f"/ca_check/daily/item_vec/ca_items_{today}/faiss/", "Faiss Index"),
-        (f"/ca_check/daily/item_vec/ca_items_{today}/hnsw/",  "HNSW  Index"),
+        (f"/ww_check/daily/item/ww_items2_{today}/score/",    "item  scores"),
+        (f"/ww_check/daily/item_vec/ww_items_{today}/faiss/", "Faiss Index"),
+        (f"/ww_check/daily/item_vec/ww_items_{today}/hnsw/",  "HNSW  Index"),
 
         ('', "\ntopk"),
         (f'/hdfs/daily_usertopk/m001/{tk}/daily_user_eod/',       'topk all eod'),
@@ -2214,7 +2214,7 @@ if 'imaster':
             today      = date_now_jp("%Y%m%d", timezone='jp', add_days= -1 )
             ## Index(['genre_name_path', 'item_emb', 'item_id', 'item_name', 'item_text', 'price', 'review_num', 'shop_id', 'shop_name', 'siid'],
             ## ['allow_combined', 'asuraku_closing_time', 'asuraku_destination', 'asuraku_flag', 'batch_date', 'campaign_id', 'discount_amount', 'discount_type', 'genre_id', 'genre_path', 'genre_name_path', 'item_id', 'image_url', 'item_max_price', 'item_min_price', 'item_name', 'item_url', 'postage_flag', 'price', 'ran_cd', 'ran_id', 'ref', 'ref_type', 'review_avg', 'review_num', 'series_id', 'sg_id', 'shop_id', 'shop_mng_id', 'shop_name', 'siid', 'user_availability', 'weekly_campaign_id']
-            dirindex   = dir_ca + f"/daily/item/ca_items2_{today}/clean/daily_*.parquet"
+            dirindex   = dir_ca + f"/daily/item/ww_items2_{today}/clean/daily_*.parquet"
             self.ddict = db_load_dict2(dirindex, colkey='siid', cols=[ 'genre_path', 'image_url'    ])
 
           log('Dict loaded', len(self.ddict))
@@ -2325,7 +2325,7 @@ if 'embed':
     def item_add_text(modelin=None, dirin=None, dirout=None):   ### py item_add_text
 
         if dirin is None :
-          dirin   = dir_cpa3 + "/input/ca_daily_coupons10c_ranid_info2"
+          dirin   = dir_cpa3 + "/input/ww_daily_coupons10c_ranid_info2"
           dirout  = dir_ca   + "/daily/item_text_all2/"
 
         t0    = get_timekey()
@@ -2453,7 +2453,7 @@ if 'embed':
 
 
     def text_faiss_create_index_check() :   ### py text_faiss_create_index
-        dirin =  dir_cpa3  + f"/ca_check/models/data/item_text_all2-vgenre3_1m//*.parquet"
+        dirin =  dir_cpa3  + f"/ww_check/models/data/item_text_all2-vgenre3_1m//*.parquet"
 
         cc = Box({})
         cc.m= 32; cc.nbits= 8; cc.nlist= 5000; cc.hnsw_m=32
@@ -2979,7 +2979,7 @@ if 'user_emb':
         log('###### Embedding Rec ')
         if len(df) < 1: return pd.DataFrame([], columns=['easy_id', 'topk_user'])
         if faiss_index is None :
-            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ca_items_{today1}/faiss/*.index" , 1)[0]
+            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ww_items_{today1}/faiss/*.index" , 1)[0]
             faiss_index = dirindex  ;  log(dirindex)
 
         ### Topk from User Vector
@@ -3091,8 +3091,8 @@ if 'qdrant':
         ## python prepro_prod.py  drant_insert_daily_emb  --add_days -1 --create 1  >> "${logfile}_qdrant_update.py"  2>&1   &
         from dbvector import Qdrant
         t0 = date_now_jp(add_days = add_days)
-        dirin   = dir_cpa3 + f"/ca_check/daily/item_vec/ca_items_{t0}/*.parquet"
-        dirin2  = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{t0}/raw3am/*.parquet"
+        dirin   = dir_cpa3 + f"/ww_check/daily/item_vec/ww_items_{t0}/*.parquet"
+        dirin2  = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{t0}/raw3am/*.parquet"
         log(dirin, dirin2)
 
 
@@ -3243,8 +3243,8 @@ if 'qdrant':
     def drant_insert_daily_emb(create=0, add_days=0):   ## py2  hnsw_insert_daily_emb  >> "${logfile}_qdrant_update.py"  2>&1   &
         ## python prepro_prod.py  drant_insert_daily_emb  --add_days -1 --create 1  >> "${logfile}_qdrant_update.py"  2>&1   &
         t0 = date_now_jp(add_days = add_days)
-        dirin   = dir_cpa3 + f"/ca_check/daily/item_vec/ca_items_{t0}/*.parquet"
-        dirin2  = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{t0}/raw3am/*.parquet"
+        dirin   = dir_cpa3 + f"/ww_check/daily/item_vec/ww_items_{t0}/*.parquet"
+        dirin2  = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{t0}/raw3am/*.parquet"
         log(dirin, dirin2)
 
         #### Get genre info
@@ -3306,7 +3306,7 @@ if 'qdrant':
             log("Not empty clientdrant"); return None
 
         t0    = date_now_jp(add_days=add_days)
-        dirin = dir_cpa3 + f"/ca_check/daily/item_vec/ca_items_{t0}/hnsw/"
+        dirin = dir_cpa3 + f"/ww_check/daily/item_vec/ww_items_{t0}/hnsw/"
 
         clientdrant = Box({})
         import hnswlib
@@ -3316,7 +3316,7 @@ if 'qdrant':
         except Exception as e :
            log(e)
            t1    = date_now_jp(add_days=add_days-1)
-           dirin = dir_cpa3 + f"/ca_check/daily/item_vec/ca_items_{t1}/hnsw/"
+           dirin = dir_cpa3 + f"/ww_check/daily/item_vec/ww_items_{t1}/hnsw/"
            log("Load previous day", dirin)
            p.load_index(dirin + "/index.bin")
 
@@ -3375,7 +3375,7 @@ if 'rec_genre':
 
         cols = ['siid', 'genre_id_path', 'item_image_url']
 
-        dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean/*.parquet"
+        dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean/*.parquet"
         df = pd_read_file(dirin, cols=cols, nfile=1000, n_pool=20, nrows=5000500050)
         log(dirin, df)
         ##### siid --> Imaster Infos
@@ -3968,7 +3968,7 @@ if 'ng_list':
 
     def ng_get_global_siid(add_days=0):
         today = date_now_jp(add_days= add_days)
-        dirin = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ng/*.parquet"
+        dirin = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ng/*.parquet"
         flist = sorted( glob_glob(dirin) )
         if len(flist) < 1 : return set()
         else :
@@ -3981,12 +3981,12 @@ if 'ng_list':
 
     def ok_get_global_siid(add_days=0):
         today = date_now_jp(add_days= add_days)
-        flist = sorted( glob_glob( dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ok/*nglist*.parquet" ) )
-        flist+= sorted( glob_glob( dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ok/*realtime*.parquet" ) )
+        flist = sorted( glob_glob( dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ok/*nglist*.parquet" ) )
+        flist+= sorted( glob_glob( dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ok/*realtime*.parquet" ) )
         if len(flist) < 1 :
             today = date_now_jp(add_days= add_days-1)
-            flist = sorted( glob_glob( dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ok/*nglist*.parquet" ) )
-            flist+= sorted( glob_glob( dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ok/*realtime*.parquet" ) )
+            flist = sorted( glob_glob( dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ok/*nglist*.parquet" ) )
+            flist+= sorted( glob_glob( dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ok/*realtime*.parquet" ) )
             if len(flist) < 1 :
                 log('No item available in T, T-1') ; 1/0
 
@@ -4102,7 +4102,7 @@ if 'daily_batch':
             # d12am = ca_today_items( '12am', add_days= add_days)  ### 12am version n
             d15am = ca_today_items( '15am', add_days= add_days)  ### 12am version n
 
-            flist = glob_glob(dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/siid_ok/*.parquet", 1000)
+            flist = glob_glob(dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/siid_ok/*.parquet", 1000)
 
             for fi in flist :
                siidok = pd_read_file(fi)
@@ -4143,17 +4143,17 @@ if 'daily_batch':
 
 
         ##### Normal mode
-        if path == 'eod' or path =='3am' :  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean03am/*.parquet"
-        if path == '10am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean10am/*.parquet"
-        if path == '12am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean12am/*.parquet"
-        if path == '14am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean14am/*.parquet"
-        if path == '16am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean16am/*.parquet"
-        if path == '18am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean18am/*.parquet"
-        if path == '20am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean20am/*.parquet"
-        if path == '23am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean23am/*.parquet"
+        if path == 'eod' or path =='3am' :  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean03am/*.parquet"
+        if path == '10am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean10am/*.parquet"
+        if path == '12am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean12am/*.parquet"
+        if path == '14am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean14am/*.parquet"
+        if path == '16am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean16am/*.parquet"
+        if path == '18am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean18am/*.parquet"
+        if path == '20am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean20am/*.parquet"
+        if path == '23am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean23am/*.parquet"
 
         ### couchbase dump
-        if path == '15am':  dirin = dir_ca + f"/daily/item/ca_items2_{today}/clean15am/*.parquet"
+        if path == '15am':  dirin = dir_ca + f"/daily/item/ww_items2_{today}/clean15am/*.parquet"
 
         try :
             flist = sorted( glob_glob(dirin, 1000) )
@@ -4866,12 +4866,12 @@ if 'daily_rec_topk':
 
         if   'pur'   in mode  :
             dbname = 'db_easyid_topgenre_pur'
-            dirin  = [dir_cpa3 + f"/input/ca_user_genre_pur_{today2}/*",
+            dirin  = [dir_cpa3 + f"/input/ww_user_genre_pur_{today2}/*",
                       dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*pur*.parquet"  ]
 
         elif 'brw'   in mode :
             dbname = 'db_easyid_topgenre_brw'
-            dirin  = [dir_cpa3 + f"/input/ca_user_genre_brw_{today2}/*",
+            dirin  = [dir_cpa3 + f"/input/ww_user_genre_brw_{today2}/*",
                       dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*browsing*.parquet", ]
 
         elif 'intra' in mode :
@@ -4882,12 +4882,12 @@ if 'daily_rec_topk':
         elif 'merge' in mode :
             # dbname = 'db_easyid_topgenre_merge'
             dbname = 'db_easyid_topgenre_brw'
-            dirin  = [ dir_cpa3 + f"/input/ca_user_genre_brw_{today2}/*" ,     ### easy_id', 'genre_id', 'genre_path', 'n_clk'
+            dirin  = [ dir_cpa3 + f"/input/ww_user_genre_brw_{today2}/*" ,     ### easy_id', 'genre_id', 'genre_path', 'n_clk'
                        dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*browsing*.parquet",   ### browsing in T-1
 
                        dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*pur*.parquet",        ### Pur  in T-1
-                       dir_cpa3 + f"/input/ca_user_genre_pur_{today2}/*",   ### in T-2
-                       ### dir_cpa3 + f"/input/ca_user_genre_pur_{20201228}/*",   ### last year, Too big with Super Sales
+                       dir_cpa3 + f"/input/ww_user_genre_pur_{today2}/*",   ### in T-2
+                       ### dir_cpa3 + f"/input/ww_user_genre_pur_{20201228}/*",   ### last year, Too big with Super Sales
 
                      ] ### browsing in T
             ww     = { 0:1, 1:1, 2: 0.5, 3: 0.5, 4: 0.5 }
@@ -4954,7 +4954,7 @@ if 'daily_rec_topk':
         elif hour <  24 : path = "p15am"
 
         dirin  = dir_cpa3 + f"/hdfs/intraday/sc_stream/{today0}/*purchase*0.parquet"
-        dirout = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today0}/score/"
+        dirout = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today0}/score/"
         log(dirin,  dirout)
 
         log('\n####### Load Intraday T')
@@ -5002,7 +5002,7 @@ if 'daily_rec_topk':
 
 
         dirin  = dir_cpa3 + f"/hdfs/intraday/sc_stream/{today0}/*browsing*0.parquet"
-        dirout = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today0}/score/"
+        dirout = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today0}/score/"
         log(dirin,  dirout)
 
         log('\n####### Load Intraday T')
@@ -5046,7 +5046,7 @@ if 'daily_rec_topk':
 
 
         dirin  = dir_cpa3 + f"/hdfs/intraday/sc_stream/{today0}/*browsing*0.parquet"
-        dirout = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today0}/score/"
+        dirout = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today0}/score/"
         log(dirin,  dirout)
 
         log('\n####### Load Intraday T')
@@ -5082,8 +5082,8 @@ if 'daily_rec_topk':
         """
         today   = date_now_jp("%Y%m%d", timezone='jp', add_days= add_days)
 
-        dirin   = dir_ca + f"/daily/item/ca_items2_{today}/"
-        dirout  = dir_ca + f"/daily/item_vec/ca_items_{today}"
+        dirin   = dir_ca + f"/daily/item/ww_items2_{today}/"
+        dirout  = dir_ca + f"/daily/item_vec/ww_items_{today}"
 
         log('####### Wait if nglist finished ', "\n", dirin,)
         os_wait_until(dirin + "/*", ntry_max=9000)
@@ -5143,7 +5143,7 @@ if 'daily_rec_topk':
          ### python prepro_prod.py  daily_create_topk_batch  --tag new  2>&1 | tee -a zlog_daily_02_user2.py   ### Full batch 10 splits
          ### 2mins per bucket,  50 bucket --> 100mins.
          today  = date_now_jp("%Y%m%d", timezone='jp', add_days=0)
-         dirin  = dir_ca + f"/daily/item_vec/ca_items_{today}/faiss/"
+         dirin  = dir_ca + f"/daily/item_vec/ww_items_{today}/faiss/"
          os_wait_until(dirin + "/*index", ntry_max=9000)
 
 
@@ -5474,10 +5474,10 @@ if 'daily_genre_score':
          """
          log("map_daily_ca_genre_siid  from Index") ####  CA siid list
          today  = date_now_jp("%Y%m%d", add_days= add_days )
-         dirin  = dir_ca + f"/daily/item/ca_items2_{today}/clean/*.parquet"
-         dirout = dir_ca + f"/daily/item/ca_items2_{today}/map_ca_genre_siid/map_ca_genre_siid.parquet"
+         dirin  = dir_ca + f"/daily/item/ww_items2_{today}/clean/*.parquet"
+         dirout = dir_ca + f"/daily/item/ww_items2_{today}/map_ca_genre_siid/map_ca_genre_siid.parquet"
 
-         # dirin  = dir_ca + f"/daily/item_vec/ca_items_{today}/*clean*.parquet"
+         # dirin  = dir_ca + f"/daily/item_vec/ww_items_{today}/*clean*.parquet"
          df     = pd_read_file(dirin, nfile=1, nrows=5000500050)
          log(df.columns)
          df = df.drop_duplicates([ 'shop_id', 'item_id' ])
@@ -5490,10 +5490,10 @@ if 'daily_genre_score':
          log(df, dirin)
 
          log("#### Scores per siid  ################################################")
-         dir2 = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/score/clk*.parquet"  #### Use Real time
+         dir2 = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/score/clk*.parquet"  #### Use Real time
          df2  = pd_read_file(dir2, cols=None, n_pool=1,)
 
-         dir2 = dir_cpa3 + f"/ca_check/daily/item/ca_items2_{today}/score/pur*.parquet"  #### Use Real time
+         dir2 = dir_cpa3 + f"/ww_check/daily/item/ww_items2_{today}/score/pur*.parquet"  #### Use Real time
          dfi  = pd_read_file(dir2, cols=None, n_pool=1,)
          log(dfi.shape)
 
@@ -5590,7 +5590,7 @@ if 'daily_genre_score':
     #################    
     def daily_siid_score5():         
          """
-         dir2 = dir_cpa3 + "/input/ca_siid_feat_all_{datek}/*"
+         dir2 = dir_cpa3 + "/input/ww_siid_feat_all_{datek}/*"
          df2  = pd_read_file_waitready(dir2, cols=None, n_pool=20, drop_duplicates=None, date_shiftdown= True, )
          log(df2.columns)
          df2['siid'] = df2.apply(lambda x : siid(x), axis=1)
@@ -5629,7 +5629,7 @@ if 'intraday, easyid topk':
         while not isok :
             add_days = add_days - 1
             today0      = date_now_jp("%Y%m%d", add_days= add_days, add_hours=0, timezone= 'jp')
-            dirpath     = dir_ca + f"/daily/item_vec/ca_items_{today0}/faiss/*.index"
+            dirpath     = dir_ca + f"/daily/item_vec/ww_items_{today0}/faiss/*.index"
             dirindex    = glob_glob( dirpath , 1)
             if len(dirindex) > 0 :
                dirindex     = dirindex[0]
@@ -5995,7 +5995,7 @@ if 'intraday, easyid topk':
 
         """
         if faiss_index is None :
-            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ca_items_{today1}/faiss/*.index" , 1)[0]
+            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ww_items_{today1}/faiss/*.index" , 1)[0]
             faiss_index = dirindex  ;  log(dirindex)
 
         df = df.drop_duplicates(['easy_id', 'genre_id'], keep='last')
@@ -6035,7 +6035,7 @@ if 'intraday, easyid topk':
         df = df.drop_duplicates(['easy_id'], keep='last')
 
         if faiss_index is None :
-            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ca_items_{today1}/faiss/*.index" , 1)[0]
+            dirindex    = glob_glob(dir_ca + f"/daily/item_vec/ww_items_{today1}/faiss/*.index" , 1)[0]
             faiss_index = dirindex  ;  log(dirindex)
 
         df2 = pd_cass_get_vect2(df, prefix= model0.pref, tablename="ndata.item_model", ivect=ivect )
@@ -6644,8 +6644,8 @@ if 'daily_eval':
       dfb = list( set(dfb) )
 
       # today    = date_now_jp("%Y%m%d", timezone='jp', add_days= 0 )
-      #dirindex = dir_ca + f"/daily/item_vec/ca_items_{today}/daily_item_clean.parquet"
-      dirindex = dir_ca + f"/daily/item/ca_items2_{today}/clean/daily_*.parquet"
+      #dirindex = dir_ca + f"/daily/item_vec/ww_items_{today}/daily_item_clean.parquet"
+      dirindex = dir_ca + f"/daily/item/ww_items2_{today}/clean/daily_*.parquet"
       im0      = db_load_dict2(dirindex, colkey='siid', cols=[ 'shop_id', 'item_id', 'genre_path', 'image_url'    ])
       dfb = [ t for t in dfb if t not in im0 ]
       dfb = [ t for t in dfb if len(t) > 8 ]
@@ -6682,7 +6682,7 @@ if 'daily_eval':
             if tag == 'eod'     :   dirkev   = dir_export + f"/{today}/eod"
             if tag == 'intra'   :   dirkev   = dir_export + f"/{today}/intraday"
             dircouch = dir_cpa3   + f"/res/couch/rec/{tk-1}/*.parquet*"
-            dirhist  = dir_cpa3   + f"/ca_check/stats/user_capur_brw/*{tk-1}*"
+            dirhist  = dir_cpa3   + f"/ww_check/stats/user_capur_brw/*{tk-1}*"
             dirout   = dir_export + f"/{today}/check/"
             nmax = 2*10**6 ; nmax2= 50000
 
@@ -6703,7 +6703,7 @@ if 'daily_eval':
             logic11  = '76ace6915d79b785'     ####  ca_logic_gethash(campaign_id="20211129", logic_id="kvn-20211130")
             tag1     = 'purkvn2'
 
-            dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/ca_log/*zcheck*pur*"
+            dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/ww_log/*zcheck*pur*"
             # dirkev   = dir_cpa3 + f"/res/couch/rec_capur/{tk-1}/*pur*kvn*.parquet"
             dircouch = dir_cpa3 + f"/res/couch/rec/{tk-1}/*.parquet"
             # dirhist  = brw_dir  + f"/*/*{tk-1}*.parquet"  ### too slow
@@ -6731,11 +6731,11 @@ if 'daily_eval':
             if tag == 'scpur' :  dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/sc_widget_pur"
             if tag == 'sclk'  :  dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/sc_widget_clk"
             dircouch = dir_cpa3 + f"/res/couch/rec/{tk-1}/*.parquet"
-            dirhist  = dir_cpa3 + f"/ca_check/stats/user_capur_brw/*{tk-1}*"
+            dirhist  = dir_cpa3 + f"/ww_check/stats/user_capur_brw/*{tk-1}*"
             dirout   = dirkev + f"_eval/"
 
             # dirhist2 = dir_cpa3 + f"/hdfs/daily_user_hist/{today2}/*/*.parquet"
-            # dirhist  = dir_cpa3 + f"/ca_check/stats/user_capur_brw/*{tk-1}*"
+            # dirhist  = dir_cpa3 + f"/ww_check/stats/user_capur_brw/*{tk-1}*"
             dirout   = dirkev + f"_eval/"
             nmax = 13*10**6  ; nmax2= 500000  ; nfile= 100
 
@@ -6746,7 +6746,7 @@ if 'daily_eval':
         log(dirkev, dirout, dircouch, dirhist) ; time.sleep(6)
         os_makedirs(dirout)
 
-        if len(glob.glob( dirout + f"/ca_{mode}_{tag1}_*.parquet")) < 1  :
+        if len(glob.glob( dirout + f"/ww_{mode}_{tag1}_*.parquet")) < 1  :
             ###### Topk Load   ######################################################
             # os_wait_until(dirkev2 , ntry_max=4000)
             flist = sorted( glob_glob( dirkev2 , nfile ) )
@@ -6778,10 +6778,10 @@ if 'daily_eval':
             ##### Clean  ###############################################################
             dfa = df.iloc[:nmax2, :]    ; del df
             dfa = dfa.drop_duplicates('easy_id', keep='last')
-            # if mode != 'export': pd_to_file(dfa, dirout + f"/ca_{mode}_{tag1}_{tk}_merge.parquet")
+            # if mode != 'export': pd_to_file(dfa, dirout + f"/ww_{mode}_{tag1}_{tk}_merge.parquet")
 
         else :
-            dfa = pd_read_file( dirout + f"/ca_*.parquet"  )
+            dfa = pd_read_file( dirout + f"/ww_*.parquet"  )
             if 'index' in dfa.columns:  del dfa['index']  ### create issue later
 
 
@@ -7130,7 +7130,7 @@ if 'old':
             if tag == 'eod'     :   dirkev   = dir_export + f"/{today}/eod"
             if tag == 'intra'   :   dirkev   = dir_export + f"/{today}/intraday"
             dircouch = dir_cpa3   + f"/res/couch/rec/{tk-1}/*.parquet*"
-            dirhist  = dir_cpa3   + f"/ca_check/stats/user_capur_brw/*{tk-1}*"
+            dirhist  = dir_cpa3   + f"/ww_check/stats/user_capur_brw/*{tk-1}*"
             dirout   = dir_export + f"/{today}/check/"
             nmax = 2*10**6 ; nmax2= 50000
 
@@ -7151,7 +7151,7 @@ if 'old':
             logic11  = '76ace6915d79b785'     ####  ca_logic_gethash(campaign_id="20211129", logic_id="kvn-20211130")
             tag1     = 'purkvn2'
 
-            dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/ca_log/*zcheck*pur*"
+            dirkev   = dir_cpa3 + f"/hdfs/daily_usertopk/m001/{tk}/ww_log/*zcheck*pur*"
             # dirkev   = dir_cpa3 + f"/res/couch/rec_capur/{tk-1}/*pur*kvn*.parquet"
             dircouch = dir_cpa3 + f"/res/couch/rec/{tk-1}/*.parquet"
             # dirhist  = brw_dir  + f"/*/*{tk-1}*.parquet"  ### too slow
@@ -7185,7 +7185,7 @@ if 'old':
             dirhist2 = dir_cpa3 + f"/hdfs/intraday/sc_stream/{today1}/*browsing*.parquet"
 
             # dirhist2 = dir_cpa3 + f"/hdfs/daily_user_hist/{today2}/*/*.parquet"
-            # dirhist  = dir_cpa3 + f"/ca_check/stats/user_capur_brw/*{tk-1}*"
+            # dirhist  = dir_cpa3 + f"/ww_check/stats/user_capur_brw/*{tk-1}*"
             dirout   = dirkev + f"_eval/"
             nmax = 13*10**6  ; nmax2= 500000  ; nfile= 100
 
@@ -7197,7 +7197,7 @@ if 'old':
         os_makedirs(dirout)
 
 
-        if len(glob.glob( dirout + f"/ca_{mode}_{tag1}_*.parquet")) < 1  :
+        if len(glob.glob( dirout + f"/ww_{mode}_{tag1}_*.parquet")) < 1  :
             ###### Topk Load   ######################################################
             # os_wait_until(dirkev2 , ntry_max=4000)
             flist = sorted( glob_glob( dirkev2 , nfile ) )
@@ -7244,10 +7244,10 @@ if 'old':
             ##### Clean  ###############################################################
             dfa = df.iloc[:nmax2, :]    ; del df
             dfa = dfa.drop_duplicates('easy_id', keep='last')
-            # if mode != 'export': pd_to_file(dfa, dirout + f"/ca_{mode}_{tag1}_{tk}_merge.parquet")
+            # if mode != 'export': pd_to_file(dfa, dirout + f"/ww_{mode}_{tag1}_{tk}_merge.parquet")
 
         else :
-            dfa = pd_read_file( dirout + f"/ca_*.parquet"  )
+            dfa = pd_read_file( dirout + f"/ww_*.parquet"  )
             if 'index' in dfa.columns:  del dfa['index']  ### create issue later
 
 
@@ -7279,8 +7279,8 @@ if 'old':
             dfb = list( set(dfb) )
 
             # today    = date_now_jp("%Y%m%d", timezone='jp', add_days= 0 )
-            #dirindex = dir_ca + f"/daily/item_vec/ca_items_{today}/daily_item_clean.parquet"
-            dirindex = dir_ca + f"/daily/item/ca_items2_{today}/clean/daily_*.parquet"
+            #dirindex = dir_ca + f"/daily/item_vec/ww_items_{today}/daily_item_clean.parquet"
+            dirindex = dir_ca + f"/daily/item/ww_items2_{today}/clean/daily_*.parquet"
             im0      = db_load_dict2(dirindex, colkey='siid', cols=[ 'shop_id', 'item_id', 'genre_path', 'image_url'    ])
             dfb = [ t for t in dfb if t not in im0 ]
             dfb = [ t for t in dfb if len(t) > 8 ]
@@ -7409,7 +7409,7 @@ if 'ab_test':
         log( dirout)  ;#  time.sleep(4)
 
         log("\n########  CA Item list")
-        df    = pd_read_file(dir_cpa3 + f"/ca_check//daily/item/ca_items2_{today}/raw3am/*.parquet")
+        df    = pd_read_file(dir_cpa3 + f"/ww_check//daily/item/ww_items2_{today}/raw3am/*.parquet")
         df    = df[df.weekly_campaign_id == df.weekly_campaign_id.values[0] ]
         df['siid'] = df.apply(lambda x : siid(x) , axis=1 )
         df = df.drop_duplicates('siid')
@@ -7431,7 +7431,7 @@ if 'ab_test':
 
 
         log("#########  Item list")
-        dfkev = pd_read_file(dir_cpa3 + f"/ca_check//daily/item/ca_items2_{today}/map_ca_genre_siid/map_ca_genre_siid.parquet")
+        dfkev = pd_read_file(dir_cpa3 + f"/ww_check//daily/item/ww_items2_{today}/map_ca_genre_siid/map_ca_genre_siid.parquet")
         log(dfkev.columns, dfkev)
         cols  = [ t for t in dfkev.columns if t not in df.columns ]
         df    = df.merge(dfkev[['siid'] + cols  ], on='siid', how='left', suffixes=(None, "_ok" )  ) ; del dfkev
@@ -7742,7 +7742,7 @@ if 'daily_stats':
             dirin = ""
             for kk, tk in enumerate(tk_list) :
                 tk1     = tk.replace("*","")  ### witohou *
-                dirouti = dir_cpa3 + f'/ca_check/stats/user_ca_pur/user_all_{tk}.parquet'
+                dirouti = dir_cpa3 + f'/ww_check/stats/user_ca_pur/user_all_{tk}.parquet'
                 if os.path.isfile(dirouti): continue
                 log( dirin, tk1, dirouti )
 
@@ -7773,7 +7773,7 @@ if 'daily_stats':
             for kk, tk in enumerate(tk_list) :
 
                 tk1     = tk.replace("*","")  ### witohou *
-                dirouti = dir_cpa3 + f'/ca_check/stats/user_brw/purca_user_brw_{tk}.parquet'
+                dirouti = dir_cpa3 + f'/ww_check/stats/user_brw/purca_user_brw_{tk}.parquet'
                 if os.path.isfile(dirouti): continue
                 log( dirin, tk1, dirouti )
 
