@@ -327,27 +327,27 @@ Old Chronos Batch
 #### Kevin Algo:        
 ## Kafka Feed
   "name": "offca_5minsc6k",
-  "command": "sh /usr/local/bin/mount_gluster.sh  && ls /a  &&  ls /dd/101/sssvols07/  && runuser -m root -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ca_5mins_c6k.sh '",
+  "command": "sh /usr/local/bin/mount_gluster.sh  && ls /a  &&  ls /dd/101/sssvols07/  && runuser -m root -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ww_5mins_c6k.sh '",
         
         
         
   "name": "offca_5mins",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ca_5mins.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ww_5mins.sh '",
 
         
     
 ##### Daily CA Logic 
   "name": "offca_daily",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily.sh '",
   
     
   "name": "offca_daily_pm",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily_pm.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily_pm.sh '",
 
 
 
   "name": "offca_manual",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_manual.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_manual.sh '",
 
 
     
@@ -362,7 +362,7 @@ Old Chronos Batch
 
 {
   "name": "offca_daily_pm",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily_pm.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily_pm.sh '",
   "shell": true,
   "executor": "",
   "executorFlags": "",
@@ -1105,7 +1105,7 @@ drwx------   - ppp ppp          0 2022-02-16 01:58 hdfs:///user/ppp/Sarah
 drwx------   - ppp ppp          0 2022-01-27 12:10 hdfs:///user/ppp/aog-user-behaviors
 drwx------   - ppp ppp          0 2022-03-25 07:40 hdfs:///user/ppp/bta
 drwx------   - ppp ppp          0 2022-01-21 04:47 hdfs:///user/ppp/ca
-drwx------   - ppp ppp          0 2022-04-05 16:23 hdfs:///user/ppp/ca_targeting
+drwx------   - ppp ppp          0 2022-04-05 16:23 hdfs:///user/ppp/ww_targeting
 drwx------   - ppp ppp          0 2022-03-29 08:59 hdfs:///user/ppp/zzztt
 drwxr-----   - ppp ppp          0 2021-10-12 05:29 hdfs:///user/ppp/cma
 drwx------   - ppp ppp          0 2022-01-21 06:14 hdfs:///user/ppp/common
@@ -3906,7 +3906,7 @@ authenticator: PasswordAuthenticator
 #   increase system_auth keyspace replication factor if you use this authorizer.
 authorizer: CassandraAuthorizer
 
-hdfs dfs -mkdir /user/ppp/nono/hive/ca_item_list/
+hdfs dfs -mkdir /user/ppp/nono/hive/ww_item_list/
 
 
 
@@ -4990,11 +4990,11 @@ tttcb301/sssvols05/ppp/tbin/tbin.sh
 hdfs:///user/coconuts/profile/version=2.0.0/service=z/span=whole/key=member/type=all/year=2020/month=10/day=04
 
 
-hdfs dfs -ls  /user/ppp/nono/db/ca_items/
+hdfs dfs -ls  /user/ppp/nono/db/ww_items/
 
-hdfs dfs -mkdir  /user/ppp/nono/db/ca_items/
+hdfs dfs -mkdir  /user/ppp/nono/db/ww_items/
 
-hdfs dfs -put /a/acb401/sssvols06/ca_check/hdfs/daily_ccs/      /user/ppp/nono/db/ca_items/
+hdfs dfs -put /a/acb401/sssvols06/ww_check/hdfs/daily_ccs/      /user/ppp/nono/db/ww_items/
 
 
 
