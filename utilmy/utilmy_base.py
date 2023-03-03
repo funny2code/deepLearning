@@ -248,6 +248,9 @@ def help_create(modulename='utilmy.nnumpy', prefixs=None):
     return ss
 
 
+def help_get_all_methods(class_object):
+    method_list = [method for method in dir(class_object) if method.startswith('__') is False]
+    return method_list
 
 
 ###################################################################################################
