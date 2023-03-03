@@ -49,7 +49,7 @@ Doc::
     https://github.com/uqfoundation/pox/tree/master/pox
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
-
+import socket
 
 #################################################################
 from utilmy.utilmy_base import log, log2
@@ -547,7 +547,7 @@ def test_os():
 
 
     log("\n#######", os_get_ip)
-    public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+    public_ip = get_public_ip()
     log("Public IP", public_ip)
     log("Internal IP", os_get_ip())
 
@@ -1744,7 +1744,15 @@ def os_get_os():
     import platform
     return platform.system()
 
-
+def get_public_ip():
+    import requests
+    try:
+        response = requests.get('https://api.ipify.org')
+        if response.status_code == 200:
+            return response.text
+    except:
+        pass
+    return None
 
 def os_get_ip(mode='internal'):
     """Return primary ip adress
