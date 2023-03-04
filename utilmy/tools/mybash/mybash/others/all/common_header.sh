@@ -1,6 +1,6 @@
 # CONSTANTS
 # =========
-HADOOP_INST=/home/ppp/work/kobashikawac01/hdp26_c4000
+HADOOP_INST=/home/ppp/work/ttrrrc01/hdp26_c4000
 source $HADOOP_INST/.bashrc.Spark2.3
 export HDFS=$HADOOP_INST/hadoop/bin/hdfs
 export HIVE=$HADOOP_INST/hive/bin/hive
@@ -11,7 +11,7 @@ kinit -kt $HOME/keytabs/$USER.nnn.keytab $USER
 export WORK_HDFS_HOME=/user/ppp/runa
 export ENV_LABEL="" # Empty for PROduction
 
-export mail_recipients="carlos.kobashikawa@zzz.com"
+export mail_recipients="zzztt.ttrrr@zzz.com"
 if [ $# -ge 1 -a -d "$1" ]
 then
     export _JAVA_OPTIONS=-Djava.io.tmpdir=$1

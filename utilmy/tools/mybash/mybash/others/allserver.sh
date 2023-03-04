@@ -327,27 +327,27 @@ Old Chronos Batch
 #### Kevin Algo:        
 ## Kafka Feed
   "name": "offca_5minsc6k",
-  "command": "sh /usr/local/bin/mount_gluster.sh  && ls /a  &&  ls /dd/101/sssvols07/  && runuser -m root -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ca_5mins_c6k.sh '",
+  "command": "sh /usr/local/bin/mount_gluster.sh  && ls /a  &&  ls /dd/101/sssvols07/  && runuser -m root -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ww_5mins_c6k.sh '",
         
         
         
   "name": "offca_5mins",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ca_5mins.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/batch_ca/ww_5mins.sh '",
 
         
     
 ##### Daily CA Logic 
   "name": "offca_daily",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily.sh '",
   
     
   "name": "offca_daily_pm",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily_pm.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily_pm.sh '",
 
 
 
   "name": "offca_manual",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_manual.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_manual.sh '",
 
 
     
@@ -362,7 +362,7 @@ Old Chronos Batch
 
 {
   "name": "offca_daily_pm",
-  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ca_daily_pm.sh '",
+  "command": "sh mount_gluster.sh && tttcb301/sssvols05/ppp/tbin/zmount/mount2.sh   &&  ls /a  && runuser -m ppp -c 'sh tttcb301/sssvols05/ppp/cprod/bin/ww_daily_pm.sh '",
   "shell": true,
   "executor": "",
   "executorFlags": "",
@@ -1105,8 +1105,8 @@ drwx------   - ppp ppp          0 2022-02-16 01:58 hdfs:///user/ppp/Sarah
 drwx------   - ppp ppp          0 2022-01-27 12:10 hdfs:///user/ppp/aog-user-behaviors
 drwx------   - ppp ppp          0 2022-03-25 07:40 hdfs:///user/ppp/bta
 drwx------   - ppp ppp          0 2022-01-21 04:47 hdfs:///user/ppp/ca
-drwx------   - ppp ppp          0 2022-04-05 16:23 hdfs:///user/ppp/ca_targeting
-drwx------   - ppp ppp          0 2022-03-29 08:59 hdfs:///user/ppp/carlos
+drwx------   - ppp ppp          0 2022-04-05 16:23 hdfs:///user/ppp/ww_targeting
+drwx------   - ppp ppp          0 2022-03-29 08:59 hdfs:///user/ppp/zzztt
 drwxr-----   - ppp ppp          0 2021-10-12 05:29 hdfs:///user/ppp/cma
 drwx------   - ppp ppp          0 2022-01-21 06:14 hdfs:///user/ppp/common
 drwx------   - ppp ppp          0 2021-07-27 08:13 hdfs:///user/ppp/cpcreborn
@@ -3116,7 +3116,7 @@ systemctl stop node_exporter  &&  cp node_exporter-1.1.0.linux-amd64/node_export
 
 
 [Yesterday 10:18 PM] Elfenbein, Sarah | Sarah | 
-    Kobashikawa, Carlos | Carlos | , Chen, Kyle | Kyle | , Alhat, Aniket
+    ttrrr, zzztt | zzztt | , Chen, Kyle | Kyle | , Alhat, Aniket
 CC: Cho, Shiten | Shiten | 
 
 I am having trouble running the query for BTA KPI reporting on C6000, and was wondering if any of you might have advice.
@@ -3906,7 +3906,7 @@ authenticator: PasswordAuthenticator
 #   increase system_auth keyspace replication factor if you use this authorizer.
 authorizer: CassandraAuthorizer
 
-hdfs dfs -mkdir /user/ppp/nono/hive/ca_item_list/
+hdfs dfs -mkdir /user/ppp/nono/hive/ww_item_list/
 
 
 
@@ -3982,7 +3982,7 @@ cqlsh   cass108.analysis-shared.jpe2b.dcnw.zzz  9042 -e "CONSISTENCY QUORUM ; co
 
 
 #####################
-   Discussion with Komoda san, carlos for Bot logging. 
+   Discussion with Komoda san, zzztt for Bot logging. 
 
    Ddiscussion with Jack 
 
@@ -4648,13 +4648,13 @@ pycallgraph -v --stdlib --include "django.core.*" graphviz -- ./manage.py syncdb
 #### Pyspark in ####################################################
 sudo su ppp
 
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3
 
 
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
 
 
-source activate /home/ppp/work/kobashikawac01/anaconda2/
+source activate /home/ppp/work/ttrrrc01/anaconda2/
 
 cd tttcb301/sssvols05/ppp/test_code/
 
@@ -4677,10 +4677,10 @@ These are 0.15.1 for the former and 0.24.2 for the latter.
 
 
 sudo su ppp
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3
 
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
 
 
 
@@ -4730,7 +4730,7 @@ hdfs:///user/coconuts/profile/version=2.0.0/service=z/span=whole/key=member/type
 
 #### Carlso Specs
 
-HADOOP_INST=/home/ppp/work/kobashikawac01/hdp26_c4000
+HADOOP_INST=/home/ppp/work/ttrrrc01/hdp26_c4000
 export KRB5_CONFIG=$HADOOP_INST/krb5.conf
 export HADOOP_HOME=$HADOOP_INST/hadoop
 export JAVA_HOME=$HADOOP_INST/jdk
@@ -4741,12 +4741,12 @@ export HCAT_HOME=$HADOOP_INST/hive/hcatalog
 export TEZ_HOME=$HADOOP_INST/tez
 export PIG_HOME=$HADOOP_INST/pig
 export HBASE_HOME=$HADOOP_INST/hbase
-export PATH=$HBASE_HOME/bin:$PIG_HOME/bin:$TEZ_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin:$JAVA_HOME/bin:$HADOOP_HOME/bin:/data_hdd/kobashikawac01/work/notebooks:/usr/lib64/qt-3.3/bin:/usr/local/maven-3.3.9/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/lib/jvm/java/bin:/usr/hdp/current/hadoop/bin:/home/ppp/.local/bin:/home/ppp/bin
+export PATH=$HBASE_HOME/bin:$PIG_HOME/bin:$TEZ_HOME/bin:$HIVE_HOME/bin:$SPARK_HOME/bin:$JAVA_HOME/bin:$HADOOP_HOME/bin:/data_hdd/ttrrrc01/work/notebooks:/usr/lib64/qt-3.3/bin:/usr/local/maven-3.3.9/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/lib/jvm/java/bin:/usr/hdp/current/hadoop/bin:/home/ppp/.local/bin:/home/ppp/bin
 export PS1='\[\033[46;30m\][\t \u@\h \W]$\[\033[0m\] '
 export KRB5CCNAME=/tmp/krb5cc_20640_2
 
 # To allow Hive read tables with data on json format
-EXTERNAL_LIB=/data_hdd/kobashikawac01/work/repositories/external-library
+EXTERNAL_LIB=/data_hdd/ttrrrc01/work/repositories/external-library
 export HIVE_AUX_JARS_PATH=$EXTERNAL_LIB/json-serde-1.3.8-jar-with-dependencies.jar
 
 
@@ -4793,9 +4793,9 @@ notebook() {
         executor_memory=2g
     fi
 
-    export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH
-    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter
-    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/kobashikawac01/work --port 8889'
+    export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH
+    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter
+    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/ttrrrc01/work --port 8889'
 
     pyspark --name "KrygShell"  \
             --queue $spark_queue\
@@ -4806,7 +4806,7 @@ notebook() {
             --executor-cores 5  \
             --executor-memory $executor_memory  \
             --conf spark.serializer=org.apache.spark.serializer.KryoSerializer  \
-            --jars /home/ppp/work/kobashikawac01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
+            --jars /home/ppp/work/ttrrrc01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
 }
 
 
@@ -4970,10 +4970,10 @@ class SSHRemote(object):
 ########################################################################
 #### Pyspark in ####################################################
 sudo su ppp
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3
 
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
 
 
 
@@ -4990,11 +4990,11 @@ tttcb301/sssvols05/ppp/tbin/tbin.sh
 hdfs:///user/coconuts/profile/version=2.0.0/service=z/span=whole/key=member/type=all/year=2020/month=10/day=04
 
 
-hdfs dfs -ls  /user/ppp/nono/db/ca_items/
+hdfs dfs -ls  /user/ppp/nono/db/ww_items/
 
-hdfs dfs -mkdir  /user/ppp/nono/db/ca_items/
+hdfs dfs -mkdir  /user/ppp/nono/db/ww_items/
 
-hdfs dfs -put /a/acb401/sssvols06/ca_check/hdfs/daily_ccs/      /user/ppp/nono/db/ca_items/
+hdfs dfs -put /a/acb401/sssvols06/ww_check/hdfs/daily_ccs/      /user/ppp/nono/db/ww_items/
 
 
 
@@ -5003,7 +5003,7 @@ hdfs dfs -put /a/acb401/sssvols06/ca_check/hdfs/daily_ccs/      /user/ppp/nono/d
 
 #########################################################################
 ## source the env
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3
 
 ## definition of the bash function
 declare -f notebook
@@ -5013,14 +5013,14 @@ notebook ()
         echo "\$spark_queue variable is empty";
         return 1;
     fi;
-    export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
-    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/kobashikawac01/work --port 8889';
-    pyspark --name "KrygShell" --queue $spark_queue --master yarn --deploy-mode client --conf spark.hadoop.yarn.timeline-service.enabled=false --num-executors 64 --executor-cores 5 --executor-memory 5g --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --jars /home/ppp/work/kobashikawac01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
+    export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
+    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/ttrrrc01/work --port 8889';
+    pyspark --name "KrygShell" --queue $spark_queue --master yarn --deploy-mode client --conf spark.hadoop.yarn.timeline-service.enabled=false --num-executors 64 --executor-cores 5 --executor-memory 5g --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --jars /home/ppp/work/ttrrrc01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
 }
  
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
 
 
 ###export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /home/ppp/work/popo01/  --ip=0.0.0.0 --no-browser  --port 1904';
@@ -5067,14 +5067,14 @@ kinit -kt /usr/local/hdp26/keytabs/ppp.nnn.keytab ppp@C2000.HADOOP.zzz.COM
 
 
 ################################## AOG server ###################################
-// use anaconda of Carlos
+// use anaconda of zzztt
 $ hostname
 ins-101
-$ export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
+$ export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
 $ jupyter notebook --notebook-dir /data_hdd/zhaomeng02 --port 9999
 #################################################################################
 
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
 
 
 export PATH=/data_hdd/popo01/conda/bin/:$PATH;
@@ -5944,7 +5944,7 @@ screen -R da7
 
 sudo su ppp
 
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3    ### Spark
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3    ### Spark
 
 
 
@@ -6197,7 +6197,7 @@ du -Sh  /home/popo01/ | sort -rh | head -20
 58GB in /home
    24.2 GiB [##########] /ppp
    21.9 GiB [######### ] /chenjiahong01
-    5.7 GiB [##        ] /kobashikawac01
+    5.7 GiB [##        ] /ttrrrc01
     3.3 GiB [#         ] /ishimnikovle01
     1.6 GiB [          ] /popo01
     1.5 GiB [          ] /campsjames01
@@ -6205,7 +6205,7 @@ du -Sh  /home/popo01/ | sort -rh | head -20
 --- /data_hdd ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   205.5 GiB [######### ] /ishimnikovle01
   156.5 GiB [#######   ] /kubotamaki01
-   88.4 GiB [####      ] /kobashikawac01
+   88.4 GiB [####      ] /ttrrrc01
    64.4 GiB [###       ] /popo01
    47.9 GiB [##        ] /ppp
    47.6 GiB [##        ] /mona_test
@@ -6215,8 +6215,8 @@ du -Sh  /home/popo01/ | sort -rh | head -20
 
   
 
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
 
 
 /opt/anaconda3/bin/jupyter lab --notebook-dir  /   --allow-root --ip=0.0.0.0 --no-browser --port 1904
@@ -7215,7 +7215,7 @@ docker-regi.intra.zzz-it.com/ppp/zanaconda3_frv01:4.1.2
 
 
 ## source the env
-source /home/ppp/work/kobashikawac01/hdp26_c4000/.bashrc.Spark2.3
+source /home/ppp/work/ttrrrc01/hdp26_c4000/.bashrc.Spark2.3
 
 ## definition of the bash function
 declare -f notebook
@@ -7225,14 +7225,14 @@ notebook ()
         echo "\$spark_queue variable is empty";
         return 1;
     fi;
-    export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
-    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/kobashikawac01/work --port 8889';
-    pyspark --name "KrygShell" --queue $spark_queue --master yarn --deploy-mode client --conf spark.hadoop.yarn.timeline-service.enabled=false --num-executors 64 --executor-cores 5 --executor-memory 5g --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --jars /home/ppp/work/kobashikawac01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
+    export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+    export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
+    export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /data_hdd/ttrrrc01/work --port 8889';
+    pyspark --name "KrygShell" --queue $spark_queue --master yarn --deploy-mode client --conf spark.hadoop.yarn.timeline-service.enabled=false --num-executors 64 --executor-cores 5 --executor-memory 5g --conf spark.serializer=org.apache.spark.serializer.KryoSerializer --jars /home/ppp/work/ttrrrc01/hdp26_c4000/apache-hive-1.2.1000.2.6.2.0-205-bin/lib/json-serde-1.3.8-jar-with-dependencies.jar
 }
  
-export PATH=/home/ppp/work/kobashikawac01/anaconda2/bin:$PATH;
-export PYSPARK_DRIVER_PYTHON=/home/ppp/work/kobashikawac01/anaconda2/bin/jupyter;
+export PATH=/home/ppp/work/ttrrrc01/anaconda2/bin:$PATH;
+export PYSPARK_DRIVER_PYTHON=/home/ppp/work/ttrrrc01/anaconda2/bin/jupyter;
 
 
 ###export PYSPARK_DRIVER_PYTHON_OPTS='notebook --notebook-dir /home/ppp/work/popo01/  --ip=0.0.0.0 --no-browser  --port 1904';

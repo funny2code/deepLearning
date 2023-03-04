@@ -790,7 +790,7 @@ Bootstrap Prediction Bands for Functional Time Series.  Efstathios Paparoditis, 
 
 44. Invert and Defend: Model-based Approximate Inversion of Generative Adversarial Networks for Secure Inference  Wei-An Lin, Yogesh Balaji, Pouya Samangouei, Rama Chellappa [paper](https://arxiv.org/pdf/1911.10291.pdf )   
 
-45. Adversarial Fisher Vectors for Unsupervised Representation Learning Shuangfei Zhai Walter Talbott Carlos Guestrin Joshua M. Susskind [paper](https://arxiv.org/pdf/1910.13101.pdf   ) 
+45. Adversarial Fisher Vectors for Unsupervised Representation Learning Shuangfei Zhai Walter Talbott zzztt Guestrin Joshua M. Susskind [paper](https://arxiv.org/pdf/1910.13101.pdf   ) 
 
 46. Alleviating Feature Confusion for Generative Zero-shot Learning Jingjing Li, Mengmeng Jing, Ke Lu, Lei Zhu, Yang Yang, Zi Huang [paper](https://arxiv.org/pdf/1909.07615.pdf   )
 
@@ -1467,7 +1467,7 @@ Predictive coding, variational autoencoders, and biological connections.  Marino
 
 43. An Interactive Insight Identification and Annotation Framework for Power Grid Pixel Maps using DenseU-Hierarchical VAE. Tianye Zhang, Haozhe Feng, Zexian Chen, Can Wang, Yanhao Huang, Yong Tang, Wei Chen [paper]( https://arxiv.org/pdf/1905.12164 )   
 
-44. Class-Conditional VAE-GAN for Local-Ancestry Simulation.  Daniel Mas Montserrat, Carlos Bustamante, Alexander Ioannidis [paper](https://arxiv.org/pdf/1911.13220)
+44. Class-Conditional VAE-GAN for Local-Ancestry Simulation.  Daniel Mas Montserrat, zzztt Bustamante, Alexander Ioannidis [paper](https://arxiv.org/pdf/1911.13220)
 
 45. VAE-based Domain Adaptation for Speaker Verification.   Xueyi Wang, Lantian Li, Dong Wang [paper](https://arxiv.org/pdf/1908.10092)   
 
@@ -1492,7 +1492,7 @@ Predictive coding, variational autoencoders, and biological connections.  Marino
 
 56. The Gaussian Process Prior VAE for Interpretable Latent Dynamics from Pixels  Michael Pearce [paper]( http://proceedings.mlr.press/v118/pearce20a/pearce20a.pdf )  
 
-57. Class-Conditional VAE-GAN for Local-Ancestry Simulation.  Daniel Mas Montserrat, Carlos Bustamante, Alexander Ioannidis [paper]( https://arxiv.org/pdf/1911.13220.pdf  )
+57. Class-Conditional VAE-GAN for Local-Ancestry Simulation.  Daniel Mas Montserrat, zzztt Bustamante, Alexander Ioannidis [paper]( https://arxiv.org/pdf/1911.13220.pdf  )
 
 58. Investigating GAN and VAE to Train DCNN   Soundararajan Ezekiel, Larry Pearlstein, Abdullah Ali Alshehri, Adam Lutz, Jackson Zaunegger, and Waleed Farag [paper]( http://www.ijmlc.org/vol9/872-AM1002.pdf)    
 

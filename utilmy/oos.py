@@ -49,7 +49,7 @@ Doc::
     https://github.com/uqfoundation/pox/tree/master/pox
 """
 import os, sys, time, datetime,inspect, json, yaml, gc, pandas as pd, numpy as np, glob
-
+import socket
 
 #################################################################
 from utilmy.utilmy_base import log, log2
@@ -266,8 +266,95 @@ def test_os():
     assert  not log(res) and len(res) >0, res
 
     log("#######   os_search_content() ..")
-    dfres = os_search_content(srch_pattern='Dummy', dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
+    dfres = os_search_content(srch_pattern=['Dummy'], dir1=dirtmp, file_pattern="*.txt", mode="str", dirlevel=2)
     assert not log(dfres) and len(dfres) > 0, dfres
+    
+    #Testing with multiple lines
+    line = """
+    First dummy text
+    Second dummy text
+    Third dummy text
+    Fourth dummy text"""
+    uu.to_file(line, dirtmp + "/os_file_test_multiple_lines.txt")
+    dfres = os_search_content(srch_pattern=["Fourth dummy text"], dir1=dirtmp, file_pattern="*multiple_lines.txt", mode="str", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing with regex mode
+    line = """
+        message:
+        This is a dummy text with a dummy email
+
+        subject: dummy@mail.com
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_email_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\w+@mail\.\w{2,3}'], dir1=dirtmp, file_pattern="*email_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    line = """
+            this is a url example, www.google.com
+            and this is a wrong url example, www.example
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_url_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'www\.[A-z]+\.com'], dir1=dirtmp, file_pattern="*url_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    line = """
+            This is a dummy credit card number: 2222405343248877	
+            This is a dummy credit card number with spaces: 2222 4053 4324 8877
+            This is a wrong credit card number: 2a22 4053 4324 8877
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_credit_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\d{4}\s?\d{4}\s?\d{4}\s?\d{4}'], dir1=dirtmp, file_pattern="*credit_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 2, dfres
+
+    line = """
+            This is a dummy ip number: 192.168.0.123	
+            This is a wrong ip number: 196.1618.0.123
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_ip_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'], dir1=dirtmp, file_pattern="*ip_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    line = """
+            This is a USA zip number: 35004
+            This is a wrong USA zip number 3500s4
+            This is a USA zip number with hyphen: 35004-4567
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_zip_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\d{5}(-\d{4})?'], dir1=dirtmp, file_pattern="*zip_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 2, dfres
+
+    line = """
+            This is a dummy social security number: 595-82-4782
+            This is a wrong social security number: 595-882-4782
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_social_security_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\d{3}-\d{2}-\d{4}'], dir1=dirtmp, file_pattern="*social_security_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    line = """
+            This is an amount of dollars: $500
+            This is an amount of dollars with decimals: $741.89
+            This is an amount of dollars: $476,445.197
+            This is a wrong amount of dollars with decimals: 975
+    """
+    uu.to_file(line, dirtmp + "/os_file_test_us_amount_regex.txt")
+    dfres = os_search_content(srch_pattern=[r'\$\d+(?:,\d{3})*(?:.\d{2})?'], dir1=dirtmp, file_pattern="*us_amount_regex.txt", mode="regex", dirlevel=2)
+    assert not log(dfres) and len(dfres) == 3, dfres
+
+    #Testing the argument dirlevel
+    uu.to_file("dummy text", dirtmp + "folder1/folder2/folder3/folder4/folder5/os_file_test_dirlevel.txt")
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp, file_pattern="*dirlevel.txt", mode="str", dirlevel=5)
+    assert not log(dfres) and len(dfres) == 1, dfres
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp, file_pattern="*dirlevel.txt", mode="str", dirlevel=4)
+    assert not log(dfres) and len(dfres) == 0, dfres
+
+    #Testing with json files
+    random_dict = {"test":54, "random":"test"}
+    jsonString = json.dumps(random_dict)
+    uu.to_file(jsonString,dirtmp + "os_file_test_json.json")
+    dfres = os_search_content(srch_pattern=[jsonString], dir1=dirtmp, file_pattern="*json.json", mode="str", dirlevel=1)
+    assert not log(dfres) and len(dfres) == 1, dfres
 
     log("###### os_walk() ..")
     folders = os_walk(path=dirtmp, pattern="*.txt")
@@ -460,7 +547,7 @@ def test_os():
 
 
     log("\n#######", os_get_ip)
-    public_ip = json.loads(requests.get("https://ip.seeip.org/jsonip?").text)["ip"]
+    public_ip = get_public_ip()
     log("Public IP", public_ip)
     log("Internal IP", os_get_ip())
 
@@ -1657,7 +1744,15 @@ def os_get_os():
     import platform
     return platform.system()
 
-
+def get_public_ip():
+    import requests
+    try:
+        response = requests.get('https://api.ipify.org')
+        if response.status_code == 200:
+            return response.text
+    except:
+        pass
+    return None
 
 def os_get_ip(mode='internal'):
     """Return primary ip adress
