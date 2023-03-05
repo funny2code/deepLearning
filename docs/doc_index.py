@@ -3000,6 +3000,7 @@ fixedDict._check_size_limit(self)
 
 utilmy/oos.py
 -------------------------functions----------------------
+get_public_ip()
 glob_glob(dirin = "", file_list = [], exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, npool = 1)
 help()
 os_copy(dirfrom = "folder/**/*.parquet", dirto = "", mode = 'file', exclude = "", include_only = "", min_size_mb = 0, max_size_mb = 500000, ndays_past = -1, nmin_past = -1, start_date = '1970-01-02', end_date = '2050-01-01', nfiles = 99999999, verbose = 0, dry = 0)
@@ -6541,6 +6542,7 @@ git_current_hash(mode = 'full')
 git_repo_root()
 help()
 help_create(modulename = 'utilmy.nnumpy', prefixs = None)
+help_get_all_methods(class_object)
 help_get_codesource(func)
 help_get_docstring(func)
 help_get_funargs(func)
