@@ -76,7 +76,7 @@ rtree
 shapely
 pretty-html-table
 networkx
-pyvis
+pyvis==0.3.1
 dateparser
 dash
 dash_bootstrap_components
