@@ -2,7 +2,7 @@ absl-py==1.4.0
 aenum==3.1.11
 aiohttp==3.8.1
 aiosignal==1.3.1
-alembic==1.9.4
+alembic==1.10.2
 arrow==1.2.3
 asn1crypto==1.5.1
 asttokens==2.2.1
@@ -16,8 +16,8 @@ backports.zoneinfo==0.2.1
 beautifulsoup4==4.11.2
 blis==0.7.9
 bootstrapped==0.0.2
-boto3==1.26.84
-botocore==1.29.84
+boto3==1.26.89
+botocore==1.29.89
 cachetools==5.3.0
 catalogue==2.0.8
 certifi==2022.12.7
@@ -58,7 +58,7 @@ fire==0.5.0
 flake8==6.0.0
 Flask==2.2.3
 flatbuffers==2.0.7
-fonttools==4.38.0
+fonttools==4.39.0
 frozenlist==1.3.3
 future==0.18.3
 gast==0.4.0
@@ -73,23 +73,23 @@ grpcio==1.51.3
 h5py==3.8.0
 hdbscan==0.8.29
 hijri-converter==2.2.4
-holidays==0.20
+holidays==0.21
 htmlmin==0.1.12
-huggingface-hub==0.12.1
+huggingface-hub==0.13.1
 humanfriendly==10.0
 icecream==2.1.3
 idna==3.4
 ImageHash==4.3.1
 imageio==2.26.0
-imodels==1.3.15
+imodels==1.3.16
 importlib-metadata==6.0.0
 importlib-resources==5.12.0
 iniconfig==2.0.0
 ipython==8.11.0
 isodate==0.6.1
 itsdangerous==2.1.2
-jax==0.4.5
-jaxlib==0.4.4
+jax==0.4.6
+jaxlib==0.4.6
 jedi==0.18.2
 Jinja2==3.1.2
 jmespath==1.0.1
@@ -116,7 +116,7 @@ mccabe==0.7.0
 mlxtend==0.21.0
 mmh3==3.0.0
 mpld3==0.5.9
-mpmath==1.2.1
+mpmath==1.3.0
 multidict==6.0.4
 multimethod==1.9.1
 multipledispatch==0.6.0
@@ -151,7 +151,7 @@ plotly==5.13.1
 pluggy==1.0.0
 ply==3.11
 pmlb==1.0.1.post3
-polars==0.16.10
+polars==0.16.12
 preshed==3.0.8
 pretty-html-table==0.9.16
 progressbar2==4.2.0
@@ -165,7 +165,7 @@ pyarrow==10.0.1
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycodestyle==2.10.0
-pydantic==1.10.5
+pydantic==1.10.6
 pyflakes==3.0.1
 Pygments==2.14.0
 pyinstrument==4.4.0
@@ -183,7 +183,7 @@ python-highcharts==0.4.2
 python-utils==3.5.2
 pytz==2022.7.1
 pytz-deprecation-shim==0.1.0.post0
-pyvis==0.3.2
+pyvis==0.3.1
 PyWavelets==1.4.1
 PyYAML==6.0
 rapidfuzz==2.13.7
@@ -208,10 +208,10 @@ six==1.16.0
 smart-open==6.3.0
 snoop==0.4.3
 soupsieve==2.4
-spacy==3.5.0
+spacy==3.5.1
 spacy-legacy==3.0.12
 spacy-loggers==1.0.4
-SQLAlchemy==2.0.4
+SQLAlchemy==2.0.5.post1
 srsly==2.4.6
 stack-data==0.6.2
 statsmodels==0.13.5
@@ -226,7 +226,7 @@ tensorflow-cpu==2.7.3
 tensorflow-estimator==2.7.0
 tensorflow-io-gcs-filesystem==0.31.0
 termcolor==2.2.0
-thinc==8.1.8
+thinc==8.1.9
 threadpoolctl==3.1.0
 tifffile==2023.2.28
 tokenizers==0.13.2
@@ -242,9 +242,9 @@ typing_extensions==4.5.0
 tzdata==2022.7
 tzlocal==4.2
 umap-learn==0.5.3
-urllib3==1.26.14
+urllib3==1.26.15
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@fcbf9f3a6c44d91213894ae70a2c2408e720b0d6#egg=utilmy
+-e git+https://github.com/arita37/myutil@4d77fd999f7d0492bd476bc03a02d70a1d36cac7#egg=utilmy
 visions==0.7.5
 wasabi==1.1.1
 wcwidth==0.2.6
@@ -252,5 +252,5 @@ Werkzeug==2.2.3
 wget==3.2
 wrapt==1.15.0
 yarl==1.8.2
-ydata-profiling==4.0.0
+ydata-profiling==4.1.0
 zipp==3.15.0
