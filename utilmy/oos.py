@@ -356,6 +356,31 @@ def test_os():
     dfres = os_search_content(srch_pattern=[jsonString], dir1=dirtmp, file_pattern="*json.json", mode="str", dirlevel=1)
     assert not log(dfres) and len(dfres) == 1, dfres
 
+    #Testing ignoring file extensions
+    uu.to_file("dummy text", dirtmp + "folder_ext/os_file_test_ign_f_ext.txt")
+    random_dict = {"test":"dummy text"}
+    jsonString = json.dumps(random_dict)
+    uu.to_file(random_dict, dirtmp + "folder_ext/os_file_test_ign_f_ext.json")
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_ext/", ignore_exts=[".json"])
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing callback parameter
+    #callback that removes the file
+    def test_callback(file_path):
+        dir_path = os.path.dirname(file_path)
+        os_remove(dir_path + "/*", ndays_past=0)
+
+    uu.to_file("dummy text", dirtmp + "folder_callback/os_file_callback_test.txt")
+    os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/", callback = test_callback)
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/")
+    assert not log(dfres) and len(dfres) == 0, dfres
+
+    #Testing callback parameter that it only executes itself when the file matchs the srch_pattern
+    uu.to_file("test text", dirtmp + "folder_callback/os_file_callback_test.txt")
+    os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/", callback = test_callback)
+    dfres = os_search_content(srch_pattern=["test text"], dir1=dirtmp + "folder_callback/")
+    assert not log(dfres) and len(dfres) == 1, dfres
+
     log("###### os_walk() ..")
     folders = os_walk(path=dirtmp, pattern="*.txt")
     assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
@@ -1474,7 +1499,7 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 
 ###################################################################################################
-def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
+def os_search_content(srch_pattern=None, ignore_exts = [] ,mode="str", dir1="", file_pattern="*.*", dirlevel=1, callback = None):
     """  search inside the files with a max dir level.
     Docs::
 
@@ -1505,6 +1530,11 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
     dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
     ll = []
     for f in dict_all["file"]:
+        if ignore_exts and os.path.splitext(f)[1] in ignore_exts:
+            continue
+        result = z_os_search_fast(f, texts=srch_pattern, mode=mode)        
+        if callback and result:
+            callback(f)
         ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
     df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
     return df
