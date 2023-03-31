@@ -396,7 +396,7 @@ def test_os():
     second_mtime = datetime.datetime(2023, 3, 29)
     os.utime(third_filename, times=(stat.st_atime, second_mtime.timestamp()))
     #Testing to search the second filename by its new modification time
-    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_modification/",start_mod_time = first_mtime.date(), end_mod_time = first_mtime.date())
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_modification/",start_time = first_mtime.date(), end_time = first_mtime.date())
     assert not log(dfres) and len(dfres) == 1, dfres
 
 
@@ -1518,7 +1518,7 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 
 ###################################################################################################
-def os_search_content(srch_pattern=None, ignore_exts = [] ,mode="str", dir1="", file_pattern="*.*", dirlevel=1, callback = None, start_mod_time = None, end_mod_time = None):
+def os_search_content(srch_pattern=None, ignore_exts = [] ,mode="str", dir1="", file_pattern="*.*", dirlevel=1, callback = None, start_time = None, end_time = None):
     """  search inside the files with a max dir level.
     Docs::
 
@@ -1548,7 +1548,7 @@ def os_search_content(srch_pattern=None, ignore_exts = [] ,mode="str", dir1="", 
     ###  'file', 'dir'
     dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
     if(dict_all["file"]):
-        dict_all["file"] = glob_glob(file_list=dict_all["file"],start_date=start_mod_time,end_date=end_mod_time)
+        dict_all["file"] = glob_glob(file_list=dict_all["file"],start_date=start_time,end_date=end_time)
     ll = []
     for f in dict_all["file"]:
         if ignore_exts and os.path.splitext(f)[1] in ignore_exts:
