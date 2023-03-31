@@ -356,6 +356,50 @@ def test_os():
     dfres = os_search_content(srch_pattern=[jsonString], dir1=dirtmp, file_pattern="*json.json", mode="str", dirlevel=1)
     assert not log(dfres) and len(dfres) == 1, dfres
 
+    #Testing ignoring file extensions
+    uu.to_file("dummy text", dirtmp + "folder_ext/os_file_test_ign_f_ext.txt")
+    random_dict = {"test":"dummy text"}
+    jsonString = json.dumps(random_dict)
+    uu.to_file(random_dict, dirtmp + "folder_ext/os_file_test_ign_f_ext.json")
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_ext/", ignore_exts=[".json"])
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing callback parameter
+    #callback that removes the file
+    def test_callback(file_path):
+        dir_path = os.path.dirname(file_path)
+        os_remove(dir_path + "/*", ndays_past=0)
+
+    uu.to_file("dummy text", dirtmp + "folder_callback/os_file_callback_test.txt")
+    os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/", callback = test_callback)
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/")
+    assert not log(dfres) and len(dfres) == 0, dfres
+
+    #Testing callback parameter that it only executes itself when the file matchs the srch_pattern
+    uu.to_file("test text", dirtmp + "folder_callback/os_file_callback_test.txt")
+    os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_callback/", callback = test_callback)
+    dfres = os_search_content(srch_pattern=["test text"], dir1=dirtmp + "folder_callback/")
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+    #Testing filtering by the modification time.
+    #Changing the modification time of these files for testing
+    first_filename = dirtmp + "folder_modification/os_file_first_modification_file.txt"
+    second_filename = dirtmp + "folder_modification/os_file_second_modification_file.txt"
+    third_filename = dirtmp + "folder_modification/os_file_third_modification_file.txt"
+    uu.to_file("dummy text", first_filename)
+    uu.to_file("dummy text", second_filename)
+    uu.to_file("dummy text", third_filename)
+    stat = os.stat(second_filename)
+    first_mtime = datetime.datetime(2023, 3, 28)
+    os.utime(second_filename, times=(stat.st_atime, first_mtime.timestamp()))    
+    stat = os.stat(third_filename)
+    second_mtime = datetime.datetime(2023, 3, 29)
+    os.utime(third_filename, times=(stat.st_atime, second_mtime.timestamp()))
+    #Testing to search the second filename by its new modification time
+    dfres = os_search_content(srch_pattern=["dummy text"], dir1=dirtmp + "folder_modification/",start_time = first_mtime.date(), end_time = first_mtime.date())
+    assert not log(dfres) and len(dfres) == 1, dfres
+
+
     log("###### os_walk() ..")
     folders = os_walk(path=dirtmp, pattern="*.txt")
     assert len(folders["file"]) > 0, "Pattern with wildcard doesn't work"
@@ -686,7 +730,7 @@ def glob_glob(dirin="", file_list=[], exclude="", include_only="",
             for fi in files[:nfiles]:
                 try:
                     t = os.stat( fi)
-                    c = t.st_ctime
+                    c = t.st_mtime
                     if start_timestamp <= c <= end_timestamp:
                         flist2.append(fi)
                 except: pass
@@ -1474,7 +1518,7 @@ def os_import(mod_name="myfile.config.model", globs=None, verbose=True):
 
 
 ###################################################################################################
-def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*", dirlevel=1):
+def os_search_content(srch_pattern=None, ignore_exts = [] ,mode="str", dir1="", file_pattern="*.*", dirlevel=1, callback = None, start_time = None, end_time = None):
     """  search inside the files with a max dir level.
     Docs::
 
@@ -1503,9 +1547,16 @@ def os_search_content(srch_pattern=None, mode="str", dir1="", file_pattern="*.*"
 
     ###  'file', 'dir'
     dict_all = os_walk(dir1, pattern=file_pattern, dirlevel=dirlevel)
+    if(dict_all["file"]):
+        dict_all["file"] = glob_glob(file_list=dict_all["file"],start_date=start_time,end_date=end_time)
     ll = []
     for f in dict_all["file"]:
-        ll = ll + z_os_search_fast(f, texts=srch_pattern, mode=mode)
+        if ignore_exts and os.path.splitext(f)[1] in ignore_exts:
+            continue
+        result = z_os_search_fast(f, texts=srch_pattern, mode=mode)
+        if callback and result:
+            callback(f)
+        ll = ll + result
     df = pd.DataFrame(ll, columns=["search", "filename", "lineno", "pos", "line"])
     return df
 
