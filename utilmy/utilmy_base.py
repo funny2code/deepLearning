@@ -763,6 +763,39 @@ class Index0(object):
 
 
 ###################################################################################################
+def json_load(path) :
+  """function json_load.
+  Doc::
+          
+  """
+  try :
+    return json.load(open( path, mode='r'))
+  except Exception as e :
+    log(e)
+    return {}
+
+
+def json_save(dd:dict, path:str) :
+  """function json_save
+  Doc::
+          
+  """
+  os_makedirs(path)
+  try :
+    json.dump(dd, open( path, mode='w'))
+    return path
+  except Exception as e :
+    log(e)
+
+
+def pprint(dd,indent=3):
+    if isinstance(dd, dict):
+        log(json.dumps(cc, sort_keys=True, indent=indent,separators=(',', ': ') ))  
+    else :
+        log(dd)
+
+    
+###################################################################################################
 ###### Pandas #####################################################################################
 from utilmy.parallel import (
     pd_read_file,    ### parallel reading
