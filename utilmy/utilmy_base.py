@@ -780,10 +780,18 @@ def json_save(dd:dict, path:str) :
   Doc::
           
   """
+  class MyEncoder(json.JSONEncoder):
+    ### to handle numpy type 
+    ### https://stackoverflow.com/questions/27050108/convert-numpy-type-to-python
+    def default(self, obj):
+        val = getattr(obj, "tolist", lambda: obj )()
+        return val                                        
+        #return super(MyEncoder, self).default(obj)
+
   os_makedirs(path)
   try :
-    json.dump(dd, open( path, mode='w'))
-    return path
+    with open(path, mode='w') as fp:
+        json.dump(dd, fp, cls=MyEncoder)
   except Exception as e :
     log(e)
 
