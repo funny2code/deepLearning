@@ -1164,10 +1164,11 @@ def os_makedirs(dir_or_file):
         Returns:
             None
     """
+    dir_or_file = dir_or_file.replace("\\", "/") ## windows case
     if os.path.isfile(dir_or_file) or "." in dir_or_file.split("/")[-1] :
         os.makedirs(os.path.dirname(os.path.abspath(dir_or_file)), exist_ok=True)
-        f = open(dir_or_file,'w')
-        f.close()
+        #f = open(dir_or_file,'w')
+        #f.close()
     else :
         os.makedirs(os.path.abspath(dir_or_file), exist_ok=True)
 
