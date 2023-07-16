@@ -11,14 +11,14 @@ backports.zoneinfo==0.2.1
 beautifulsoup4==4.12.2
 blis==0.7.9
 bootstrapped==0.0.2
-boto3==1.28.1
-botocore==1.31.1
+boto3==1.28.3
+botocore==1.31.3
 cachetools==5.3.1
 catalogue==2.0.8
 certifi==2023.5.7
 charset-normalizer==3.2.0
 cheap-repr==0.5.1
-click==8.1.4
+click==8.1.5
 click-plugins==1.1.1
 cligj==0.7.2
 cloudpickle==2.2.1
@@ -33,7 +33,7 @@ cymem==2.0.7
 Cython==0.29.36
 dacite==1.8.1
 dash==2.11.1
-dash-bootstrap-components==1.4.1
+dash-bootstrap-components==1.4.2
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 dash-table==5.0.0
@@ -52,13 +52,13 @@ fire==0.5.0
 flake8==6.0.0
 Flask==2.2.5
 flatbuffers==2.0.7
-fonttools==4.40.0
+fonttools==4.41.0
 fsspec==2023.6.0
 future==0.18.3
 gast==0.4.0
 gensim==4.1.2
 geopandas==0.13.2
-google-auth==2.21.0
+google-auth==2.22.0
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 greenlet==2.0.2
@@ -91,7 +91,7 @@ Keras-Preprocessing==1.1.2
 kiwisolver==1.4.4
 langcodes==3.3.0
 lazy_loader==0.3
-libclang==16.0.0
+libclang==16.0.6
 llvmlite==0.40.1
 loguru==0.7.0
 Mako==1.2.4
@@ -103,7 +103,7 @@ matplotlib-inline==0.1.6
 mccabe==0.7.0
 ml-dtypes==0.2.0
 mlxtend==0.22.0
-mmh3==4.0.0
+mmh3==4.0.1
 mpld3==0.5.9
 mpmath==1.3.0
 multimethod==1.9.1
@@ -134,7 +134,7 @@ Pillow==10.0.0
 plotly==5.15.0
 pluggy==1.2.0
 pmlb==1.0.1.post3
-polars==0.18.6
+polars==0.18.7
 preshed==3.0.8
 pretty-html-table==0.9.16
 prompt-toolkit==3.0.39
@@ -154,7 +154,7 @@ pyinstrument==4.5.0
 pynndescent==0.5.10
 pyparsing==3.0.9
 pyproj==3.5.0
-PySnooper==1.1.1
+PySnooper==1.2.0
 pyspark==3.4.1
 pytest==7.4.0
 python-box==7.0.1
@@ -188,7 +188,7 @@ soupsieve==2.4.1
 spacy==3.6.0
 spacy-legacy==3.0.12
 spacy-loggers==1.0.4
-SQLAlchemy==2.0.18
+SQLAlchemy==2.0.19
 srsly==2.4.6
 stack-data==0.6.2
 statsmodels==0.14.0
@@ -204,8 +204,8 @@ tensorflow-estimator==2.7.0
 tensorflow-io-gcs-filesystem==0.32.0
 termcolor==2.3.0
 thinc==8.1.10
-threadpoolctl==3.1.0
-tifffile==2023.7.4
+threadpoolctl==3.2.0
+tifffile==2023.7.10
 tokenizers==0.13.3
 tomli==2.0.1
 torch==1.10.0+cpu
@@ -221,7 +221,7 @@ tzlocal==5.0.1
 umap-learn==0.5.3
 urllib3==1.26.16
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@083e8a8146243864bcf3e434e86d95e63da6c3b4#egg=utilmy
+-e git+https://github.com/arita37/myutil@5db3858a6c1d77b91fb53bb31fc77e4873f6d365#egg=utilmy
 visions==0.7.5
 wasabi==1.1.2
 wcwidth==0.2.6
@@ -230,4 +230,4 @@ wget==3.2
 wordcloud==1.9.2
 wrapt==1.15.0
 ydata-profiling==4.3.1
-zipp==3.16.0
+zipp==3.16.2
