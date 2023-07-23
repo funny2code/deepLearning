@@ -9,20 +9,20 @@ awswrangler==3.2.1
 backcall==0.2.0
 backports.zoneinfo==0.2.1
 beautifulsoup4==4.12.2
-blis==0.7.9
+blis==0.7.10
 bootstrapped==0.0.2
-boto3==1.28.3
-botocore==1.31.3
+boto3==1.28.9
+botocore==1.31.9
 cachetools==5.3.1
 catalogue==2.0.8
-certifi==2023.5.7
+certifi==2023.7.22
 charset-normalizer==3.2.0
 cheap-repr==0.5.1
-click==8.1.5
+click==8.1.6
 click-plugins==1.1.1
 cligj==0.7.2
 cloudpickle==2.2.1
-cmaes==0.9.1
+cmaes==0.10.0
 colorama==0.4.6
 coloredlogs==15.0.1
 colorlog==6.7.0
@@ -52,7 +52,7 @@ fire==0.5.0
 flake8==6.0.0
 Flask==2.2.5
 flatbuffers==2.0.7
-fonttools==4.41.0
+fonttools==4.41.1
 fsspec==2023.6.0
 future==0.18.3
 gast==0.4.0
@@ -62,10 +62,10 @@ google-auth==2.22.0
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
 greenlet==2.0.2
-grpcio==1.56.0
+grpcio==1.56.2
 h5py==3.9.0
-hdbscan==0.8.30
-holidays==0.28
+hdbscan==0.8.33
+holidays==0.29
 htmlmin==0.1.12
 huggingface-hub==0.16.4
 humanfriendly==10.0
@@ -134,7 +134,7 @@ Pillow==10.0.0
 plotly==5.15.0
 pluggy==1.2.0
 pmlb==1.0.1.post3
-polars==0.18.7
+polars==0.18.8
 preshed==3.0.8
 pretty-html-table==0.9.16
 prompt-toolkit==3.0.39
@@ -150,7 +150,7 @@ pycodestyle==2.10.0
 pydantic==1.10.11
 pyflakes==3.0.1
 Pygments==2.15.1
-pyinstrument==4.5.0
+pyinstrument==4.5.1
 pynndescent==0.5.10
 pyparsing==3.0.9
 pyproj==3.5.0
@@ -163,8 +163,8 @@ python-highcharts==0.4.2
 pytz==2023.3
 pyvis==0.3.1
 PyWavelets==1.4.1
-PyYAML==6.0
-rapidfuzz==3.1.1
+PyYAML==6.0.1
+rapidfuzz==3.1.2
 rebound-cli==2.1.0
 regex==2023.6.3
 requests==2.31.0
@@ -189,7 +189,7 @@ spacy==3.6.0
 spacy-legacy==3.0.12
 spacy-loggers==1.0.4
 SQLAlchemy==2.0.19
-srsly==2.4.6
+srsly==2.4.7
 stack-data==0.6.2
 statsmodels==0.14.0
 stdlib-list==0.9.0
@@ -212,7 +212,7 @@ torch==1.10.0+cpu
 torchvision==0.11.1+rocm4.2
 tqdm==4.65.0
 traitlets==5.9.0
-transformers==4.30.2
+transformers==4.31.0
 typeguard==2.13.3
 typer==0.9.0
 typing_extensions==4.7.1
@@ -221,7 +221,7 @@ tzlocal==5.0.1
 umap-learn==0.5.3
 urllib3==1.26.16
 urwid==2.1.2
--e git+https://github.com/arita37/myutil@5db3858a6c1d77b91fb53bb31fc77e4873f6d365#egg=utilmy
+-e git+https://github.com/arita37/myutil@5de11d95b30a0605ec99ce0ae8b9b4da0453c08c#egg=utilmy
 visions==0.7.5
 wasabi==1.1.2
 wcwidth==0.2.6
@@ -229,5 +229,5 @@ Werkzeug==2.2.3
 wget==3.2
 wordcloud==1.9.2
 wrapt==1.15.0
-ydata-profiling==4.3.1
+ydata-profiling==4.3.2
 zipp==3.16.2
